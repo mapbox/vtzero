@@ -24,9 +24,9 @@ coverage:
 
 clean:
 	rm -rf build
-	rm *.profdata
-	rm *.profraw
-	rm local.env
+	rm -f *.profdata
+	rm -f *.profraw
+	rm -f local.env
 
 distclean: clean
 	rm -rf .mason
