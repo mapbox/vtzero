@@ -5,7 +5,6 @@ static void bench(benchmark::State& state) // NOLINT google-runtime-references
 {
     if (state.thread_index == 0)
     {
-
     }
 
     while (state.KeepRunning())
@@ -20,10 +19,13 @@ static void bench(benchmark::State& state) // NOLINT google-runtime-references
     }
 }
 
-
 int main(int argc, char* argv[])
 {
-    benchmark::RegisterBenchmark("bench", bench)->Threads(2)->Threads(4)->Threads(8)->Arg(100); // NOLINT clang-analyzer-cplusplus.NewDeleteLeaks
+    benchmark::RegisterBenchmark("bench", bench) // NOLINT clang-analyzer-cplusplus.NewDeleteLeaks
+        ->Threads(2)
+        ->Threads(4)
+        ->Threads(8)
+        ->Arg(100);
     benchmark::Initialize(&argc, argv);
     benchmark::RunSpecifiedBenchmarks();
     return 0;
