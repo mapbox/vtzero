@@ -1,39 +1,53 @@
 
-# Whether to turn compiler warnings into errors
-export WERROR ?= true
+PROTOZERO_INCLUDE := ../protozero/include
 
-default: release
+CXXFLAGS := -std=c++11 -Iinclude -I${PROTOZERO_INCLUDE} -g -Wall -Wextra -Wpedantic -Werror
 
-release:
-	mkdir -p build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release -DWERROR=$(WERROR) && VERBOSE=1 cmake --build .
+EXAMPLES := examples/vtzero-create examples/vtzero-filter examples/vtzero-show
 
-debug:
-	mkdir -p build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Debug -DWERROR=$(WERROR) && VERBOSE=1 cmake --build .
+TESTS := test/unit_tests
 
-test:
-	@if [ -f ./build/unit-tests ]; then ./build/unit-tests; else echo "Please run 'make release' or 'make debug' first" && exit 1; fi
+examples: $(EXAMPLES)
 
-bench:
-	@if [ -f ./build/bench-tests ]; then ./build/bench-tests; else echo "Please run 'make release' or 'make debug' first" && exit 1; fi
+tests: $(TESTS)
 
-tidy:
-	./scripts/clang-tidy.sh
+all: examples tests
 
-coverage:
-	./scripts/coverage.sh
+examples/utils.o: examples/utils.cpp
+	$(CXX) $(CXXFLAGS) -c $^ -o $@
+
+examples/vtzero-create.o: examples/vtzero-create.cpp
+	$(CXX) $(CXXFLAGS) -c $^ -o $@
+
+examples/vtzero-create: examples/vtzero-create.o
+	$(CXX) $^ -o $@
+
+examples/vtzero-filter.o: examples/vtzero-filter.cpp
+	$(CXX) $(CXXFLAGS) -c $^ -o $@
+
+examples/vtzero-filter: examples/vtzero-filter.o examples/utils.o
+	$(CXX) $^ -o $@
+
+examples/vtzero-show.o: examples/vtzero-show.cpp
+	$(CXX) $(CXXFLAGS) -c $^ -o $@
+
+examples/vtzero-show: examples/vtzero-show.o examples/utils.o
+	$(CXX) $^ -o $@
+
+test/unit_tests: test/test_main.o test/tests.o
+	$(CXX) $^ -o $@
+
+test/test_main.o: test/test_main.cpp
+	$(CXX) $(CXXFLAGS) -Itest/include -c $^ -o $@
+
+test/tests.o: test/tests.cpp
+	$(CXX) $(CXXFLAGS) -Itest/include -c $^ -o $@
+
+test: tests
+	test/unit_tests
 
 clean:
-	rm -rf build
-	rm -f *.profdata
-	rm -f *.profraw
-	rm -f local.env
+	rm -f $(EXAMPLES) $(TESTS) examples/*.o test/*.o
 
-distclean: clean
-	rm -rf .mason
-	rm -rf mason_packages
-	rm -rf .toolchain
+.PHONY: clean test
 
-format:
-	./scripts/format.sh
-
-.PHONY: test bench

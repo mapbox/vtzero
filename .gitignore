@@ -6,3 +6,8 @@ build
 .toolchain
 .mason
 local.env
+*.o
+test/unit_tests
+examples/vtzero-create
+examples/vtzero-filter
+examples/vtzero-show

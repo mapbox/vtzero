@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VTZERO_VERSION_HPP
+#define VTZERO_VERSION_HPP
 
 /// The major version number
 #define VTZERO_VERSION_MAJOR 1
@@ -16,3 +17,5 @@
 
 /// Version number as string
 #define VTZERO_VERSION_STRING "1.0.0"
+
+#endif // VTZERO_VERSION_HPP

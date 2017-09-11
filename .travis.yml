@@ -68,14 +68,15 @@ install:
   - ./scripts/setup.sh --config local.env
   # put mason and clang++ on PATH
   - source local.env
-  - mason install cmake ${CMAKE_VERSION}
-  - mason link cmake ${CMAKE_VERSION}
-  - which cmake
+#  - mason install cmake ${CMAKE_VERSION}
+#  - mason link cmake ${CMAKE_VERSION}
+#  - which cmake
 
 script:
-  - make release
+#  - make release
+  - make
   - make test
-  - make clean
-  - make debug
-  - make test
-  - make clean
+#  - make clean
+#  - make debug
+#  - make test
+#  - make clean
