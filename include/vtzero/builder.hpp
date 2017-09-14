@@ -608,22 +608,17 @@ namespace vtzero {
             m_layers.emplace_back(new layer_builder_existing{layer.data()});
         }
 
-        std::string serialize() {
-            std::string data;
-
+        void serialize(std::string& data) const {
             protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{data};
             for (auto& layer : m_layers) {
                 layer->build(pbf_tile_builder);
             }
-
-            return data;
         }
 
-        void serialize(std::string& data) {
-            protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{data};
-            for (auto& layer : m_layers) {
-                layer->build(pbf_tile_builder);
-            }
+        std::string serialize() const {
+            std::string data;
+            serialize(data);
+            return data;
         }
 
     }; // class tile_builder
