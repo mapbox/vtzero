@@ -3,6 +3,7 @@
 
 #include "geometry.hpp"
 #include "reader.hpp"
+#include "tag_value.hpp"
 #include "types.hpp"
 
 #include <protozero/pbf_builder.hpp>
