@@ -64,6 +64,7 @@ env:
    - CMAKE_VERSION="3.8.2"
 
 install:
+  - (cd ..; git clone --depth=1 https://github.com/mapbox/protozero)
   # set up the environment by installing mason and clang++
   - ./scripts/setup.sh --config local.env
   # put mason and clang++ on PATH
