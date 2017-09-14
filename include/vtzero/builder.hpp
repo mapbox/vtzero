@@ -604,8 +604,8 @@ namespace vtzero {
             return static_cast<layer_builder_impl*>(m_layers.back().get());
         }
 
-        void add_layer_with_data(const layer& layer) {
-            m_layers.emplace_back(new layer_builder_existing{layer.data()});
+        void add_layer(const data_view& data) {
+            m_layers.emplace_back(new layer_builder_existing{data});
         }
 
         void serialize(std::string& data) const {

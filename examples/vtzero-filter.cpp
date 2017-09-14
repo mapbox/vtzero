@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
     if (remaining_args == 2) {
         vtzero::tile_builder tb;
-        tb.add_layer_with_data(layer);
+        tb.add_layer(layer.data());
         std::cout << tb.serialize();
     } else {
         const uint32_t id = std::atoi(argv[optind + 2]);
