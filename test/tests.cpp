@@ -1,7 +1,7 @@
 
 #include <vtzero/geometry.hpp>
-#include <vtzero/reader.hpp>
 #include <vtzero/builder.hpp>
+#include <vtzero/vector_tile.hpp>
 
 #include <catch.hpp>
 

@@ -2,9 +2,9 @@
 #define VTZERO_BUILDER_HPP
 
 #include "geometry.hpp"
-#include "reader.hpp"
 #include "tag_value.hpp"
 #include "types.hpp"
+#include "vector_tile.hpp"
 
 #include <protozero/pbf_builder.hpp>
 

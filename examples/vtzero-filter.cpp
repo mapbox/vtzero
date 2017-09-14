@@ -2,7 +2,7 @@
 #include "utils.hpp"
 
 #include <vtzero/builder.hpp>
-#include <vtzero/reader.hpp>
+#include <vtzero/vector_tile.hpp>
 
 #include <fstream>
 #include <getopt.h>

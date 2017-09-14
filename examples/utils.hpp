@@ -1,5 +1,5 @@
 
-#include <vtzero/reader.hpp>
+#include <vtzero/vector_tile.hpp>
 
 #include <string>
 
