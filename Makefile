@@ -1,7 +1,7 @@
 
 PROTOZERO_INCLUDE := ../protozero/include
 
-CXXFLAGS := -std=c++11 -Iinclude -I${PROTOZERO_INCLUDE} -g -Wall -Wextra -Wpedantic -Werror
+COMPILE_FLAGS := -std=c++11 -Iinclude -I${PROTOZERO_INCLUDE} -g -Wall -Wextra -Wpedantic -Werror
 
 EXAMPLES := examples/vtzero-create examples/vtzero-filter examples/vtzero-show
 
@@ -14,34 +14,34 @@ tests: $(TESTS)
 all: examples tests
 
 examples/utils.o: examples/utils.cpp
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -c $^ -o $@
 
 examples/vtzero-create.o: examples/vtzero-create.cpp
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -c $^ -o $@
 
 examples/vtzero-create: examples/vtzero-create.o
-	$(CXX) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 
 examples/vtzero-filter.o: examples/vtzero-filter.cpp
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -c $^ -o $@
 
 examples/vtzero-filter: examples/vtzero-filter.o examples/utils.o
-	$(CXX) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 
 examples/vtzero-show.o: examples/vtzero-show.cpp
-	$(CXX) $(CXXFLAGS) -c $^ -o $@
+	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -c $^ -o $@
 
 examples/vtzero-show: examples/vtzero-show.o examples/utils.o
-	$(CXX) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 
 test/unit_tests: test/test_main.o test/tests.o
-	$(CXX) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 
 test/test_main.o: test/test_main.cpp
-	$(CXX) $(CXXFLAGS) -Itest/include -c $^ -o $@
+	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -Itest/include -c $^ -o $@
 
 test/tests.o: test/tests.cpp
-	$(CXX) $(CXXFLAGS) -Itest/include -c $^ -o $@
+	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -Itest/include -c $^ -o $@
 
 test: tests
 	test/unit_tests
