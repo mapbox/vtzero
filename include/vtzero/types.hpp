@@ -3,10 +3,13 @@
 
 #include <protozero/types.hpp>
 
-#include <cstdint>
-
 namespace vtzero {
 
+    /**
+     * Using data_view class from protozero. See the protozero documentation
+     * on how to change this to use different implementations.
+     * https://github.com/mapbox/protozero/blob/master/doc/advanced.md#protozero_use_view
+     */
     using data_view = protozero::data_view;
 
     // based on https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto

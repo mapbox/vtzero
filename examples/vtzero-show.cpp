@@ -1,4 +1,3 @@
-
 #include "utils.hpp"
 
 #include <vtzero/vector_tile.hpp>
@@ -25,7 +24,7 @@ struct geom_handler_points {
 
 struct geom_handler_linestrings {
 
-    std::string output;
+    std::string output{};
 
     void linestring_begin(uint32_t count) {
         output = "      LINESTRING[count=";
@@ -55,7 +54,7 @@ struct geom_handler_linestrings {
 
 struct geom_handler_polygons {
 
-    std::string output;
+    std::string output{};
 
     void ring_begin(uint32_t count) {
         output = "      RING[count=";

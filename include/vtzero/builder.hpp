@@ -65,30 +65,6 @@ namespace vtzero {
             m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<T>(name));
             m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
         }
-/*
-        uint32_t add_key_impl(const data_view& text) {
-            m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
-            return m_max_key++;
-        }
-
-        uint32_t add_key(const data_view& text) {
-            auto p = m_keys_map.insert(std::make_pair(std::string{text.data(), text.size()}, m_max_key));
-
-            if (p.second) {
-                return add_key_impl(text);
-            }
-
-            return p.first->second;
-        }
-
-        template <typename TCache>
-        uint32_t add_key(const data_view& text, TCache& cache = m_default_cache) {
-            return cache.get_or_set(text, [&]() {
-                m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
-                return m_max_key++;
-            }
-        }
-*/
 
         uint32_t add_key(const data_view& text) {
             auto p = m_keys_map.insert(std::make_pair(std::string{text.data(), text.size()}, m_max_key));

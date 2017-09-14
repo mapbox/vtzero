@@ -11,9 +11,18 @@
 namespace vtzero {
 
     struct point {
-        int32_t x;
-        int32_t y;
-    };
+
+        int32_t x = 0;
+        int32_t y = 0;
+
+        point() noexcept = default;
+
+        point(int32_t x_, int32_t y_) :
+            x(x_),
+            y(y_) {
+        }
+
+    }; // struct point
 
     template <typename T>
     point create_point(T p) noexcept {
@@ -98,7 +107,10 @@ namespace vtzero {
             m_count = detail::get_command_count(*it);
 
             if (m_command_id != expected_command) {
-                throw geometry_exception{std::string{"expected command "} + std::to_string(expected_command) + " but got " + std::to_string(m_command_id)};
+                throw geometry_exception{std::string{"expected command "} +
+                                         std::to_string(expected_command) +
+                                         " but got " +
+                                         std::to_string(m_command_id)};
             }
 
             ++it;
