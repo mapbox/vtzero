@@ -71,6 +71,34 @@ namespace vtzero {
 
     } // namespace detail
 
+    struct string_value_type {
+        data_view value;
+    };
+
+    struct float_value_type {
+        float value;
+    };
+
+    struct double_value_type {
+        double value;
+    };
+
+    struct int_value_type {
+        int64_t value;
+    };
+
+    struct uint_value_type {
+        uint64_t value;
+    };
+
+    struct sint_value_type {
+        int64_t value;
+    };
+
+    struct bool_value_type {
+        bool value;
+    };
+
 } // namespace vtzero
 
 #endif // VTZERO_TYPES_HPP

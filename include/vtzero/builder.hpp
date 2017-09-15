@@ -11,7 +11,6 @@
 #include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <map>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -28,18 +27,35 @@ namespace vtzero {
 
     }; // class layer_builder_base
 
-    struct kv_index {
-        uint32_t k;
-        uint32_t v;
-    };
+    class index_value {
+
+        static const uint32_t invalid_value = std::numeric_limits<uint32_t>::max();
+
+        uint32_t m_value = invalid_value;
+
+    public:
+
+        index_value() noexcept = default;
+
+        index_value(uint32_t value) noexcept :
+            m_value(value) {
+        }
+
+        bool valid() const noexcept {
+            return m_value != invalid_value;
+        }
+
+        uint32_t value() const noexcept {
+            return m_value;
+        }
+
+    }; // struct index_value
 
     class layer_builder_impl : public layer_builder_base {
 
         std::string m_data;
         std::string m_keys_data;
         std::string m_values_data;
-        std::map<std::string, uint32_t> m_keys_map;
-        std::map<std::string, uint32_t> m_values_map;
 
         protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
         protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys;
@@ -47,6 +63,21 @@ namespace vtzero {
 
         uint32_t m_max_key = 0;
         uint32_t m_max_value = 0;
+
+        static index_value find_in_table(const data_view& text, const std::string& data) {
+            uint32_t index = 0;
+            protozero::pbf_message<detail::pbf_layer> pbf_table{data};
+
+            while (pbf_table.next()) {
+                const auto v = pbf_table.get_view();
+                if (v == text) {
+                    return index_value{index};
+                }
+                ++index;
+            }
+
+            return index_value{};
+        }
 
     public:
 
@@ -56,8 +87,6 @@ namespace vtzero {
             m_data(),
             m_keys_data(),
             m_values_data(),
-            m_keys_map(),
-            m_values_map(),
             m_pbf_message_layer(m_data),
             m_pbf_message_keys(m_keys_data),
             m_pbf_message_values(m_values_data) {
@@ -66,31 +95,30 @@ namespace vtzero {
             m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
         }
 
-        uint32_t add_key(const data_view& text) {
-            auto p = m_keys_map.insert(std::make_pair(std::string{text.data(), text.size()}, m_max_key));
-
-            if (p.second) {
-                ++m_max_key;
-                m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
-            }
-
-            return p.first->second;
+        index_value add_key_without_dup_check(const data_view& text) {
+            m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
+            return m_max_key++;
         }
 
-        uint32_t add_value(const data_view& text) {
-            auto p = m_values_map.insert(std::make_pair(std::string{text.data(), text.size()}, m_max_value));
-
-            if (p.second) {
-                ++m_max_value;
-
-                m_pbf_message_values.add_string(detail::pbf_layer::values, text);
+        index_value add_key(const data_view& text) {
+            const auto index = find_in_table(text, m_keys_data);
+            if (index.valid()) {
+                return index;
             }
-
-            return p.first->second;
+            return add_key_without_dup_check(text);
         }
 
-        kv_index add_tag(const data_view& key, const data_view& value) {
-            return {add_key(key), add_value(value)};
+        index_value add_value_without_dup_check(const data_view& text) {
+            m_pbf_message_values.add_string(detail::pbf_layer::values, text);
+            return m_max_value++;
+        }
+
+        index_value add_value(const data_view& text) {
+            const auto index = find_in_table(text, m_values_data);
+            if (index.valid()) {
+                return index;
+            }
+            return add_value_without_dup_check(text);
         }
 
         const std::string& data() const noexcept {
@@ -151,10 +179,6 @@ namespace vtzero {
             return *m_layer;
         };
 
-        uint32_t add_key(const data_view& text) {
-            return m_layer->add_key(text);
-        }
-
         void add_feature(feature& feature, layer& layer);
 
     }; // class layer_builder
@@ -165,15 +189,23 @@ namespace vtzero {
 
             layer_builder m_layer;
 
-            void add_tag_internal(uint32_t key_idx, const data_view value) {
-                m_pbf_tags.add_element(key_idx);
-                m_pbf_tags.add_element(m_layer.get_layer().add_value(value));
+            void add_key_internal(index_value idx) {
+                m_pbf_tags.add_element(idx.value());
             }
 
-            void add_tag_internal(const data_view key, const data_view value) {
-                const auto idx = m_layer.get_layer().add_tag(key, value);
-                m_pbf_tags.add_element(idx.k);
-                m_pbf_tags.add_element(idx.v);
+            void add_value_internal(index_value idx) {
+                m_pbf_tags.add_element(idx.value());
+            }
+
+            template <typename T>
+            void add_key_internal(T&& key) {
+                add_key_internal(m_layer.get_layer().add_key(data_view{std::forward<T>(key)}));
+            }
+
+            template <typename T>
+            void add_value_internal(T&& value) {
+                tag_value v{std::forward<T>(value)};
+                add_value_internal(m_layer.get_layer().add_value(v.data()));
             }
 
         protected:
@@ -188,21 +220,14 @@ namespace vtzero {
             }
 
             void add_tag_impl(const tag_view& tag) {
-                add_tag_internal(tag.key(), tag.value().data());
+                add_key_internal(tag.key());
+                add_value_internal(tag.value().data());
             }
 
-            template <typename TValue>
-            void add_tag_impl(uint32_t key_idx, TValue&& value) {
-                tag_value v{std::forward<TValue>(value)};
-                add_tag_internal(key_idx, v.data());
-            }
-
-            template <typename TKey, typename TValue,
-                    typename std::enable_if<!std::is_same<typename std::decay<TKey>::type, uint32_t>{}, int>::type = 0>
+            template <typename TKey, typename TValue>
             void add_tag_impl(TKey&& key, TValue&& value) {
-                data_view k{std::forward<TKey>(key)};
-                tag_value v{std::forward<TValue>(value)};
-                add_tag_internal(k, v.data());
+                add_key_internal(std::forward<TKey>(key));
+                add_value_internal(std::forward<TValue>(value));
             }
 
             void do_commit() {

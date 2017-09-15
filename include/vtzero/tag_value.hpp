@@ -19,6 +19,13 @@ namespace vtzero {
             return {m_data.data(), m_data.size()};
         }
 
+        // ------------------
+
+        explicit tag_value(string_value_type value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_string(detail::pbf_value::string_value, value.value);
+        }
+
         explicit tag_value(const char* value) {
             protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
             pbf_message_value.add_string(detail::pbf_value::string_value, value);
@@ -34,9 +41,23 @@ namespace vtzero {
             pbf_message_value.add_string(detail::pbf_value::string_value, value);
         }
 
+        // ------------------
+
+        explicit tag_value(float_value_type value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_float(detail::pbf_value::float_value, value.value);
+        }
+
         explicit tag_value(float value) {
             protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
             pbf_message_value.add_float(detail::pbf_value::float_value, value);
+        }
+
+        // ------------------
+
+        explicit tag_value(double_value_type value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_double(detail::pbf_value::double_value, value.value);
         }
 
         explicit tag_value(double value) {
@@ -44,9 +65,23 @@ namespace vtzero {
             pbf_message_value.add_double(detail::pbf_value::double_value, value);
         }
 
+        // ------------------
+
+        explicit tag_value(int_value_type value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_int64(detail::pbf_value::int_value, value.value);
+        }
+
         explicit tag_value(int64_t value) {
             protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
             pbf_message_value.add_int64(detail::pbf_value::int_value, value);
+        }
+
+        // ------------------
+
+        explicit tag_value(uint_value_type value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_uint64(detail::pbf_value::uint_value, value.value);
         }
 
         explicit tag_value(uint64_t value) {
@@ -54,9 +89,18 @@ namespace vtzero {
             pbf_message_value.add_uint64(detail::pbf_value::uint_value, value);
         }
 
-        explicit tag_value(int64_t value, int /*unused*/) {
+        // ------------------
+
+        explicit tag_value(sint_value_type value) {
             protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
-            pbf_message_value.add_sint64(detail::pbf_value::sint_value, value);
+            pbf_message_value.add_sint64(detail::pbf_value::sint_value, value.value);
+        }
+
+        // ------------------
+
+        explicit tag_value(bool_value_type value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_bool(detail::pbf_value::bool_value, value.value);
         }
 
         explicit tag_value(bool value) {
@@ -65,30 +109,6 @@ namespace vtzero {
         }
 
     }; // class tag_value
-
-    inline tag_value float_value(float value) {
-        return tag_value{value};
-    }
-
-    inline tag_value double_value(double value) {
-        return tag_value{value};
-    }
-
-    inline tag_value int_value(int64_t value) {
-        return tag_value{value};
-    }
-
-    inline tag_value uint_value(uint64_t value) {
-        return tag_value{value};
-    }
-
-    inline tag_value sint_value(int64_t value) {
-        return tag_value{value, 0};
-    }
-
-    inline tag_value bool_value(bool value) {
-        return tag_value{value};
-    }
 
 } // namespace vtzero
 

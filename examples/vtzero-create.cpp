@@ -1,5 +1,6 @@
 
 #include <vtzero/builder.hpp>
+#include <vtzero/index.hpp>
 
 #include <cassert>
 #include <sys/types.h>
@@ -13,6 +14,8 @@ int main() {
     vtzero::layer_builder layer_lines{tile, "lines"};
     vtzero::layer_builder layer_polygons{tile, "polygons"};
 
+    vtzero::key_index_unordered_map idx{layer_points};
+
     {
         vtzero::point_feature_builder feature{layer_points, 1 /* id */};
         feature.add_points(1);
@@ -22,21 +25,23 @@ int main() {
         feature.rollback();
     }
 
+    const auto some = idx("some");
+
     {
         vtzero::point_feature_builder feature{layer_points, 2 /* id */};
         feature.add_point(20, 20);
-        feature.add_tag("some", "attr");
+        feature.add_tag(some, "attr");
     }
     {
         vtzero::point_feature_builder feature{layer_points, 3 /* id */};
         feature.add_point(20, 20);
-        feature.add_tag("some", "attr");
+        feature.add_tag(idx("some"), "attr");
     }
 
     {
         vtzero::point_feature_builder feature{layer_points, 4 /* id */};
         feature.add_point(20, 20);
-        feature.add_tag("some", "otherattr");
+        feature.add_tag(idx("some"), "otherattr");
     }
 
 
@@ -45,6 +50,7 @@ int main() {
     feature.add_tag("otherkey", "attr");
     feature.commit();
 
+    vtzero::value_index_unordered_map<vtzero::sint_value_type, int32_t> maxspeed_index{layer_lines};
     {
         vtzero::line_string_feature_builder feature{layer_lines, 6 /* id */};
         feature.add_linestring(3);
@@ -54,7 +60,7 @@ int main() {
         std::vector<vtzero::point> points = {{11, 11}, {12, 13}};
         feature.add_linestring(points.begin(), points.end());
         feature.add_tag("highway", "primary");
-        feature.add_tag(std::string{"maxspeed"}, vtzero::sint_value(50));
+        feature.add_tag(std::string{"maxspeed"}, maxspeed_index(50));
     }
 
     {
@@ -71,6 +77,7 @@ int main() {
         feature.set_point(5, 5);
         feature.close_ring();
         feature.add_tag("natural", "wood");
+        feature.add_tag("number_of_trees", vtzero::sint_value_type{23402752});
     }
 
     const auto data = tile.serialize();
