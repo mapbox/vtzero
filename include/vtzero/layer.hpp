@@ -62,11 +62,6 @@ namespace vtzero {
             return feature{m_data};
         }
 
-        feature operator->() const {
-            assert(m_data.data() != nullptr);
-            return feature{m_data};
-        }
-
         /**
          * @throws format_exception if the layer data is ill-formed.
          */
@@ -141,6 +136,9 @@ namespace vtzero {
                         case protozero::tag_and_type(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited):
                             m_name = reader.get_view();
                             break;
+                        case protozero::tag_and_type(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited):
+                            reader.skip(); // ignore features for now
+                            break;
                         case protozero::tag_and_type(detail::pbf_layer::keys, protozero::pbf_wire_type::length_delimited):
                             m_key_table.push_back(reader.get_view());
                             break;
@@ -151,7 +149,11 @@ namespace vtzero {
                             m_extent = reader.get_uint32();
                             break;
                         default:
-                            reader.skip();
+                            throw format_exception{"unknown field in layer (tag=" +
+                                                   std::to_string(static_cast<uint32_t>(reader.tag())) +
+                                                   ", type=" +
+                                                   std::to_string(static_cast<uint32_t>(reader.wire_type())) +
+                                                   ")"};
                             break;
                     }
                 }
@@ -258,13 +260,33 @@ namespace vtzero {
         }
 
         /**
-         * Count the number of features in this layer.
+         * Does this layer contain any features?
+         *
+         * Complexity: Constant.
+         *
+         * @throws format_exception if the layer data is ill-formed.
+         */
+        bool empty() const {
+            try {
+                protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
+                if (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
+                    return false;
+                }
+            } catch (const protozero::exception&) {
+                // convert protozero exceptions into vtzero exception
+                throw protocol_buffers_exception{};
+            }
+            return true;
+        }
+
+        /**
+         * The number of features in this layer.
          *
          * Complexity: Linear in the number of features.
          *
          * @throws format_exception if the layer data is ill-formed.
          */
-        std::size_t get_feature_count() const {
+        std::size_t size() const {
             assert(valid());
             std::size_t count = 0;
 

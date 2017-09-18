@@ -24,6 +24,11 @@ namespace vtzero {
 
     }; // struct point
 
+    template <typename TChar, typename TTraits>
+    std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, point p) {
+        return out << '(' << p.x << ',' << p.y << ')';
+    }
+
     template <typename T>
     point create_point(T p) noexcept {
         return {p.x, p.y};
@@ -205,7 +210,6 @@ namespace vtzero {
 
     template <typename TGeomHandler>
     void decode_polygon_geometry(const data_view& geometry, bool strict, TGeomHandler&& geom_handler) {
-
         geometry_decoder decoder{geometry, strict};
 
         // spec 4.3.4.4 "1. A MoveTo command"

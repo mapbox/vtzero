@@ -17,15 +17,34 @@ namespace vtzero {
 
         data_view m_value;
 
+        static bool check_tag_and_type(protozero::pbf_tag_type tag, protozero::pbf_wire_type type) noexcept {
+            static protozero::pbf_wire_type types[] = {
+                protozero::pbf_wire_type::length_delimited,
+                protozero::pbf_wire_type::length_delimited, // string_value
+                protozero::pbf_wire_type::fixed32, // float_value
+                protozero::pbf_wire_type::fixed64, // double_value
+                protozero::pbf_wire_type::varint,  // int_value
+                protozero::pbf_wire_type::varint,  // uint_value
+                protozero::pbf_wire_type::varint,  // sint_value
+                protozero::pbf_wire_type::varint   // bool_value
+            };
+
+            if (tag < 1 || tag > 7) {
+                return false;
+            }
+
+            return types[tag] == type;
+        }
+
         protozero::pbf_message<detail::pbf_value> check_value(detail::pbf_value type, protozero::pbf_wire_type wire_type) const {
             assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
 
-            if (!value_message.next(type, wire_type)) {
-                throw type_exception{};
+            if (value_message.next(type, wire_type)) {
+                return value_message;
             }
 
-            return value_message;
+            throw type_exception{};
         }
 
     public:
@@ -44,6 +63,10 @@ namespace vtzero {
             assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
             if (value_message.next()) {
+                const auto tag_val = static_cast<protozero::pbf_tag_type>(value_message.tag());
+                if (!check_tag_and_type(tag_val, value_message.wire_type())) {
+                    throw format_exception{"illegal value_type"};
+                }
                 return value_message.tag();
             }
             throw format_exception{"missing tag value"};
@@ -54,31 +77,38 @@ namespace vtzero {
         }
 
         data_view string_value() const {
-            return check_value(detail::pbf_value::string_value, protozero::pbf_wire_type::length_delimited).get_view();
+            return check_value(detail::pbf_value::string_value,
+                               protozero::pbf_wire_type::length_delimited).get_view();
         }
 
         float float_value() const {
-            return check_value(detail::pbf_value::float_value, protozero::pbf_wire_type::fixed32).get_float();
+            return check_value(detail::pbf_value::float_value,
+                               protozero::pbf_wire_type::fixed32).get_float();
         }
 
         double double_value() const {
-            return check_value(detail::pbf_value::double_value, protozero::pbf_wire_type::fixed64).get_double();
+            return check_value(detail::pbf_value::double_value,
+                               protozero::pbf_wire_type::fixed64).get_double();
         }
 
         std::int64_t int_value() const {
-            return check_value(detail::pbf_value::int_value, protozero::pbf_wire_type::varint).get_int64();
+            return check_value(detail::pbf_value::int_value,
+                               protozero::pbf_wire_type::varint).get_int64();
         }
 
         std::uint64_t uint_value() const {
-            return check_value(detail::pbf_value::uint_value, protozero::pbf_wire_type::varint).get_uint64();
+            return check_value(detail::pbf_value::uint_value,
+                               protozero::pbf_wire_type::varint).get_uint64();
         }
 
         std::int64_t sint_value() const {
-            return check_value(detail::pbf_value::sint_value, protozero::pbf_wire_type::varint).get_sint64();
+            return check_value(detail::pbf_value::sint_value,
+                               protozero::pbf_wire_type::varint).get_sint64();
         }
 
         bool bool_value() const {
-            return check_value(detail::pbf_value::bool_value, protozero::pbf_wire_type::varint).get_bool();
+            return check_value(detail::pbf_value::bool_value,
+                               protozero::pbf_wire_type::varint).get_bool();
         }
 
     }; // class value_view
@@ -173,10 +203,11 @@ namespace vtzero {
         tag_view operator*() const;
 
         tags_iterator& operator++() {
-            ++m_it;
-            if (m_it == m_end) {
+            assert(m_it != m_end);
+            if (std::next(m_it) == m_end) {
                 throw format_exception{"unpaired tag key/value indexes (spec 4.4)"};
             }
+            ++m_it;
             ++m_it;
             return *this;
         }
@@ -211,7 +242,10 @@ namespace vtzero {
          *
          * Complexity: Linear.
          */
-        std::size_t size() const noexcept {
+        std::size_t size() const {
+            if (m_it.size() % 2 != 0) {
+                throw format_exception{"unpaired tag key/value indexes (spec 4.4)"};
+            }
             return m_it.size() / 2;
         }
 
@@ -252,10 +286,16 @@ namespace vtzero {
             while (reader.next()) {
                 switch (reader.tag_and_type()) {
                     case protozero::tag_and_type(detail::pbf_feature::id, protozero::pbf_wire_type::varint):
+                        if (m_has_id) {
+                            throw format_exception{"Feature has more than one ID field"};
+                        }
                         m_id = reader.get_uint64();
                         m_has_id = true;
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
+                        if (m_tags.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
+                            throw format_exception{"Feature has more than one tags field"}; // XXX or do we need to handle this?
+                        }
                         m_tags = reader.get_packed_uint32();
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
@@ -268,10 +308,17 @@ namespace vtzero {
                         }
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
+                        if (m_geometry.size() != 0) {
+                            throw format_exception{"Feature has more than one geometry field"}; // XXX or do we need to handle this?
+                        }
                         m_geometry = reader.get_view();
                         break;
                     default:
-                        reader.skip();
+                        throw format_exception{"unknown field in feature (tag=" +
+                                               std::to_string(static_cast<uint32_t>(reader.tag())) +
+                                               ", type=" +
+                                               std::to_string(static_cast<uint32_t>(reader.wire_type())) +
+                                               ")"};
                 }
             }
 

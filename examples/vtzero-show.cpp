@@ -130,8 +130,13 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
 
     for (const auto feature : layer) {
         std::cout << "  feature:\n"
-                  << "    id:       " << feature.id() << '\n'
-                  << "    geomtype: " << vtzero::geom_type_name(feature.type()) << '\n'
+                  << "    id:       ";
+        if (feature.has_id()) {
+            std::cout << feature.id() << '\n';
+        } else {
+            std::cout << "(none)\n";
+        }
+        std::cout << "    geomtype: " << vtzero::geom_type_name(feature.type()) << '\n'
                   << "    geometry:\n";
         switch (feature.type()) {
             case vtzero::GeomType::POINT:
@@ -163,7 +168,7 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
 
 void print_layer_overview(const vtzero::layer& layer) {
     std::cout.write(layer.name().data(), layer.name().size());
-    std::cout << ' ' << layer.get_feature_count() << '\n';
+    std::cout << ' ' << layer.size() << '\n';
 }
 
 void print_help() {

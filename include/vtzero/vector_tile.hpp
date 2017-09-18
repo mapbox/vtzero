@@ -124,6 +124,34 @@ namespace vtzero {
         }
 
         /**
+         * Is this vector tile empty? Returns true if there are no layers
+         * in this vector tile.
+         *
+         * Complexity: Constant.
+         */
+        bool empty() const noexcept {
+            return m_data.empty();
+        }
+
+        /**
+         * Return the number of layers in this tile.
+         *
+         * Complexity: Linear.
+         */
+        std::size_t size() const noexcept {
+            std::size_t size = 0;
+
+            protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
+            while (tile_reader.next(detail::pbf_tile::layers,
+                                    protozero::pbf_wire_type::length_delimited)) {
+                tile_reader.skip();
+                ++size;
+            }
+
+            return size;
+        }
+
+        /**
          * Returns the layer with the specified zero-based index.
          *
          * Complexity: Linear in the number of layers.
