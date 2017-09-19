@@ -14,7 +14,7 @@
 
 namespace vtzero {
 
-    class layer_iterator {
+    class tile_iterator {
 
         protozero::pbf_message<detail::pbf_tile> m_tile_reader;
         data_view m_data;
@@ -44,14 +44,14 @@ namespace vtzero {
         /**
          * Construct special "end" iterator.
          */
-        layer_iterator() = default;
+        tile_iterator() = default;
 
         /**
          * Construct layer iterator from specified vector tile data.
          *
          * @throws format_exception if the tile data is ill-formed.
          */
-        layer_iterator(const data_view& tile_data) :
+        tile_iterator(const data_view& tile_data) :
             m_tile_reader(tile_data),
             m_data() {
             next();
@@ -62,15 +62,10 @@ namespace vtzero {
             return layer{m_data};
         }
 
-        layer operator->() const {
-            assert(m_data.data() != nullptr);
-            return layer{m_data};
-        }
-
         /**
          * @throws format_exception if the tile data is ill-formed.
          */
-        layer_iterator& operator++() {
+        tile_iterator& operator++() {
             next();
             return *this;
         }
@@ -78,21 +73,21 @@ namespace vtzero {
         /**
          * @throws format_exception if the tile data is ill-formed.
          */
-        layer_iterator operator++(int) {
-            const layer_iterator tmp{*this};
+        tile_iterator operator++(int) {
+            const tile_iterator tmp{*this};
             ++(*this);
             return tmp;
         }
 
-        bool operator==(const layer_iterator& other) const noexcept {
+        bool operator==(const tile_iterator& other) const noexcept {
             return m_data == other.m_data;
         }
 
-        bool operator!=(const layer_iterator& other) const noexcept {
+        bool operator!=(const tile_iterator& other) const noexcept {
             return !(*this == other);
         }
 
-    }; // layer_iterator
+    }; // tile_iterator
 
     /**
      * A vector tile is basically nothing more than an ordered collection
@@ -105,6 +100,9 @@ namespace vtzero {
 
     public:
 
+        using iterator = tile_iterator;
+        using const_iterator = tile_iterator;
+
         explicit vector_tile(const data_view& data) noexcept :
             m_data(data) {
         }
@@ -113,14 +111,14 @@ namespace vtzero {
             m_data(data.data(), data.size()) {
         }
 
-        /// Returns an iterator to the beginning.
-        layer_iterator begin() const {
-            return layer_iterator{m_data};
+        /// Returns an iterator to the beginning of layers.
+        tile_iterator begin() const {
+            return tile_iterator{m_data};
         }
 
-        /// Returns an iterator to the end.
-        layer_iterator end() const {
-            return layer_iterator{};
+        /// Returns an iterator to the end of layers.
+        tile_iterator end() const {
+            return tile_iterator{};
         }
 
         /**

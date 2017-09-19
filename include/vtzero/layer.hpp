@@ -14,7 +14,7 @@
 
 namespace vtzero {
 
-    class feature_iterator {
+    class layer_iterator {
 
         protozero::pbf_message<detail::pbf_layer> m_layer_reader;
         data_view m_data;
@@ -44,14 +44,14 @@ namespace vtzero {
         /**
          * Construct special "end" iterator.
          */
-        feature_iterator() = default;
+        layer_iterator() = default;
 
         /**
          * Construct feature iterator from specified vector tile data.
          *
          * @throws format_exception if the tile data is ill-formed.
          */
-        feature_iterator(const data_view& tile_data) :
+        layer_iterator(const data_view& tile_data) :
             m_layer_reader(tile_data),
             m_data() {
             next();
@@ -65,7 +65,7 @@ namespace vtzero {
         /**
          * @throws format_exception if the layer data is ill-formed.
          */
-        feature_iterator& operator++() {
+        layer_iterator& operator++() {
             next();
             return *this;
         }
@@ -73,21 +73,21 @@ namespace vtzero {
         /**
          * @throws format_exception if the layer data is ill-formed.
          */
-        feature_iterator operator++(int) {
-            const feature_iterator tmp{*this};
+        layer_iterator operator++(int) {
+            const layer_iterator tmp{*this};
             ++(*this);
             return tmp;
         }
 
-        bool operator==(const feature_iterator& other) const noexcept {
+        bool operator==(const layer_iterator& other) const noexcept {
             return m_data == other.m_data;
         }
 
-        bool operator!=(const feature_iterator& other) const noexcept {
+        bool operator!=(const layer_iterator& other) const noexcept {
             return !(*this == other);
         }
 
-    }; // feature_iterator
+    }; // layer_iterator
 
     /**
      * A layer according to spec 4.1
@@ -102,6 +102,9 @@ namespace vtzero {
         std::vector<data_view> m_value_table;
 
     public:
+
+        using iterator = layer_iterator;
+        using const_iterator = layer_iterator;
 
         layer() :
             m_data(),
@@ -220,12 +223,12 @@ namespace vtzero {
             return m_value_table[n];
         }
 
-        feature_iterator begin() const {
-            return feature_iterator{m_data};
+        layer_iterator begin() const {
+            return layer_iterator{m_data};
         }
 
-        feature_iterator end() const {
-            return feature_iterator{};
+        layer_iterator end() const {
+            return layer_iterator{};
         }
 
         /**
