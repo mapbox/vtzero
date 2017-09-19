@@ -13,6 +13,38 @@
 
 namespace vtzero {
 
+    namespace detail {
+
+        inline data_view get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, string_value_type) {
+            return value_message.get_view();
+        }
+
+        inline float get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, float_value_type) {
+            return value_message.get_float();
+        }
+
+        inline double get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, double_value_type) {
+            return value_message.get_double();
+        }
+
+        inline int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, int_value_type) {
+            return value_message.get_int64();
+        }
+
+        inline uint64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, uint_value_type) {
+            return value_message.get_uint64();
+        }
+
+        inline int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, sint_value_type) {
+            return value_message.get_sint64();
+        }
+
+        inline bool get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, bool_value_type) {
+            return value_message.get_bool();
+        }
+
+    }
+
     class value_view {
 
         data_view m_value;
@@ -34,6 +66,25 @@ namespace vtzero {
             }
 
             return types[tag] == type;
+        }
+
+        template <typename T>
+        decltype(T::value) get_value(detail::pbf_value type, protozero::pbf_wire_type wire_type) const {
+            assert(valid());
+            protozero::pbf_message<detail::pbf_value> value_message{m_value};
+
+            decltype(T::value) result;
+            bool has_result = false;
+            while (value_message.next(type, wire_type)) {
+                result = detail::get_value_impl(value_message, T{});
+                has_result = true;
+            }
+
+            if (has_result) {
+                return result;
+            }
+
+            throw type_exception{};
         }
 
         protozero::pbf_message<detail::pbf_value> check_value(detail::pbf_value type, protozero::pbf_wire_type wire_type) const {
@@ -77,38 +128,38 @@ namespace vtzero {
         }
 
         data_view string_value() const {
-            return check_value(detail::pbf_value::string_value,
-                               protozero::pbf_wire_type::length_delimited).get_view();
+            return get_value<string_value_type>(detail::pbf_value::string_value,
+                                                protozero::pbf_wire_type::length_delimited);
         }
 
         float float_value() const {
-            return check_value(detail::pbf_value::float_value,
-                               protozero::pbf_wire_type::fixed32).get_float();
+            return get_value<float_value_type>(detail::pbf_value::float_value,
+                                               protozero::pbf_wire_type::fixed32);
         }
 
         double double_value() const {
-            return check_value(detail::pbf_value::double_value,
-                               protozero::pbf_wire_type::fixed64).get_double();
+            return get_value<double_value_type>(detail::pbf_value::double_value,
+                                                protozero::pbf_wire_type::fixed64);
         }
 
         std::int64_t int_value() const {
-            return check_value(detail::pbf_value::int_value,
-                               protozero::pbf_wire_type::varint).get_int64();
+            return get_value<int_value_type>(detail::pbf_value::int_value,
+                                             protozero::pbf_wire_type::varint);
         }
 
         std::uint64_t uint_value() const {
-            return check_value(detail::pbf_value::uint_value,
-                               protozero::pbf_wire_type::varint).get_uint64();
+            return get_value<uint_value_type>(detail::pbf_value::uint_value,
+                                              protozero::pbf_wire_type::varint);
         }
 
         std::int64_t sint_value() const {
-            return check_value(detail::pbf_value::sint_value,
-                               protozero::pbf_wire_type::varint).get_sint64();
+            return get_value<sint_value_type>(detail::pbf_value::sint_value,
+                                              protozero::pbf_wire_type::varint);
         }
 
         bool bool_value() const {
-            return check_value(detail::pbf_value::bool_value,
-                               protozero::pbf_wire_type::varint).get_bool();
+            return get_value<bool_value_type>(detail::pbf_value::bool_value,
+                                              protozero::pbf_wire_type::varint);
         }
 
     }; // class value_view
@@ -286,9 +337,6 @@ namespace vtzero {
             while (reader.next()) {
                 switch (reader.tag_and_type()) {
                     case protozero::tag_and_type(detail::pbf_feature::id, protozero::pbf_wire_type::varint):
-                        if (m_has_id) {
-                            throw format_exception{"Feature has more than one ID field"};
-                        }
                         m_id = reader.get_uint64();
                         m_has_id = true;
                         break;

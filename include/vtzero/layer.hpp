@@ -128,10 +128,6 @@ namespace vtzero {
                     switch (reader.tag_and_type()) {
                         case protozero::tag_and_type(detail::pbf_layer::version, protozero::pbf_wire_type::varint):
                             m_version = reader.get_uint32();
-                            // This library can only handle version 1 and 2.
-                            if (m_version < 1 || m_version > 2) {
-                                throw version_exception{m_version};
-                            }
                             break;
                         case protozero::tag_and_type(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited):
                             m_name = reader.get_view();
@@ -160,6 +156,11 @@ namespace vtzero {
             } catch (const protozero::exception&) {
                 // convert protozero exceptions into vtzero exception
                 throw protocol_buffers_exception{};
+            }
+
+            // This library can only handle version 1 and 2.
+            if (m_version < 1 || m_version > 2) {
+                throw version_exception{m_version};
             }
 
             // 4.1 "A layer MUST contain a name field."

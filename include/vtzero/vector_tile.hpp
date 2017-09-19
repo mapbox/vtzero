@@ -22,13 +22,13 @@ namespace vtzero {
         void next() {
             try {
                 if (m_tile_reader.next(detail::pbf_tile::layers,
-                                    protozero::pbf_wire_type::length_delimited)) {
+                                       protozero::pbf_wire_type::length_delimited)) {
                     m_data = m_tile_reader.get_view();
                 } else {
                     m_data = data_view{};
                 }
             } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
+                // convert protozero exceptions into vtzero exceptions
                 throw protocol_buffers_exception{};
             }
         }
