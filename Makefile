@@ -34,13 +34,16 @@ examples/vtzero-show.o: examples/vtzero-show.cpp
 examples/vtzero-show: examples/vtzero-show.o examples/utils.o
 	$(CXX) $(LDFLAGS) $^ -o $@
 
-test/unit_tests: test/test_main.o test/tests.o
+test/unit_tests: test/test_main.o test/fixture_tests.o test/tests.o
 	$(CXX) $(LDFLAGS) $^ -o $@
 
 test/test_main.o: test/test_main.cpp
 	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -Itest/include -c $^ -o $@
 
 test/tests.o: test/tests.cpp
+	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -Itest/include -c $^ -o $@
+
+test/fixture_tests.o: test/fixture_tests.cpp
 	$(CXX) $(CXXFLAGS) $(COMPILE_FLAGS) -Itest/include -c $^ -o $@
 
 test: tests
