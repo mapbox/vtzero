@@ -67,13 +67,13 @@ namespace vtzero {
         }
 
         template <typename T>
-        decltype(T::value) get_value(detail::pbf_value type, protozero::pbf_wire_type wire_type) const {
+        typename T::type get_value() const {
             assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
 
             decltype(T::value) result;
             bool has_result = false;
-            while (value_message.next(type, wire_type)) {
+            while (value_message.next(T::vtype, T::wire_type)) {
                 result = detail::get_value_impl(value_message, T{});
                 has_result = true;
             }
@@ -126,38 +126,31 @@ namespace vtzero {
         }
 
         data_view string_value() const {
-            return get_value<string_value_type>(detail::pbf_value::string_value,
-                                                protozero::pbf_wire_type::length_delimited);
+            return get_value<string_value_type>();
         }
 
         float float_value() const {
-            return get_value<float_value_type>(detail::pbf_value::float_value,
-                                               protozero::pbf_wire_type::fixed32);
+            return get_value<float_value_type>();
         }
 
         double double_value() const {
-            return get_value<double_value_type>(detail::pbf_value::double_value,
-                                                protozero::pbf_wire_type::fixed64);
+            return get_value<double_value_type>();
         }
 
         std::int64_t int_value() const {
-            return get_value<int_value_type>(detail::pbf_value::int_value,
-                                             protozero::pbf_wire_type::varint);
+            return get_value<int_value_type>();
         }
 
         std::uint64_t uint_value() const {
-            return get_value<uint_value_type>(detail::pbf_value::uint_value,
-                                              protozero::pbf_wire_type::varint);
+            return get_value<uint_value_type>();
         }
 
         std::int64_t sint_value() const {
-            return get_value<sint_value_type>(detail::pbf_value::sint_value,
-                                              protozero::pbf_wire_type::varint);
+            return get_value<sint_value_type>();
         }
 
         bool bool_value() const {
-            return get_value<bool_value_type>(detail::pbf_value::bool_value,
-                                              protozero::pbf_wire_type::varint);
+            return get_value<bool_value_type>();
         }
 
     }; // class value_view

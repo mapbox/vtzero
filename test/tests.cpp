@@ -1,8 +1,52 @@
 
 #include <vtzero/geometry.hpp>
 #include <vtzero/builder.hpp>
+#include <vtzero/tag_value.hpp>
+#include <vtzero/value_view.hpp>
 
 #include <catch.hpp>
+
+TEST_CASE("string value") {
+    vtzero::tag_value v{"foo"};
+    vtzero::value_view vv{v.data()};
+    REQUIRE(vv.string_value() == "foo");
+}
+
+TEST_CASE("float value") {
+    vtzero::tag_value v{1.2f};
+    vtzero::value_view vv{v.data()};
+    REQUIRE(vv.float_value() == Approx(1.2));
+}
+
+TEST_CASE("double value") {
+    vtzero::tag_value v{1.2};
+    vtzero::value_view vv{v.data()};
+    REQUIRE(vv.double_value() == Approx(1.2));
+}
+
+TEST_CASE("int value") {
+    vtzero::tag_value v{vtzero::int_value_type{42}};
+    vtzero::value_view vv{v.data()};
+    REQUIRE(vv.int_value() == 42);
+}
+
+TEST_CASE("uint value") {
+    vtzero::tag_value v{vtzero::uint_value_type{42}};
+    vtzero::value_view vv{v.data()};
+    REQUIRE(vv.uint_value() == 42);
+}
+
+TEST_CASE("sint value") {
+    vtzero::tag_value v{vtzero::sint_value_type{42}};
+    vtzero::value_view vv{v.data()};
+    REQUIRE(vv.sint_value() == 42);
+}
+
+TEST_CASE("bool value") {
+    vtzero::tag_value v{true};
+    vtzero::value_view vv{v.data()};
+    REQUIRE(vv.bool_value());
+}
 
 struct point_handler {
 

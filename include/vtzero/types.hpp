@@ -72,30 +72,51 @@ namespace vtzero {
     } // namespace detail
 
     struct string_value_type {
+        using type = data_view;
+        constexpr static const value_type vtype = value_type::string_value;
+        constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::length_delimited;
         data_view value;
     };
 
     struct float_value_type {
+        using type = float;
+        constexpr static const value_type vtype = value_type::float_value;
+        constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed32;
         float value;
     };
 
     struct double_value_type {
+        using type = double;
+        constexpr static const value_type vtype = value_type::double_value;
+        constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed64;
         double value;
     };
 
     struct int_value_type {
+        using type = int64_t;
+        constexpr static const value_type vtype = value_type::int_value;
+        constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         int64_t value;
     };
 
     struct uint_value_type {
+        using type = uint64_t;
+        constexpr static const value_type vtype = value_type::uint_value;
+        constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         uint64_t value;
     };
 
     struct sint_value_type {
+        using type = int64_t;
+        constexpr static const value_type vtype = value_type::sint_value;
+        constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         int64_t value;
     };
 
     struct bool_value_type {
+        using type = bool;
+        constexpr static const value_type vtype = value_type::bool_value;
+        constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         bool value;
     };
 
