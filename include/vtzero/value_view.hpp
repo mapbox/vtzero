@@ -49,14 +49,14 @@ namespace vtzero {
 
         static bool check_tag_and_type(protozero::pbf_tag_type tag, protozero::pbf_wire_type type) noexcept {
             static protozero::pbf_wire_type types[] = {
-                protozero::pbf_wire_type::length_delimited,
-                protozero::pbf_wire_type::length_delimited, // string_value
-                protozero::pbf_wire_type::fixed32, // float_value
-                protozero::pbf_wire_type::fixed64, // double_value
-                protozero::pbf_wire_type::varint,  // int_value
-                protozero::pbf_wire_type::varint,  // uint_value
-                protozero::pbf_wire_type::varint,  // sint_value
-                protozero::pbf_wire_type::varint   // bool_value
+                protozero::pbf_wire_type::length_delimited, // dummy 0 value
+                string_value_type::wire_type,
+                float_value_type::wire_type,
+                double_value_type::wire_type,
+                int_value_type::wire_type,
+                uint_value_type::wire_type,
+                sint_value_type::wire_type,
+                bool_value_type::wire_type,
             };
 
             if (tag < 1 || tag > 7) {
