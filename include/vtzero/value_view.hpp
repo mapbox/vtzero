@@ -156,7 +156,7 @@ namespace vtzero {
     }; // class value_view
 
     template <typename V>
-    decltype(std::declval<V>()(string_value_type{})) value_visit(V&& visitor, const value_view& value) {
+    decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const value_view& value) {
         switch (value.type()) {
             case value_type::string_value:
                 return std::forward<V>(visitor)(value.string_value());

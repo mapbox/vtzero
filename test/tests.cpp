@@ -53,13 +53,13 @@ TEST_CASE("string value") {
     REQUIRE(vv.string_value() == "foo");
 
     visitor_test_void vt;
-    vtzero::value_visit(vt, vv);
+    vtzero::apply_visitor(vt, vv);
     REQUIRE(vt.x == 2);
 
-    const auto result = vtzero::value_visit(visitor_test_int{}, vv);
+    const auto result = vtzero::apply_visitor(visitor_test_int{}, vv);
     REQUIRE(result == 2);
 
-    const auto str = vtzero::value_visit(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
     REQUIRE(str == "foo");
 }
 
@@ -69,10 +69,10 @@ TEST_CASE("float value") {
     REQUIRE(vv.float_value() == Approx(1.2));
 
     visitor_test_void vt;
-    vtzero::value_visit(vt, vv);
+    vtzero::apply_visitor(vt, vv);
     REQUIRE(vt.x == 1);
 
-    const auto result = vtzero::value_visit(visitor_test_int{}, vv);
+    const auto result = vtzero::apply_visitor(visitor_test_int{}, vv);
     REQUIRE(result == 1);
 }
 
@@ -87,7 +87,7 @@ TEST_CASE("int value") {
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.int_value() == 42);
 
-    const auto str = vtzero::value_visit(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
     REQUIRE(str == "42");
 }
 
@@ -96,7 +96,7 @@ TEST_CASE("uint value") {
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.uint_value() == 99);
 
-    const auto str = vtzero::value_visit(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
     REQUIRE(str == "99");
 }
 
