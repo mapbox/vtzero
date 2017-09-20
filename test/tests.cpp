@@ -6,16 +6,74 @@
 
 #include <catch.hpp>
 
+struct visitor_test_void {
+
+    int x = 0;
+
+    template <typename T>
+    void operator()(T /*value*/) {
+        x = 1;
+    }
+
+    void operator()(vtzero::data_view /*value*/) {
+        x = 2;
+    }
+
+};
+
+struct visitor_test_int {
+
+    template <typename T>
+    int operator()(T /*value*/) {
+        return 1;
+    }
+
+    int operator()(vtzero::data_view /*value*/) {
+        return 2;
+    }
+
+};
+
+struct visitor_test_to_string {
+
+    template <typename T>
+    std::string operator()(T value) {
+        return std::to_string(value);
+    }
+
+    std::string operator()(vtzero::data_view value) {
+        return std::string{value.data(), value.size()};
+    }
+
+};
+
 TEST_CASE("string value") {
     vtzero::tag_value v{"foo"};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.string_value() == "foo");
+
+    visitor_test_void vt;
+    vtzero::value_visit(vt, vv);
+    REQUIRE(vt.x == 2);
+
+    const auto result = vtzero::value_visit(visitor_test_int{}, vv);
+    REQUIRE(result == 2);
+
+    const auto str = vtzero::value_visit(visitor_test_to_string{}, vv);
+    REQUIRE(str == "foo");
 }
 
 TEST_CASE("float value") {
     vtzero::tag_value v{1.2f};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.float_value() == Approx(1.2));
+
+    visitor_test_void vt;
+    vtzero::value_visit(vt, vv);
+    REQUIRE(vt.x == 1);
+
+    const auto result = vtzero::value_visit(visitor_test_int{}, vv);
+    REQUIRE(result == 1);
 }
 
 TEST_CASE("double value") {
@@ -28,12 +86,18 @@ TEST_CASE("int value") {
     vtzero::tag_value v{vtzero::int_value_type{42}};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.int_value() == 42);
+
+    const auto str = vtzero::value_visit(visitor_test_to_string{}, vv);
+    REQUIRE(str == "42");
 }
 
 TEST_CASE("uint value") {
-    vtzero::tag_value v{vtzero::uint_value_type{42}};
+    vtzero::tag_value v{vtzero::uint_value_type{99}};
     vtzero::value_view vv{v.data()};
-    REQUIRE(vv.uint_value() == 42);
+    REQUIRE(vv.uint_value() == 99);
+
+    const auto str = vtzero::value_visit(visitor_test_to_string{}, vv);
+    REQUIRE(str == "99");
 }
 
 TEST_CASE("sint value") {

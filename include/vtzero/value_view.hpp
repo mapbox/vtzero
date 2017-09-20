@@ -156,29 +156,22 @@ namespace vtzero {
     }; // class value_view
 
     template <typename V>
-    void value_visit(V&& visitor, const value_view& value) {
+    decltype(std::declval<V>()(string_value_type{})) value_visit(V&& visitor, const value_view& value) {
         switch (value.type()) {
-            case detail::pbf_value::string_value:
-                std::forward<V>(visitor)(value.string_value());
-                break;
-            case detail::pbf_value::float_value:
-                std::forward<V>(visitor)(value.float_value());
-                break;
-            case detail::pbf_value::double_value:
-                std::forward<V>(visitor)(value.double_value());
-                break;
-            case detail::pbf_value::int_value:
-                std::forward<V>(visitor)(value.int_value());
-                break;
-            case detail::pbf_value::uint_value:
-                std::forward<V>(visitor)(value.uint_value());
-                break;
-            case detail::pbf_value::sint_value:
-                std::forward<V>(visitor)(value.sint_value());
-                break;
-            case detail::pbf_value::bool_value:
-                std::forward<V>(visitor)(value.bool_value());
-                break;
+            case value_type::string_value:
+                return std::forward<V>(visitor)(value.string_value());
+            case value_type::float_value:
+                return std::forward<V>(visitor)(value.float_value());
+            case value_type::double_value:
+                return std::forward<V>(visitor)(value.double_value());
+            case value_type::int_value:
+                return std::forward<V>(visitor)(value.int_value());
+            case value_type::uint_value:
+                return std::forward<V>(visitor)(value.uint_value());
+            case value_type::sint_value:
+                return std::forward<V>(visitor)(value.sint_value());
+            default: // case value_type::bool_value:
+                return std::forward<V>(visitor)(value.bool_value());
         }
     }
 
