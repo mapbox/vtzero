@@ -232,6 +232,18 @@ namespace vtzero {
 
     }; // class feature
 
+
+    template <typename TMap, typename TKey = typename TMap::key_type, typename TValue = typename TMap::mapped_type>
+    TMap create_properties_map(const vtzero::feature& feature, const vtzero::layer& layer) {
+        TMap map;
+
+        for (const auto& p : feature.properties(layer)) {
+            map.emplace(TKey{p.key()}, convert_value<TValue>(p.value()));
+        }
+
+        return map;
+    }
+
 } // namespace vtzero
 
 #endif // VTZERO_FEATURE_HPP

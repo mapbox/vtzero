@@ -193,7 +193,7 @@ namespace vtzero {
 
     } // namespace detail
 
-    template <typename T, typename S>
+    template <typename T, typename S = std::string>
     T convert_value(const value_view& value) {
         return apply_visitor(detail::convert_visitor<T, S>{}, value);
     }
