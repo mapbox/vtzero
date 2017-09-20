@@ -175,6 +175,29 @@ namespace vtzero {
         }
     }
 
+    namespace detail {
+
+        template <typename T, typename S>
+        struct convert_visitor {
+
+            template <typename V>
+            T operator()(V value) const {
+                return T{value};
+            }
+
+            T operator()(data_view value) const {
+                return T{S{value}};
+            }
+
+        }; // convert_visitor
+
+    } // namespace detail
+
+    template <typename T, typename S>
+    T convert_value(const value_view& value) {
+        return apply_visitor(detail::convert_visitor<T, S>{}, value);
+    }
+
 } // namespace vtzero
 
 #endif // VTZERO_VALUE_VIEW_HPP

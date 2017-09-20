@@ -6,6 +6,10 @@
 
 #include <catch.hpp>
 
+#ifdef VTZERO_TEST_WITH_VARIANT
+# include <boost/variant.hpp>
+#endif
+
 struct visitor_test_void {
 
     int x = 0;
@@ -47,6 +51,10 @@ struct visitor_test_to_string {
 
 };
 
+#ifdef VTZERO_TEST_WITH_VARIANT
+using variant_type = boost::variant<std::string, float, double, int64_t, uint64_t, bool>;
+#endif
+
 TEST_CASE("string value") {
     vtzero::property_value v{"foo"};
     vtzero::value_view vv{v.data()};
@@ -61,6 +69,11 @@ TEST_CASE("string value") {
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
     REQUIRE(str == "foo");
+
+#ifdef VTZERO_TEST_WITH_VARIANT
+    const auto vari = vtzero::convert_value<variant_type, std::string>(vv);
+    REQUIRE(boost::get<std::string>(vari) == "foo");
+#endif
 }
 
 TEST_CASE("float value") {
@@ -74,6 +87,11 @@ TEST_CASE("float value") {
 
     const auto result = vtzero::apply_visitor(visitor_test_int{}, vv);
     REQUIRE(result == 1);
+
+#ifdef VTZERO_TEST_WITH_VARIANT
+    const auto vari = vtzero::convert_value<variant_type, std::string>(vv);
+    REQUIRE(boost::get<float>(vari) == Approx(1.2));
+#endif
 }
 
 TEST_CASE("double value") {
