@@ -2,7 +2,7 @@
 #define VTZERO_BUILDER_HPP
 
 #include "geometry.hpp"
-#include "tag_value.hpp"
+#include "property_value.hpp"
 #include "types.hpp"
 #include "vector_tile.hpp"
 
@@ -204,7 +204,7 @@ namespace vtzero {
 
             template <typename T>
             void add_value_internal(T&& value) {
-                tag_value v{std::forward<T>(value)};
+                property_value v{std::forward<T>(value)};
                 add_value_internal(m_layer.get_layer().add_value(v.data()));
             }
 
@@ -219,13 +219,13 @@ namespace vtzero {
                 m_feature_writer.add_uint64(detail::pbf_feature::id, id);
             }
 
-            void add_tag_impl(const tag_view& tag) {
-                add_key_internal(tag.key());
-                add_value_internal(tag.value().data());
+            void add_property_impl(const property_view& property) {
+                add_key_internal(property.key());
+                add_value_internal(property.value().data());
             }
 
             template <typename TKey, typename TValue>
-            void add_tag_impl(TKey&& key, TValue&& value) {
+            void add_property_impl(TKey&& key, TValue&& value) {
                 add_key_internal(std::forward<TKey>(key));
                 add_value_internal(std::forward<TValue>(value));
             }
@@ -261,7 +261,7 @@ namespace vtzero {
             }
 
             template <typename ...TArgs>
-            void add_tag(TArgs&& ...args) {
+            void add_property(TArgs&& ...args) {
                 if (m_pbf_geometry.valid()) {
                     assert(m_num_points == 0 && "Not enough calls to set_point()");
                     m_pbf_geometry.commit();
@@ -269,7 +269,7 @@ namespace vtzero {
                 if (!m_pbf_tags.valid()) {
                     m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
                 }
-                add_tag_impl(std::forward<TArgs>(args)...);
+                add_property_impl(std::forward<TArgs>(args)...);
             }
 
             void commit() {
@@ -302,8 +302,8 @@ namespace vtzero {
         }
 
         template <typename ...TArgs>
-        void add_tag(TArgs&& ...args) {
-            add_tag_impl(std::forward<TArgs>(args)...);
+        void add_property(TArgs&& ...args) {
+            add_property_impl(std::forward<TArgs>(args)...);
         }
 
     }; // class geometry_feature_builder
@@ -583,8 +583,8 @@ namespace vtzero {
 
     inline void layer_builder::add_feature(feature& feature, layer& layer) {
         geometry_feature_builder feature_builder{*this, feature.id(), feature.type(), feature.geometry()};
-        for (auto tag : feature.tags(layer)) {
-            feature_builder.add_tag(tag);
+        for (auto property : feature.properties(layer)) {
+            feature_builder.add_property(property);
         }
     }
 

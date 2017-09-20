@@ -1,7 +1,7 @@
 
 #include <vtzero/geometry.hpp>
 #include <vtzero/builder.hpp>
-#include <vtzero/tag_value.hpp>
+#include <vtzero/property_value.hpp>
 #include <vtzero/value_view.hpp>
 
 #include <catch.hpp>
@@ -48,7 +48,7 @@ struct visitor_test_to_string {
 };
 
 TEST_CASE("string value") {
-    vtzero::tag_value v{"foo"};
+    vtzero::property_value v{"foo"};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.string_value() == "foo");
 
@@ -64,7 +64,7 @@ TEST_CASE("string value") {
 }
 
 TEST_CASE("float value") {
-    vtzero::tag_value v{1.2f};
+    vtzero::property_value v{1.2f};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.float_value() == Approx(1.2));
 
@@ -77,13 +77,13 @@ TEST_CASE("float value") {
 }
 
 TEST_CASE("double value") {
-    vtzero::tag_value v{1.2};
+    vtzero::property_value v{1.2};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.double_value() == Approx(1.2));
 }
 
 TEST_CASE("int value") {
-    vtzero::tag_value v{vtzero::int_value_type{42}};
+    vtzero::property_value v{vtzero::int_value_type{42}};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.int_value() == 42);
 
@@ -92,7 +92,7 @@ TEST_CASE("int value") {
 }
 
 TEST_CASE("uint value") {
-    vtzero::tag_value v{vtzero::uint_value_type{99}};
+    vtzero::property_value v{vtzero::uint_value_type{99}};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.uint_value() == 99);
 
@@ -101,13 +101,13 @@ TEST_CASE("uint value") {
 }
 
 TEST_CASE("sint value") {
-    vtzero::tag_value v{vtzero::sint_value_type{42}};
+    vtzero::property_value v{vtzero::sint_value_type{42}};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.sint_value() == 42);
 }
 
 TEST_CASE("bool value") {
-    vtzero::tag_value v{true};
+    vtzero::property_value v{true};
     vtzero::value_view vv{v.data()};
     REQUIRE(vv.bool_value());
 }

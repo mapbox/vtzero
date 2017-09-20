@@ -49,7 +49,7 @@ namespace vtzero {
         index_value operator()(const TExt& v) {
             const auto it = m_index.find(v);
             if (it == m_index.end()) {
-                const auto idx = m_builder.get_layer().add_value_without_dup_check(tag_value{TInternal{v}}.data());
+                const auto idx = m_builder.get_layer().add_value_without_dup_check(property_value{TInternal{v}}.data());
                 m_index.emplace(v, idx);
                 return idx;
             }

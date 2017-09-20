@@ -151,14 +151,14 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
             default:
                 std::cout << "UNKNOWN GEOMETRY TYPE\n";
         }
-        std::cout << "    tags:\n";
-        for (auto tag : feature.tags(layer)) {
+        std::cout << "    properties:\n";
+        for (auto property : feature.properties(layer)) {
             std::cout << "      ";
-            std::cout.write(tag.key().data(), tag.key().size());
+            std::cout.write(property.key().data(), property.key().size());
             std::cout << '=';
-            vtzero::value_visit(print_value{}, tag.value());
+            vtzero::value_visit(print_value{}, property.value());
             if (print_values_with_type) {
-                std::cout << " [" << vtzero::value_type_name(tag.value().type()) << "]\n";
+                std::cout << " [" << vtzero::value_type_name(property.value().type()) << "]\n";
             } else {
                 std::cout << '\n';
             }

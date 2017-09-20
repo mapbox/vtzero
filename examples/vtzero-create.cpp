@@ -20,8 +20,8 @@ int main() {
         vtzero::point_feature_builder feature{layer_points, 1 /* id */};
         feature.add_points(1);
         feature.set_point(10, 10);
-        feature.add_tag("foo", "bar");
-        feature.add_tag("x", "y");
+        feature.add_property("foo", "bar");
+        feature.add_property("x", "y");
         feature.rollback();
     }
 
@@ -30,24 +30,24 @@ int main() {
     {
         vtzero::point_feature_builder feature{layer_points, 2 /* id */};
         feature.add_point(20, 20);
-        feature.add_tag(some, "attr");
+        feature.add_property(some, "attr");
     }
     {
         vtzero::point_feature_builder feature{layer_points, 3 /* id */};
         feature.add_point(20, 20);
-        feature.add_tag(idx("some"), "attr");
+        feature.add_property(idx("some"), "attr");
     }
 
     {
         vtzero::point_feature_builder feature{layer_points, 4 /* id */};
         feature.add_point(20, 20);
-        feature.add_tag(idx("some"), "otherattr");
+        feature.add_property(idx("some"), "otherattr");
     }
 
 
     vtzero::point_feature_builder feature{layer_points, 5 /* id */};
     feature.add_point(vtzero::point{20, 20});
-    feature.add_tag("otherkey", "attr");
+    feature.add_property("otherkey", "attr");
     feature.commit();
 
     vtzero::value_index_unordered_map<vtzero::sint_value_type, int32_t> maxspeed_index{layer_lines};
@@ -59,8 +59,8 @@ int main() {
         feature.set_point(vtzero::point{20, 20});
         std::vector<vtzero::point> points = {{11, 11}, {12, 13}};
         feature.add_linestring(points.begin(), points.end());
-        feature.add_tag("highway", "primary");
-        feature.add_tag(std::string{"maxspeed"}, maxspeed_index(50));
+        feature.add_property("highway", "primary");
+        feature.add_property(std::string{"maxspeed"}, maxspeed_index(50));
     }
 
     {
@@ -76,8 +76,8 @@ int main() {
         feature.set_point(3, 5);
         feature.set_point(5, 5);
         feature.close_ring();
-        feature.add_tag("natural", "wood");
-        feature.add_tag("number_of_trees", vtzero::sint_value_type{23402752});
+        feature.add_property("natural", "wood");
+        feature.add_property("number_of_trees", vtzero::sint_value_type{23402752});
     }
 
     const auto data = tile.serialize();

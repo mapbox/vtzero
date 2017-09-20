@@ -147,9 +147,9 @@ TEST_CASE("MVT test 005: Tile with single point with broken tags array") {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 1);
 
-//    REQUIRE_THROWS_AS(feature.tags(layer).size(), const vtzero::format_exception&); XXX
-    auto it = feature.tags(layer).begin();
-    REQUIRE(it != feature.tags(layer).end());
+//    REQUIRE_THROWS_AS(feature.properties(layer).size(), const vtzero::format_exception&); XXX
+    auto it = feature.properties(layer).begin();
+    REQUIRE(it != feature.properties(layer).end());
     REQUIRE_THROWS_AS(it.size(), const vtzero::format_exception&);
     REQUIRE_THROWS_AS(*it, const vtzero::format_exception&);
     REQUIRE_THROWS_AS(++it, const vtzero::format_exception&);
@@ -177,7 +177,7 @@ TEST_CASE("MVT test 007: Tile with key in table encoded as int") {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 1);
 
-    auto it = feature.tags(layer).begin();
+    auto it = feature.properties(layer).begin();
     (void)it;
 /*    REQUIRE_THROWS_AS((*it).key(), const vtzero::format_exception&); XXX broken test fixture?
     */
@@ -236,7 +236,7 @@ TEST_CASE("MVT test 013: Tile with key in table encoded as int") {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 1);
 
-/*    auto it = feature.tags(layer).begin();
+/*    auto it = feature.properties(layer).begin();
     REQUIRE_THROWS_AS((*it).key(), const vtzero::format_exception&); XXX*/
 }
 

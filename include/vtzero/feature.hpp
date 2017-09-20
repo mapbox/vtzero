@@ -15,18 +15,18 @@
 namespace vtzero {
 
     /**
-     * A vector tile tag.
+     * A vector tile property.
      */
-    class tag_view {
+    class property_view {
 
         data_view m_key;
         value_view m_value;
 
     public:
 
-        tag_view() = default;
+        property_view() = default;
 
-        tag_view(const data_view& key, const value_view& value) noexcept :
+        property_view(const data_view& key, const value_view& value) noexcept :
             m_key(key),
             m_value(value) {
         }
@@ -47,11 +47,11 @@ namespace vtzero {
             return m_value;
         }
 
-    }; // class tag_view
+    }; // class property_view
 
     class layer;
 
-    class tags_iterator {
+    class properties_iterator {
 
         protozero::pbf_reader::const_uint32_iterator m_it;
         protozero::pbf_reader::const_uint32_iterator m_end;
@@ -60,12 +60,12 @@ namespace vtzero {
     public:
 
         using iterator_category = std::forward_iterator_tag;
-        using value_type        = tag_view;
+        using value_type        = property_view;
         using difference_type   = std::ptrdiff_t;
         using pointer           = value_type*;
         using reference         = value_type&;
 
-        tags_iterator(const protozero::pbf_reader::const_uint32_iterator& begin,
+        properties_iterator(const protozero::pbf_reader::const_uint32_iterator& begin,
                       const protozero::pbf_reader::const_uint32_iterator& end,
                       const layer* layer) :
             m_it(begin),
@@ -74,36 +74,36 @@ namespace vtzero {
             assert(layer);
         }
 
-        tag_view operator*() const;
+        property_view operator*() const;
 
-        tags_iterator& operator++() {
+        properties_iterator& operator++() {
             assert(m_it != m_end);
             if (std::next(m_it) == m_end) {
-                throw format_exception{"unpaired tag key/value indexes (spec 4.4)"};
+                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
             }
             ++m_it;
             ++m_it;
             return *this;
         }
 
-        tags_iterator operator++(int) {
-            const tags_iterator tmp{*this};
+        properties_iterator operator++(int) {
+            const properties_iterator tmp{*this};
             ++(*this);
             return tmp;
         }
 
-        bool operator==(const tags_iterator& other) const noexcept {
+        bool operator==(const properties_iterator& other) const noexcept {
             return m_it == other.m_it &&
                    m_end == other.m_end &&
                    m_layer == other.m_layer;
         }
 
-        bool operator!=(const tags_iterator& other) const noexcept {
+        bool operator!=(const properties_iterator& other) const noexcept {
             return !(*this == other);
         }
 
         /**
-         * Returns true if there are no tags.
+         * Returns true if there are no properties.
          *
          * Complexity: Constant.
          */
@@ -112,18 +112,18 @@ namespace vtzero {
         }
 
         /**
-         * Return the number of tags.
+         * Return the number of properties.
          *
          * Complexity: Linear.
          */
         std::size_t size() const {
             if (m_it.size() % 2 != 0) {
-                throw format_exception{"unpaired tag key/value indexes (spec 4.4)"};
+                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
             }
             return m_it.size() / 2;
         }
 
-    }; // tags_iterator
+    }; // properties_iterator
 
     /**
      * A feature according to spec 4.2.
@@ -133,7 +133,7 @@ namespace vtzero {
         using uint32_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint32_iterator>;
 
         uint64_t m_id;
-        uint32_it_range m_tags;
+        uint32_it_range m_properties;
         data_view m_geometry;
         GeomType m_type;
         bool m_has_id;
@@ -142,7 +142,7 @@ namespace vtzero {
 
         feature() :
             m_id(0),
-            m_tags(),
+            m_properties(),
             m_geometry(),
             m_type(),
             m_has_id(false) {
@@ -150,7 +150,7 @@ namespace vtzero {
 
         feature(const data_view& data) :
             m_id(0), // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
-            m_tags(),
+            m_properties(),
             m_geometry(),
             m_type(), // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
             m_has_id(false) {
@@ -164,10 +164,10 @@ namespace vtzero {
                         m_has_id = true;
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
-                        if (m_tags.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
+                        if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
                             throw format_exception{"Feature has more than one tags field"}; // XXX or do we need to handle this?
                         }
-                        m_tags = reader.get_packed_uint32();
+                        m_properties = reader.get_packed_uint32();
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
                             const auto type = reader.get_enum();
@@ -225,9 +225,9 @@ namespace vtzero {
             return m_geometry;
         }
 
-        protozero::iterator_range<tags_iterator> tags(const layer& layer) const noexcept {
-            return {{m_tags.begin(), m_tags.end(), &layer},
-                    {m_tags.end(), m_tags.end(), &layer}};
+        protozero::iterator_range<properties_iterator> properties(const layer& layer) const noexcept {
+            return {{m_properties.begin(), m_properties.end(), &layer},
+                    {m_properties.end(), m_properties.end(), &layer}};
         }
 
     }; // class feature

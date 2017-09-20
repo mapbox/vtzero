@@ -81,14 +81,15 @@ public:
 }; // class geometry_exception
 
 /**
- * This exception is thrown when a tag value is accessed using the wrong type.
+ * This exception is thrown when a property value is accessed using the wrong
+ * type.
  */
 class type_exception : public exception {
 
 public:
 
     explicit type_exception() :
-        exception("wrong tag value type") {
+        exception("wrong property value type") {
     }
 
 }; // class type_exception
