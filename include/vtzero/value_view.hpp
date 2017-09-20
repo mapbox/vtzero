@@ -73,7 +73,7 @@ namespace vtzero {
 
             decltype(T::value) result;
             bool has_result = false;
-            while (value_message.next(T::vtype, T::wire_type)) {
+            while (value_message.next(T::pvtype, T::wire_type)) {
                 result = detail::get_value_impl(value_message, T{});
                 has_result = true;
             }
@@ -108,13 +108,13 @@ namespace vtzero {
             return m_value.data() != nullptr;
         }
 
-        value_type type() const {
+        property_value_type type() const {
             assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
             if (value_message.next()) {
                 const auto tag_val = static_cast<protozero::pbf_tag_type>(value_message.tag());
                 if (!check_tag_and_type(tag_val, value_message.wire_type())) {
-                    throw format_exception{"illegal value_type"};
+                    throw format_exception{"illegal property value type"};
                 }
                 return value_message.tag();
             }
@@ -158,19 +158,19 @@ namespace vtzero {
     template <typename V>
     decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const value_view& value) {
         switch (value.type()) {
-            case value_type::string_value:
+            case property_value_type::string_value:
                 return std::forward<V>(visitor)(value.string_value());
-            case value_type::float_value:
+            case property_value_type::float_value:
                 return std::forward<V>(visitor)(value.float_value());
-            case value_type::double_value:
+            case property_value_type::double_value:
                 return std::forward<V>(visitor)(value.double_value());
-            case value_type::int_value:
+            case property_value_type::int_value:
                 return std::forward<V>(visitor)(value.int_value());
-            case value_type::uint_value:
+            case property_value_type::uint_value:
                 return std::forward<V>(visitor)(value.uint_value());
-            case value_type::sint_value:
+            case property_value_type::sint_value:
                 return std::forward<V>(visitor)(value.sint_value());
-            default: // case value_type::bool_value:
+            default: // case property_value_type::bool_value:
                 return std::forward<V>(visitor)(value.bool_value());
         }
     }

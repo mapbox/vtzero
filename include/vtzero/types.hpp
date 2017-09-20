@@ -28,7 +28,7 @@ namespace vtzero {
         return names[static_cast<int>(type)];
     }
 
-    enum class value_type : protozero::pbf_tag_type {
+    enum class property_value_type : protozero::pbf_tag_type {
         string_value = 1,
         float_value  = 2,
         double_value = 3,
@@ -38,7 +38,7 @@ namespace vtzero {
         bool_value   = 7
     };
 
-    inline const char* value_type_name(value_type type) noexcept {
+    inline const char* value_type_name(property_value_type type) noexcept {
         static const char* names[] = {
             "", "string", "float", "double", "int", "uint", "sint", "bool"
         };
@@ -67,55 +67,55 @@ namespace vtzero {
             geometry = 4
         };
 
-        using pbf_value = value_type;
+        using pbf_value = property_value_type;
 
     } // namespace detail
 
     struct string_value_type {
         using type = data_view;
-        constexpr static const value_type vtype = value_type::string_value;
+        constexpr static const property_value_type pvtype = property_value_type::string_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::length_delimited;
         data_view value;
     };
 
     struct float_value_type {
         using type = float;
-        constexpr static const value_type vtype = value_type::float_value;
+        constexpr static const property_value_type pvtype = property_value_type::float_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed32;
         float value;
     };
 
     struct double_value_type {
         using type = double;
-        constexpr static const value_type vtype = value_type::double_value;
+        constexpr static const property_value_type pvtype = property_value_type::double_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed64;
         double value;
     };
 
     struct int_value_type {
         using type = int64_t;
-        constexpr static const value_type vtype = value_type::int_value;
+        constexpr static const property_value_type pvtype = property_value_type::int_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         int64_t value;
     };
 
     struct uint_value_type {
         using type = uint64_t;
-        constexpr static const value_type vtype = value_type::uint_value;
+        constexpr static const property_value_type pvtype = property_value_type::uint_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         uint64_t value;
     };
 
     struct sint_value_type {
         using type = int64_t;
-        constexpr static const value_type vtype = value_type::sint_value;
+        constexpr static const property_value_type pvtype = property_value_type::sint_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         int64_t value;
     };
 
     struct bool_value_type {
         using type = bool;
-        constexpr static const value_type vtype = value_type::bool_value;
+        constexpr static const property_value_type pvtype = property_value_type::bool_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
         bool value;
     };
