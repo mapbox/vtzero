@@ -179,6 +179,22 @@ namespace vtzero {
             return *m_layer;
         };
 
+        index_value add_key_without_dup_check(const data_view& text) {
+            return m_layer->add_key_without_dup_check(text);
+        }
+
+        index_value add_key(const data_view& text) {
+            return m_layer->add_key(text);
+        }
+
+        index_value add_value_without_dup_check(const data_view& text) {
+            return m_layer->add_value_without_dup_check(text);
+        }
+
+        index_value add_value(const data_view& text) {
+            return m_layer->add_value(text);
+        }
+
         void add_feature(feature& feature, layer& layer);
 
     }; // class layer_builder
@@ -581,13 +597,6 @@ namespace vtzero {
 
     }; // class polygon_feature_builder
 
-    inline void layer_builder::add_feature(feature& feature, layer& layer) {
-        geometry_feature_builder feature_builder{*this, feature.id(), feature.type(), feature.geometry()};
-        for (auto property : feature.properties(layer)) {
-            feature_builder.add_property(property);
-        }
-    }
-
     class tile_builder {
 
         std::vector<std::unique_ptr<layer_builder_base>> m_layers;
@@ -624,6 +633,13 @@ namespace vtzero {
         }
 
     }; // class tile_builder
+
+    inline void layer_builder::add_feature(feature& feature, layer& layer) {
+        geometry_feature_builder feature_builder{*this, feature.id(), feature.type(), feature.geometry()};
+        for (auto property : feature.properties(layer)) {
+            feature_builder.add_property(property);
+        }
+    }
 
     template <typename ...TArgs>
     layer_builder::layer_builder(vtzero::tile_builder& tile, TArgs&& ...args) :
