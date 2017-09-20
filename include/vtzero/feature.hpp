@@ -26,7 +26,7 @@ namespace vtzero {
 
         tag_view() = default;
 
-        tag_view(const data_view& key, const data_view& value) noexcept :
+        tag_view(const data_view& key, const value_view& value) noexcept :
             m_key(key),
             m_value(value) {
         }

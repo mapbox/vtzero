@@ -100,7 +100,7 @@ namespace vtzero {
 
         value_view() = default;
 
-        value_view(const data_view& value) noexcept :
+        explicit value_view(const data_view& value) noexcept :
             m_value(value) {
         }
 

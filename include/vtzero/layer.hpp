@@ -5,6 +5,7 @@
 #include "feature.hpp"
 #include "geometry.hpp"
 #include "types.hpp"
+#include "value_view.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -99,7 +100,7 @@ namespace vtzero {
         uint32_t m_extent;
         data_view m_name;
         std::vector<data_view> m_key_table;
-        std::vector<data_view> m_value_table;
+        std::vector<value_view> m_value_table;
 
     public:
 
@@ -142,7 +143,7 @@ namespace vtzero {
                             m_key_table.push_back(reader.get_view());
                             break;
                         case protozero::tag_and_type(detail::pbf_layer::values, protozero::pbf_wire_type::length_delimited):
-                            m_value_table.push_back(reader.get_view());
+                            m_value_table.emplace_back(reader.get_view());
                             break;
                         case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
                             m_extent = reader.get_uint32();
@@ -203,11 +204,11 @@ namespace vtzero {
             return m_key_table;
         }
 
-        const std::vector<data_view>& value_table() const noexcept {
+        const std::vector<value_view>& value_table() const noexcept {
             return m_value_table;
         }
 
-        const data_view& key(uint32_t n) const {
+        data_view key(uint32_t n) const {
             if (n >= m_key_table.size()) {
                 throw format_exception{std::string{"key table index too large: "} + std::to_string(n)};
             }
@@ -215,7 +216,7 @@ namespace vtzero {
             return m_key_table[n];
         }
 
-        const data_view& value(uint32_t n) const {
+        value_view value(uint32_t n) const {
             if (n >= m_value_table.size()) {
                 throw format_exception{std::string{"value table index too large: "} + std::to_string(n)};
             }
