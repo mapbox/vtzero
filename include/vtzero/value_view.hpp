@@ -11,38 +11,6 @@
 
 namespace vtzero {
 
-    namespace detail {
-
-        inline data_view get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, string_value_type) {
-            return value_message.get_view();
-        }
-
-        inline float get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, float_value_type) {
-            return value_message.get_float();
-        }
-
-        inline double get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, double_value_type) {
-            return value_message.get_double();
-        }
-
-        inline int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, int_value_type) {
-            return value_message.get_int64();
-        }
-
-        inline uint64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, uint_value_type) {
-            return value_message.get_uint64();
-        }
-
-        inline int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, sint_value_type) {
-            return value_message.get_sint64();
-        }
-
-        inline bool get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, bool_value_type) {
-            return value_message.get_bool();
-        }
-
-    } // namespace detail
-
     class value_view {
 
         data_view m_value;
@@ -66,6 +34,34 @@ namespace vtzero {
             return types[tag] == type;
         }
 
+        static data_view get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, string_value_type) {
+            return value_message.get_view();
+        }
+
+        static float get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, float_value_type) {
+            return value_message.get_float();
+        }
+
+        static double get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, double_value_type) {
+            return value_message.get_double();
+        }
+
+        static int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, int_value_type) {
+            return value_message.get_int64();
+        }
+
+        static uint64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, uint_value_type) {
+            return value_message.get_uint64();
+        }
+
+        static int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, sint_value_type) {
+            return value_message.get_sint64();
+        }
+
+        static bool get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, bool_value_type) {
+            return value_message.get_bool();
+        }
+
         template <typename T>
         typename T::type get_value() const {
             assert(valid());
@@ -74,7 +70,7 @@ namespace vtzero {
             decltype(T::value) result;
             bool has_result = false;
             while (value_message.next(T::pvtype, T::wire_type)) {
-                result = detail::get_value_impl(value_message, T{});
+                result = get_value_impl(value_message, T{});
                 has_result = true;
             }
 
