@@ -81,17 +81,6 @@ namespace vtzero {
             throw type_exception{};
         }
 
-        protozero::pbf_message<detail::pbf_value> check_value(detail::pbf_value type, protozero::pbf_wire_type wire_type) const {
-            assert(valid());
-            protozero::pbf_message<detail::pbf_value> value_message{m_value};
-
-            if (value_message.next(type, wire_type)) {
-                return value_message;
-            }
-
-            throw type_exception{};
-        }
-
     public:
 
         value_view() = default;
