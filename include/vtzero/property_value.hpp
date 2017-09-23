@@ -5,6 +5,7 @@
 
 #include <protozero/pbf_builder.hpp>
 
+#include <functional>
 #include <string>
 
 namespace vtzero {
@@ -108,8 +109,49 @@ namespace vtzero {
             pbf_message_value.add_bool(detail::pbf_value::bool_value, value);
         }
 
+        std::size_t hash() const noexcept {
+            return std::hash<std::string>{}(m_data);
+        }
+
+        bool operator==(const property_value& other) const noexcept {
+            return m_data == other.m_data;
+        }
+
+        bool operator!=(const property_value& other) const noexcept {
+            return !(*this == other);
+        }
+
+        bool operator<(const property_value& other) const noexcept {
+            return this->m_data < other.m_data;
+        }
+
+        bool operator<=(const property_value& other) const noexcept {
+            return this->m_data <= other.m_data;
+        }
+
+        bool operator>(const property_value& other) const noexcept {
+            return this->m_data > other.m_data;
+        }
+
+        bool operator>=(const property_value& other) const noexcept {
+            return this->m_data >= other.m_data;
+        }
+
     }; // class property_value
 
 } // namespace vtzero
+
+namespace std {
+
+    template <>
+    struct hash<vtzero::property_value> {
+        using argument_type = vtzero::property_value;
+        using result_type = std::size_t;
+        std::size_t operator()(const vtzero::property_value& value) const noexcept {
+            return value.hash();
+        }
+    };
+
+} // namespace std
 
 #endif // VTZERO_PROPERTY_VALUE_HPP
