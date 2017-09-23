@@ -7,6 +7,7 @@
 #include <protozero/pbf_message.hpp>
 
 #include <cstdint>
+#include <cstring>
 #include <utility>
 
 namespace vtzero {
@@ -81,6 +82,19 @@ namespace vtzero {
             throw type_exception{};
         }
 
+        int compare(const value_view& other) const noexcept {
+            const int cmp = std::memcmp(m_value.data(),
+                                        other.m_value.data(),
+                                        std::min(m_value.size(), other.m_value.size()));
+            if (cmp == 0) {
+                if (m_value.size() == other.m_value.size()) {
+                    return 0;
+                }
+                return m_value.size() < other.m_value.size() ? -1 : 1;
+            }
+            return cmp;
+        }
+
     public:
 
         value_view() = default;
@@ -136,6 +150,31 @@ namespace vtzero {
 
         bool bool_value() const {
             return get_value<bool_value_type>();
+        }
+
+        bool operator==(const value_view& other) const noexcept {
+            return m_value.size() == other.m_value.size() &&
+                   std::memcmp(m_value.data(), other.m_value.data(), m_value.size()) == 0;
+        }
+
+        bool operator!=(const value_view& other) const noexcept {
+            return !(*this == other);
+        }
+
+        bool operator<(const value_view& other) const noexcept {
+            return compare(other) < 0;
+        }
+
+        bool operator<=(const value_view& other) const noexcept {
+            return compare(other) <= 0;
+        }
+
+        bool operator>(const value_view& other) const noexcept {
+            return compare(other) > 0;
+        }
+
+        bool operator>=(const value_view& other) const noexcept {
+            return compare(other) >= 0;
         }
 
     }; // class value_view
