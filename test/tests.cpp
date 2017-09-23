@@ -1,6 +1,7 @@
 
-#include <vtzero/geometry.hpp>
 #include <vtzero/builder.hpp>
+#include <vtzero/geometry.hpp>
+#include <vtzero/index.hpp>
 #include <vtzero/property_value.hpp>
 #include <vtzero/value_view.hpp>
 
@@ -251,5 +252,49 @@ TEST_CASE("Point builder") {
 
     std::vector<vtzero::point> result = {{10, 20}};
     REQUIRE(handler.data == result);
+}
+
+TEST_CASE("value index") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const auto key = lbuilder.add_key("some_key");
+
+    vtzero::point_feature_builder fbuilder{lbuilder, 17};
+    fbuilder.add_point(10, 20);
+
+    SECTION("no index") {
+        fbuilder.add_property(key, vtzero::sint_value_type{12});
+    }
+
+    SECTION("external value index using unordered_map") {
+        vtzero::value_index<vtzero::sint_value_type, int, std::unordered_map> index{lbuilder};
+        fbuilder.add_property(key, index(12));
+    }
+
+    SECTION("external value index using map") {
+        vtzero::value_index<vtzero::sint_value_type, int, std::map> index{lbuilder};
+        fbuilder.add_property(key, index(12));
+    }
+
+    SECTION("property_value_type index") {
+        vtzero::value_index_internal<std::unordered_map> index{lbuilder};
+        fbuilder.add_property(key, index(vtzero::property_value{vtzero::sint_value_type{12}}));
+    }
+
+    fbuilder.commit();
+
+    std::string data = tbuilder.serialize();
+
+    // ============
+
+    vtzero::vector_tile tile{data};
+
+    REQUIRE(tile.size() == 1);
+    const auto layer = *tile.begin();
+    REQUIRE(layer.size() == 1);
+    const auto feature = *layer.begin();
+    REQUIRE(feature.id() == 17);
+    const auto property = *feature.properties(layer).begin();
+    REQUIRE(property.value().sint_value() == 12);
 }
 

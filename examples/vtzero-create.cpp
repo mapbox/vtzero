@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <unordered_map>
 
 int main() {
     vtzero::tile_builder tile;
@@ -14,7 +15,7 @@ int main() {
     vtzero::layer_builder layer_lines{tile, "lines"};
     vtzero::layer_builder layer_polygons{tile, "polygons"};
 
-    vtzero::key_index_unordered_map idx{layer_points};
+    vtzero::key_index<std::unordered_map> idx{layer_points};
 
     {
         vtzero::point_feature_builder feature{layer_points, 1 /* id */};
@@ -50,7 +51,7 @@ int main() {
     feature.add_property("otherkey", "attr");
     feature.commit();
 
-    vtzero::value_index_unordered_map<vtzero::sint_value_type, int32_t> maxspeed_index{layer_lines};
+    vtzero::value_index<vtzero::sint_value_type, int32_t, std::unordered_map> maxspeed_index{layer_lines};
     {
         vtzero::line_string_feature_builder feature{layer_lines, 6 /* id */};
         feature.add_linestring(3);
