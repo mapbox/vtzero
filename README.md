@@ -63,5 +63,5 @@ to show contents of `TILE-FILE`.
 ## AUTHORS
 
 Jochen Topf (jochen@topf.org)
-Dane Springmeyer (dane@mapbox.comm)
+Dane Springmeyer (dane@mapbox.com)
 
