@@ -16,16 +16,32 @@ Implements the [Mapbox Vector Tile Specification 2.x](https://www.mapbox.com/vec
 
 * C++11 compiler
 * make
-* [Protozero](https://github.com/mapbox/protozero)
+* Latest [Protozero](https://github.com/mapbox/protozero)
 
 
 ## Build
 
-Call `make` to build the tests and examples. Call `make test` to build and
-run the tests.
+First clone `protozero`:
 
-You might have to set `PROTOZERO_INCLUDE` in the Makefile.
+```
+git clone git@github.com:mapbox/protozero.git
+```
 
+Then clone `vtzero` beside `protozero`. By default the `vtzero` build system looks for `protozero` at `../protozero`. If you would like to use `protozero` from a different path you can set `PROTOZERO_INCLUDE`.
+
+Then, inside the `vtzero` directory do:
+
+```
+git submodule update --init
+```
+
+Finally, to build the examples do:
+
+```
+make
+```
+
+Call `make test` to build and run the tests.
 
 ## Examples
 
@@ -44,7 +60,8 @@ Call
 to show contents of `TILE-FILE`.
 
 
-## AUTHOR
+## AUTHORS
 
 Jochen Topf (jochen@topf.org)
+Dane Springmeyer (dane@mapbox.comm)
 
