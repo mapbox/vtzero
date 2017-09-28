@@ -99,8 +99,33 @@ namespace vtzero {
         uint32_t m_version;
         uint32_t m_extent;
         data_view m_name;
-        std::vector<data_view> m_key_table;
-        std::vector<value_view> m_value_table;
+        mutable std::vector<data_view> m_key_table;
+        mutable std::vector<value_view> m_value_table;
+        mutable std::size_t m_key_table_size = 0;
+        mutable std::size_t m_value_table_size = 0;
+
+        void initialize_tables() const {
+            m_key_table.reserve(m_key_table_size);
+            m_key_table_size = 0;
+
+            m_value_table.reserve(m_value_table_size);
+            m_value_table_size = 0;
+
+            protozero::pbf_message<detail::pbf_layer> reader{m_data};
+            while (reader.next()) {
+                switch (reader.tag_and_type()) {
+                    case protozero::tag_and_type(detail::pbf_layer::keys, protozero::pbf_wire_type::length_delimited):
+                        m_key_table.push_back(reader.get_view());
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::values, protozero::pbf_wire_type::length_delimited):
+                        m_value_table.emplace_back(reader.get_view());
+                        break;
+                    default:
+                        reader.skip();
+                        break;
+                }
+            }
+        }
 
     public:
 
@@ -140,10 +165,12 @@ namespace vtzero {
                             reader.skip(); // ignore features for now
                             break;
                         case protozero::tag_and_type(detail::pbf_layer::keys, protozero::pbf_wire_type::length_delimited):
-                            m_key_table.push_back(reader.get_view());
+                            reader.skip();
+                            ++m_key_table_size;
                             break;
                         case protozero::tag_and_type(detail::pbf_layer::values, protozero::pbf_wire_type::length_delimited):
-                            m_value_table.emplace_back(reader.get_view());
+                            reader.skip();
+                            ++m_value_table_size;
                             break;
                         case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
                             m_extent = reader.get_uint32();
@@ -201,27 +228,33 @@ namespace vtzero {
         }
 
         const std::vector<data_view>& key_table() const noexcept {
+            if (m_key_table_size > 0) {
+                initialize_tables();
+            }
             return m_key_table;
         }
 
         const std::vector<value_view>& value_table() const noexcept {
+            if (m_value_table_size > 0) {
+                initialize_tables();
+            }
             return m_value_table;
         }
 
         data_view key(uint32_t n) const {
-            if (n >= m_key_table.size()) {
+            if (n >= key_table().size()) {
                 throw format_exception{std::string{"key table index too large: "} + std::to_string(n)};
             }
 
-            return m_key_table[n];
+            return key_table()[n];
         }
 
         value_view value(uint32_t n) const {
-            if (n >= m_value_table.size()) {
+            if (n >= value_table().size()) {
                 throw format_exception{std::string{"value table index too large: "} + std::to_string(n)};
             }
 
-            return m_value_table[n];
+            return value_table()[n];
         }
 
         layer_iterator begin() const {
