@@ -173,6 +173,21 @@ namespace vtzero {
         }
 
         /**
+         * Returns the layer with the specified zero-based index.
+         *
+         * Complexity: Linear in the number of layers.
+         *
+         * @returns The specified layer or the invalid layer if index is
+         *          larger than the number of layers.
+         * @throws format_exception if the tile data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
+         */
+        template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+        layer operator[](T index) const {
+            return operator[](std::size_t(index));
+        }
+
+        /**
          * Returns the layer with the specified name.
          *
          * Complexity: Linear in the number of layers.

@@ -213,7 +213,7 @@ TEST_CASE("MVT test 014: Tile layer without a name") {
     vtzero::vector_tile tile{buffer};
     REQUIRE(tile.size() == 1);
 
-    REQUIRE_THROWS_AS(*tile.begin(), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(tile[0], const vtzero::format_exception&);
 }
 
 // XXX 015: we do not test for this, because it would be expensive
