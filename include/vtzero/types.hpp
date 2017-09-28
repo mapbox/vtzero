@@ -120,6 +120,30 @@ namespace vtzero {
         bool value;
     };
 
+    class index_value {
+
+        static const uint32_t invalid_value = std::numeric_limits<uint32_t>::max();
+
+        uint32_t m_value = invalid_value;
+
+    public:
+
+        index_value() noexcept = default;
+
+        index_value(uint32_t value) noexcept :
+            m_value(value) {
+        }
+
+        bool valid() const noexcept {
+            return m_value != invalid_value;
+        }
+
+        uint32_t value() const noexcept {
+            return m_value;
+        }
+
+    }; // struct index_value
+
 } // namespace vtzero
 
 #endif // VTZERO_TYPES_HPP
