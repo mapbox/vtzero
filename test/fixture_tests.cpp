@@ -205,14 +205,7 @@ TEST_CASE("MVT test 013: Tile with key in table encoded as int") {
     vtzero::vector_tile tile{buffer};
     REQUIRE(tile.size() == 1);
 
-    const auto layer = *tile.begin();
-    REQUIRE_FALSE(layer.empty());
-
-    const auto feature = *layer.begin();
-    REQUIRE(feature.id() == 1);
-
-/*    auto it = feature.begin();
-    REQUIRE_THROWS_AS((*it).key(), const vtzero::format_exception&); XXX*/
+    REQUIRE_THROWS_AS(*tile.begin(), const vtzero::format_exception&);
 }
 
 TEST_CASE("MVT test 014: Tile layer without a name") {
