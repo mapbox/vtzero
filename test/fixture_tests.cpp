@@ -402,6 +402,10 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     const auto prop = *feature.begin();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().string_value() == "i am a string value");
+
+    const auto it = feature.begin();
+    REQUIRE(it.get_index_pair().first.value() == 0);
+    REQUIRE(it.get_index_pair().second.value() == 0);
 }
 
 TEST_CASE("MVT test 033: Layer with single feature with float property value") {

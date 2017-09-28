@@ -94,6 +94,10 @@ namespace vtzero {
             return !(*this == other);
         }
 
+        std::pair<index_value, index_value> get_index_pair() const noexcept {
+            return {*m_it, *std::next(m_it)};
+        }
+
     }; // properties_iterator
 
     /**
