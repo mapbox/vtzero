@@ -234,20 +234,18 @@ namespace vtzero {
             return m_value_table;
         }
 
+        /**
+         * @throws std::out_of_range if the index is out of range.
+         */
         data_view key(uint32_t n) const {
-            if (n >= key_table().size()) {
-                throw format_exception{std::string{"key table index too large: "} + std::to_string(n)};
-            }
-
-            return key_table()[n];
+            return key_table().at(n);
         }
 
+        /**
+         * @throws std::out_of_range if the index is out of range.
+         */
         value_view value(uint32_t n) const {
-            if (n >= value_table().size()) {
-                throw format_exception{std::string{"value table index too large: "} + std::to_string(n)};
-            }
-
-            return value_table()[n];
+            return value_table().at(n);
         }
 
         layer_iterator begin() const {
