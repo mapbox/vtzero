@@ -147,10 +147,9 @@ TEST_CASE("MVT test 005: Tile with single point with broken tags array") {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 1);
 
-//    REQUIRE_THROWS_AS(feature.properties(layer).size(), const vtzero::format_exception&); XXX
-    auto it = feature.properties(layer).begin();
-    REQUIRE(it != feature.properties(layer).end());
-    REQUIRE_THROWS_AS(it.size(), const vtzero::format_exception&);
+    auto it = feature.begin();
+    REQUIRE(it != feature.end());
+    REQUIRE_THROWS_AS(feature.size(), const vtzero::format_exception&);
     REQUIRE_THROWS_AS(*it, const vtzero::format_exception&);
     REQUIRE_THROWS_AS(++it, const vtzero::format_exception&);
 }
@@ -219,7 +218,7 @@ TEST_CASE("MVT test 013: Tile with key in table encoded as int") {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 1);
 
-/*    auto it = feature.properties(layer).begin();
+/*    auto it = feature.begin();
     REQUIRE_THROWS_AS((*it).key(), const vtzero::format_exception&); XXX*/
 }
 
@@ -378,7 +377,7 @@ TEST_CASE("MVT test 027: Layer with unused bool property value") {
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.properties(layer).size() == 0);
+    REQUIRE(feature.size() == 0);
 
     const auto& vtab = layer.value_table();
     REQUIRE(vtab.size() == 1);
@@ -405,9 +404,9 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.properties(layer).size() == 1);
+    REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.properties(layer).begin();
+    const auto prop = *feature.begin();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().string_value() == "i am a string value");
 }
@@ -421,9 +420,9 @@ TEST_CASE("MVT test 033: Layer with single feature with float property value") {
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.properties(layer).size() == 1);
+    REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.properties(layer).begin();
+    const auto prop = *feature.begin();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().float_value() == Approx(3.1));
 }
@@ -437,9 +436,9 @@ TEST_CASE("MVT test 034: Layer with single feature with double property value") 
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.properties(layer).size() == 1);
+    REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.properties(layer).begin();
+    const auto prop = *feature.begin();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().double_value() == Approx(1.23));
 }
@@ -453,9 +452,9 @@ TEST_CASE("MVT test 035: Layer with single feature with int property value") {
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.properties(layer).size() == 1);
+    REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.properties(layer).begin();
+    const auto prop = *feature.begin();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().int_value() == 6);
 }
@@ -469,9 +468,9 @@ TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.properties(layer).size() == 1);
+    REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.properties(layer).begin();
+    const auto prop = *feature.begin();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().uint_value() == 87948);
 }
@@ -485,9 +484,9 @@ TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.properties(layer).size() == 1);
+    REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.properties(layer).begin();
+    const auto prop = *feature.begin();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().sint_value() == 87948);
 }

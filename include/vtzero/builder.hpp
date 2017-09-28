@@ -202,7 +202,7 @@ namespace vtzero {
             return m_layer->add_value(text);
         }
 
-        void add_feature(feature& feature, layer& layer);
+        void add_feature(feature& feature);
 
     }; // class layer_builder
 
@@ -648,9 +648,9 @@ namespace vtzero {
 
     }; // class tile_builder
 
-    inline void layer_builder::add_feature(feature& feature, layer& layer) {
+    inline void layer_builder::add_feature(feature& feature) {
         geometry_feature_builder feature_builder{*this, feature.id(), feature.type(), feature.geometry()};
-        for (auto property : feature.properties(layer)) {
+        for (auto property : feature) {
             feature_builder.add_property(property);
         }
     }

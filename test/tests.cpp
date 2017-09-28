@@ -154,12 +154,12 @@ TEST_CASE("property map") {
     REQUIRE(layer.size() == 1);
     auto feature = *layer.begin();
 
-    REQUIRE(feature.properties(layer).size() == 3);
+    REQUIRE(feature.size() == 3);
 
 #ifdef VTZERO_TEST_WITH_VARIANT
     SECTION("std::map") {
         using prop_map_type = std::map<std::string, variant_type>;
-        auto map = vtzero::create_properties_map<prop_map_type>(feature, layer);
+        auto map = vtzero::create_properties_map<prop_map_type>(feature);
 
         REQUIRE(map.size() == 3);
         REQUIRE(boost::get<std::string>(map["foo"]) == "bar");
@@ -168,7 +168,7 @@ TEST_CASE("property map") {
     }
     SECTION("std::unordered_map") {
         using prop_map_type = std::unordered_map<std::string, variant_type>;
-        auto map = vtzero::create_properties_map<prop_map_type>(feature, layer);
+        auto map = vtzero::create_properties_map<prop_map_type>(feature);
 
         REQUIRE(map.size() == 3);
         REQUIRE(boost::get<std::string>(map["foo"]) == "bar");
@@ -294,7 +294,7 @@ TEST_CASE("value index") {
     REQUIRE(layer.size() == 1);
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 17);
-    const auto property = *feature.properties(layer).begin();
+    const auto property = *feature.begin();
     REQUIRE(property.value().sint_value() == 12);
 }
 

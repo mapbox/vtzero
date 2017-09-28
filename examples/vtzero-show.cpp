@@ -152,7 +152,7 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
                 std::cout << "UNKNOWN GEOMETRY TYPE\n";
         }
         std::cout << "    properties:\n";
-        for (auto property : feature.properties(layer)) {
+        for (auto property : feature) {
             std::cout << "      ";
             std::cout.write(property.key().data(), property.key().size());
             std::cout << '=';

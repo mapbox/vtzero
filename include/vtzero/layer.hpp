@@ -17,6 +17,7 @@ namespace vtzero {
 
     class layer_iterator {
 
+        const layer* m_layer = nullptr;
         protozero::pbf_message<detail::pbf_layer> m_layer_reader;
         data_view m_data;
 
@@ -48,7 +49,8 @@ namespace vtzero {
          * @throws format_exception if the tile data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        layer_iterator(const data_view& tile_data) :
+        layer_iterator(const layer* layer, const data_view& tile_data) :
+            m_layer(layer),
             m_layer_reader(tile_data),
             m_data() {
             next();
@@ -56,7 +58,7 @@ namespace vtzero {
 
         feature operator*() const {
             assert(m_data.data() != nullptr);
-            return feature{m_data};
+            return feature{m_layer, m_data};
         }
 
         /**
@@ -249,7 +251,7 @@ namespace vtzero {
         }
 
         layer_iterator begin() const {
-            return layer_iterator{m_data};
+            return layer_iterator{this, m_data};
         }
 
         layer_iterator end() const {
@@ -276,7 +278,7 @@ namespace vtzero {
                 protozero::pbf_message<detail::pbf_feature> feature_reader{feature_data};
                 if (feature_reader.next(detail::pbf_feature::id, protozero::pbf_wire_type::varint)) {
                     if (feature_reader.get_uint64() == id) {
-                        return feature{feature_data};
+                        return feature{this, feature_data};
                     }
                 }
             }

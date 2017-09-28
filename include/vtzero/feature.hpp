@@ -111,18 +111,6 @@ namespace vtzero {
             return m_it == m_end;
         }
 
-        /**
-         * Return the number of properties.
-         *
-         * Complexity: Linear.
-         */
-        std::size_t size() const {
-            if (m_it.size() % 2 != 0) {
-                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
-            }
-            return m_it.size() / 2;
-        }
-
     }; // properties_iterator
 
     /**
@@ -132,6 +120,7 @@ namespace vtzero {
 
         using uint32_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint32_iterator>;
 
+        const layer* m_layer;
         uint64_t m_id;
         uint32_it_range m_properties;
         data_view m_geometry;
@@ -141,6 +130,7 @@ namespace vtzero {
     public:
 
         feature() :
+            m_layer(nullptr),
             m_id(0),
             m_properties(),
             m_geometry(),
@@ -148,7 +138,8 @@ namespace vtzero {
             m_has_id(false) {
         }
 
-        feature(const data_view& data) :
+        feature(const layer* layer, const data_view& data) :
+            m_layer(layer),
             m_id(0), // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
             m_properties(),
             m_geometry(),
@@ -225,19 +216,30 @@ namespace vtzero {
             return m_geometry;
         }
 
-        protozero::iterator_range<properties_iterator> properties(const layer& layer) const noexcept {
-            return {{m_properties.begin(), m_properties.end(), &layer},
-                    {m_properties.end(), m_properties.end(), &layer}};
+        properties_iterator begin() const noexcept {
+            return {m_properties.begin(), m_properties.end(), m_layer};
+        }
+
+        properties_iterator end() const noexcept {
+            return {m_properties.end(), m_properties.end(), m_layer};
+        }
+
+        std::size_t size() const {
+            const auto size = m_properties.size();
+            if (size % 2 != 0) {
+                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
+            }
+            return size / 2;
         }
 
     }; // class feature
 
 
     template <typename TMap, typename TKey = typename TMap::key_type, typename TValue = typename TMap::mapped_type>
-    TMap create_properties_map(const vtzero::feature& feature, const vtzero::layer& layer) {
+    TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
-        for (const auto& p : feature.properties(layer)) {
+        for (const auto& p : feature) {
             map.emplace(TKey{p.key()}, convert_value<TValue>(p.value()));
         }
 
