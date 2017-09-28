@@ -54,7 +54,6 @@ namespace vtzero {
     class properties_iterator {
 
         protozero::pbf_reader::const_uint32_iterator m_it;
-        protozero::pbf_reader::const_uint32_iterator m_end;
         const layer* m_layer;
 
     public:
@@ -66,10 +65,8 @@ namespace vtzero {
         using reference         = value_type&;
 
         properties_iterator(const protozero::pbf_reader::const_uint32_iterator& begin,
-                      const protozero::pbf_reader::const_uint32_iterator& end,
-                      const layer* layer) :
+                            const layer* layer) :
             m_it(begin),
-            m_end(end),
             m_layer(layer) {
             assert(layer);
         }
@@ -77,10 +74,6 @@ namespace vtzero {
         property_view operator*() const;
 
         properties_iterator& operator++() {
-            assert(m_it != m_end);
-            if (std::next(m_it) == m_end) {
-                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
-            }
             ++m_it;
             ++m_it;
             return *this;
@@ -94,21 +87,11 @@ namespace vtzero {
 
         bool operator==(const properties_iterator& other) const noexcept {
             return m_it == other.m_it &&
-                   m_end == other.m_end &&
                    m_layer == other.m_layer;
         }
 
         bool operator!=(const properties_iterator& other) const noexcept {
             return !(*this == other);
-        }
-
-        /**
-         * Returns true if there are no properties.
-         *
-         * Complexity: Constant.
-         */
-        bool empty() const noexcept {
-            return m_it == m_end;
         }
 
     }; // properties_iterator
@@ -123,6 +106,7 @@ namespace vtzero {
         const layer* m_layer;
         uint64_t m_id;
         uint32_it_range m_properties;
+        std::size_t m_properties_size = 0;
         data_view m_geometry;
         GeomType m_type;
         bool m_has_id;
@@ -188,6 +172,12 @@ namespace vtzero {
             if (m_geometry.empty()) {
                 throw format_exception{"Missing geometry field in feature (spec 4.2)"};
             }
+
+            const auto size = m_properties.size();
+            if (size % 2 != 0) {
+                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
+            }
+            m_properties_size = size / 2;
         }
 
         bool valid() const noexcept {
@@ -216,20 +206,16 @@ namespace vtzero {
             return m_geometry;
         }
 
+        std::size_t size() const noexcept {
+            return m_properties_size;
+        }
+
         properties_iterator begin() const noexcept {
-            return {m_properties.begin(), m_properties.end(), m_layer};
+            return {m_properties.begin(), m_layer};
         }
 
         properties_iterator end() const noexcept {
-            return {m_properties.end(), m_properties.end(), m_layer};
-        }
-
-        std::size_t size() const {
-            const auto size = m_properties.size();
-            if (size % 2 != 0) {
-                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
-            }
-            return size / 2;
+            return {m_properties.end(), m_layer};
         }
 
     }; // class feature

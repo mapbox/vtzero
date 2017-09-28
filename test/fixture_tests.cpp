@@ -144,14 +144,7 @@ TEST_CASE("MVT test 005: Tile with single point with broken tags array") {
 
     const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
-    const auto feature = *layer.begin();
-    REQUIRE(feature.id() == 1);
-
-    auto it = feature.begin();
-    REQUIRE(it != feature.end());
-    REQUIRE_THROWS_AS(feature.size(), const vtzero::format_exception&);
-    REQUIRE_THROWS_AS(*it, const vtzero::format_exception&);
-    REQUIRE_THROWS_AS(++it, const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(*layer.begin(), const vtzero::format_exception&);
 }
 
 TEST_CASE("MVT test 006: Tile with single point with invalid GeomType") {

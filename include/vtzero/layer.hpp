@@ -325,10 +325,6 @@ namespace vtzero {
     }; // class layer
 
     inline property_view properties_iterator::operator*() const {
-        assert(m_it != m_end);
-        if (std::next(m_it) == m_end) {
-            throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
-        }
         return {m_layer->key(*m_it), m_layer->value(*std::next(m_it))};
     }
 
