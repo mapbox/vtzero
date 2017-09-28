@@ -20,16 +20,11 @@ namespace vtzero {
         data_view m_data;
 
         void next() {
-            try {
-                if (m_tile_reader.next(detail::pbf_tile::layers,
-                                       protozero::pbf_wire_type::length_delimited)) {
-                    m_data = m_tile_reader.get_view();
-                } else {
-                    m_data = data_view{};
-                }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exceptions
-                throw protocol_buffers_exception{};
+            if (m_tile_reader.next(detail::pbf_tile::layers,
+                                    protozero::pbf_wire_type::length_delimited)) {
+                m_data = m_tile_reader.get_view();
+            } else {
+                m_data = data_view{};
             }
         }
 
@@ -50,6 +45,7 @@ namespace vtzero {
          * Construct layer iterator from specified vector tile data.
          *
          * @throws format_exception if the tile data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         tile_iterator(const data_view& tile_data) :
             m_tile_reader(tile_data),
@@ -64,6 +60,7 @@ namespace vtzero {
 
         /**
          * @throws format_exception if the tile data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         tile_iterator& operator++() {
             next();
@@ -135,8 +132,10 @@ namespace vtzero {
          * Return the number of layers in this tile.
          *
          * Complexity: Linear.
+         *
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        std::size_t size() const noexcept {
+        std::size_t size() const {
             std::size_t size = 0;
 
             protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
@@ -157,21 +156,17 @@ namespace vtzero {
          * @returns The specified layer or the invalid layer if index is
          *          larger than the number of layers.
          * @throws format_exception if the tile data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         layer operator[](std::size_t index) const {
             protozero::pbf_message<detail::pbf_tile> reader{m_data};
 
-            try {
-                while (reader.next(detail::pbf_tile::layers, protozero::pbf_wire_type::length_delimited)) {
-                    if (index == 0) {
-                        return layer{reader.get_view()};
-                    }
-                    reader.skip();
-                    --index;
+            while (reader.next(detail::pbf_tile::layers, protozero::pbf_wire_type::length_delimited)) {
+                if (index == 0) {
+                    return layer{reader.get_view()};
                 }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
-                throw protocol_buffers_exception{};
+                reader.skip();
+                --index;
             }
 
             return layer{};
@@ -190,26 +185,22 @@ namespace vtzero {
          * @returns The specified layer or the invalid layer if there is no
          *          layer with this name.
          * @throws format_exception if the tile data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         layer operator[](const data_view& name) const {
             protozero::pbf_message<detail::pbf_tile> reader{m_data};
 
-            try {
-                while (reader.next(detail::pbf_tile::layers, protozero::pbf_wire_type::length_delimited)) {
-                    const auto layer_data = reader.get_view();
-                    protozero::pbf_message<detail::pbf_layer> layer_reader{layer_data};
-                    if (layer_reader.next(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited)) {
-                        if (layer_reader.get_view() == name) {
-                            return layer{layer_data};
-                        }
-                    } else {
-                        // 4.1 "A layer MUST contain a name field."
-                        throw format_exception{"missing name in layer (spec 4.1)"};
+            while (reader.next(detail::pbf_tile::layers, protozero::pbf_wire_type::length_delimited)) {
+                const auto layer_data = reader.get_view();
+                protozero::pbf_message<detail::pbf_layer> layer_reader{layer_data};
+                if (layer_reader.next(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited)) {
+                    if (layer_reader.get_view() == name) {
+                        return layer{layer_data};
                     }
+                } else {
+                    // 4.1 "A layer MUST contain a name field."
+                    throw format_exception{"missing name in layer (spec 4.1)"};
                 }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
-                throw protocol_buffers_exception{};
             }
 
             return layer{};

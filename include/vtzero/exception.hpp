@@ -49,20 +49,6 @@ public:
 }; // class format_exception
 
 /**
- * This exception is thrown when the low-level vector tile encoding isn't
- * valid according to the protocol buffer specification.
- */
-class protocol_buffers_exception : public format_exception {
-
-public:
-
-    explicit protocol_buffers_exception() :
-        format_exception("invalid protocol buffers format") {
-    }
-
-}; // class protocol_buffers_exception
-
-/**
  * This exception is thrown when a geometry encoding isn't valid according to
  * the vector tile specification.
  */

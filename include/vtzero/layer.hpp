@@ -21,16 +21,11 @@ namespace vtzero {
         data_view m_data;
 
         void next() {
-            try {
-                if (m_layer_reader.next(detail::pbf_layer::features,
-                                        protozero::pbf_wire_type::length_delimited)) {
-                    m_data = m_layer_reader.get_view();
-                } else {
-                    m_data = data_view{};
-                }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
-                throw protocol_buffers_exception{};
+            if (m_layer_reader.next(detail::pbf_layer::features,
+                                    protozero::pbf_wire_type::length_delimited)) {
+                m_data = m_layer_reader.get_view();
+            } else {
+                m_data = data_view{};
             }
         }
 
@@ -51,6 +46,7 @@ namespace vtzero {
          * Construct feature iterator from specified vector tile data.
          *
          * @throws format_exception if the tile data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         layer_iterator(const data_view& tile_data) :
             m_layer_reader(tile_data),
@@ -65,6 +61,7 @@ namespace vtzero {
 
         /**
          * @throws format_exception if the layer data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         layer_iterator& operator++() {
             next();
@@ -73,6 +70,7 @@ namespace vtzero {
 
         /**
          * @throws format_exception if the layer data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         layer_iterator operator++(int) {
             const layer_iterator tmp{*this};
@@ -145,48 +143,43 @@ namespace vtzero {
          * @throws format_exception if the layer data is ill-formed.
          * @throws version_exception if the layer contains an unsupported version
          *                           number (only version 1 and 2 are supported)
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         explicit layer(const data_view& data) :
             m_data(data),
             m_version(1), // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
             m_extent(4096), // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
             m_name() {
-            try {
-                protozero::pbf_message<detail::pbf_layer> reader{data};
-                while (reader.next()) {
-                    switch (reader.tag_and_type()) {
-                        case protozero::tag_and_type(detail::pbf_layer::version, protozero::pbf_wire_type::varint):
-                            m_version = reader.get_uint32();
-                            break;
-                        case protozero::tag_and_type(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited):
-                            m_name = reader.get_view();
-                            break;
-                        case protozero::tag_and_type(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited):
-                            reader.skip(); // ignore features for now
-                            break;
-                        case protozero::tag_and_type(detail::pbf_layer::keys, protozero::pbf_wire_type::length_delimited):
-                            reader.skip();
-                            ++m_key_table_size;
-                            break;
-                        case protozero::tag_and_type(detail::pbf_layer::values, protozero::pbf_wire_type::length_delimited):
-                            reader.skip();
-                            ++m_value_table_size;
-                            break;
-                        case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
-                            m_extent = reader.get_uint32();
-                            break;
-                        default:
-                            throw format_exception{"unknown field in layer (tag=" +
-                                                   std::to_string(static_cast<uint32_t>(reader.tag())) +
-                                                   ", type=" +
-                                                   std::to_string(static_cast<uint32_t>(reader.wire_type())) +
-                                                   ")"};
-                            break;
-                    }
+            protozero::pbf_message<detail::pbf_layer> reader{data};
+            while (reader.next()) {
+                switch (reader.tag_and_type()) {
+                    case protozero::tag_and_type(detail::pbf_layer::version, protozero::pbf_wire_type::varint):
+                        m_version = reader.get_uint32();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited):
+                        m_name = reader.get_view();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited):
+                        reader.skip(); // ignore features for now
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::keys, protozero::pbf_wire_type::length_delimited):
+                        reader.skip();
+                        ++m_key_table_size;
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::values, protozero::pbf_wire_type::length_delimited):
+                        reader.skip();
+                        ++m_value_table_size;
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
+                        m_extent = reader.get_uint32();
+                        break;
+                    default:
+                        throw format_exception{"unknown field in layer (tag=" +
+                                                std::to_string(static_cast<uint32_t>(reader.tag())) +
+                                                ", type=" +
+                                                std::to_string(static_cast<uint32_t>(reader.wire_type())) +
+                                                ")"};
                 }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
-                throw protocol_buffers_exception{};
             }
 
             // This library can only handle version 1 and 2.
@@ -274,24 +267,20 @@ namespace vtzero {
          * @returns Feature with the specified ID or the invalid feature if
          *          there is no feature with this ID.
          * @throws format_exception if the layer data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         feature get_feature(uint64_t id) const {
             assert(valid());
 
-            try {
-                protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
-                while (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
-                    const auto feature_data = layer_reader.get_view();
-                    protozero::pbf_message<detail::pbf_feature> feature_reader{feature_data};
-                    if (feature_reader.next(detail::pbf_feature::id, protozero::pbf_wire_type::varint)) {
-                        if (feature_reader.get_uint64() == id) {
-                            return feature{feature_data};
-                        }
+            protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
+            while (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
+                const auto feature_data = layer_reader.get_view();
+                protozero::pbf_message<detail::pbf_feature> feature_reader{feature_data};
+                if (feature_reader.next(detail::pbf_feature::id, protozero::pbf_wire_type::varint)) {
+                    if (feature_reader.get_uint64() == id) {
+                        return feature{feature_data};
                     }
                 }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
-                throw protocol_buffers_exception{};
             }
 
             return feature{};
@@ -303,16 +292,12 @@ namespace vtzero {
          * Complexity: Constant.
          *
          * @throws format_exception if the layer data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         bool empty() const {
-            try {
-                protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
-                if (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
-                    return false;
-                }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
-                throw protocol_buffers_exception{};
+            protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
+            if (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
+                return false;
             }
             return true;
         }
@@ -322,21 +307,16 @@ namespace vtzero {
          *
          * Complexity: Linear in the number of features.
          *
-         * @throws format_exception if the layer data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         std::size_t size() const {
             assert(valid());
             std::size_t count = 0;
 
-            try {
-                protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
-                while (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
-                    layer_reader.skip();
-                    ++count;
-                }
-            } catch (const protozero::exception&) {
-                // convert protozero exceptions into vtzero exception
-                throw protocol_buffers_exception{};
+            protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
+            while (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
+                layer_reader.skip();
+                ++count;
             }
 
             return count;
