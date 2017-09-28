@@ -11,3 +11,7 @@ as if the items are concatenated. Encoders should never encode fields in this
 way, though, so it is very unlikely that this would ever happen. For
 performance reasons vtzero doesn't handle this case.
 
+The vtzero spec clearly says that you can not have two layers with the same
+name in a vector tile. For performance reasons this is neither checked on
+reading nor on writing.
+

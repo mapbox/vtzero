@@ -158,6 +158,14 @@ TEST_CASE("MVT test 006: Tile with single point with invalid GeomType") {
     REQUIRE_THROWS_AS(*layer.begin(), const vtzero::format_exception&);
 }
 
+TEST_CASE("MVT test 007: Layer version as string instead of as an int") {
+    std::string buffer{open_tile("007/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+
+    REQUIRE_THROWS_AS(tile[0], const vtzero::format_exception&);
+}
+
 TEST_CASE("MVT test 008: Tile layer extent encoded as string") {
     std::string buffer{open_tile("008/tile.mvt")};
     vtzero::vector_tile tile{buffer};
@@ -216,8 +224,18 @@ TEST_CASE("MVT test 014: Tile layer without a name") {
     REQUIRE_THROWS_AS(tile[0], const vtzero::format_exception&);
 }
 
-// XXX 015: we do not test for this, because it would be expensive
-//          extra check?
+TEST_CASE("MVT test 015: Two layers with the same name") {
+    std::string buffer{open_tile("015/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 2);
+
+    for (const auto layer : tile) {
+        REQUIRE(layer.name() == "hello");
+    }
+
+    const auto layer = tile["hello"];
+    REQUIRE(layer.name() == "hello");
+}
 
 TEST_CASE("MVT test 016: Valid unknown geometry") {
     std::string buffer{open_tile("016/tile.mvt")};
@@ -377,7 +395,7 @@ TEST_CASE("MVT test 030: Two geometry fields") {
     const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
 
-    REQUIRE_THROWS_AS(*layer.begin(), const vtzero::format_exception&); // XXX see https://github.com/mapbox/mvt-fixtures/issues/36
+    REQUIRE_THROWS_AS(*layer.begin(), const vtzero::format_exception&);
 }
 
 TEST_CASE("MVT test 032: Layer with single feature with string property value") {
@@ -507,4 +525,52 @@ TEST_CASE("MVT test 038: Layer with all types of property value") {
     REQUIRE_THROWS_AS(vtab[1].string_value(), const vtzero::type_exception&);
 }
 
+TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
+    std::string buffer{open_tile("039/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+
+    const auto layer = tile[0];
+    REQUIRE(layer.version() == 1);
+    REQUIRE(layer.name() == "hello");
+    REQUIRE(layer.extent() == 4096);
+    REQUIRE(layer.size() == 1);
+
+    const auto feature = *layer.begin();
+    REQUIRE(feature.id() == 0);
+    REQUIRE(feature.type() == vtzero::GeomType::UNKNOWN);
+    REQUIRE(feature.size() == 0);
+}
+
+TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the layer.") {
+    std::string buffer{open_tile("040/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+    const auto layer = tile[0];
+    REQUIRE(layer.size() == 1);
+    const auto feature = *layer.begin();
+    REQUIRE(feature.size() == 1);
+    REQUIRE_THROWS_AS(*feature.begin(), const std::out_of_range&);
+}
+
+TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
+    std::string buffer{open_tile("041/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+    const auto layer = tile[0];
+    REQUIRE(layer.size() == 1);
+    const auto feature = *layer.begin();
+    REQUIRE_THROWS_AS(*feature.begin(), const std::out_of_range&);
+}
+
+TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in the layer.") {
+    std::string buffer{open_tile("042/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+    const auto layer = tile[0];
+    REQUIRE(layer.size() == 1);
+    const auto feature = *layer.begin();
+    REQUIRE(feature.size() == 1);
+    REQUIRE_THROWS_AS(*feature.begin(), const std::out_of_range&);
+}
 

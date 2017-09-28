@@ -144,7 +144,7 @@ namespace vtzero {
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
                         if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
-                            throw format_exception{"Feature has more than one tags field"}; // XXX or do we need to handle this?
+                            throw format_exception{"Feature has more than one tags field"};
                         }
                         m_properties = reader.get_packed_uint32();
                         break;
@@ -159,7 +159,7 @@ namespace vtzero {
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
                         if (m_geometry.size() != 0) {
-                            throw format_exception{"Feature has more than one geometry field"}; // XXX or do we need to handle this?
+                            throw format_exception{"Feature has more than one geometry field"};
                         }
                         m_geometry = reader.get_view();
                         break;
