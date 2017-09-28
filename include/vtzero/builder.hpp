@@ -61,6 +61,7 @@ namespace vtzero {
         protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys;
         protozero::pbf_builder<detail::pbf_layer> m_pbf_message_values;
 
+        std::size_t m_num_features = 0;
         uint32_t m_max_key = 0;
         uint32_t m_max_value = 0;
 
@@ -137,12 +138,18 @@ namespace vtzero {
             return m_pbf_message_layer;
         }
 
+        void increment_feature_count() noexcept {
+            ++m_num_features;
+        }
+
         void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) override {
-            pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
-                data(),
-                keys_data(),
-                values_data()
-            );
+            if (m_num_features > 0) {
+                pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
+                    data(),
+                    keys_data(),
+                    values_data()
+                );
+            }
         }
 
     }; // class layer_builder_impl
@@ -250,7 +257,10 @@ namespace vtzero {
                 if (m_pbf_tags.valid()) {
                     m_pbf_tags.commit();
                 }
-                m_feature_writer.commit();
+                if (m_feature_writer.valid()) {
+                    m_feature_writer.commit();
+                    m_layer.get_layer().increment_feature_count();
+                }
             }
 
             void do_rollback() {
@@ -274,6 +284,10 @@ namespace vtzero {
 
             feature_builder(layer_builder layer, uint64_t id) :
                 feature_builder_base(layer, id) {
+            }
+
+            ~feature_builder() {
+                commit(); // XXX exceptions?
             }
 
             template <typename ...TArgs>
