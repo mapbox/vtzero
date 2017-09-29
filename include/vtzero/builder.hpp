@@ -307,6 +307,10 @@ namespace vtzero {
             m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
         }
 
+        ~geometry_feature_builder() {
+            do_commit(); // XXX exceptions?
+        }
+
         template <typename ...TArgs>
         void add_property(TArgs&& ...args) {
             add_property_impl(std::forward<TArgs>(args)...);
