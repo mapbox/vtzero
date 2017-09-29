@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
         std::cout << tb.serialize();
     } else {
         const uint32_t id = std::atoi(argv[optind + 2]);
-        auto feature = layer.get_feature(id);
+        auto feature = layer[id];
         if (!feature.valid()) {
             std::cerr << "No feature with that id\n";
             std::exit(1);

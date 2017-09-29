@@ -269,7 +269,7 @@ namespace vtzero {
          * @throws format_exception if the layer data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        feature get_feature(uint64_t id) const {
+        feature operator[](uint64_t id) const {
             assert(valid());
 
             protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
