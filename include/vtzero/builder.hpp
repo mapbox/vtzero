@@ -192,17 +192,17 @@ namespace vtzero {
                 m_pbf_tags.add_element(idx.value());
             }
 
+            template <typename T>
+            void add_key_internal(T&& key) {
+                add_key_internal(m_layer.get_layer().add_key(data_view{std::forward<T>(key)}));
+            }
+
             void add_value_internal(index_value idx) {
                 m_pbf_tags.add_element(idx.value());
             }
 
             void add_value_internal(value_view value) {
                 add_value_internal(m_layer.get_layer().add_value(value.data()));
-            }
-
-            template <typename T>
-            void add_key_internal(T&& key) {
-                add_key_internal(m_layer.get_layer().add_key(data_view{std::forward<T>(key)}));
             }
 
             template <typename T>

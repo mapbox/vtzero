@@ -15,6 +15,10 @@
 
 namespace vtzero {
 
+    /**
+     * Iterator for iterating over features in a layer. You usually do not
+     * create these but get them from calling vector_tile::begin()/end().
+     */
     class layer_iterator {
 
         const layer* m_layer = nullptr;
@@ -56,12 +60,19 @@ namespace vtzero {
             next();
         }
 
+        /**
+         * Dereference operator to get the feature.
+         *
+         * @returns feature
+         */
         feature operator*() const {
             assert(m_data.data() != nullptr);
             return feature{m_layer, m_data};
         }
 
         /**
+         * Prefix increment operator.
+         *
          * @throws format_exception if the layer data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
@@ -71,6 +82,8 @@ namespace vtzero {
         }
 
         /**
+         * Postfix increment operator.
+         *
          * @throws format_exception if the layer data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
@@ -80,10 +93,12 @@ namespace vtzero {
             return tmp;
         }
 
+        /// Equality operator
         bool operator==(const layer_iterator& other) const noexcept {
             return m_data == other.m_data;
         }
 
+        /// Inequality operator
         bool operator!=(const layer_iterator& other) const noexcept {
             return !(*this == other);
         }
@@ -91,7 +106,9 @@ namespace vtzero {
     }; // layer_iterator
 
     /**
-     * A layer according to spec 4.1
+     * A layer according to spec 4.1. It contains a version, the extent,
+     * and a name as well as a collection of features. Use the begin()/end()
+     * methods to get an iterator for accessing the features.
      */
     class layer {
 

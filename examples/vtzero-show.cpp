@@ -121,7 +121,7 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
             std::cout << "    " << n++ << ": ";
             vtzero::apply_visitor(print_value{}, value);
             if (print_values_with_type) {
-                std::cout << " [" << vtzero::value_type_name(value.type()) << "]\n";
+                std::cout << " [" << vtzero::property_value_type_name(value.type()) << "]\n";
             } else {
                 std::cout << '\n';
             }
@@ -158,7 +158,7 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
             std::cout << '=';
             vtzero::apply_visitor(print_value{}, property.value());
             if (print_values_with_type) {
-                std::cout << " [" << vtzero::value_type_name(property.value().type()) << "]\n";
+                std::cout << " [" << vtzero::property_value_type_name(property.value().type()) << "]\n";
             } else {
                 std::cout << '\n';
             }

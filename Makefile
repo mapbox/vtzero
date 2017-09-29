@@ -5,6 +5,20 @@ COMPILE_FLAGS := -std=c++11 -Iinclude -I${PROTOZERO_INCLUDE} -g -Wall -Wextra -W
 
 EXAMPLES := examples/vtzero-create examples/vtzero-filter examples/vtzero-show
 
+HPP_FILES := include/vtzero/builder.hpp \
+             include/vtzero/exception.hpp \
+             include/vtzero/feature.hpp \
+             include/vtzero/geometry.hpp \
+             include/vtzero/index.hpp \
+             include/vtzero/layer.hpp \
+             include/vtzero/property_value.hpp \
+             include/vtzero/types.hpp \
+             include/vtzero/value_view.hpp \
+             include/vtzero/vector_tile.hpp \
+             include/vtzero/version.hpp
+
+DOC_FILES := doc/advanced.md
+
 TESTS := test/unit_tests
 
 examples: $(EXAMPLES)
@@ -49,8 +63,11 @@ test/fixture_tests.o: test/fixture_tests.cpp
 test: tests
 	test/unit_tests
 
+doc: doc/Doxyfile README.md $(DOC_FILES) $(HPP_FILES)
+	doxygen doc/Doxyfile
+
 clean:
 	rm -f $(EXAMPLES) $(TESTS) examples/*.o test/*.o
 
-.PHONY: clean test
+.PHONY: clean test doc
 

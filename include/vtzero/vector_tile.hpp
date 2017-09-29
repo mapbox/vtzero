@@ -14,6 +14,10 @@
 
 namespace vtzero {
 
+    /**
+     * Iterator for iterating over layers in a tile. You usually do not
+     * create these but get them from calling vector_tile::begin()/end().
+     */
     class tile_iterator {
 
         protozero::pbf_message<detail::pbf_tile> m_tile_reader;
@@ -53,12 +57,19 @@ namespace vtzero {
             next();
         }
 
+        /**
+         * Dereference operator to get the layer.
+         *
+         * @returns layer
+         */
         layer operator*() const {
             assert(m_data.data() != nullptr);
             return layer{m_data};
         }
 
         /**
+         * Prefix increment operator.
+         *
          * @throws format_exception if the tile data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
@@ -68,7 +79,10 @@ namespace vtzero {
         }
 
         /**
+         * Postfix increment operator.
+         *
          * @throws format_exception if the tile data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
          */
         tile_iterator operator++(int) {
             const tile_iterator tmp{*this};
@@ -76,10 +90,12 @@ namespace vtzero {
             return tmp;
         }
 
+        /// Equality operator
         bool operator==(const tile_iterator& other) const noexcept {
             return m_data == other.m_data;
         }
 
+        /// Inequality operator
         bool operator!=(const tile_iterator& other) const noexcept {
             return !(*this == other);
         }
@@ -89,7 +105,9 @@ namespace vtzero {
     /**
      * A vector tile is basically nothing more than an ordered collection
      * of named layers. Use the subscript operator to access a layer by index
-     * or name. Use begin()/end() to iterator over the layers.
+     * or name. Use begin()/end() to iterate over the layers. Using the
+     * iterators is the most efficient way if you are looking at all they
+     * layers.
      */
     class vector_tile {
 
@@ -100,10 +118,20 @@ namespace vtzero {
         using iterator = tile_iterator;
         using const_iterator = tile_iterator;
 
+        /**
+         * Construct the vector_tile from a data_view. The vector_tile object
+         * will keep a reference to the data referenced by the data_view. No
+         * copy of the data is done.
+         */
         explicit vector_tile(const data_view& data) noexcept :
             m_data(data) {
         }
 
+        /**
+         * Construct the vector_tile from a string. The vector_tile object
+         * will keep a reference to the data referenced by the string. No
+         * copy of the data is done.
+         */
         explicit vector_tile(const std::string& data) noexcept :
             m_data(data.data(), data.size()) {
         }
@@ -131,7 +159,7 @@ namespace vtzero {
         /**
          * Return the number of layers in this tile.
          *
-         * Complexity: Linear.
+         * Complexity: Linear in the number of layers.
          *
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
@@ -159,13 +187,14 @@ namespace vtzero {
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
         layer operator[](std::size_t index) const {
-            protozero::pbf_message<detail::pbf_tile> reader{m_data};
+            protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
 
-            while (reader.next(detail::pbf_tile::layers, protozero::pbf_wire_type::length_delimited)) {
+            while (tile_reader.next(detail::pbf_tile::layers,
+                                    protozero::pbf_wire_type::length_delimited)) {
                 if (index == 0) {
-                    return layer{reader.get_view()};
+                    return layer{tile_reader.get_view()};
                 }
-                reader.skip();
+                tile_reader.skip();
                 --index;
             }
 
@@ -203,12 +232,14 @@ namespace vtzero {
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
         layer operator[](const data_view& name) const {
-            protozero::pbf_message<detail::pbf_tile> reader{m_data};
+            protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
 
-            while (reader.next(detail::pbf_tile::layers, protozero::pbf_wire_type::length_delimited)) {
-                const auto layer_data = reader.get_view();
+            while (tile_reader.next(detail::pbf_tile::layers,
+                                    protozero::pbf_wire_type::length_delimited)) {
+                const auto layer_data = tile_reader.get_view();
                 protozero::pbf_message<detail::pbf_layer> layer_reader{layer_data};
-                if (layer_reader.next(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited)) {
+                if (layer_reader.next(detail::pbf_layer::name,
+                                      protozero::pbf_wire_type::length_delimited)) {
                     if (layer_reader.get_view() == name) {
                         return layer{layer_data};
                     }
