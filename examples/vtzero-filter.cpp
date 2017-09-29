@@ -9,6 +9,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <unistd.h>
 
 void print_help() {
     std::cout << "vtzero-filter [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n\n"
@@ -49,11 +50,13 @@ int main(int argc, char* argv[]) {
     vtzero::vector_tile tile{data};
 
     auto layer = get_layer(tile, argv[optind + 1]);
+    std::cerr << "Found layer: " << std::string(layer.name()) << "\n";
 
     if (remaining_args == 2) {
         vtzero::tile_builder tb;
         tb.add_layer(layer.data());
-        std::cout << tb.serialize();
+        const auto tile = tb.serialize();
+        write(1, tile.data(), tile.size());
     } else {
         const uint32_t id = std::atoi(argv[optind + 2]);
         auto feature = layer[id];
@@ -64,7 +67,8 @@ int main(int argc, char* argv[]) {
         vtzero::tile_builder tb;
         vtzero::layer_builder layer_builder{tb, layer};
         layer_builder.add_feature(feature);
-        std::cout << tb.serialize();
+        const auto tile = tb.serialize();
+        write(1, tile.data(), tile.size());
     }
 }
 
