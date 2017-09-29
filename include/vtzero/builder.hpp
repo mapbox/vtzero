@@ -142,7 +142,7 @@ namespace vtzero {
         }
 
         void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) override {
-            pbf_tile_builder.add_bytes(detail::pbf_tile::layers, m_data.data(), m_data.size());
+            pbf_tile_builder.add_bytes(detail::pbf_tile::layers, m_data);
         }
 
     }; // class layer_builder_existing
@@ -605,8 +605,8 @@ namespace vtzero {
             return static_cast<layer_builder_impl*>(m_layers.back().get());
         }
 
-        void add_layer(const data_view& data) {
-            m_layers.emplace_back(new layer_builder_existing{data});
+        void add_layer(data_view&& data) {
+            m_layers.emplace_back(new layer_builder_existing{std::forward<data_view>(data)});
         }
 
         void serialize(std::string& data) const {
