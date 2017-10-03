@@ -1,6 +1,7 @@
 #ifndef VTZERO_TYPES_HPP
 #define VTZERO_TYPES_HPP
 
+#include <protozero/data_view.hpp>
 #include <protozero/types.hpp>
 
 /**
