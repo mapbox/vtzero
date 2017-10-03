@@ -196,7 +196,7 @@ namespace vtzero {
         TMap map;
 
         for (const auto& p : feature) {
-            map.emplace(TKey{p.key()}, convert_value<TValue>(p.value()));
+            map.emplace(TKey{p.key()}, convert_property_value<TValue>(p.value()));
         }
 
         return map;

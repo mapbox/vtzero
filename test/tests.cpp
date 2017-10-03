@@ -75,7 +75,7 @@ TEST_CASE("string value") {
     REQUIRE(str == "foo");
 
 #ifdef VTZERO_TEST_WITH_VARIANT
-    const auto vari = vtzero::convert_value<variant_type, std::string>(vv);
+    const auto vari = vtzero::convert_property_value<variant_type>(vv);
     REQUIRE(boost::get<std::string>(vari) == "foo");
 #endif
 }
@@ -93,7 +93,7 @@ TEST_CASE("float value") {
     REQUIRE(result == 1);
 
 #ifdef VTZERO_TEST_WITH_VARIANT
-    const auto vari = vtzero::convert_value<variant_type, std::string>(vv);
+    const auto vari = vtzero::convert_property_value<variant_type, std::string>(vv);
     REQUIRE(boost::get<float>(vari) == Approx(1.2));
 #endif
 }

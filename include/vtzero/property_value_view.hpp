@@ -217,8 +217,34 @@ namespace vtzero {
 
     } // namespace detail
 
+    /**
+     * Convert a property_value_view to a different (usually variant-based)
+     * class.
+     *
+     * Usage: If you have a variant type like
+     *
+     * @code
+     *   using variant_type = boost::variant<std::string, float, double, int64_t, uint64_t, bool>;
+     * @endcode
+     *
+     * you can use
+     * @code
+     *   property_value_view x = ...;
+     *   auto v = convert_property_value<variant_type>(x);
+     * @endcode
+     *
+     * to convert the data.
+     *
+     * @tparam T The variant type to convert to. Must contain the types float,
+     *           double, int64_t, uint64_t, and bool plus the string type S.
+     * @tparam S The string type to use in the variant. By default this is
+     *           std::string, but you can use anything that is convertible
+     *           from a vtzero::data_view.
+     * @param value The property value to convert.
+     *
+     */
     template <typename T, typename S = std::string>
-    T convert_value(const property_value_view& value) {
+    T convert_property_value(const property_value_view& value) {
         return apply_visitor(detail::convert_visitor<T, S>{}, value);
     }
 
