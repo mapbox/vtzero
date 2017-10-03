@@ -3,7 +3,7 @@
 #include <vtzero/geometry.hpp>
 #include <vtzero/index.hpp>
 #include <vtzero/property_value.hpp>
-#include <vtzero/value_view.hpp>
+#include <vtzero/property_value_view.hpp>
 
 #include <catch.hpp>
 
@@ -61,7 +61,7 @@ using variant_type = boost::variant<std::string, float, double, int64_t, uint64_
 
 TEST_CASE("string value") {
     vtzero::property_value v{"foo"};
-    vtzero::value_view vv{v.data()};
+    vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.string_value() == "foo");
 
     visitor_test_void vt;
@@ -82,7 +82,7 @@ TEST_CASE("string value") {
 
 TEST_CASE("float value") {
     vtzero::property_value v{1.2f};
-    vtzero::value_view vv{v.data()};
+    vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.float_value() == Approx(1.2));
 
     visitor_test_void vt;
@@ -100,13 +100,13 @@ TEST_CASE("float value") {
 
 TEST_CASE("double value") {
     vtzero::property_value v{1.2};
-    vtzero::value_view vv{v.data()};
+    vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.double_value() == Approx(1.2));
 }
 
 TEST_CASE("int value") {
     vtzero::property_value v{vtzero::int_value_type{42}};
-    vtzero::value_view vv{v.data()};
+    vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.int_value() == 42);
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
@@ -115,7 +115,7 @@ TEST_CASE("int value") {
 
 TEST_CASE("uint value") {
     vtzero::property_value v{vtzero::uint_value_type{99}};
-    vtzero::value_view vv{v.data()};
+    vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.uint_value() == 99);
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
@@ -124,13 +124,13 @@ TEST_CASE("uint value") {
 
 TEST_CASE("sint value") {
     vtzero::property_value v{vtzero::sint_value_type{42}};
-    vtzero::value_view vv{v.data()};
+    vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.sint_value() == 42);
 }
 
 TEST_CASE("bool value") {
     vtzero::property_value v{true};
-    vtzero::value_view vv{v.data()};
+    vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.bool_value());
 }
 

@@ -184,7 +184,7 @@ TEST_CASE("MVT test 010: Tile layer value is encoded as int, but pretends to be 
     const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
 
-    vtzero::value_view v{layer.value(0)};
+    vtzero::property_value_view v{layer.value(0)};
     REQUIRE_THROWS_AS(v.type(), const vtzero::format_exception&);
 }
 
@@ -196,7 +196,7 @@ TEST_CASE("MVT test 011: Tile layer value is encoded as unknown type") {
     const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
 
-    vtzero::value_view v{layer.value(0)};
+    vtzero::property_value_view v{layer.value(0)};
     REQUIRE_THROWS_AS(v.type(), const vtzero::format_exception&);
 }
 

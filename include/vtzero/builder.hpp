@@ -201,7 +201,7 @@ namespace vtzero {
                 m_pbf_tags.add_element(idx.value());
             }
 
-            void add_value_internal(value_view value) {
+            void add_value_internal(property_value_view value) {
                 add_value_internal(m_layer.get_layer().add_value(value.data()));
             }
 

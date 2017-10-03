@@ -3,7 +3,7 @@
 
 #include "exception.hpp"
 #include "types.hpp"
-#include "value_view.hpp"
+#include "property_value_view.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -20,13 +20,13 @@ namespace vtzero {
     class property_view {
 
         data_view m_key;
-        value_view m_value;
+        property_value_view m_value;
 
     public:
 
         property_view() = default;
 
-        property_view(const data_view& key, const value_view& value) noexcept :
+        property_view(const data_view& key, const property_value_view& value) noexcept :
             m_key(key),
             m_value(value) {
         }
@@ -43,7 +43,7 @@ namespace vtzero {
             return m_key;
         }
 
-        value_view value() const noexcept {
+        property_value_view value() const noexcept {
             return m_value;
         }
 

@@ -160,7 +160,7 @@ namespace vtzero {
         index_value() noexcept = default;
 
         /// Construct with the given value.
-        index_value(uint32_t value) noexcept :
+        index_value(uint32_t value) noexcept : // NOLINT (non-explicit on purpose)
             m_value(value) {
         }
 

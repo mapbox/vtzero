@@ -5,7 +5,7 @@
 #include "feature.hpp"
 #include "geometry.hpp"
 #include "types.hpp"
-#include "value_view.hpp"
+#include "property_value_view.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -118,7 +118,7 @@ namespace vtzero {
         std::size_t m_num_features = 0;
         data_view m_name{};
         mutable std::vector<data_view> m_key_table;
-        mutable std::vector<value_view> m_value_table;
+        mutable std::vector<property_value_view> m_value_table;
         mutable std::size_t m_key_table_size = 0;
         mutable std::size_t m_value_table_size = 0;
 
@@ -276,7 +276,7 @@ namespace vtzero {
          * Complexity: Amortized constant. First time the table is needed
          *             it needs to be created.
          */
-        const std::vector<value_view>& value_table() const {
+        const std::vector<property_value_view>& value_table() const {
             if (m_value_table_size > 0) {
                 initialize_tables();
             }
@@ -303,7 +303,7 @@ namespace vtzero {
          *
          * @throws std::out_of_range if the index is out of range.
          */
-        value_view value(index_value index) const {
+        property_value_view value(index_value index) const {
             return value_table().at(index.value());
         }
 

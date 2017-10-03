@@ -1,5 +1,5 @@
-#ifndef VTZERO_VALUE_VIEW_HPP
-#define VTZERO_VALUE_VIEW_HPP
+#ifndef VTZERO_PROPERTY_VALUE_VIEW_HPP
+#define VTZERO_PROPERTY_VALUE_VIEW_HPP
 
 #include "exception.hpp"
 #include "types.hpp"
@@ -12,7 +12,7 @@
 
 namespace vtzero {
 
-    class value_view {
+    class property_value_view {
 
         data_view m_value;
 
@@ -82,7 +82,7 @@ namespace vtzero {
             throw type_exception{};
         }
 
-        int compare(const value_view& other) const noexcept {
+        int compare(const property_value_view& other) const noexcept {
             const int cmp = std::memcmp(m_value.data(),
                                         other.m_value.data(),
                                         std::min(m_value.size(), other.m_value.size()));
@@ -97,9 +97,9 @@ namespace vtzero {
 
     public:
 
-        value_view() = default;
+        property_value_view() = default;
 
-        explicit value_view(const data_view& value) noexcept :
+        explicit property_value_view(const data_view& value) noexcept :
             m_value(value) {
         }
 
@@ -152,35 +152,35 @@ namespace vtzero {
             return get_value<bool_value_type>();
         }
 
-        bool operator==(const value_view& other) const noexcept {
+        bool operator==(const property_value_view& other) const noexcept {
             return m_value.size() == other.m_value.size() &&
                    std::memcmp(m_value.data(), other.m_value.data(), m_value.size()) == 0;
         }
 
-        bool operator!=(const value_view& other) const noexcept {
+        bool operator!=(const property_value_view& other) const noexcept {
             return !(*this == other);
         }
 
-        bool operator<(const value_view& other) const noexcept {
+        bool operator<(const property_value_view& other) const noexcept {
             return compare(other) < 0;
         }
 
-        bool operator<=(const value_view& other) const noexcept {
+        bool operator<=(const property_value_view& other) const noexcept {
             return compare(other) <= 0;
         }
 
-        bool operator>(const value_view& other) const noexcept {
+        bool operator>(const property_value_view& other) const noexcept {
             return compare(other) > 0;
         }
 
-        bool operator>=(const value_view& other) const noexcept {
+        bool operator>=(const property_value_view& other) const noexcept {
             return compare(other) >= 0;
         }
 
     }; // class value_view
 
     template <typename V>
-    decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const value_view& value) {
+    decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const property_value_view& value) {
         switch (value.type()) {
             case property_value_type::string_value:
                 return std::forward<V>(visitor)(value.string_value());
@@ -218,10 +218,10 @@ namespace vtzero {
     } // namespace detail
 
     template <typename T, typename S = std::string>
-    T convert_value(const value_view& value) {
+    T convert_value(const property_value_view& value) {
         return apply_visitor(detail::convert_visitor<T, S>{}, value);
     }
 
 } // namespace vtzero
 
-#endif // VTZERO_VALUE_VIEW_HPP
+#endif // VTZERO_PROPERTY_VALUE_VIEW_HPP
