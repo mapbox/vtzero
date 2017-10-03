@@ -4,6 +4,7 @@
 #include "exception.hpp"
 #include "types.hpp"
 #include "property_value_view.hpp"
+#include "property_view.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -13,41 +14,6 @@
 #include <utility>
 
 namespace vtzero {
-
-    /**
-     * A vector tile property.
-     */
-    class property_view {
-
-        data_view m_key;
-        property_value_view m_value;
-
-    public:
-
-        property_view() = default;
-
-        property_view(const data_view& key, const property_value_view& value) noexcept :
-            m_key(key),
-            m_value(value) {
-        }
-
-        bool valid() const noexcept {
-            return m_key.data() != nullptr;
-        }
-
-        operator bool() const noexcept {
-            return valid();
-        }
-
-        data_view key() const noexcept {
-            return m_key;
-        }
-
-        property_value_view value() const noexcept {
-            return m_value;
-        }
-
-    }; // class property_view
 
     class layer;
 
