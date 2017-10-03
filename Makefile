@@ -12,8 +12,9 @@ HPP_FILES := include/vtzero/builder.hpp \
              include/vtzero/index.hpp \
              include/vtzero/layer.hpp \
              include/vtzero/property_value.hpp \
+             include/vtzero/property_value_view.hpp \
+             include/vtzero/property_view.hpp \
              include/vtzero/types.hpp \
-             include/vtzero/value_view.hpp \
              include/vtzero/vector_tile.hpp \
              include/vtzero/version.hpp
 
