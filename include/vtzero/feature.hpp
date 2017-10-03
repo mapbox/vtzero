@@ -73,32 +73,31 @@ namespace vtzero {
 
         using uint32_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint32_iterator>;
 
-        const layer* m_layer;
-        uint64_t m_id;
-        uint32_it_range m_properties;
+        const layer* m_layer = nullptr;
+        uint64_t m_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
+        uint32_it_range m_properties{};
         std::size_t m_properties_size = 0;
-        data_view m_geometry;
-        GeomType m_type;
-        bool m_has_id;
+        data_view m_geometry{};
+        GeomType m_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
+        bool m_has_id = false;
 
     public:
 
-        feature() :
-            m_layer(nullptr),
-            m_id(0),
-            m_properties(),
-            m_geometry(),
-            m_type(),
-            m_has_id(false) {
-        }
+        /**
+         * Construct an invalid feature object.
+         */
+        feature() noexcept = default;
 
+        /**
+         * Construct a feature object. This is usually not something done in
+         * user code, because features are created by the layer_iterator.
+         *
+         * @throws format_exception if the layer data is ill-formed.
+         */
         feature(const layer* layer, const data_view& data) :
-            m_layer(layer),
-            m_id(0), // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
-            m_properties(),
-            m_geometry(),
-            m_type(), // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
-            m_has_id(false) {
+            m_layer(layer) {
+            assert(layer);
+            assert(data.data());
 
             protozero::pbf_message<detail::pbf_feature> reader{data};
 
@@ -150,53 +149,95 @@ namespace vtzero {
             m_properties_size = size / 2;
         }
 
+        /**
+         * Is this a valid feature? Valid features are those not created from
+         * the default constructor.
+         */
         bool valid() const noexcept {
             return m_geometry.data() != nullptr;
         }
 
+        /**
+         * Is this a valid feature? Valid features are those not created from
+         * the default constructor.
+         */
         operator bool() const noexcept {
             return valid();
         }
 
+        /**
+         * The ID of this feature. According to the spec IDs should be unique
+         * in a layer if they are set (spec 4.2).
+         */
         uint64_t id() const noexcept {
             assert(valid());
             return m_id;
         }
 
+        /**
+         * Does this feature have an ID?
+         */
         bool has_id() const noexcept {
             return m_has_id;
         }
 
+        /**
+         * The geometry type of this feature.
+         */
         GeomType type() const noexcept {
             assert(valid());
             return m_type;
         }
 
+        /**
+         * Get the geometry of this feature.
+         */
         const data_view& geometry() const noexcept {
             return m_geometry;
         }
 
+        /**
+         * Returns the number of properties in this feature.
+         *
+         * Complexity: Constant.
+         */
         std::size_t size() const noexcept {
             return m_properties_size;
         }
 
+        /// Returns an iterator to the beginning of the properties.
         properties_iterator begin() const noexcept {
             return {m_properties.begin(), m_layer};
         }
 
+        /// Returns an iterator to the end of the properties.
         properties_iterator end() const noexcept {
             return {m_properties.end(), m_layer};
         }
 
     }; // class feature
 
-
+    /**
+     * Create some kind of mapping from property keys to property values.
+     *
+     * This can be used to read all properties into a std::map or similar
+     * object.
+     *
+     * @tparam TMap Map type (std::map, std::unordered_map, ...) Must support
+     *              the emplace() method.
+     * @tparam TKey Key type, usually the key of the map type. The data_view
+     *              of the property key is converted to this type before
+     *              adding it to the map.
+     * @tparam TValue Value type, usally the value of the map type. The
+     *                property_value_view is converted to this type before
+     *                adding it to the map.
+     */
     template <typename TMap, typename TKey = typename TMap::key_type, typename TValue = typename TMap::mapped_type>
     TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
         for (const auto& p : feature) {
-            map.emplace(TKey{p.key()}, convert_property_value<TValue>(p.value()));
+            map.emplace(TKey(p.key()), convert_property_value<TValue>(p.value()));
         }
 
         return map;
