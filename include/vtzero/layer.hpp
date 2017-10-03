@@ -45,7 +45,7 @@ namespace vtzero {
         /**
          * Construct special "end" iterator.
          */
-        layer_iterator() = default;
+        layer_iterator() noexcept = default;
 
         /**
          * Construct feature iterator from specified vector tile data.
@@ -112,10 +112,11 @@ namespace vtzero {
      */
     class layer {
 
-        data_view m_data;
-        uint32_t m_version;
-        uint32_t m_extent;
-        data_view m_name;
+        data_view m_data{};
+        uint32_t m_version = 1; // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
+        uint32_t m_extent = 4096; // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
+        std::size_t m_num_features = 0;
+        data_view m_name{};
         mutable std::vector<data_view> m_key_table;
         mutable std::vector<value_view> m_value_table;
         mutable std::size_t m_key_table_size = 0;
@@ -149,15 +150,14 @@ namespace vtzero {
         using iterator = layer_iterator;
         using const_iterator = layer_iterator;
 
-        layer() :
-            m_data(),
-            m_version(0),
-            m_extent(0),
-            m_name() {
-        }
+        /**
+         * Construct an invalid layer object.
+         */
+        layer() = default;
 
         /**
-         * Construct a layer object.
+         * Construct a layer object. This is usually not something done in
+         * user code, because layers are created by the tile_iterator.
          *
          * @throws format_exception if the layer data is ill-formed.
          * @throws version_exception if the layer contains an unsupported version
@@ -165,10 +165,7 @@ namespace vtzero {
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
         explicit layer(const data_view& data) :
-            m_data(data),
-            m_version(1), // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
-            m_extent(4096), // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
-            m_name() {
+            m_data(data) {
             protozero::pbf_message<detail::pbf_layer> reader{data};
             while (reader.next()) {
                 switch (reader.tag_and_type()) {
@@ -180,6 +177,7 @@ namespace vtzero {
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited):
                         reader.skip(); // ignore features for now
+                        ++m_num_features;
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::keys, protozero::pbf_wire_type::length_delimited):
                         reader.skip();
@@ -212,41 +210,73 @@ namespace vtzero {
             }
         }
 
+        /**
+         * Is this a valid layer? Valid layers are those not created from the
+         * default constructor.
+         */
         bool valid() const noexcept {
-            return m_version != 0;
+            return m_data.data() != nullptr;
         }
 
+        /**
+         * Is this a valid layer? Valid layers are those not created from the
+         * default constructor.
+         */
         operator bool() const noexcept {
             return valid();
         }
 
+        /**
+         * Get a reference to the raw data this layer is created from.
+         */
         data_view data() const noexcept {
             return m_data;
         }
 
+        /**
+         * Return the name of the layer.
+         */
         data_view name() const noexcept {
             assert(valid());
             return m_name;
         }
 
+        /**
+         * Return the version of this layer.
+         */
         std::uint32_t version() const noexcept {
             assert(valid());
             return m_version;
         }
 
+        /**
+         * Return the extent of this layer.
+         */
         std::uint32_t extent() const noexcept {
             assert(valid());
             return m_extent;
         }
 
-        const std::vector<data_view>& key_table() const noexcept {
+        /**
+         * Return a reference to the key table.
+         *
+         * Complexity: Amortized constant. First time the table is needed
+         *             it needs to be created.
+         */
+        const std::vector<data_view>& key_table() const {
             if (m_key_table_size > 0) {
                 initialize_tables();
             }
             return m_key_table;
         }
 
-        const std::vector<value_view>& value_table() const noexcept {
+        /**
+         * Return a reference to the value table.
+         *
+         * Complexity: Amortized constant. First time the table is needed
+         *             it needs to be created.
+         */
+        const std::vector<value_view>& value_table() const {
             if (m_value_table_size > 0) {
                 initialize_tables();
             }
@@ -254,25 +284,55 @@ namespace vtzero {
         }
 
         /**
+         * Get the property key with the given index.
+         *
+         * Complexity: Amortized constant. First time the table is needed
+         *             it needs to be created.
+         *
          * @throws std::out_of_range if the index is out of range.
          */
-        data_view key(uint32_t n) const {
-            return key_table().at(n);
+        data_view key(index_value index) const {
+            return key_table().at(index.value());
         }
 
         /**
+         * Get the property value with the given index.
+         *
+         * Complexity: Amortized constant. First time the table is needed
+         *             it needs to be created.
+         *
          * @throws std::out_of_range if the index is out of range.
          */
-        value_view value(uint32_t n) const {
-            return value_table().at(n);
+        value_view value(index_value index) const {
+            return value_table().at(index.value());
         }
 
+        /**
+         * Does this layer contain any features?
+         *
+         * Complexity: Constant.
+         */
+        bool empty() const noexcept {
+            return m_num_features == 0;
+        }
+
+        /**
+         * The number of features in this layer.
+         *
+         * Complexity: Constant.
+         */
+        std::size_t size() const noexcept {
+            return m_num_features;
+        }
+
+        /// Returns an iterator to the beginning of features.
         layer_iterator begin() const {
-            return layer_iterator{this, m_data};
+            return {this, m_data};
         }
 
+        /// Returns an iterator to the end of features.
         layer_iterator end() const {
-            return layer_iterator{};
+            return {};
         }
 
         /**
@@ -301,42 +361,6 @@ namespace vtzero {
             }
 
             return feature{};
-        }
-
-        /**
-         * Does this layer contain any features?
-         *
-         * Complexity: Constant.
-         *
-         * @throws format_exception if the layer data is ill-formed.
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         */
-        bool empty() const {
-            protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
-            if (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * The number of features in this layer.
-         *
-         * Complexity: Linear in the number of features.
-         *
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         */
-        std::size_t size() const {
-            assert(valid());
-            std::size_t count = 0;
-
-            protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
-            while (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
-                layer_reader.skip();
-                ++count;
-            }
-
-            return count;
         }
 
     }; // class layer
