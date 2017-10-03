@@ -12,12 +12,17 @@
 
 namespace vtzero {
 
+    /**
+     * A view of a vector tile property value.
+     *
+     * Doesn't hold any data itself, just references the value.
+     */
     class property_value_view {
 
-        data_view m_value;
+        data_view m_value{};
 
         static bool check_tag_and_type(protozero::pbf_tag_type tag, protozero::pbf_wire_type type) noexcept {
-            static protozero::pbf_wire_type types[] = {
+            static constexpr const protozero::pbf_wire_type types[] = {
                 protozero::pbf_wire_type::length_delimited, // dummy 0 value
                 string_value_type::wire_type,
                 float_value_type::wire_type,
@@ -82,31 +87,35 @@ namespace vtzero {
             throw type_exception{};
         }
 
-        int compare(const property_value_view& other) const noexcept {
-            const int cmp = std::memcmp(m_value.data(),
-                                        other.m_value.data(),
-                                        std::min(m_value.size(), other.m_value.size()));
-            if (cmp == 0) {
-                if (m_value.size() == other.m_value.size()) {
-                    return 0;
-                }
-                return m_value.size() < other.m_value.size() ? -1 : 1;
-            }
-            return cmp;
-        }
-
     public:
 
-        property_value_view() = default;
+        /**
+         * The default constructor creates an invalid (empty)
+         * property_value_view.
+         */
+        property_value_view() noexcept = default;
 
+        /**
+         * Create a (valid) property_view from a data_view.
+         */
         explicit property_value_view(const data_view& value) noexcept :
             m_value(value) {
         }
 
+        /**
+         * Is this a valid view? Property value views are valid if they were
+         * constructed using the non-default constructor.
+         */
         bool valid() const noexcept {
             return m_value.data() != nullptr;
         }
 
+        /**
+         * Get the type of this property value.
+         *
+         * @pre @code valid() @endcode
+         * @throws format_exception if the encoding is invalid
+         */
         property_value_type type() const {
             assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
@@ -120,65 +129,130 @@ namespace vtzero {
             throw format_exception{"missing tag value"};
         }
 
+        /**
+         * Get the internal data_view this object was constructed with.
+         */
         data_view data() const noexcept {
             return m_value;
         }
 
+        /**
+         * Get string value of this object.
+         *
+         * @pre @code valid() @endcode
+         * @throws type_exception if the type of this property value is
+         *                        something other than string.
+         */
         data_view string_value() const {
             return get_value<string_value_type>();
         }
 
+        /**
+         * Get float value of this object.
+         *
+         * @pre @code valid() @endcode
+         * @throws type_exception if the type of this property value is
+         *                        something other than float.
+         */
         float float_value() const {
             return get_value<float_value_type>();
         }
 
+        /**
+         * Get double value of this object.
+         *
+         * @pre @code valid() @endcode
+         * @throws type_exception if the type of this property value is
+         *                        something other than double.
+         */
         double double_value() const {
             return get_value<double_value_type>();
         }
 
+        /**
+         * Get int value of this object.
+         *
+         * @pre @code valid() @endcode
+         * @throws type_exception if the type of this property value is
+         *                        something other than int.
+         */
         std::int64_t int_value() const {
             return get_value<int_value_type>();
         }
 
+        /**
+         * Get uint value of this object.
+         *
+         * @pre @code valid() @endcode
+         * @throws type_exception if the type of this property value is
+         *                        something other than uint.
+         */
         std::uint64_t uint_value() const {
             return get_value<uint_value_type>();
         }
 
+        /**
+         * Get sint value of this object.
+         *
+         * @pre @code valid() @endcode
+         * @throws type_exception if the type of this property value is
+         *                        something other than sint.
+         */
         std::int64_t sint_value() const {
             return get_value<sint_value_type>();
         }
 
+        /**
+         * Get bool value of this object.
+         *
+         * @pre @code valid() @endcode
+         * @throws type_exception if the type of this property value is
+         *                        something other than bool.
+         */
         bool bool_value() const {
             return get_value<bool_value_type>();
         }
 
-        bool operator==(const property_value_view& other) const noexcept {
-            return m_value.size() == other.m_value.size() &&
-                   std::memcmp(m_value.data(), other.m_value.data(), m_value.size()) == 0;
-        }
+    }; // class property_value_view
 
-        bool operator!=(const property_value_view& other) const noexcept {
-            return !(*this == other);
-        }
+    /// property_value_views are equal if they contain the same data.
+    inline bool operator==(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+        return lhs.data() == rhs.data();
+    }
 
-        bool operator<(const property_value_view& other) const noexcept {
-            return compare(other) < 0;
-        }
+    /// property_value_views are unequal if they do not contain the same data.
+    inline bool operator!=(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+        return lhs.data() != rhs.data();
+    }
 
-        bool operator<=(const property_value_view& other) const noexcept {
-            return compare(other) <= 0;
-        }
+    /// property_value_views are ordered in the same way as the underlying data_view
+    inline bool operator<(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+        return lhs.data() < rhs.data();
+    }
 
-        bool operator>(const property_value_view& other) const noexcept {
-            return compare(other) > 0;
-        }
+    /// property_value_views are ordered in the same way as the underlying data_view
+    inline bool operator<=(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+        return lhs.data() <= rhs.data();
+    }
 
-        bool operator>=(const property_value_view& other) const noexcept {
-            return compare(other) >= 0;
-        }
+    /// property_value_views are ordered in the same way as the underlying data_view
+    inline bool operator>(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+        return lhs.data() > rhs.data();
+    }
 
-    }; // class value_view
+    /// property_value_views are ordered in the same way as the underlying data_view
+    inline bool operator>=(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+        return lhs.data() >= rhs.data();
+    }
 
+    /**
+     * Apply the value to a visitor.
+     *
+     * The visitor must have an overloaded call operator taking single
+     * argument of types data_view, float, double, int64_t, uint64_t, and bool.
+     * All call operators must return the same type which will be the return
+     * type of this function.
+     */
     template <typename V>
     decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const property_value_view& value) {
         switch (value.type()) {
@@ -213,7 +287,7 @@ namespace vtzero {
                 return T{S{value}};
             }
 
-        }; // convert_visitor
+        }; // struct convert_visitor
 
     } // namespace detail
 
