@@ -185,6 +185,30 @@ namespace vtzero {
 
     }; // struct index_value
 
+    class geometry {
+
+        data_view m_data{};
+        GeomType m_type = GeomType::UNKNOWN;
+
+    public:
+
+        geometry() noexcept = default;
+
+        geometry(data_view data, GeomType type) noexcept :
+            m_data(data),
+            m_type(type) {
+        }
+
+        data_view data() const noexcept {
+            return m_data;
+        }
+
+        GeomType type() const noexcept {
+            return m_type;
+        }
+
+    }; // class geometry
+
 } // namespace vtzero
 
 #endif // VTZERO_TYPES_HPP

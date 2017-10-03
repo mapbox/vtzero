@@ -106,7 +106,7 @@ TEST_CASE("MVT test 002: Tile with single point feature without id") {
 
     REQUIRE_FALSE(feature.has_id());
     REQUIRE(feature.id() == 0);
-    REQUIRE(feature.type() == vtzero::GeomType::POINT);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
     point_handler handler;
     vtzero::decode_point_geometry(feature.geometry(), true, handler);
@@ -124,7 +124,7 @@ TEST_CASE("MVT test 003: Tile with single point with missing geometry type") {
     const auto feature = check_layer(tile);
     REQUIRE(feature.has_id());
     REQUIRE(feature.id() == 1);
-    REQUIRE(feature.type() == vtzero::GeomType::UNKNOWN);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
 }
 
 TEST_CASE("MVT test 004: Tile with single point with missing geometry") {
@@ -243,7 +243,7 @@ TEST_CASE("MVT test 016: Valid unknown geometry") {
     REQUIRE(tile.size() == 1);
 
     const auto feature = check_layer(tile);
-    REQUIRE(feature.type() == vtzero::GeomType::UNKNOWN);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
 }
 
 TEST_CASE("MVT test 017: Valid point geometry") {
@@ -256,7 +256,7 @@ TEST_CASE("MVT test 017: Valid point geometry") {
     REQUIRE(feature.has_id());
     REQUIRE(feature.id() == 1);
 
-    REQUIRE(feature.type() == vtzero::GeomType::POINT);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
     point_handler handler;
     vtzero::decode_point_geometry(feature.geometry(), true, handler);
@@ -272,7 +272,7 @@ TEST_CASE("MVT test 018: Valid linestring geometry") {
 
     const auto feature = check_layer(tile);
 
-    REQUIRE(feature.type() == vtzero::GeomType::LINESTRING);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
 
     linestring_handler handler;
     vtzero::decode_linestring_geometry(feature.geometry(), true, handler);
@@ -289,7 +289,7 @@ TEST_CASE("MVT test 019: Valid polygon geometry") {
 
     const auto feature = check_layer(tile);
 
-    REQUIRE(feature.type() == vtzero::GeomType::POLYGON);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
 
     polygon_handler handler;
     vtzero::decode_polygon_geometry(feature.geometry(), true, handler);
@@ -306,7 +306,7 @@ TEST_CASE("MVT test 020: Valid multipoint geometry") {
 
     const auto feature = check_layer(tile);
 
-    REQUIRE(feature.type() == vtzero::GeomType::POINT);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
     point_handler handler;
     vtzero::decode_point_geometry(feature.geometry(), true, handler);
@@ -323,7 +323,7 @@ TEST_CASE("MVT test 021: Valid multilinestring geometry") {
 
     const auto feature = check_layer(tile);
 
-    REQUIRE(feature.type() == vtzero::GeomType::LINESTRING);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
 
     linestring_handler handler;
     vtzero::decode_linestring_geometry(feature.geometry(), true, handler);
@@ -340,7 +340,7 @@ TEST_CASE("MVT test 022: Valid multipolygon geometry") {
 
     const auto feature = check_layer(tile);
 
-    REQUIRE(feature.type() == vtzero::GeomType::POLYGON);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
 
     polygon_handler handler;
     vtzero::decode_polygon_geometry(feature.geometry(), false, handler);
@@ -554,7 +554,7 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 0);
-    REQUIRE(feature.type() == vtzero::GeomType::UNKNOWN);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE(feature.size() == 0);
 }
 

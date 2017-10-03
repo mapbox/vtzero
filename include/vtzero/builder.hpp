@@ -304,10 +304,10 @@ namespace vtzero {
 
     public:
 
-        geometry_feature_builder(layer_builder layer, uint64_t id, GeomType geom_type, const data_view& geometry) :
+        geometry_feature_builder(layer_builder layer, uint64_t id, const geometry geometry) :
             feature_builder_base(layer, id) {
-            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geom_type));
-            m_feature_writer.add_string(detail::pbf_feature::geometry, geometry);
+            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
+            m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
             m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
         }
 
@@ -633,7 +633,7 @@ namespace vtzero {
     }; // class tile_builder
 
     inline void layer_builder::add_feature(feature& feature) {
-        geometry_feature_builder feature_builder{*this, feature.id(), feature.type(), feature.geometry()};
+        geometry_feature_builder feature_builder{*this, feature.id(), feature.geometry()};
         for (auto property : feature) {
             feature_builder.add_property(property);
         }

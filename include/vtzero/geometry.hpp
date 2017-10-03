@@ -7,6 +7,7 @@
 #include <protozero/pbf_reader.hpp>
 
 #include <cstdint>
+#include <iosfwd>
 
 namespace vtzero {
 
@@ -17,7 +18,7 @@ namespace vtzero {
 
         point() noexcept = default;
 
-        point(int32_t x_, int32_t y_) :
+        point(int32_t x_, int32_t y_) noexcept :
             x(x_),
             y(y_) {
         }
@@ -34,11 +35,11 @@ namespace vtzero {
         return {p.x, p.y};
     }
 
-    inline bool operator==(const point& a, const point& b) noexcept {
+    inline bool operator==(const point a, const point b) noexcept {
         return a.x == b.x && a.y == b.y;
     }
 
-    inline bool operator!=(const point& a, const point& b) noexcept {
+    inline bool operator!=(const point a, const point b) noexcept {
         return !(a==b);
     }
 
@@ -72,85 +73,86 @@ namespace vtzero {
             return int64_t(a.x) * int64_t(b.y) - int64_t(b.x) * int64_t(a.y);
         }
 
+        /**
+         * Decode a geometry as specified in spec 4.3 from a sequence of 32 bit
+         * unsigned integers.
+         */
+        class geometry_decoder {
+
+            protozero::pbf_reader::const_uint32_iterator it;
+            protozero::pbf_reader::const_uint32_iterator end;
+
+            point m_cursor{0, 0};
+            uint32_t m_command_id = 0;
+            uint32_t m_count = 0;
+            bool m_strict = true;
+
+        public:
+
+            geometry_decoder(const data_view& data, bool strict = true) :
+                it(data.data(), data.data() + data.size()),
+                end(data.data() + data.size(), data.data() + data.size()),
+                m_strict(strict) {
+            }
+
+            uint32_t count() const noexcept {
+                return m_count;
+            }
+
+            bool done() const noexcept {
+                return it == end;
+            }
+
+            bool next_command(uint32_t expected_command) {
+                if (it == end) {
+                    return false;
+                }
+                m_command_id = detail::get_command_id(*it);
+                m_count = detail::get_command_count(*it);
+
+                if (m_command_id != expected_command) {
+                    throw geometry_exception{std::string{"expected command "} +
+                                            std::to_string(expected_command) +
+                                            " but got " +
+                                            std::to_string(m_command_id)};
+                }
+
+                ++it;
+
+                return true;
+            }
+
+            point next_point() {
+                assert(m_count > 0);
+
+                if (it == end || std::next(it) == end) {
+                    throw geometry_exception{"too few points in geometry"};
+                }
+
+                const int32_t x = protozero::decode_zigzag32(*it++);
+                const int32_t y = protozero::decode_zigzag32(*it++);
+
+                // spec 4.3.3.2 "For any pair of (dX, dY) the dX and dY MUST NOT both be 0."
+                if (m_strict && x == 0 && y == 0) {
+                    throw geometry_exception{"found consecutive equal points (spec 4.3.3.2) (strict mode)"};
+                }
+
+                m_cursor.x += x;
+                m_cursor.y += y;
+
+                --m_count;
+
+                return m_cursor;
+            }
+
+        }; // class geometry_decoder
+
     } // namespace detail
 
-    /**
-     * Decode a geometry as specified in spec 4.3 from a sequence of 32 bit
-     * unsigned integers.
-     */
-    class geometry_decoder {
-
-        protozero::pbf_reader::const_uint32_iterator it;
-        protozero::pbf_reader::const_uint32_iterator end;
-
-        point m_cursor{0, 0};
-        uint32_t m_command_id = 0;
-        uint32_t m_count = 0;
-        bool m_strict = true;
-
-    public:
-
-        geometry_decoder(const data_view& data, bool strict = true) :
-            it(data.data(), data.data() + data.size()),
-            end(data.data() + data.size(), data.data() + data.size()),
-            m_strict(strict) {
-        }
-
-        uint32_t count() const noexcept {
-            return m_count;
-        }
-
-        bool done() const noexcept {
-            return it == end;
-        }
-
-        bool next_command(uint32_t expected_command) {
-            if (it == end) {
-                return false;
-            }
-            m_command_id = detail::get_command_id(*it);
-            m_count = detail::get_command_count(*it);
-
-            if (m_command_id != expected_command) {
-                throw geometry_exception{std::string{"expected command "} +
-                                         std::to_string(expected_command) +
-                                         " but got " +
-                                         std::to_string(m_command_id)};
-            }
-
-            ++it;
-
-            return true;
-        }
-
-        point next_point() {
-            assert(m_count > 0);
-
-            if (it == end || std::next(it) == end) {
-                throw geometry_exception{"too few points in geometry"};
-            }
-
-            const int32_t x = protozero::decode_zigzag32(*it++);
-            const int32_t y = protozero::decode_zigzag32(*it++);
-
-            // spec 4.3.3.2 "For any pair of (dX, dY) the dX and dY MUST NOT both be 0."
-            if (m_strict && x == 0 && y == 0) {
-                throw geometry_exception{"found consecutive equal points (spec 4.3.3.2) (strict mode)"};
-            }
-
-            m_cursor.x += x;
-            m_cursor.y += y;
-
-            --m_count;
-
-            return m_cursor;
-        }
-
-    }; // class geometry_decoder
-
     template <typename TGeomHandler>
-    void decode_point_geometry(const data_view& geometry, bool strict, TGeomHandler&& geom_handler) {
-        geometry_decoder decoder{geometry, strict};
+    void decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        assert(geometry.type() == GeomType::POINT);
+        detail::geometry_decoder decoder{geometry.data(), strict};
 
         // spec 4.3.4.2 "MUST consist of of a single MoveTo command"
         if (!decoder.next_command(detail::command_move_to())) {
@@ -176,8 +178,9 @@ namespace vtzero {
     }
 
     template <typename TGeomHandler>
-    void decode_linestring_geometry(const data_view& geometry, bool strict, TGeomHandler&& geom_handler) {
-        geometry_decoder decoder{geometry, strict};
+    void decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        assert(geometry.type() == GeomType::LINESTRING);
+        detail::geometry_decoder decoder{geometry.data(), strict};
 
         // spec 4.3.4.3 "1. A MoveTo command"
         while (decoder.next_command(detail::command_move_to())) {
@@ -209,8 +212,9 @@ namespace vtzero {
     }
 
     template <typename TGeomHandler>
-    void decode_polygon_geometry(const data_view& geometry, bool strict, TGeomHandler&& geom_handler) {
-        geometry_decoder decoder{geometry, strict};
+    void decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        assert(geometry.type() == GeomType::POLYGON);
+        detail::geometry_decoder decoder{geometry.data(), strict};
 
         // spec 4.3.4.4 "1. A MoveTo command"
         while (decoder.next_command(detail::command_move_to())) {

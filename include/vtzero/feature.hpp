@@ -78,7 +78,7 @@ namespace vtzero {
         uint32_it_range m_properties{};
         std::size_t m_properties_size = 0;
         data_view m_geometry{};
-        GeomType m_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
+        GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
         bool m_has_id = false;
 
     public:
@@ -119,7 +119,7 @@ namespace vtzero {
                             if (type < 0 || type > 3) {
                                 throw format_exception{"Unknown geometry type (spec 4.3.4)"};
                             }
-                            m_type = static_cast<GeomType>(type);
+                            m_geometry_type = static_cast<GeomType>(type);
                         }
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
@@ -184,16 +184,17 @@ namespace vtzero {
         /**
          * The geometry type of this feature.
          */
-        GeomType type() const noexcept {
+        GeomType geometry_type() const noexcept {
             assert(valid());
-            return m_type;
+            return m_geometry_type;
         }
 
         /**
          * Get the geometry of this feature.
          */
-        const data_view& geometry() const noexcept {
-            return m_geometry;
+        vtzero::geometry geometry() const noexcept {
+            assert(valid());
+            return {m_geometry, m_geometry_type};
         }
 
         /**

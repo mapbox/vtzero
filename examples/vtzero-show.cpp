@@ -136,9 +136,9 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
         } else {
             std::cout << "(none)\n";
         }
-        std::cout << "    geomtype: " << vtzero::geom_type_name(feature.type()) << '\n'
+        std::cout << "    geomtype: " << vtzero::geom_type_name(feature.geometry_type()) << '\n'
                   << "    geometry:\n";
-        switch (feature.type()) {
+        switch (feature.geometry_type()) {
             case vtzero::GeomType::POINT:
                 vtzero::decode_point_geometry(feature.geometry(), strict, geom_handler_points{});
                 break;
