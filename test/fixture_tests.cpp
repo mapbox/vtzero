@@ -362,6 +362,14 @@ TEST_CASE("MVT test 023: Invalid layer: missing layer name") {
     REQUIRE_THROWS_AS(*tile.begin(), const vtzero::format_exception&);
 }
 
+TEST_CASE("MVT test 024: Missing layer version") {
+    std::string buffer = open_tile("024/tile.mvt");
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+//    const auto layer = *tile.begin(); XXX
+//    REQUIRE(layer.version() == 1);
+}
+
 TEST_CASE("MVT test 025: Layer without features") {
     std::string buffer = open_tile("025/tile.mvt");
     vtzero::vector_tile tile{buffer};
@@ -370,6 +378,14 @@ TEST_CASE("MVT test 025: Layer without features") {
     const auto layer = *tile.begin();
     REQUIRE(layer.empty());
     REQUIRE(layer.size() == 0);
+}
+
+TEST_CASE("MVT test 026: Extra value type") {
+    std::string buffer = open_tile("026/tile.mvt");
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+//    const auto layer = *tile.begin(); XXX
+//    REQUIRE(layer.size() == 1);
 }
 
 TEST_CASE("MVT test 027: Layer with unused bool property value") {
@@ -572,5 +588,13 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
     const auto feature = *layer.begin();
     REQUIRE(feature.size() == 1);
     REQUIRE_THROWS_AS(*feature.begin(), const std::out_of_range&);
+}
+
+TEST_CASE("MVT test 043: A layer with a number of points that refer to different value types.") {
+    std::string buffer{open_tile("043/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.size() == 1);
+    const auto layer = tile[0];
+    REQUIRE(layer.size() == 6);
 }
 
