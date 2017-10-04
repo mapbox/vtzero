@@ -86,6 +86,6 @@ int main() {
     assert(fd > 0);
 
     const auto len = ::write(fd, data.c_str(), data.size());
-    assert(static_cast<size_t>(len) == data.size());
+    assert(static_cast<std::size_t>(len) == data.size());
 }
 

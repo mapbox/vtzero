@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
         const auto output = tb.serialize();
         write(1, output.data(), output.size());
     } else {
-        const uint32_t id = std::atoi(argv[optind + 2]);
+        const auto id = static_cast<uint32_t>(std::atoi(argv[optind + 2]));
         auto feature = layer[id];
         if (!feature.valid()) {
             std::cerr << "No feature with that id\n";
