@@ -44,7 +44,7 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 
 find_package(Protozero 1.5.3 REQUIRED)
 
-include_directories(${PROTOZERO_INCLUDE_DIR})
+include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIR})
 
 
 #-----------------------------------------------------------------------------

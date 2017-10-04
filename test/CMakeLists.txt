@@ -6,7 +6,7 @@
 #
 #-----------------------------------------------------------------------------
 
-include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 add_executable(unit-tests test_main.cpp tests.cpp)
 add_executable(fixture-tests test_main.cpp fixture_tests.cpp)
