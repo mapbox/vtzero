@@ -8,6 +8,8 @@
 
 cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
 #-----------------------------------------------------------------------------
 
 project(vtzero LANGUAGES CXX)
@@ -40,10 +42,7 @@ include_directories("${CMAKE_SOURCE_DIR}/include")
 #
 #-----------------------------------------------------------------------------
 
-find_path(PROTOZERO_INCLUDE_DIR protozero/version.hpp
-    PATH_SUFFIXES include
-    PATHS ../protozero
-)
+find_package(Protozero 1.5.3 REQUIRED)
 
 include_directories(${PROTOZERO_INCLUDE_DIR})
 
