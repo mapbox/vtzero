@@ -1,5 +1,5 @@
 ---
-Checks:          '*,-cert-err58-cpp'
+Checks:          '*,-cert-dcl21-cpp,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-google-runtime-references'
 WarningsAsErrors: '*'
 HeaderFilterRegex: '\/include\/'
 AnalyzeTemporaryDtors: false
