@@ -15,7 +15,7 @@ Implements the [Mapbox Vector Tile Specification 2.x](https://www.mapbox.com/vec
 ## Depends
 
 * C++11 compiler
-* make
+* CMake
 * Latest [Protozero](https://github.com/mapbox/protozero)
 
 
@@ -38,10 +38,14 @@ git submodule update --init
 Finally, to build the examples do:
 
 ```
+mkdir build
+cd build
+cmake ..
 make
 ```
 
-Call `make test` to build and run the tests.
+Call `ctest` to run the tests.
+
 
 ## Examples
 
@@ -60,7 +64,13 @@ Call
 to show contents of `TILE-FILE`.
 
 
-## AUTHORS
+## Docs
+
+To build the API docs call `make doc` after CMake. The results will be in your
+build directory under `doc/html`.
+
+
+## Authors
 
 Jochen Topf (jochen@topf.org)
 Dane Springmeyer (dane@mapbox.com)

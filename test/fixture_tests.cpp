@@ -5,12 +5,19 @@
 
 #include <catch.hpp>
 
+#include <cstdlib>
 #include <fstream>
 #include <stdexcept>
 #include <string>
 
 static std::string open_tile(const std::string& path) {
-    std::ifstream stream{std::string{"test/mvt-fixtures/fixtures/"} + path.c_str(), std::ios_base::in|std::ios_base::binary};
+    const auto fixtures_dir = std::getenv("FIXTURES_DIR");
+    if (fixtures_dir == nullptr) {
+        std::cerr << "Set FIXTURES_DIR environment variable to the directory where the mvt fixtures are!\n";
+        std::exit(2);
+    }
+
+    std::ifstream stream{std::string{fixtures_dir} + "/" + path.c_str(), std::ios_base::in|std::ios_base::binary};
     if (!stream.is_open()) {
         throw std::runtime_error{"could not open: '" + path + "'"};
     }
