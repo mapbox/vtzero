@@ -60,10 +60,6 @@ namespace vtzero {
 
         template <typename T>
         layer_builder_impl(T&& name, uint32_t version, uint32_t extent) :
-            layer_builder_base(),
-            m_data(),
-            m_keys_data(),
-            m_values_data(),
             m_pbf_message_layer(m_data),
             m_pbf_message_keys(m_keys_data),
             m_pbf_message_values(m_values_data) {
@@ -136,8 +132,7 @@ namespace vtzero {
 
     public:
 
-        layer_builder_existing(const data_view& data) :
-            layer_builder_base(),
+        explicit layer_builder_existing(const data_view& data) :
             m_data(data) {
         }
 
@@ -156,7 +151,7 @@ namespace vtzero {
     public:
 
         template <typename ...TArgs>
-        layer_builder(vtzero::tile_builder& tile, TArgs&& ...args);
+        explicit layer_builder(vtzero::tile_builder& tile, TArgs&& ...args);
 
         vtzero::layer_builder_impl& get_layer() noexcept {
             return *m_layer;
@@ -178,7 +173,7 @@ namespace vtzero {
             return m_layer->add_value(text);
         }
 
-        void add_feature(feature& feature);
+        void add_feature(const feature& feature);
 
     }; // class layer_builder
 
@@ -270,6 +265,12 @@ namespace vtzero {
                 commit(); // XXX exceptions?
             }
 
+            feature_builder(const feature_builder&) = delete;
+            feature_builder& operator=(const feature_builder&) = delete;
+
+            feature_builder(feature_builder&&) = default;
+            feature_builder& operator=(feature_builder&&) = default;
+
             template <typename ...TArgs>
             void add_property(TArgs&& ...args) {
                 if (m_pbf_geometry.valid()) {
@@ -304,7 +305,7 @@ namespace vtzero {
 
     public:
 
-        geometry_feature_builder(layer_builder layer, uint64_t id, const geometry geometry) :
+        geometry_feature_builder(layer_builder layer, const geometry geometry, uint64_t id = 0) :
             feature_builder_base(layer, id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
             m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
@@ -314,6 +315,12 @@ namespace vtzero {
         ~geometry_feature_builder() {
             do_commit(); // XXX exceptions?
         }
+
+        geometry_feature_builder(const geometry_feature_builder&) = delete;
+        geometry_feature_builder& operator=(const geometry_feature_builder&) = delete;
+
+        geometry_feature_builder(geometry_feature_builder&&) = default;
+        geometry_feature_builder& operator=(geometry_feature_builder&&) = default;
 
         template <typename ...TArgs>
         void add_property(TArgs&& ...args) {
@@ -326,7 +333,7 @@ namespace vtzero {
 
     public:
 
-        point_feature_builder(layer_builder layer, uint64_t id = 0) :
+        explicit point_feature_builder(layer_builder layer, uint64_t id = 0) :
             feature_builder(layer, id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -335,6 +342,12 @@ namespace vtzero {
         ~point_feature_builder() {
             assert(m_num_points == 0 && "has fewer points than expected");
         }
+
+        point_feature_builder(const point_feature_builder&) = delete;
+        point_feature_builder& operator=(const point_feature_builder&) = delete;
+
+        point_feature_builder(point_feature_builder&&) = default;
+        point_feature_builder& operator=(point_feature_builder&&) = default;
 
         void add_point(const point p) {
             assert(m_pbf_geometry.valid());
@@ -420,7 +433,7 @@ namespace vtzero {
 
     public:
 
-        line_string_feature_builder(layer_builder layer, uint64_t id = 0) :
+        explicit line_string_feature_builder(layer_builder layer, uint64_t id = 0) :
             feature_builder(layer, id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -429,6 +442,12 @@ namespace vtzero {
         ~line_string_feature_builder() {
             assert(m_num_points == 0 && "LineString has fewer points than expected");
         }
+
+        line_string_feature_builder(const line_string_feature_builder&) = delete;
+        line_string_feature_builder& operator=(const line_string_feature_builder&) = delete;
+
+        line_string_feature_builder(line_string_feature_builder&&) = default;
+        line_string_feature_builder& operator=(line_string_feature_builder&&) = default;
 
         void add_linestring(const uint32_t count) {
             assert(m_pbf_geometry.valid());
@@ -508,7 +527,7 @@ namespace vtzero {
 
     public:
 
-        polygon_feature_builder(layer_builder layer, uint64_t id = 0) :
+        explicit polygon_feature_builder(layer_builder layer, uint64_t id = 0) :
             feature_builder(layer, id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -517,6 +536,12 @@ namespace vtzero {
         ~polygon_feature_builder() {
             assert(m_num_points == 0 && "ring has fewer points than expected");
         }
+
+        polygon_feature_builder(const polygon_feature_builder&) = delete;
+        polygon_feature_builder& operator=(const polygon_feature_builder&) = delete;
+
+        polygon_feature_builder(polygon_feature_builder&&) = default;
+        polygon_feature_builder& operator=(polygon_feature_builder&&) = default;
 
         void add_ring(const uint32_t count) {
             assert(m_pbf_geometry.valid());
@@ -606,15 +631,17 @@ namespace vtzero {
     public:
 
         layer_builder_impl* add_layer(const layer& layer) {
-            m_layers.emplace_back(new layer_builder_impl{layer.name(), layer.version(), layer.extent()});
-            return static_cast<layer_builder_impl*>(m_layers.back().get());
+            const auto ptr = new layer_builder_impl{layer.name(), layer.version(), layer.extent()};
+            m_layers.emplace_back(ptr);
+            return ptr;
         }
 
         template <typename T,
                   typename std::enable_if<!std::is_same<typename std::decay<T>::type, layer>{}, int>::type = 0>
         layer_builder_impl* add_layer(T&& name, uint32_t version = 2, uint32_t extent = 4096) {
-            m_layers.emplace_back(new layer_builder_impl{std::forward<T>(name), version, extent});
-            return static_cast<layer_builder_impl*>(m_layers.back().get());
+            const auto ptr = new layer_builder_impl{std::forward<T>(name), version, extent};
+            m_layers.emplace_back(ptr);
+            return ptr;
         }
 
         void add_layer(data_view&& data) {
@@ -636,8 +663,8 @@ namespace vtzero {
 
     }; // class tile_builder
 
-    inline void layer_builder::add_feature(feature& feature) {
-        geometry_feature_builder feature_builder{*this, feature.id(), feature.geometry()};
+    inline void layer_builder::add_feature(const feature& feature) {
+        geometry_feature_builder feature_builder{*this, feature.geometry(), feature.id()};
         for (auto property : feature) {
             feature_builder.add_property(property);
         }

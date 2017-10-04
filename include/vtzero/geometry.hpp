@@ -89,7 +89,7 @@ namespace vtzero {
 
         public:
 
-            geometry_decoder(const data_view& data, bool strict = true) :
+            explicit geometry_decoder(const data_view& data, bool strict = true) :
                 it(data.data(), data.data() + data.size()),
                 end(data.data() + data.size(), data.data() + data.size()),
                 m_strict(strict) {

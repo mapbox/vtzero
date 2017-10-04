@@ -16,7 +16,7 @@ namespace vtzero {
 
     public:
 
-        key_index(layer_builder& builder) :
+        explicit key_index(layer_builder& builder) :
             m_builder(builder) {
         }
 
@@ -42,7 +42,7 @@ namespace vtzero {
 
     public:
 
-        value_index(layer_builder& builder) :
+        explicit value_index(layer_builder& builder) :
             m_builder(builder) {
         }
 
@@ -67,7 +67,7 @@ namespace vtzero {
 
     public:
 
-        value_index_internal(layer_builder& builder) :
+        explicit value_index_internal(layer_builder& builder) :
             m_builder(builder) {
         }
 

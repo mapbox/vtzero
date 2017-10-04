@@ -40,31 +40,31 @@ namespace vtzero {
             return types[tag] == type;
         }
 
-        static data_view get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, string_value_type) {
+        static data_view get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, string_value_type /* dummy */) {
             return value_message.get_view();
         }
 
-        static float get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, float_value_type) {
+        static float get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, float_value_type /* dummy */) {
             return value_message.get_float();
         }
 
-        static double get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, double_value_type) {
+        static double get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, double_value_type /* dummy */) {
             return value_message.get_double();
         }
 
-        static int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, int_value_type) {
+        static int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, int_value_type /* dummy */) {
             return value_message.get_int64();
         }
 
-        static uint64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, uint_value_type) {
+        static uint64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, uint_value_type /* dummy */) {
             return value_message.get_uint64();
         }
 
-        static int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, sint_value_type) {
+        static int64_t get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, sint_value_type /* dummy */) {
             return value_message.get_sint64();
         }
 
-        static bool get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, bool_value_type) {
+        static bool get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, bool_value_type /* dummy */) {
             return value_message.get_bool();
         }
 

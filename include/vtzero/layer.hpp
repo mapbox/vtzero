@@ -4,8 +4,8 @@
 #include "exception.hpp"
 #include "feature.hpp"
 #include "geometry.hpp"
-#include "types.hpp"
 #include "property_value_view.hpp"
+#include "types.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -55,8 +55,7 @@ namespace vtzero {
          */
         layer_iterator(const layer* layer, const data_view& tile_data) :
             m_layer(layer),
-            m_layer_reader(tile_data),
-            m_data() {
+            m_layer_reader(tile_data) {
             next();
         }
 

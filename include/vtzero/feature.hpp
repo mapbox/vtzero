@@ -2,9 +2,9 @@
 #define VTZERO_FEATURE_HPP
 
 #include "exception.hpp"
-#include "types.hpp"
 #include "property_value_view.hpp"
 #include "property_view.hpp"
+#include "types.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -123,7 +123,7 @@ namespace vtzero {
                         }
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
-                        if (m_geometry.size() != 0) {
+                        if (!m_geometry.empty()) {
                             throw format_exception{"Feature has more than one geometry field"};
                         }
                         m_geometry = reader.get_view();
