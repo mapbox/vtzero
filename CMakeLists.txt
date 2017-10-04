@@ -48,6 +48,27 @@ include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIR})
 
 
 #-----------------------------------------------------------------------------
+#
+#  Optional "clang-tidy" target
+#
+#-----------------------------------------------------------------------------
+message(STATUS "Looking for clang-tidy")
+find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-5.0 clang-tidy-3.8)
+
+if(CLANG_TIDY)
+    message(STATUS "Looking for clang-tidy - found")
+    add_custom_target(clang-tidy
+        ${CLANG_TIDY}
+        -p ${CMAKE_BINARY_DIR}
+        ${CMAKE_SOURCE_DIR}/examples/*.cpp ${CMAKE_SOURCE_DIR}/test/*.cpp
+    )
+else()
+    message(STATUS "Looking for clang-tidy - not found")
+    message(STATUS "  Build target 'clang-tidy' will not be available.")
+endif()
+
+
+#-----------------------------------------------------------------------------
 
 enable_testing()
 
