@@ -1,5 +1,5 @@
-#ifndef PROPERTY_VIEW_HPP
-#define PROPERTY_VIEW_HPP
+#ifndef VTZERO_PROPERTY_VIEW_HPP
+#define VTZERO_PROPERTY_VIEW_HPP
 
 #include "property_value_view.hpp"
 #include "types.hpp"
@@ -61,4 +61,4 @@ namespace vtzero {
 
 } // namespace vtzero
 
-#endif // PROPERTY_VIEW_HPP
+#endif // VTZERO_PROPERTY_VIEW_HPP
