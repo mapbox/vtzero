@@ -86,6 +86,13 @@ struct geom_handler_polygons {
 
 };
 
+template <typename TChar, typename TTraits>
+std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, vtzero::data_view value) {
+    out.write(value.data(), static_cast<std::streamsize>(value.size()));
+    return out;
+}
+
+
 struct print_value {
 
     template <typename T>
@@ -94,9 +101,7 @@ struct print_value {
     }
 
     void operator()(const vtzero::data_view& value) const {
-        std::cout << '"';
-        std::cout.write(value.data(), value.size());
-        std::cout << '"';
+        std::cout << '"' << value << '"';
     }
 
 }; // struct print_value
@@ -111,9 +116,7 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
         std::cout << "  keys:\n";
         int n = 0;
         for (const auto& key : layer.key_table()) {
-            std::cout << "    " << n++ << ": ";
-            std::cout.write(key.data(), key.size());
-            std::cout << '\n';
+            std::cout << "    " << n++ << ": " << key << '\n';
         }
         std::cout << "  values:\n";
         n = 0;
@@ -153,9 +156,7 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
         }
         std::cout << "    properties:\n";
         for (auto property : feature) {
-            std::cout << "      ";
-            std::cout.write(property.key().data(), property.key().size());
-            std::cout << '=';
+            std::cout << "      " << property.key() << '=';
             vtzero::apply_visitor(print_value{}, property.value());
             if (print_values_with_type) {
                 std::cout << " [" << vtzero::property_value_type_name(property.value().type()) << "]\n";
@@ -167,8 +168,7 @@ void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, boo
 }
 
 void print_layer_overview(const vtzero::layer& layer) {
-    std::cout.write(layer.name().data(), layer.name().size());
-    std::cout << ' ' << layer.size() << '\n';
+    std::cout << layer.name() << ' ' << layer.size() << '\n';
 }
 
 void print_help() {
