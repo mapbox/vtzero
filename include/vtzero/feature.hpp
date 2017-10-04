@@ -86,7 +86,7 @@ namespace vtzero {
         /**
          * Construct an invalid feature object.
          */
-        feature() noexcept = default;
+        feature() = default;
 
         /**
          * Construct a feature object. This is usually not something done in
