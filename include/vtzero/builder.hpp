@@ -257,7 +257,7 @@ namespace vtzero {
         protected:
 
             protozero::packed_field_uint32 m_pbf_geometry{};
-            size_t m_num_points = 0;
+            uint32_t m_num_points = 0;
             point m_cursor{0, 0};
 
         public:
@@ -430,7 +430,7 @@ namespace vtzero {
             assert(m_num_points == 0 && "LineString has fewer points than expected");
         }
 
-        void add_linestring(size_t count) {
+        void add_linestring(const uint32_t count) {
             assert(m_pbf_geometry.valid());
             assert(!m_pbf_tags.valid());
             assert(count > 1);
@@ -469,7 +469,11 @@ namespace vtzero {
 
         template <typename TIter>
         void add_linestring(TIter begin, TIter end) {
-            add_linestring(std::distance(begin, end));
+            auto size = std::distance(begin, end);
+            if (size > (1u << 29)) {
+                throw format_exception{"a linestring can not contain more then 2^29 points"};
+            }
+            add_linestring(uint32_t(size));
             for (; begin != end; ++begin) {
                 set_point(*begin);
             }
@@ -514,7 +518,7 @@ namespace vtzero {
             assert(m_num_points == 0 && "ring has fewer points than expected");
         }
 
-        void add_ring(size_t count) {
+        void add_ring(const uint32_t count) {
             assert(m_pbf_geometry.valid());
             assert(!m_pbf_tags.valid());
             assert(count > 3);
