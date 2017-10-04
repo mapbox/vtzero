@@ -46,10 +46,10 @@ int main() {
     }
 
 
-    vtzero::point_feature_builder feature{layer_points, 5 /* id */};
-    feature.add_point(vtzero::point{20, 20});
-    feature.add_property("otherkey", "attr");
-    feature.commit();
+    vtzero::point_feature_builder feature1{layer_points, 5 /* id */};
+    feature1.add_point(vtzero::point{20, 20});
+    feature1.add_property("otherkey", "attr");
+    feature1.commit();
 
     vtzero::value_index<vtzero::sint_value_type, int32_t, std::unordered_map> maxspeed_index{layer_lines};
     {

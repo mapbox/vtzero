@@ -55,8 +55,8 @@ int main(int argc, char* argv[]) {
     if (remaining_args == 2) {
         vtzero::tile_builder tb;
         tb.add_layer(layer.data());
-        const auto tile = tb.serialize();
-        write(1, tile.data(), tile.size());
+        const auto output = tb.serialize();
+        write(1, output.data(), output.size());
     } else {
         const uint32_t id = std::atoi(argv[optind + 2]);
         auto feature = layer[id];
@@ -67,8 +67,8 @@ int main(int argc, char* argv[]) {
         vtzero::tile_builder tb;
         vtzero::layer_builder layer_builder{tb, layer};
         layer_builder.add_feature(feature);
-        const auto tile = tb.serialize();
-        write(1, tile.data(), tile.size());
+        const auto output = tb.serialize();
+        write(1, output.data(), output.size());
     }
 }
 
