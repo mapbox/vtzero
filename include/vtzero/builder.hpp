@@ -68,6 +68,12 @@ namespace vtzero {
             m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
         }
 
+        layer_builder_impl(const layer_builder_impl&) = delete;
+        layer_builder_impl& operator=(const layer_builder_impl&) = delete;
+
+        layer_builder_impl(layer_builder_impl&&) noexcept = default;
+        layer_builder_impl& operator=(layer_builder_impl&&) noexcept = default;
+
         index_value add_key_without_dup_check(const data_view& text) {
             m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
             return m_max_key++;
@@ -217,6 +223,12 @@ namespace vtzero {
                 m_feature_writer.add_uint64(detail::pbf_feature::id, id);
             }
 
+            feature_builder_base(const feature_builder_base&) = delete;
+            feature_builder_base& operator=(const feature_builder_base&) = delete;
+
+            feature_builder_base(feature_builder_base&&) noexcept = default;
+            feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
+
             void add_property_impl(const property_view& property) {
                 add_key_internal(property.key());
                 add_value_internal(property.value());
@@ -268,8 +280,8 @@ namespace vtzero {
             feature_builder(const feature_builder&) = delete;
             feature_builder& operator=(const feature_builder&) = delete;
 
-            feature_builder(feature_builder&&) = default;
-            feature_builder& operator=(feature_builder&&) = default;
+            feature_builder(feature_builder&&) noexcept = default;
+            feature_builder& operator=(feature_builder&&) noexcept = default;
 
             template <typename ...TArgs>
             void add_property(TArgs&& ...args) {
@@ -319,8 +331,8 @@ namespace vtzero {
         geometry_feature_builder(const geometry_feature_builder&) = delete;
         geometry_feature_builder& operator=(const geometry_feature_builder&) = delete;
 
-        geometry_feature_builder(geometry_feature_builder&&) = default;
-        geometry_feature_builder& operator=(geometry_feature_builder&&) = default;
+        geometry_feature_builder(geometry_feature_builder&&) noexcept = default;
+        geometry_feature_builder& operator=(geometry_feature_builder&&) noexcept = default;
 
         template <typename ...TArgs>
         void add_property(TArgs&& ...args) {
@@ -346,8 +358,8 @@ namespace vtzero {
         point_feature_builder(const point_feature_builder&) = delete;
         point_feature_builder& operator=(const point_feature_builder&) = delete;
 
-        point_feature_builder(point_feature_builder&&) = default;
-        point_feature_builder& operator=(point_feature_builder&&) = default;
+        point_feature_builder(point_feature_builder&&) noexcept = default;
+        point_feature_builder& operator=(point_feature_builder&&) noexcept = default;
 
         void add_point(const point p) {
             assert(m_pbf_geometry.valid());
@@ -446,8 +458,8 @@ namespace vtzero {
         line_string_feature_builder(const line_string_feature_builder&) = delete;
         line_string_feature_builder& operator=(const line_string_feature_builder&) = delete;
 
-        line_string_feature_builder(line_string_feature_builder&&) = default;
-        line_string_feature_builder& operator=(line_string_feature_builder&&) = default;
+        line_string_feature_builder(line_string_feature_builder&&) noexcept = default;
+        line_string_feature_builder& operator=(line_string_feature_builder&&) noexcept = default;
 
         void add_linestring(const uint32_t count) {
             assert(m_pbf_geometry.valid());
@@ -540,8 +552,8 @@ namespace vtzero {
         polygon_feature_builder(const polygon_feature_builder&) = delete;
         polygon_feature_builder& operator=(const polygon_feature_builder&) = delete;
 
-        polygon_feature_builder(polygon_feature_builder&&) = default;
-        polygon_feature_builder& operator=(polygon_feature_builder&&) = default;
+        polygon_feature_builder(polygon_feature_builder&&) noexcept = default;
+        polygon_feature_builder& operator=(polygon_feature_builder&&) noexcept = default;
 
         void add_ring(const uint32_t count) {
             assert(m_pbf_geometry.valid());
@@ -629,6 +641,14 @@ namespace vtzero {
         std::vector<std::unique_ptr<layer_builder_base>> m_layers;
 
     public:
+
+        tile_builder() noexcept = default;
+
+        tile_builder(const tile_builder&) = delete;
+        tile_builder& operator=(const tile_builder&) = delete;
+
+        tile_builder(tile_builder&&) = default;
+        tile_builder& operator=(tile_builder&&) noexcept = default;
 
         layer_builder_impl* add_layer(const layer& layer) {
             const auto ptr = new layer_builder_impl{layer.name(), layer.version(), layer.extent()};
