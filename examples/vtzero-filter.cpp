@@ -18,6 +18,11 @@ void print_help() {
               << "  -h, --help         This help message\n";
 }
 
+void print_usage(const char* command) {
+    std::cerr << "Usage: " << command << " [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n";
+    std::exit(1);
+}
+
 int main(int argc, char* argv[]) {
     static struct option long_options[] = {
         {"help",   no_argument, nullptr, 'h'},
@@ -41,8 +46,7 @@ int main(int argc, char* argv[]) {
 
     const int remaining_args = argc - optind;
     if (remaining_args < 2 || remaining_args > 3) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n";
-        std::exit(1);
+        print_usage(argv[0]);
     }
 
     const auto data = read_file(argv[optind]);
@@ -58,8 +62,16 @@ int main(int argc, char* argv[]) {
         const auto output = tb.serialize();
         write(1, output.data(), output.size());
     } else {
-        const auto id = static_cast<uint32_t>(std::atoi(argv[optind + 2]));
-        auto feature = layer[id];
+        char* str_end = nullptr;
+        const long id = std::strtol(argv[optind + 2], &str_end, 10);
+        if (str_end != argv[optind + 2] + std::strlen(argv[optind + 2])) {
+            print_usage(argv[0]);
+        }
+        if (id < 0 || id > std::numeric_limits<long>::max()) {
+            print_usage(argv[0]);
+        }
+
+        auto feature = layer[static_cast<uint32_t>(id)];
         if (!feature.valid()) {
             std::cerr << "No feature with that id\n";
             std::exit(1);

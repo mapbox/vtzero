@@ -16,14 +16,18 @@ std::string read_file(const std::string& filename) {
 }
 
 vtzero::layer get_layer(vtzero::vector_tile& tile, const std::string& layer_name_or_num) {
-    if (layer_name_or_num.find_first_not_of("0123456789") == std::string::npos) {
-        const auto num = std::atoi(layer_name_or_num.c_str());
-        const auto layer = tile[num];
-        if (!layer) {
-            std::cerr << "No such layer: " << num << '\n';
-            std::exit(1);
+    char* str_end = nullptr;
+    const long num = std::strtol(layer_name_or_num.c_str(), &str_end, 10);
+
+    if (str_end == layer_name_or_num.data() + layer_name_or_num.size()) {
+        if (num >= 0 && num < std::numeric_limits<long>::max()) {
+            const auto layer = tile[num];
+            if (!layer) {
+                std::cerr << "No such layer: " << num << '\n';
+                std::exit(1);
+            }
+            return layer;
         }
-        return layer;
     }
 
     const auto layer = tile[layer_name_or_num];
