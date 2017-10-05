@@ -108,7 +108,7 @@ struct print_value {
 
 void print_layer(const vtzero::layer& layer, bool strict, bool print_tables, bool print_values_with_type) {
     std::cout << "layer:\n"
-              << "  name:    " << std::string{layer.name()} << '\n'
+              << "  name:    " << std::string(layer.name()) << '\n'
               << "  version: " << layer.version() << '\n'
               << "  extent:  " << layer.extent() << '\n';
 

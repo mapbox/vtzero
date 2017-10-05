@@ -91,59 +91,129 @@ namespace vtzero {
 
     /// property value type holding a reference to a string
     struct string_value_type {
+
         using type = data_view;
+
         constexpr static const property_value_type pvtype = property_value_type::string_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::length_delimited;
-        data_view value;
-    };
+
+        data_view value{};
+
+        string_value_type() noexcept = default;
+
+        explicit string_value_type(data_view v) :
+            value(std::move(v)) {
+        }
+
+    }; // struct string_value_type
 
     /// property value type holding a float
     struct float_value_type {
+
         using type = float;
+
         constexpr static const property_value_type pvtype = property_value_type::float_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed32;
-        float value;
-    };
+
+        float value = 0.0f;
+
+        float_value_type() noexcept = default;
+
+        explicit float_value_type(float v) :
+            value(v) {
+        }
+
+    }; // struct float_value_type
 
     /// property value type holding a double
     struct double_value_type {
+
         using type = double;
+
         constexpr static const property_value_type pvtype = property_value_type::double_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed64;
-        double value;
-    };
+
+        double value = 0.0;
+
+        double_value_type() noexcept = default;
+
+        explicit double_value_type(double v) :
+            value(v) {
+        }
+
+    }; // struct double_value_type
 
     /// property value type holding an int
     struct int_value_type {
+
         using type = int64_t;
+
         constexpr static const property_value_type pvtype = property_value_type::int_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
-        int64_t value;
-    };
+
+        int64_t value = 0;
+
+        int_value_type() noexcept = default;
+
+        explicit int_value_type(int64_t v) :
+            value(v) {
+        }
+
+    }; // struct int_value_type
 
     /// property value type holding a uint
     struct uint_value_type {
+
         using type = uint64_t;
+
         constexpr static const property_value_type pvtype = property_value_type::uint_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
-        uint64_t value;
-    };
+
+        uint64_t value = 0;
+
+        uint_value_type() noexcept = default;
+
+        explicit uint_value_type(uint64_t v) :
+            value(v) {
+        }
+
+    }; // struct uint_value_type
 
     /// property value type holding an sint
     struct sint_value_type {
+
         using type = int64_t;
+
         constexpr static const property_value_type pvtype = property_value_type::sint_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
-        int64_t value;
-    };
+
+        int64_t value = 0;
+
+        sint_value_type() noexcept = default;
+
+        explicit sint_value_type(int64_t v) :
+            value(v) {
+        }
+
+    }; // struct sint_value_type
 
     /// property value type holding a bool
     struct bool_value_type {
+
         using type = bool;
+
         constexpr static const property_value_type pvtype = property_value_type::bool_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
-        bool value;
-    };
+
+        bool value = false;
+
+        bool_value_type() noexcept = default;
+
+        explicit bool_value_type(bool v) :
+            value(v) {
+        }
+
+    }; // struct bool_value_type
 
     /**
      * This class wraps the uint32_t used for looking up keys/values in the

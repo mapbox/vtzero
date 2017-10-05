@@ -76,7 +76,7 @@ namespace vtzero {
             typename T::type result{};
             bool has_result = false;
             while (value_message.next(T::pvtype, T::wire_type)) {
-                result = get_value_impl(value_message, T{});
+                result = get_value_impl(value_message, T());
                 has_result = true;
             }
 
