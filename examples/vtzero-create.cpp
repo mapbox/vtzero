@@ -3,9 +3,9 @@
 #include <vtzero/index.hpp>
 
 #include <cassert>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <unordered_map>
 
@@ -82,7 +82,7 @@ int main() {
     }
 
     const auto data = tile.serialize();
-    const int fd = ::open("test.mvt", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    const int fd = ::open("test.mvt", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
     assert(fd > 0);
 
     const auto len = ::write(fd, data.c_str(), data.size());

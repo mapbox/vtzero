@@ -43,7 +43,7 @@ namespace vtzero {
          * Is this a valid view? Property views are valid if they were
          * constructed using the non-default constructor.
          */
-        operator bool() const noexcept {
+        explicit operator bool() const noexcept {
             return valid();
         }
 

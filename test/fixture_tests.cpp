@@ -1,6 +1,6 @@
 
-#include <vtzero/geometry.hpp>
 #include <vtzero/builder.hpp>
+#include <vtzero/geometry.hpp>
 #include <vtzero/vector_tile.hpp>
 
 #include <catch.hpp>
@@ -107,7 +107,7 @@ TEST_CASE("MVT test 001: Empty tile") {
     vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.empty());
-    REQUIRE(tile.size() == 0);
+    REQUIRE(tile.size() == 0); // NOLINT clang-tidy: readability-container-size-empty
 
     const auto num_layers = std::distance(tile.begin(), tile.end());
     REQUIRE(num_layers == 0);
@@ -387,7 +387,7 @@ TEST_CASE("MVT test 025: Layer without features") {
     REQUIRE(tile.size() == 1);
     const auto layer = *tile.begin();
     REQUIRE(layer.empty());
-    REQUIRE(layer.size() == 0);
+    REQUIRE(layer.size() == 0); // NOLINT clang-tidy: readability-container-size-empty
 }
 
 TEST_CASE("MVT test 026: Extra value type") {
@@ -408,7 +408,7 @@ TEST_CASE("MVT test 027: Layer with unused bool property value") {
     REQUIRE(layer.size() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.size() == 0);
+    REQUIRE(feature.size() == 0); // NOLINT clang-tidy: readability-container-size-empty
 
     const auto& vtab = layer.value_table();
     REQUIRE(vtab.size() == 1);
@@ -567,7 +567,7 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
-    REQUIRE(feature.size() == 0);
+    REQUIRE(feature.empty());
 }
 
 TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the layer.") {

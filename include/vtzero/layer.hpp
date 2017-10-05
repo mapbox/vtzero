@@ -221,7 +221,7 @@ namespace vtzero {
          * Is this a valid layer? Valid layers are those not created from the
          * default constructor.
          */
-        operator bool() const noexcept {
+        explicit operator bool() const noexcept {
             return valid();
         }
 

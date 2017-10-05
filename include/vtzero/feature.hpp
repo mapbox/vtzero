@@ -161,7 +161,7 @@ namespace vtzero {
          * Is this a valid feature? Valid features are those not created from
          * the default constructor.
          */
-        operator bool() const noexcept {
+        explicit operator bool() const noexcept {
             return valid();
         }
 
@@ -195,6 +195,15 @@ namespace vtzero {
         vtzero::geometry geometry() const noexcept {
             assert(valid());
             return {m_geometry, m_geometry_type};
+        }
+
+        /**
+         * Returns true if this feature doesn't have any properties.
+         *
+         * Complexity: Constant.
+         */
+        bool empty() const noexcept {
+            return m_properties_size == 0;
         }
 
         /**

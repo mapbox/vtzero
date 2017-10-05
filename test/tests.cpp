@@ -212,7 +212,8 @@ namespace vtzero {
         return {static_cast<int32_t>(p.p1),
                 static_cast<int32_t>(p.p2)};
     }
-}
+
+} // namespace vtzero
 
 TEST_CASE("Point builder") {
     vtzero::tile_builder tbuilder;
