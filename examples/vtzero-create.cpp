@@ -82,7 +82,7 @@ int main() {
     }
 
     const auto data = tile.serialize();
-    const int fd = ::open("test.mvt", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644);
+    const int fd = ::open("test.mvt", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644); // NOLINT clang-tidy: cppcoreguidelines-pro-type-vararg
     assert(fd > 0);
 
     const auto len = ::write(fd, data.c_str(), data.size());

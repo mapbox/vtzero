@@ -63,11 +63,11 @@ int main(int argc, char* argv[]) {
         write(1, output.data(), output.size());
     } else {
         char* str_end = nullptr;
-        const long id = std::strtol(argv[optind + 2], &str_end, 10);
+        const long id = std::strtol(argv[optind + 2], &str_end, 10); // NOLINT clang-tidy: google-runtime-int
         if (str_end != argv[optind + 2] + std::strlen(argv[optind + 2])) {
             print_usage(argv[0]);
         }
-        if (id < 0 || id > std::numeric_limits<long>::max()) {
+        if (id < 0 || id > std::numeric_limits<long>::max()) { // NOLINT clang-tidy: google-runtime-int
             print_usage(argv[0]);
         }
 
