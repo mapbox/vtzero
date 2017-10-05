@@ -1,64 +1,133 @@
+#-----------------------------------------------------------------------------
+#
+#  Configuration for continuous integration service at travis-ci.org
+#
+#-----------------------------------------------------------------------------
+
 language: generic
+
+sudo: false
+
+dist: trusty
+
+#-----------------------------------------------------------------------------
+
+# Save common build configurations as shortcuts, so we can reference them later.
+addons_shortcuts:
+  addons_clang35: &clang35
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.5' ]
+      packages: [ 'clang-3.5' ]
+  addons_clang38: &clang38
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.8' ]
+      packages: [ 'clang-3.8' ]
+  addons_clang39: &clang39
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.9' ]
+      packages: [ 'clang-3.9' ]
+  addons_clang39: &clang40
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0' ]
+      packages: [ 'clang-4.0' ]
+  addons_clang39: &clang50
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0' ]
+      packages: [ 'clang-5.0' ]
+  addons_gcc47: &gcc47
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-4.7', 'gcc-4.7' ]
+  addons_gcc48: &gcc48
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-4.8', 'gcc-4.8' ]
+  addons_gcc49: &gcc49
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-4.9', 'gcc-4.9' ]
+  addons_gcc5: &gcc5
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-5', 'gcc-5' ]
+  addons_gcc6: &gcc6
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'g++-6', 'gcc-6', 'doxygen', 'graphviz' ]
+
+#-----------------------------------------------------------------------------
 
 matrix:
   include:
-    # clang-tidy/format specific job
     - os: linux
-      sudo: false
-      env: CLANG_FORMAT CLANG_TIDY
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev' ]
-      script:
-        - make tidy
-        - make format
+      compiler: "clang-3.5"
+      env: CXX=clang++-3.5
+      addons: *clang35
     - os: linux
-      sudo: false
-      env: CXX=g++-4.9
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'g++-4.9' ]
+      compiler: "clang-3.8"
+      env: CXX=clang++-3.8
+      addons: *clang38
     - os: linux
-      sudo: false
-      env: CXX=g++-5
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'g++-5' ]
+      compiler: "clang-3.9"
+      env: CXX=clang++-3.9
+      addons: *clang39
     - os: linux
-      sudo: false
-      env: CXX=clang++
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev' ]
+      compiler: "clang-4.0"
+      env: CXX=clang++-4.0
+      addons: *clang40
     - os: linux
-      sudo: false
-      env: CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer"
+      compiler: "clang-5.0"
+      env: CXX=clang++-5.0
+      addons: *clang50
+    - os: linux
+      compiler: "clang-5.0"
+      env: CXX=clang++-5.0 RUN_CLANG_TIDY=1
+      addons: *clang50
+    - os: linux
+      compiler: "clang-5.0"
+      env: CXX=clang++-5.0
+           CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer"
            LDFLAGS="-fsanitize=address,undefined,integer"
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev' ]
-    # coverage build
+      addons: *clang50
     - os: linux
-      sudo: false
-      env: CXXFLAGS="--coverage" LDFLAGS="--coverage"
-      addons:
-        apt:
-          sources: [ 'ubuntu-toolchain-r-test' ]
-          packages: [ 'libstdc++6', 'libstdc++-5-dev' ]
-      script:
-#        - make debug
-        - make test
-        # MASON_LLVM_RELEASE comes from the setup.sh script
-        - mason install llvm-cov ${MASON_LLVM_RELEASE}
-        - mason link llvm-cov ${MASON_LLVM_RELEASE}
-        - curl -S -f https://codecov.io/bash -o codecov
-        - chmod +x codecov
-        - ./codecov -x "llvm-cov gcov" -Z
+      compiler: "gcc-4.7"
+      env: CXX=g++-4.7
+      addons: *gcc47
+    - os: linux
+      compiler: "gcc-4.8"
+      env: CXX=g++-4.8
+      addons: *gcc48
+    - os: linux
+      compiler: "gcc-4.9"
+      env: CXX=g++-4.9 COVERAGE=gcov-4.9
+      addons: *gcc49
+    - os: linux
+      compiler: "gcc-5"
+      env: CXX=g++-5 CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
+      addons: *gcc5
+    - os: linux
+      compiler: "gcc-5"
+      env: CXX=g++-5 CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=1"
+      addons: *gcc5
+    - os: linux
+      compiler: "gcc-6"
+      env: CXX=g++-6 BUILD_DOC=1
+      addons: *gcc6
+    - os: linux
+      compiler: "gcc-6"
+      env: CXX=g++-6 PROTOZERO_DATA_VIEW=std::experimental::string_view
+      addons: *gcc6
+    - os: osx
+      osx_image: xcode6
+      compiler: clang
+    - os: osx
+      osx_image: xcode7
+      compiler: clang
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+
+#-----------------------------------------------------------------------------
 
 install:
   - git submodule update --init
@@ -67,7 +136,21 @@ install:
 script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake .. -DPROTOZERO_DATA_VIEW=$PROTOZERO_DATA_VIEW
   - make VERBOSE=1
   - ctest --output-on-failure
+  - if [ -n "${BUILD_DOC}" ]; then make doc; fi
+  - if [ -n "${RUN_CLANG_TIDY}" ]; then make clang-tidy; fi
+  - |
+    if [ -n "${COVERAGE}" ]; then
+      make clean
+      CXXFLAGS="--coverage ${CXXFLAGS}" LDFLAGS="--coverage ${LDFLAGS}" make
+      ctest
+      which ${COVERAGE}
+      curl -S -f https://codecov.io/bash -o codecov
+      chmod +x codecov
+      ${COVERAGE} -p $(find test/ -name '*.o')
+      ./codecov -Z -f '*vtzero*' -X search
+    fi
 
+#-----------------------------------------------------------------------------
