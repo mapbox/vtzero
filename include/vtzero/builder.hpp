@@ -71,8 +71,8 @@ namespace vtzero {
         layer_builder_impl(const layer_builder_impl&) = delete;
         layer_builder_impl& operator=(const layer_builder_impl&) = delete;
 
-        layer_builder_impl(layer_builder_impl&&) noexcept = default;
-        layer_builder_impl& operator=(layer_builder_impl&&) noexcept = default;
+        layer_builder_impl(layer_builder_impl&&) = default;
+        layer_builder_impl& operator=(layer_builder_impl&&) = default;
 
         index_value add_key_without_dup_check(const data_view& text) {
             m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
@@ -642,13 +642,13 @@ namespace vtzero {
 
     public:
 
-        tile_builder() noexcept = default;
+        tile_builder() = default;
 
         tile_builder(const tile_builder&) = delete;
         tile_builder& operator=(const tile_builder&) = delete;
 
         tile_builder(tile_builder&&) = default;
-        tile_builder& operator=(tile_builder&&) noexcept = default;
+        tile_builder& operator=(tile_builder&&) = default;
 
         layer_builder_impl* add_layer(const layer& layer) {
             const auto ptr = new layer_builder_impl{layer.name(), layer.version(), layer.extent()};
