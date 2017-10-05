@@ -21,7 +21,7 @@ namespace vtzero {
         }
 
         index_value operator()(const data_view& v) {
-            std::string text{v};
+            std::string text(v);
             const auto it = m_index.find(text);
             if (it == m_index.end()) {
                 const auto idx = m_builder.add_key_without_dup_check(v);
