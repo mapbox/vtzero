@@ -73,7 +73,7 @@ namespace vtzero {
             assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
 
-            decltype(T::value) result;
+            typename T::type result{};
             bool has_result = false;
             while (value_message.next(T::pvtype, T::wire_type)) {
                 result = get_value_impl(value_message, T{});
