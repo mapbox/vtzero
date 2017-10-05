@@ -35,6 +35,11 @@ endif()
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
+set(PROTOZERO_DATA_VIEW "" CACHE STRING "Type used for vtzero::data_view")
+if(NOT PROTOZERO_DATA_VIEW STREQUAL "")
+    add_definitions(-DPROTOZERO_DATA_VIEW=${PROTOZERO_DATA_VIEW})
+endif()
+
 
 #-----------------------------------------------------------------------------
 #
