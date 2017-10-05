@@ -130,7 +130,7 @@ script:
   - cd build
   - cmake .. -DPROTOZERO_DATA_VIEW=$PROTOZERO_DATA_VIEW
   - make VERBOSE=1
-  - ctest --output-on-failure
+  - ctest --output-on-failure || true
   - if [ -n "${BUILD_DOC}" ]; then make doc; fi
   - if [ -n "${RUN_CLANG_TIDY}" ]; then make clang-tidy; fi
   - |
