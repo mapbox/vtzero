@@ -138,7 +138,7 @@ namespace vtzero {
 
     public:
 
-        explicit layer_builder_existing(const data_view& data) :
+        explicit layer_builder_existing(const data_view data) :
             m_data(data) {
         }
 

@@ -32,7 +32,7 @@ namespace vtzero {
 
         properties_iterator(const protozero::pbf_reader::const_uint32_iterator begin,
                             const layer* layer) :
-            m_it(std::move(begin)),
+            m_it(begin),
             m_layer(layer) {
             assert(layer);
         }

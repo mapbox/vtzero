@@ -39,7 +39,7 @@ namespace vtzero {
         static const char* names[] = {
             "unknown", "point", "linestring", "polygon"
         };
-        return names[static_cast<int>(type)];
+        return names[static_cast<int>(type)]; // NOLINT clang-tidy: cppcoreguidelines-pro-bounds-constant-array-index
     }
 
     /// The property value type as specified in the vector tile spec
@@ -60,7 +60,7 @@ namespace vtzero {
         static const char* names[] = {
             "", "string", "float", "double", "int", "uint", "sint", "bool"
         };
-        return names[static_cast<int>(type)];
+        return names[static_cast<int>(type)]; // NOLINT clang-tidy: cppcoreguidelines-pro-bounds-constant-array-index
     }
 
     namespace detail {
@@ -102,7 +102,7 @@ namespace vtzero {
         string_value_type() noexcept = default;
 
         explicit string_value_type(data_view v) :
-            value(std::move(v)) {
+            value(v) {
         }
 
     }; // struct string_value_type

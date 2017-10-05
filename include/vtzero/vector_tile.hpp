@@ -21,7 +21,7 @@ namespace vtzero {
     class tile_iterator {
 
         protozero::pbf_message<detail::pbf_tile> m_tile_reader;
-        data_view m_data;
+        data_view m_data{};
 
         void next() {
             if (m_tile_reader.next(detail::pbf_tile::layers,
@@ -123,7 +123,7 @@ namespace vtzero {
          * copy of the data is done.
          */
         explicit vector_tile(const data_view data) noexcept :
-            m_data(std::move(data)) {
+            m_data(data) {
         }
 
         /**
