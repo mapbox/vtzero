@@ -80,7 +80,7 @@ struct polygon_handler {
         data.back().push_back(point);
     }
 
-    void ring_end(bool) const noexcept {
+    void ring_end(bool /*dummy*/) const noexcept {
     }
 
 }; // struct polygon_handler

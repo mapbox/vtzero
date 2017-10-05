@@ -98,8 +98,8 @@ namespace vtzero {
         /**
          * Create a (valid) property_view from a data_view.
          */
-        explicit property_value_view(const data_view& value) noexcept :
-            m_value(value) {
+        explicit property_value_view(const data_view value) noexcept :
+            m_value(std::move(value)) {
         }
 
         /**

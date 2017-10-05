@@ -23,7 +23,7 @@ namespace vtzero {
 
         const layer* m_layer = nullptr;
         protozero::pbf_message<detail::pbf_layer> m_layer_reader;
-        data_view m_data;
+        data_view m_data{};
 
         void next() {
             if (m_layer_reader.next(detail::pbf_layer::features,

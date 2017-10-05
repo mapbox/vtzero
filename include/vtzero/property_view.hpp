@@ -26,9 +26,9 @@ namespace vtzero {
         /**
          * Create a (valid) property_view from a key and value.
          */
-        property_view(const data_view& key, const property_value_view& value) noexcept :
-            m_key(key),
-            m_value(value) {
+        property_view(const data_view key, const property_value_view value) noexcept :
+            m_key(std::move(key)),
+            m_value(std::move(value)) {
         }
 
         /**

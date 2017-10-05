@@ -122,8 +122,8 @@ namespace vtzero {
          * will keep a reference to the data referenced by the data_view. No
          * copy of the data is done.
          */
-        explicit vector_tile(const data_view& data) noexcept :
-            m_data(data) {
+        explicit vector_tile(const data_view data) noexcept :
+            m_data(std::move(data)) {
         }
 
         /**
