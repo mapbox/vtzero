@@ -93,6 +93,17 @@ matrix:
       compiler: "gcc-4.9"
       env: CXX=g++-4.9 COVERAGE=gcov-4.9
       addons: *gcc49
+      script:
+        - mkdir build
+        - cd build
+        - CXXFLAGS="--coverage ${CXXFLAGS}" LDFLAGS="--coverage ${LDFLAGS}" cmake ..
+        - make VERBOSE=1
+        - ctest
+        - which ${COVERAGE}
+        - curl -S -f https://codecov.io/bash -o codecov
+        - chmod +x codecov
+        - ${COVERAGE} -p $(find test/ -name '*.o')
+        - ./codecov -Z -f '*vtzero*' -X search
     - os: linux
       compiler: "gcc-5"
       env: CXX=g++-5 CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
@@ -133,16 +144,5 @@ script:
   - ctest --output-on-failure || true
   - if [ -n "${BUILD_DOC}" ]; then make doc; fi
   - if [ -n "${RUN_CLANG_TIDY}" ]; then make clang-tidy; fi
-  - |
-    if [ -n "${COVERAGE}" ]; then
-      make clean
-      CXXFLAGS="--coverage ${CXXFLAGS}" LDFLAGS="--coverage ${LDFLAGS}" make
-      ctest
-      which ${COVERAGE}
-      curl -S -f https://codecov.io/bash -o codecov
-      chmod +x codecov
-      ${COVERAGE} -p $(find test/ -name '*.o')
-      ./codecov -Z -f '*vtzero*' -X search
-    fi
 
 #-----------------------------------------------------------------------------
