@@ -3,8 +3,7 @@ SET "PATH=C:\msys64\mingw64\bin;C:\msys64\usr\bin;%PATH%"
 echo %PATH%
 
 echo "Installing MSYS2 packages..."
-bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-boost mingw-w64-x86_64-doxygen mingw-w64-x86_64-gdb mingw-w64-x86_64-clang-tools-extra"
-bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-crypto++"
+bash -lc "pacman -S --needed --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-boost"
 
 echo "Generating makefiles"
 mkdir build
@@ -16,3 +15,4 @@ make
 
 echo "Testing"
 ctest
+
