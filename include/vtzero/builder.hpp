@@ -85,7 +85,7 @@ namespace vtzero {
             m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
         }
 
-        ~layer_builder_impl() noexcept = default;
+        ~layer_builder_impl() noexcept override = default;
 
         layer_builder_impl(const layer_builder_impl&) = delete;
         layer_builder_impl& operator=(const layer_builder_impl&) = delete;
