@@ -29,6 +29,7 @@ option(WERROR "Add -Werror flag to build (turns warnings into errors)" ON)
 
 if(MSVC)
     add_definitions(-std=c++11 /W3)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 else()
     add_definitions(-std=c++11 -Wall -Wextra -pedantic -Wsign-compare -Wconversion)
     if(WERROR)
