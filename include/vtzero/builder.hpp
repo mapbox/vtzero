@@ -23,6 +23,8 @@ namespace vtzero {
 
     public:
 
+        virtual ~layer_builder_base() noexcept = default;
+
         virtual void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) = 0;
 
     }; // class layer_builder_base
@@ -67,6 +69,8 @@ namespace vtzero {
             m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<T>(name));
             m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
         }
+
+        ~layer_builder_impl() noexcept = default;
 
         layer_builder_impl(const layer_builder_impl&) = delete;
         layer_builder_impl& operator=(const layer_builder_impl&) = delete;
@@ -643,6 +647,8 @@ namespace vtzero {
     public:
 
         tile_builder() = default;
+
+        ~tile_builder() noexcept = default;
 
         tile_builder(const tile_builder&) = delete;
         tile_builder& operator=(const tile_builder&) = delete;
