@@ -24,7 +24,11 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CD build
 ECHO config^: %config%
 
-SET CMAKE_CMD=cmake .. -LA -G "Visual Studio 14 Win64"
+::This will produce lots of LNK4099 warnings which can be ignored.
+::Unfortunately they can't be disabled, see
+::http://stackoverflow.com/questions/661606/visual-c-how-to-disable-specific-linker-warnings
+SET CMAKE_CMD=cmake .. ^
+-LA -G "Visual Studio 14 Win64"
 
 ECHO calling^: %CMAKE_CMD%
 %CMAKE_CMD%
