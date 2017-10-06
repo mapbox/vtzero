@@ -2,7 +2,6 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/index.hpp>
 
-#include <cassert>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -83,9 +82,15 @@ int main() {
 
     const auto data = tile.serialize();
     const int fd = ::open("test.mvt", O_WRONLY | O_CREAT | O_TRUNC | O_CLOEXEC, 0644); // NOLINT clang-tidy: cppcoreguidelines-pro-type-vararg
-    assert(fd > 0);
+    if (fd < 0) {
+        std::cerr << "Can not open output file\n";
+        std::exit(1);
+    }
 
     const auto len = ::write(fd, data.c_str(), data.size());
-    assert(static_cast<std::size_t>(len) == data.size());
+    if (static_cast<std::size_t>(len) != data.size()) {
+        std::cerr << "Error writing output file\n";
+        std::exit(1);
+    }
 }
 
