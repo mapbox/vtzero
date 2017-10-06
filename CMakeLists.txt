@@ -51,6 +51,8 @@ find_package(Protozero 1.5.3 REQUIRED)
 
 include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIR})
 
+find_package(Boost)
+
 
 #-----------------------------------------------------------------------------
 #

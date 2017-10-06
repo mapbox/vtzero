@@ -5,8 +5,10 @@
 
 #ifdef VTZERO_TEST_WITH_VARIANT
 # include <boost/variant.hpp>
+using variant_type = boost::variant<std::string, float, double, int64_t, uint64_t, bool>;
 #endif
 
+#include <string>
 #include <map>
 #include <unordered_map>
 

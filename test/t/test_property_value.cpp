@@ -5,6 +5,13 @@
 
 #include <catch.hpp>
 
+#ifdef VTZERO_TEST_WITH_VARIANT
+# include <boost/variant.hpp>
+using variant_type = boost::variant<std::string, float, double, int64_t, uint64_t, bool>;
+#endif
+
+#include <string>
+
 struct visitor_test_void {
 
     int x = 0;
@@ -45,10 +52,6 @@ struct visitor_test_to_string {
     }
 
 };
-
-#ifdef VTZERO_TEST_WITH_VARIANT
-using variant_type = boost::variant<std::string, float, double, int64_t, uint64_t, bool>;
-#endif
 
 TEST_CASE("empty property_value_view") {
     char x[1] = {0};
