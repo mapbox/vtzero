@@ -108,12 +108,12 @@ namespace vtzero {
          * The default constructor creates an invalid (empty)
          * property_value_view.
          */
-        property_value_view() noexcept = default;
+        constexpr property_value_view() noexcept = default;
 
         /**
          * Create a (valid) property_view from a data_view.
          */
-        explicit property_value_view(const data_view value) noexcept :
+        explicit constexpr property_value_view(const data_view value) noexcept :
             m_value(value) {
         }
 
@@ -121,7 +121,7 @@ namespace vtzero {
          * Is this a valid view? Property value views are valid if they were
          * constructed using the non-default constructor.
          */
-        bool valid() const noexcept {
+        constexpr bool valid() const noexcept {
             return m_value.data() != nullptr;
         }
 
@@ -147,7 +147,7 @@ namespace vtzero {
         /**
          * Get the internal data_view this object was constructed with.
          */
-        data_view data() const noexcept {
+        constexpr data_view data() const noexcept {
             return m_value;
         }
 
@@ -231,32 +231,32 @@ namespace vtzero {
     }; // class property_value_view
 
     /// property_value_views are equal if they contain the same data.
-    inline bool operator==(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+    inline constexpr bool operator==(const property_value_view lhs, const property_value_view rhs) noexcept {
         return lhs.data() == rhs.data();
     }
 
     /// property_value_views are unequal if they do not contain the same data.
-    inline bool operator!=(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+    inline constexpr bool operator!=(const property_value_view lhs, const property_value_view rhs) noexcept {
         return lhs.data() != rhs.data();
     }
 
     /// property_value_views are ordered in the same way as the underlying data_view
-    inline bool operator<(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+    inline bool operator<(const property_value_view lhs, const property_value_view rhs) noexcept {
         return lhs.data() < rhs.data();
     }
 
     /// property_value_views are ordered in the same way as the underlying data_view
-    inline bool operator<=(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+    inline bool operator<=(const property_value_view lhs, const property_value_view rhs) noexcept {
         return lhs.data() <= rhs.data();
     }
 
     /// property_value_views are ordered in the same way as the underlying data_view
-    inline bool operator>(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+    inline bool operator>(const property_value_view lhs, const property_value_view rhs) noexcept {
         return lhs.data() > rhs.data();
     }
 
     /// property_value_views are ordered in the same way as the underlying data_view
-    inline bool operator>=(const property_value_view& lhs, const property_value_view& rhs) noexcept {
+    inline bool operator>=(const property_value_view lhs, const property_value_view rhs) noexcept {
         return lhs.data() >= rhs.data();
     }
 
@@ -269,7 +269,7 @@ namespace vtzero {
      * type of this function.
      */
     template <typename V>
-    decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const property_value_view& value) {
+    decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const property_value_view value) {
         switch (value.type()) {
             case property_value_type::string_value:
                 return std::forward<V>(visitor)(value.string_value());
@@ -333,7 +333,7 @@ namespace vtzero {
      *
      */
     template <typename T, typename S = std::string>
-    T convert_property_value(const property_value_view& value) {
+    T convert_property_value(const property_value_view value) {
         return apply_visitor(detail::convert_visitor<T, S>{}, value);
     }
 
