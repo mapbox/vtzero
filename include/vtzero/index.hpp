@@ -1,6 +1,15 @@
 #ifndef VTZERO_INDEX_HPP
 #define VTZERO_INDEX_HPP
 
+/*****************************************************************************
+
+vtzero - Minimalistic vector tile decoder and encoder in C++.
+
+This file is from https://github.com/mapbox/vtzero where you can find more
+documentation.
+
+*****************************************************************************/
+
 #include "builder.hpp"
 
 #include <cstdint>

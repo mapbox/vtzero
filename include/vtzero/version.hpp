@@ -1,6 +1,15 @@
 #ifndef VTZERO_VERSION_HPP
 #define VTZERO_VERSION_HPP
 
+/*****************************************************************************
+
+vtzero - Minimalistic vector tile decoder and encoder in C++.
+
+This file is from https://github.com/mapbox/vtzero where you can find more
+documentation.
+
+*****************************************************************************/
+
 /// The major version number
 #define VTZERO_VERSION_MAJOR 1
 

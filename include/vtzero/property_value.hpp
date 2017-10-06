@@ -1,6 +1,15 @@
 #ifndef VTZERO_PROPERTY_VALUE_HPP
 #define VTZERO_PROPERTY_VALUE_HPP
 
+/*****************************************************************************
+
+vtzero - Minimalistic vector tile decoder and encoder in C++.
+
+This file is from https://github.com/mapbox/vtzero where you can find more
+documentation.
+
+*****************************************************************************/
+
 #include "types.hpp"
 
 #include <protozero/pbf_builder.hpp>
