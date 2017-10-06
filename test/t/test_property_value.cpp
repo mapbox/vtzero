@@ -53,10 +53,17 @@ struct visitor_test_to_string {
 
 };
 
+TEST_CASE("default constructed property_value_view") {
+    vtzero::property_value_view pvv;
+    REQUIRE_FALSE(pvv.valid());
+    REQUIRE(pvv.data().data() == nullptr);
+}
+
 TEST_CASE("empty property_value_view") {
     char x[1] = {0};
     vtzero::data_view dv{x, 1};
     vtzero::property_value_view pvv{dv};
+    REQUIRE(pvv.valid());
     REQUIRE_THROWS(pvv.type());
 }
 
