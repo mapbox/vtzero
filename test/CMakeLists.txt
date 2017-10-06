@@ -8,9 +8,9 @@
 
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-set(TEST_SOURCES t/test_property_value.cpp t/test_types.cpp)
+set(TEST_SOURCES t/test_builder.cpp t/test_property_map.cpp t/test_property_value.cpp t/test_types.cpp)
 
-add_executable(unit-tests test_main.cpp tests.cpp ${TEST_SOURCES})
+add_executable(unit-tests test_main.cpp ${TEST_SOURCES})
 add_executable(fixture-tests test_main.cpp fixture_tests.cpp)
 
 add_test(NAME unit-tests COMMAND unit-tests)
