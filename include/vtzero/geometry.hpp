@@ -31,9 +31,9 @@ namespace vtzero {
         int32_t x = 0;
         int32_t y = 0;
 
-        point() noexcept = default;
+        constexpr point() noexcept = default;
 
-        point(int32_t x_, int32_t y_) noexcept :
+        constexpr point(int32_t x_, int32_t y_) noexcept :
             x(x_),
             y(y_) {
         }
@@ -50,37 +50,37 @@ namespace vtzero {
         return {p.x, p.y};
     }
 
-    inline bool operator==(const point a, const point b) noexcept {
+    inline constexpr bool operator==(const point a, const point b) noexcept {
         return a.x == b.x && a.y == b.y;
     }
 
-    inline bool operator!=(const point a, const point b) noexcept {
+    inline constexpr bool operator!=(const point a, const point b) noexcept {
         return !(a==b);
     }
 
     namespace detail {
 
-        constexpr inline uint32_t command_integer(uint32_t id, uint32_t count) noexcept {
+        inline constexpr uint32_t command_integer(uint32_t id, uint32_t count) noexcept {
             return (id & 0x7) | (count << 3);
         }
 
-        constexpr inline uint32_t command_move_to(uint32_t count = 0) noexcept {
+        inline constexpr uint32_t command_move_to(uint32_t count = 0) noexcept {
             return command_integer(1, count);
         }
 
-        constexpr inline uint32_t command_line_to(uint32_t count = 0) noexcept {
+        inline constexpr uint32_t command_line_to(uint32_t count = 0) noexcept {
             return command_integer(2, count);
         }
 
-        constexpr inline uint32_t command_close_path(uint32_t count = 0) noexcept {
+        inline constexpr uint32_t command_close_path(uint32_t count = 0) noexcept {
             return command_integer(7, count);
         }
 
-        constexpr inline uint32_t get_command_id(uint32_t command_integer) noexcept {
+        inline constexpr uint32_t get_command_id(uint32_t command_integer) noexcept {
             return command_integer & 0x7;
         }
 
-        constexpr inline uint32_t get_command_count(uint32_t command_integer) noexcept {
+        inline constexpr uint32_t get_command_count(uint32_t command_integer) noexcept {
             return command_integer >> 3;
         }
 

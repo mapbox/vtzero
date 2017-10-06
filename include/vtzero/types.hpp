@@ -108,9 +108,9 @@ namespace vtzero {
 
         data_view value{};
 
-        string_value_type() noexcept = default;
+        constexpr string_value_type() noexcept = default;
 
-        explicit string_value_type(data_view v) :
+        explicit constexpr string_value_type(data_view v) :
             value(v) {
         }
 
@@ -126,9 +126,9 @@ namespace vtzero {
 
         float value = 0.0f;
 
-        float_value_type() noexcept = default;
+        constexpr float_value_type() noexcept = default;
 
-        explicit float_value_type(float v) :
+        explicit constexpr float_value_type(float v) :
             value(v) {
         }
 
@@ -144,9 +144,9 @@ namespace vtzero {
 
         double value = 0.0;
 
-        double_value_type() noexcept = default;
+        constexpr double_value_type() noexcept = default;
 
-        explicit double_value_type(double v) :
+        explicit constexpr double_value_type(double v) :
             value(v) {
         }
 
@@ -162,9 +162,9 @@ namespace vtzero {
 
         int64_t value = 0;
 
-        int_value_type() noexcept = default;
+        constexpr int_value_type() noexcept = default;
 
-        explicit int_value_type(int64_t v) :
+        explicit constexpr int_value_type(int64_t v) :
             value(v) {
         }
 
@@ -180,9 +180,9 @@ namespace vtzero {
 
         uint64_t value = 0;
 
-        uint_value_type() noexcept = default;
+        constexpr uint_value_type() noexcept = default;
 
-        explicit uint_value_type(uint64_t v) :
+        explicit constexpr uint_value_type(uint64_t v) :
             value(v) {
         }
 
@@ -198,9 +198,9 @@ namespace vtzero {
 
         int64_t value = 0;
 
-        sint_value_type() noexcept = default;
+        constexpr sint_value_type() noexcept = default;
 
-        explicit sint_value_type(int64_t v) :
+        explicit constexpr sint_value_type(int64_t v) :
             value(v) {
         }
 
@@ -216,9 +216,9 @@ namespace vtzero {
 
         bool value = false;
 
-        bool_value_type() noexcept = default;
+        constexpr bool_value_type() noexcept = default;
 
-        explicit bool_value_type(bool v) :
+        explicit constexpr bool_value_type(bool v) :
             value(v) {
         }
 
@@ -237,10 +237,10 @@ namespace vtzero {
     public:
 
         /// Default construct to an invalid value.
-        index_value() noexcept = default;
+        constexpr index_value() noexcept = default;
 
         /// Construct with the given value.
-        index_value(uint32_t value) noexcept : // NOLINT (non-explicit on purpose)
+        constexpr index_value(uint32_t value) noexcept : // NOLINT (non-explicit on purpose)
             m_value(value) {
         }
 
@@ -248,7 +248,7 @@ namespace vtzero {
          * Is this index value valid? Index values are valid if they have
          * been initialized with something other than the default constructor.
          */
-        bool valid() const noexcept {
+        constexpr bool valid() const noexcept {
             return m_value != invalid_value;
         }
 
@@ -271,18 +271,18 @@ namespace vtzero {
 
     public:
 
-        geometry() noexcept = default;
+        constexpr geometry() noexcept = default;
 
-        geometry(data_view data, GeomType type) noexcept :
+        constexpr geometry(data_view data, GeomType type) noexcept :
             m_data(data),
             m_type(type) {
         }
 
-        data_view data() const noexcept {
+        constexpr data_view data() const noexcept {
             return m_data;
         }
 
-        GeomType type() const noexcept {
+        constexpr GeomType type() const noexcept {
             return m_type;
         }
 
