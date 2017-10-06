@@ -20,8 +20,9 @@ TEST_CASE("default constructed float_value_type") {
 }
 
 TEST_CASE("float_value_type with value") {
-    vtzero::float_value_type v{2.7f};
-    REQUIRE(v.value == Approx(2.7f));
+    float x = 2.7f;
+    vtzero::float_value_type v{x};
+    REQUIRE(v.value == Approx(x));
 }
 
 TEST_CASE("default constructed double_value_type") {
@@ -30,8 +31,9 @@ TEST_CASE("default constructed double_value_type") {
 }
 
 TEST_CASE("double_value_type with value") {
-    vtzero::double_value_type v{2.7};
-    REQUIRE(v.value == Approx(2.7));
+    double x = 2.7;
+    vtzero::double_value_type v{x};
+    REQUIRE(v.value == Approx(x));
 }
 
 TEST_CASE("default constructed int_value_type") {
@@ -70,7 +72,8 @@ TEST_CASE("default constructed bool_value_type") {
 }
 
 TEST_CASE("bool_value_type with value") {
-    vtzero::bool_value_type v{true};
+    bool x = true;
+    vtzero::bool_value_type v{x};
     REQUIRE(v.value);
 }
 
