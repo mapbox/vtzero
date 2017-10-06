@@ -412,7 +412,7 @@ TEST_CASE("MVT test 027: Layer with unused bool property value") {
 
     const auto& vtab = layer.value_table();
     REQUIRE(vtab.size() == 1);
-    REQUIRE(vtab[0].bool_value() == true);
+    REQUIRE(vtab[0].bool_value());
 }
 
 TEST_CASE("MVT test 030: Two geometry fields") {
@@ -537,7 +537,7 @@ TEST_CASE("MVT test 038: Layer with all types of property value") {
     const auto& vtab = layer.value_table();
     REQUIRE(vtab.size() == 7);
     REQUIRE(vtab[0].string_value() == "ello");
-    REQUIRE(vtab[1].bool_value() == true);
+    REQUIRE(vtab[1].bool_value());
     REQUIRE(vtab[2].int_value() == 6);
     REQUIRE(vtab[3].double_value() == Approx(1.23));
     REQUIRE(vtab[4].float_value() == Approx(3.1));
