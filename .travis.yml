@@ -95,19 +95,21 @@ matrix:
       addons: *gcc48
     - os: linux
       compiler: "gcc-4.9"
-      env: CXX=g++-4.9 BUILD_TYPE='Debug' COVERAGE=gcov-4.9
+      env: CXX=g++-4.9 CXXFLAGS="--coverage" LDFLAGS="--coverage" BUILD_TYPE='Debug' COVERAGE=gcov-4.9
       addons: *gcc49
       script:
         - mkdir build
         - cd build
-        - CXXFLAGS="--coverage ${CXXFLAGS}" LDFLAGS="--coverage ${LDFLAGS}" cmake ..
+        - cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
         - make VERBOSE=1
         - ctest
         - which ${COVERAGE}
         - curl -S -f https://codecov.io/bash -o codecov
         - chmod +x codecov
-        - ${COVERAGE} -p $(find test/ -name '*.o')
-        - ./codecov -Z -f '*vtzero*' -X search
+        - ${COVERAGE} -p $(find test -name 'test_*.o')
+        - ./codecov -Z -c -X gcov -F unit_tests
+        - ${COVERAGE} -p $(find test -name 'fixture_tests.cpp.o')
+        - ./codecov -Z -c -X gcov -F fixture_tests
     - os: linux
       compiler: "gcc-5"
       env: CXX=g++-5 BUILD_TYPE='Debug' CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
