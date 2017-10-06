@@ -28,7 +28,6 @@ documentation.
 #include <iostream>
 #include <memory>
 #include <string>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -671,14 +670,13 @@ namespace vtzero {
         tile_builder(tile_builder&&) = default;
         tile_builder& operator=(tile_builder&&) = default;
 
-        layer_builder_impl* add_layer(const layer& layer) {
+        layer_builder_impl* add_layer(layer& layer) {
             const auto ptr = new layer_builder_impl{layer.name(), layer.version(), layer.extent()};
             m_layers.emplace_back(ptr);
             return ptr;
         }
 
-        template <typename T,
-                  typename std::enable_if<!std::is_same<typename std::decay<T>::type, layer>{}, int>::type = 0>
+        template <typename T>
         layer_builder_impl* add_layer(T&& name, uint32_t version = 2, uint32_t extent = 4096) {
             const auto ptr = new layer_builder_impl{std::forward<T>(name), version, extent};
             m_layers.emplace_back(ptr);
