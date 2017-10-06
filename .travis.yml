@@ -57,41 +57,45 @@ matrix:
   include:
     - os: linux
       compiler: "clang-3.5"
-      env: CXX=clang++-3.5
+      env: CXX=clang++-3.5 BUILD_TYPE='Debug'
       addons: *clang35
     - os: linux
       compiler: "clang-3.8"
-      env: CXX=clang++-3.8
+      env: CXX=clang++-3.8 BUILD_TYPE='Debug'
       addons: *clang38
     - os: linux
       compiler: "clang-3.9"
-      env: CXX=clang++-3.9
+      env: CXX=clang++-3.9 BUILD_TYPE='Debug'
       addons: *clang39
     - os: linux
       compiler: "clang-4.0"
-      env: CXX=clang++-4.0
+      env: CXX=clang++-4.0 BUILD_TYPE='Debug'
       addons: *clang40
     - os: linux
       compiler: "clang-5.0"
-      env: CXX=clang++-5.0
+      env: CXX=clang++-5.0 BUILD_TYPE='Debug'
       addons: *clang50
     - os: linux
       compiler: "clang-5.0"
-      env: CXX=clang++-5.0 RUN_CLANG_TIDY=1
+      env: CXX=clang++-5.0 BUILD_TYPE='Release'
       addons: *clang50
     - os: linux
       compiler: "clang-5.0"
-      env: CXX=clang++-5.0
+      env: CXX=clang++-5.0 BUILD_TYPE='Debug' RUN_CLANG_TIDY=1
+      addons: *clang50
+    - os: linux
+      compiler: "clang-5.0"
+      env: CXX=clang++-5.0 BUILD_TYPE='Debug'
            CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer"
            LDFLAGS="-fsanitize=address,undefined,integer"
       addons: *clang50
     - os: linux
       compiler: "gcc-4.8"
-      env: CXX=g++-4.8
+      env: CXX=g++-4.8 BUILD_TYPE='Debug'
       addons: *gcc48
     - os: linux
       compiler: "gcc-4.9"
-      env: CXX=g++-4.9 COVERAGE=gcov-4.9
+      env: CXX=g++-4.9 BUILD_TYPE='Debug' COVERAGE=gcov-4.9
       addons: *gcc49
       script:
         - mkdir build
@@ -106,29 +110,40 @@ matrix:
         - ./codecov -Z -f '*vtzero*' -X search
     - os: linux
       compiler: "gcc-5"
-      env: CXX=g++-5 CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
+      env: CXX=g++-5 BUILD_TYPE='Debug' CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
       addons: *gcc5
     - os: linux
       compiler: "gcc-5"
-      env: CXX=g++-5 CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=1"
+      env: CXX=g++-5 BUILD_TYPE='Debug' CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=1"
       addons: *gcc5
     - os: linux
       compiler: "gcc-6"
-      env: CXX=g++-6 BUILD_DOC=1
+      env: CXX=g++-6 BUILD_TYPE='Debug' BUILD_DOC=1
       addons: *gcc6
     - os: linux
       compiler: "gcc-6"
-      env: CXX=g++-6 PROTOZERO_DATA_VIEW=std::experimental::string_view
+      env: CXX=g++-6 BUILD_TYPE='Release'
+      addons: *gcc6
+    - os: linux
+      compiler: "gcc-6"
+      env: CXX=g++-6 BUILD_TYPE='Debug' PROTOZERO_DATA_VIEW=std::experimental::string_view
       addons: *gcc6
     - os: osx
       osx_image: xcode6
       compiler: clang
+      env: BUILD_TYPE='Debug'
     - os: osx
       osx_image: xcode7
       compiler: clang
+      env: BUILD_TYPE='Debug'
     - os: osx
       osx_image: xcode8
       compiler: clang
+      env: BUILD_TYPE='Debug'
+    - os: osx
+      osx_image: xcode8
+      compiler: clang
+      env: BUILD_TYPE='Release'
 
 #-----------------------------------------------------------------------------
 
@@ -139,7 +154,7 @@ install:
 script:
   - mkdir build
   - cd build
-  - cmake .. -DPROTOZERO_DATA_VIEW=$PROTOZERO_DATA_VIEW
+  - cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DPROTOZERO_DATA_VIEW=$PROTOZERO_DATA_VIEW
   - make VERBOSE=1
   - ctest --output-on-failure
   - if [ -n "${BUILD_DOC}" ]; then make doc; fi
