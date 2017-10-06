@@ -60,7 +60,11 @@ int main(int argc, char* argv[]) {
         vtzero::tile_builder tb;
         tb.add_layer(layer.data());
         const auto output = tb.serialize();
-        write(1, output.data(), output.size());
+        const auto len = ::write(1, output.data(), output.size());
+        if (static_cast<size_t>(len) != output.size()) {
+            std::cerr << "Error writing tile\n";
+            std::exit(1);
+        }
     } else {
         char* str_end = nullptr;
         const long id = std::strtol(argv[optind + 2], &str_end, 10); // NOLINT clang-tidy: google-runtime-int
@@ -80,7 +84,11 @@ int main(int argc, char* argv[]) {
         vtzero::layer_builder layer_builder{tb, layer};
         layer_builder.add_feature(feature);
         const auto output = tb.serialize();
-        write(1, output.data(), output.size());
+        const auto len = ::write(1, output.data(), output.size());
+        if (static_cast<size_t>(len) != output.size()) {
+            std::cerr << "Error writing tile\n";
+            std::exit(1);
+        }
     }
 }
 
