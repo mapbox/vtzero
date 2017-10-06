@@ -58,7 +58,7 @@ namespace vtzero {
         uint32_t m_max_key = 0;
         uint32_t m_max_value = 0;
 
-        static index_value find_in_table(const data_view& text, const std::string& data) {
+        static index_value find_in_table(const data_view text, const std::string& data) {
             uint32_t index = 0;
             protozero::pbf_message<detail::pbf_layer> pbf_table{data};
 
@@ -93,12 +93,12 @@ namespace vtzero {
         layer_builder_impl(layer_builder_impl&&) = default;
         layer_builder_impl& operator=(layer_builder_impl&&) = default;
 
-        index_value add_key_without_dup_check(const data_view& text) {
+        index_value add_key_without_dup_check(const data_view text) {
             m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
             return m_max_key++;
         }
 
-        index_value add_key(const data_view& text) {
+        index_value add_key(const data_view text) {
             const auto index = find_in_table(text, m_keys_data);
             if (index.valid()) {
                 return index;
@@ -106,12 +106,12 @@ namespace vtzero {
             return add_key_without_dup_check(text);
         }
 
-        index_value add_value_without_dup_check(const data_view& text) {
+        index_value add_value_without_dup_check(const data_view text) {
             m_pbf_message_values.add_string(detail::pbf_layer::values, text);
             return m_max_value++;
         }
 
-        index_value add_value(const data_view& text) {
+        index_value add_value(const data_view text) {
             const auto index = find_in_table(text, m_values_data);
             if (index.valid()) {
                 return index;
@@ -182,19 +182,19 @@ namespace vtzero {
             return *m_layer;
         };
 
-        index_value add_key_without_dup_check(const data_view& text) {
+        index_value add_key_without_dup_check(const data_view text) {
             return m_layer->add_key_without_dup_check(text);
         }
 
-        index_value add_key(const data_view& text) {
+        index_value add_key(const data_view text) {
             return m_layer->add_key(text);
         }
 
-        index_value add_value_without_dup_check(const data_view& text) {
+        index_value add_value_without_dup_check(const data_view text) {
             return m_layer->add_value_without_dup_check(text);
         }
 
-        index_value add_value(const data_view& text) {
+        index_value add_value(const data_view text) {
             return m_layer->add_value(text);
         }
 

@@ -35,7 +35,7 @@ namespace vtzero {
             m_builder(builder) {
         }
 
-        index_value operator()(const data_view& v) {
+        index_value operator()(const data_view v) {
             std::string text(v);
             const auto it = m_index.find(text);
             if (it == m_index.end()) {

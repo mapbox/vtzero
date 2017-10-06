@@ -66,7 +66,7 @@ namespace vtzero {
          * @throws format_exception if the tile data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        explicit tile_iterator(const data_view& tile_data) :
+        explicit tile_iterator(const data_view tile_data) :
             m_tile_reader(tile_data) {
             next();
         }
@@ -245,7 +245,7 @@ namespace vtzero {
          * @throws format_exception if the tile data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        layer operator[](const data_view& name) const {
+        layer operator[](const data_view name) const {
             protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
 
             while (tile_reader.next(detail::pbf_tile::layers,

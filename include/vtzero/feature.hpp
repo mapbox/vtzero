@@ -109,7 +109,7 @@ namespace vtzero {
          *
          * @throws format_exception if the layer data is ill-formed.
          */
-        feature(const layer* layer, const data_view& data) :
+        feature(const layer* layer, const data_view data) :
             m_layer(layer) {
             assert(layer);
             assert(data.data());
