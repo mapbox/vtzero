@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file vector_tile.hpp
+ *
+ * @brief Contains the vector_tile and tile_iterator classes.
+ */
+
 #include "exception.hpp"
 #include "layer.hpp"
 #include "types.hpp"

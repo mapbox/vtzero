@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file layer.hpp
+ *
+ * @brief Contains the layer and layer_iterator classes.
+ */
+
 #include "exception.hpp"
 #include "feature.hpp"
 #include "geometry.hpp"

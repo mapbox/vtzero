@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file index.hpp
+ *
+ * @brief Contains classes for indexing the key/value tables inside layers.
+ */
+
 #include "builder.hpp"
 
 #include <cstdint>

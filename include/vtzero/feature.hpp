@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file feature.hpp
+ *
+ * @brief Contains the feature and properties_iterator classes.
+ */
+
 #include "exception.hpp"
 #include "property_value_view.hpp"
 #include "property_view.hpp"

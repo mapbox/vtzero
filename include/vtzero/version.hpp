@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file version.hpp
+ *
+ * @brief Contains the version number macros for the vtzero library.
+ */
+
 /// The major version number
 #define VTZERO_VERSION_MAJOR 1
 

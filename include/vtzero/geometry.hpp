@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file geometry.hpp
+ *
+ * @brief Contains classes and functions related to geometry handling.
+ */
+
 #include "exception.hpp"
 #include "types.hpp"
 

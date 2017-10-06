@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file builder.hpp
+ *
+ * @brief Contains the classes and functions to build vector tiles.
+ */
+
 #include "geometry.hpp"
 #include "property_value.hpp"
 #include "types.hpp"

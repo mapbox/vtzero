@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file property_value_view.hpp
+ *
+ * @brief Contains the property_value_view class.
+ */
+
 #include "exception.hpp"
 #include "types.hpp"
 

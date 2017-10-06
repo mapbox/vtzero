@@ -10,6 +10,12 @@ documentation.
 
 *****************************************************************************/
 
+/**
+ * @file property_value.hpp
+ *
+ * @brief Contains the property_value class.
+ */
+
 #include "types.hpp"
 
 #include <protozero/pbf_builder.hpp>
