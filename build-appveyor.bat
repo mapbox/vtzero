@@ -4,7 +4,6 @@ SET EL=0
 
 ECHO ~~~~~~ %~f0 ~~~~~~
 
-SET CUSTOM_CMAKE=cmake-3.6.2-win64-x64
 ::show all available env vars
 SET
 ECHO cmake on AppVeyor
@@ -13,15 +12,9 @@ cmake -version
 ECHO activating VS cmd prompt && CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-SET lodir=%CD%
-SET PATH=%lodir%\%CUSTOM_CMAKE%\bin;%PATH%
-
 ECHO our own cmake
 cmake -version
 
-CD %lodir%\..
-
-CD %lodir%
 IF EXIST build ECHO deleting build dir... && RD /Q /S build
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
@@ -31,12 +24,7 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 CD build
 ECHO config^: %config%
 
-::This will produce lots of LNK4099 warnings which can be ignored.
-::Unfortunately they can't be disabled, see
-::http://stackoverflow.com/questions/661606/visual-c-how-to-disable-specific-linker-warnings
-SET CMAKE_CMD=cmake .. ^
--LA -G "Visual Studio 14 Win64" ^
--DCMAKE_BUILD_TYPE=%config%
+SET CMAKE_CMD=cmake .. -LA -G "Visual Studio 14 Win64"
 
 ECHO calling^: %CMAKE_CMD%
 %CMAKE_CMD%

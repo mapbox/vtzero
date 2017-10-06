@@ -4,6 +4,14 @@
 #
 #-----------------------------------------------------------------------------
 
+platform: x64
+
+image: Visual Studio 2017
+
+clone_depth: 1
+
+#-----------------------------------------------------------------------------
+
 environment:
   matrix:
   - config: MSYS2
@@ -17,12 +25,8 @@ environment:
   - config: RelWithDebInfo
     autocrlf: false
 
-shallow_clone: true
+#-----------------------------------------------------------------------------
 
-# Operating system (build VM template)
-os: Visual Studio 2015
-
-# scripts that are called at very beginning, before repo cloning
 init:
   - git config --global core.autocrlf %autocrlf%
   - git config --get core.autocrlf
@@ -34,11 +38,6 @@ install:
           C:\msys64\usr\bin\pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade
        && C:\msys64\usr\bin\pacman -Rc --noconfirm mingw-w64-x86_64-gcc-libs
     )
-
-# clone directory
-clone_folder: c:\projects\vtzero
-
-platform: x64
 
 build_script:
   - cd c:\projects\vtzero
@@ -54,3 +53,5 @@ build_script:
 before_build:
   - del "C:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
 
+
+#-----------------------------------------------------------------------------
