@@ -27,10 +27,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(WERROR "Add -Werror flag to build (turns warnings into errors)" ON)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wall -Wextra -pedantic -Wsign-compare -Wconversion")
-
-if (WERROR)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+if(MSVC)
+    add_definitions(-std=c++11 /W3)
+else()
+    add_definitions(-std=c++11 -Wall -Wextra -pedantic -Wsign-compare -Wconversion)
+    if(WERROR)
+        add_definitions(-Werror)
+    endif()
 endif()
 
 include_directories("${CMAKE_SOURCE_DIR}/include")
