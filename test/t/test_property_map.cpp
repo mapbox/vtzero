@@ -8,8 +8,8 @@
 using variant_type = boost::variant<std::string, float, double, int64_t, uint64_t, bool>;
 #endif
 
-#include <string>
 #include <map>
+#include <string>
 #include <unordered_map>
 
 TEST_CASE("property map") {

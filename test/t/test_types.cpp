@@ -80,6 +80,6 @@ TEST_CASE("bool_value_type with value") {
 TEST_CASE("default constructed geometry") {
     vtzero::geometry geom;
     REQUIRE(geom.type() == vtzero::GeomType::UNKNOWN);
-    REQUIRE(geom.data().size() == 0);
+    REQUIRE(geom.data().empty());
 }
 

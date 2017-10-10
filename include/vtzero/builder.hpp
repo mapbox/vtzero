@@ -37,7 +37,15 @@ namespace vtzero {
 
     public:
 
+        layer_builder_base() noexcept = default;
+
         virtual ~layer_builder_base() noexcept = default;
+
+        layer_builder_base(const layer_builder_base&) noexcept = default;
+        layer_builder_base& operator=(const layer_builder_base&) noexcept = default;
+
+        layer_builder_base(layer_builder_base&&) noexcept = default;
+        layer_builder_base& operator=(layer_builder_base&&) noexcept = default;
 
         virtual void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) = 0;
 
@@ -241,8 +249,11 @@ namespace vtzero {
                 m_feature_writer.add_uint64(detail::pbf_feature::id, id);
             }
 
-            feature_builder_base(const feature_builder_base&) = delete;
-            feature_builder_base& operator=(const feature_builder_base&) = delete;
+            ~feature_builder_base() noexcept = default;
+
+            feature_builder_base(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
+            feature_builder_base& operator=(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
+                                                                                   // The check wants these functions to be public...
 
             feature_builder_base(feature_builder_base&&) noexcept = default;
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
