@@ -26,14 +26,14 @@ addons_shortcuts:
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.9' ]
       packages: [ 'clang-3.9' ]
-  addons_clang39: &clang40
+  addons_clang40: &clang40
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0' ]
       packages: [ 'clang-4.0' ]
-  addons_clang39: &clang50
+  addons_clang50: &clang50
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0' ]
-      packages: [ 'clang-5.0' ]
+      packages: [ 'clang-5.0', 'clang-tidy-5.0' ]
   addons_gcc48: &gcc48
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
@@ -49,7 +49,7 @@ addons_shortcuts:
   addons_gcc6: &gcc6
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
-      packages: [ 'g++-6', 'gcc-6', 'doxygen', 'graphviz' ]
+      packages: [ 'g++-6', 'gcc-6' ]
 
 #-----------------------------------------------------------------------------
 
@@ -57,95 +57,92 @@ matrix:
   include:
     - os: linux
       compiler: "clang-3.5"
-      env: CXX=clang++-3.5 BUILD_TYPE='Debug'
+      env: BUILD='Debug' CC=clang-3.5 CXX=clang++-3.5
       addons: *clang35
     - os: linux
       compiler: "clang-3.8"
-      env: CXX=clang++-3.8 BUILD_TYPE='Debug'
+      env: BUILD='Debug' CC=clang-3.8 CXX=clang++-3.8
       addons: *clang38
     - os: linux
       compiler: "clang-3.9"
-      env: CXX=clang++-3.9 BUILD_TYPE='Debug'
+      env: BUILD='Debug' CC=clang-3.9 CXX=clang++-3.9
       addons: *clang39
     - os: linux
       compiler: "clang-4.0"
-      env: CXX=clang++-4.0 BUILD_TYPE='Debug'
+      env: BUILD='Debug' CC=clang-4.0 CXX=clang++-4.0
       addons: *clang40
     - os: linux
       compiler: "clang-5.0"
-      env: CXX=clang++-5.0 BUILD_TYPE='Debug'
+      env: BUILD='Debug' CC=clang-5.0 CXX=clang++-5.0
+           CLANG_TIDY=clang-tidy-5.0
       addons: *clang50
     - os: linux
       compiler: "clang-5.0"
-      env: CXX=clang++-5.0 BUILD_TYPE='Release'
+      env: BUILD='Release' CC=clang-5.0 CXX=clang++-5.0
       addons: *clang50
     - os: linux
       compiler: "clang-5.0"
-      env: CXX=clang++-5.0 BUILD_TYPE='Debug' RUN_CLANG_TIDY=1
-      addons: *clang50
-    - os: linux
-      compiler: "clang-5.0"
-      env: CXX=clang++-5.0 BUILD_TYPE='Debug'
+      env: BUILD='Debug' CC=clang-5.0 CXX=clang++-5.0
            CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer"
            LDFLAGS="-fsanitize=address,undefined,integer"
       addons: *clang50
     - os: linux
+      compiler: "gcc-4.7"
+      env: BUILD='Debug' CC=gcc-4.7 CXX=g++-4.7
+      addons: *gcc47
+    - os: linux
       compiler: "gcc-4.8"
-      env: CXX=g++-4.8 BUILD_TYPE='Debug'
+      env: BUILD='Debug' CC=gcc-4.8 CXX=g++-4.8
       addons: *gcc48
     - os: linux
       compiler: "gcc-4.9"
-      env: CXX=g++-4.9 CXXFLAGS="--coverage" LDFLAGS="--coverage" BUILD_TYPE='Debug' COVERAGE=gcov-4.9
+      env: BUILD='Debug' CC=gcc-4.9 CXX=g++-4.9
+           COVERAGE=gcov-4.9
+           CXXFLAGS="--coverage" LDFLAGS="--coverage"
       addons: *gcc49
-      script:
-        - mkdir build
-        - cd build
-        - cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE}
-        - make VERBOSE=1
-        - ctest
-        - which ${COVERAGE}
-        - curl -S -f https://codecov.io/bash -o codecov
-        - chmod +x codecov
-        - ${COVERAGE} -p $(find test -name 'test_*.o')
-        - ./codecov -Z -c -X gcov -F unit_tests
-        - ${COVERAGE} -p $(find test -name 'fixture_tests.cpp.o')
-        - ./codecov -Z -c -X gcov -F fixture_tests
     - os: linux
       compiler: "gcc-5"
-      env: CXX=g++-5 BUILD_TYPE='Debug' CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
+      env: BUILD='Debug' CC=gcc-5 CXX=g++-5
+           CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0"
       addons: *gcc5
     - os: linux
       compiler: "gcc-5"
-      env: CXX=g++-5 BUILD_TYPE='Debug' CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=1"
+      env: BUILD='Debug' CC=gcc-5 CXX=g++-5
+           CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=1"
       addons: *gcc5
     - os: linux
       compiler: "gcc-6"
-      env: CXX=g++-6 BUILD_TYPE='Debug' BUILD_DOC=1
+      env: BUILD='Debug' CC=gcc-6 CXX=g++-6
       addons: *gcc6
     - os: linux
       compiler: "gcc-6"
-      env: CXX=g++-6 BUILD_TYPE='Release'
+      env: BUILD='Debug' CC=gcc-6 CXX=g++-6
+           PROTOZERO_DATA_VIEW=std::experimental::string_view
       addons: *gcc6
     - os: linux
       compiler: "gcc-6"
-      env: CXX=g++-6 BUILD_TYPE='Debug' PROTOZERO_DATA_VIEW=std::experimental::string_view
+      env: BUILD='Release' CC=gcc-6 CXX=g++-6
       addons: *gcc6
     - os: osx
-      osx_image: xcode6
+      osx_image: xcode6.4
       compiler: clang
-      env: BUILD_TYPE='Debug'
+      env: BUILD='Debug'
     - os: osx
-      osx_image: xcode7
+      osx_image: xcode7.3
       compiler: clang
-      env: BUILD_TYPE='Debug'
+      env: BUILD='Debug'
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode8.3
       compiler: clang
-      env: BUILD_TYPE='Debug'
+      env: BUILD='Debug'
     - os: osx
-      osx_image: xcode8
+      osx_image: xcode9.1
       compiler: clang
-      env: BUILD_TYPE='Release'
+      env: BUILD='Debug'
+    - os: osx
+      osx_image: xcode9.1
+      compiler: clang
+      env: BUILD='Release'
 
 #-----------------------------------------------------------------------------
 
@@ -156,10 +153,20 @@ install:
 script:
   - mkdir build
   - cd build
-  - cmake -LA .. -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DPROTOZERO_DATA_VIEW=$PROTOZERO_DATA_VIEW
+  - cmake .. -LA -DCMAKE_BUILD_TYPE=${BUILD} -DPROTOZERO_DATA_VIEW=$PROTOZERO_DATA_VIEW -DCLANG_TIDY=$(which ${CLANG_TIDY})
   - make VERBOSE=1
   - ctest --output-on-failure
-  - if [ -n "${BUILD_DOC}" ]; then make doc; fi
-  - if [ -n "${RUN_CLANG_TIDY}" ]; then make clang-tidy; fi
+  - if [ -n "${CLANG_TIDY}" ]; then make clang-tidy; fi
+  - |
+    if [ -n "${COVERAGE}" ]; then
+      which ${COVERAGE}
+      curl -S -f https://codecov.io/bash -o codecov
+      chmod +x codecov
+      ${COVERAGE} -p $(find test -name 'test_*.o')
+      ./codecov -Z -c -X gcov -F unit_tests
+      ${COVERAGE} -p $(find test -name 'fixture_tests.cpp.o')
+      ./codecov -Z -c -X gcov -F fixture_tests
+    fi
+
 
 #-----------------------------------------------------------------------------

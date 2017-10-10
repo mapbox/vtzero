@@ -12,7 +12,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 #-----------------------------------------------------------------------------
 
-project(vtzero LANGUAGES CXX)
+project(vtzero)
 
 set(VTZERO_VERSION_MAJOR 0)
 set(VTZERO_VERSION_MINOR 0)
@@ -47,7 +47,7 @@ endif()
 
 #-----------------------------------------------------------------------------
 #
-#  Find dependency: protozero
+#  Find dependencies
 #
 #-----------------------------------------------------------------------------
 
@@ -64,19 +64,72 @@ find_package(Boost)
 #
 #-----------------------------------------------------------------------------
 message(STATUS "Looking for clang-tidy")
-find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-5.0 clang-tidy-3.8)
+find_program(CLANG_TIDY NAMES clang-tidy clang-tidy-5.0)
 
 if(CLANG_TIDY)
-    message(STATUS "Looking for clang-tidy - found")
+    message(STATUS "Looking for clang-tidy - found ${CLANG_TIDY}")
     add_custom_target(clang-tidy
         ${CLANG_TIDY}
         -p ${CMAKE_BINARY_DIR}
-        ${CMAKE_SOURCE_DIR}/examples/*.cpp ${CMAKE_SOURCE_DIR}/test/*.cpp
+        ${CMAKE_SOURCE_DIR}/examples/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/t/*.cpp
     )
 else()
     message(STATUS "Looking for clang-tidy - not found")
     message(STATUS "  Build target 'clang-tidy' will not be available.")
 endif()
+
+
+#-----------------------------------------------------------------------------
+#
+#  Optional "cppcheck" target
+#
+#-----------------------------------------------------------------------------
+message(STATUS "Looking for cppcheck")
+find_program(CPPCHECK NAMES cppcheck)
+
+if(CPPCHECK)
+    message(STATUS "Looking for cppcheck - found")
+    add_custom_target(cppcheck
+        ${CPPCHECK}
+        -Uassert --std=c++11 --enable=all
+        ${CMAKE_SOURCE_DIR}/examples/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/*.cpp
+        ${CMAKE_SOURCE_DIR}/test/t/*.cpp
+    )
+else()
+    message(STATUS "Looking for cppcheck - not found")
+    message(STATUS "  Build target 'cppcheck' will not be available.")
+endif()
+
+
+#-----------------------------------------------------------------------------
+#
+#  Include what you use
+#
+#-----------------------------------------------------------------------------
+message(STATUS "Looking for iwyu")
+find_program(IWYU_TOOL NAMES iwyu_tool)
+
+if(IWYU_TOOL)
+    message(STATUS "Looking for iwyu - found")
+    add_custom_target(iwyu
+        ${IWYU_TOOL} -p ${CMAKE_BINARY_DIR}
+    )
+else()
+    message(STATUS "Looking for iwyu - not found")
+    message(STATUS "  Build target 'iwyu' will not be available.")
+endif()
+
+
+#-----------------------------------------------------------------------------
+#
+#  Installation
+#
+#-----------------------------------------------------------------------------
+
+install(DIRECTORY include/vtzero DESTINATION include)
 
 
 #-----------------------------------------------------------------------------

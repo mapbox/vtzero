@@ -12,9 +12,6 @@ cmake -version
 ECHO activating VS cmd prompt && CALL "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" amd64
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
-ECHO our own cmake
-cmake -version
-
 IF EXIST build ECHO deleting build dir... && RD /Q /S build
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 
@@ -47,7 +44,6 @@ IF %ERRORLEVEL% NEQ 0 GOTO ERROR
 ctest --output-on-failure ^
 -C %config% ^
 IF %ERRORLEVEL% NEQ 0 GOTO ERROR
-
 
 GOTO DONE
 
