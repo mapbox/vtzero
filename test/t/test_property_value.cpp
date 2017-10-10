@@ -61,10 +61,10 @@ TEST_CASE("default constructed property_value_view") {
 
 TEST_CASE("empty property_value_view") {
     char x[1] = {0};
-    vtzero::data_view dv{x, 1};
+    vtzero::data_view dv{x, 0};
     vtzero::property_value_view pvv{dv};
     REQUIRE(pvv.valid());
-    REQUIRE_THROWS(pvv.type());
+    REQUIRE_THROWS_AS(pvv.type(), vtzero::format_exception);
 }
 
 TEST_CASE("string value") {
@@ -107,9 +107,12 @@ TEST_CASE("float value") {
 }
 
 TEST_CASE("double value") {
-    vtzero::property_value v{1.2};
+    vtzero::property_value v{3.4};
     vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.double_value() == Approx(1.2));
+    REQUIRE(vv.double_value() == Approx(3.4));
+
+    const auto result = vtzero::apply_visitor(visitor_test_int{}, vv);
+    REQUIRE(result == 1);
 }
 
 TEST_CASE("int value") {
@@ -134,11 +137,17 @@ TEST_CASE("sint value") {
     vtzero::property_value v{vtzero::sint_value_type{42}};
     vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.sint_value() == 42);
+
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
+    REQUIRE(str == "42");
 }
 
 TEST_CASE("bool value") {
     vtzero::property_value v{true};
     vtzero::property_value_view vv{v.data()};
     REQUIRE(vv.bool_value());
+
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
+    REQUIRE(str == "1");
 }
 

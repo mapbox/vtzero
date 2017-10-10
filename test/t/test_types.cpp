@@ -77,9 +77,26 @@ TEST_CASE("bool_value_type with value") {
     REQUIRE(v.value);
 }
 
+TEST_CASE("property_value_type names") {
+    REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::string_value)} == "string");
+    REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::float_value)} == "float");
+    REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::double_value)} == "double");
+    REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::int_value)} == "int");
+    REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::uint_value)} == "uint");
+    REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::sint_value)} == "sint");
+    REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::bool_value)} == "bool");
+}
+
 TEST_CASE("default constructed geometry") {
     vtzero::geometry geom;
     REQUIRE(geom.type() == vtzero::GeomType::UNKNOWN);
     REQUIRE(geom.data().empty());
+}
+
+TEST_CASE("GeomType names") {
+    REQUIRE(std::string{vtzero::geom_type_name(vtzero::GeomType::UNKNOWN)} == "unknown");
+    REQUIRE(std::string{vtzero::geom_type_name(vtzero::GeomType::POINT)} == "point");
+    REQUIRE(std::string{vtzero::geom_type_name(vtzero::GeomType::LINESTRING)} == "linestring");
+    REQUIRE(std::string{vtzero::geom_type_name(vtzero::GeomType::POLYGON)} == "polygon");
 }
 
