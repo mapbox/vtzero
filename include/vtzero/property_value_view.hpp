@@ -299,7 +299,7 @@ namespace vtzero {
             }
 
             T operator()(data_view value) const {
-                return T{S{value}};
+                return T{S(value)};
             }
 
         }; // struct convert_visitor
