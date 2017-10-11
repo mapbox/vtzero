@@ -51,12 +51,13 @@ void write_data_to_file(const std::string& data, const std::string& filename) {
 }
 
 vtzero::layer get_layer(vtzero::vector_tile& tile, const std::string& layer_name_or_num) {
+    vtzero::layer layer;
     char* str_end = nullptr;
     const long num = std::strtol(layer_name_or_num.c_str(), &str_end, 10); // NOLINT clang-tidy: google-runtime-int
 
     if (str_end == layer_name_or_num.data() + layer_name_or_num.size()) {
         if (num >= 0 && num < std::numeric_limits<long>::max()) { // NOLINT clang-tidy: google-runtime-int
-            const auto layer = tile[num];
+            layer = tile[num];
             if (!layer) {
                 std::cerr << "No such layer: " << num << '\n';
                 std::exit(1);
@@ -65,7 +66,7 @@ vtzero::layer get_layer(vtzero::vector_tile& tile, const std::string& layer_name
         }
     }
 
-    const auto layer = tile[layer_name_or_num];
+    layer = tile[layer_name_or_num];
     if (!layer) {
         std::cerr << "No layer named '" << layer_name_or_num << "'.\n";
         std::exit(1);
