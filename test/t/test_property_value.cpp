@@ -159,7 +159,7 @@ TEST_CASE("property_value_view equality comparisons") {
 
     vtzero::property_value t{true};
     vtzero::property_value f{false};
-    vtzero::property_value v1{1l};
+    vtzero::property_value v1{vtzero::int_value_type{1}};
     vtzero::property_value vs{"foo"};
 
     REQUIRE(pvv{t.data()} == pvv{t.data()});
@@ -180,8 +180,8 @@ TEST_CASE("property_value_view ordering") {
     REQUIRE(pvv{t.data()} >  pvv{f.data()});
     REQUIRE(pvv{t.data()} >= pvv{f.data()});
 
-    vtzero::property_value v1{22l};
-    vtzero::property_value v2{17l};
+    vtzero::property_value v1{vtzero::int_value_type{22}};
+    vtzero::property_value v2{vtzero::int_value_type{17}};
 
     REQUIRE_FALSE(pvv{v1.data()} <  pvv{v2.data()});
     REQUIRE_FALSE(pvv{v1.data()} <= pvv{v2.data()});
