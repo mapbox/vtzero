@@ -310,6 +310,19 @@ namespace vtzero {
 
     }; // class vector_tile
 
+    /**
+     * Helper function to determine whether some data could represent a
+     * vector tile. This takes advantage of the fact that the first byte of
+     * a vector tile is always 0x1a. It can't be 100% reliable though, because
+     * some other data could still contain that byte.
+     *
+     * @returns false if this is definitely no vector tile
+     *          true if this could be a vector tile
+     */
+    inline bool is_vector_tile(const data_view data) noexcept {
+        return data.size() > 0 && data.data()[0] == 0x1a;
+    }
+
 } // namespace vtzero
 
 #endif // VTZERO_VECTOR_TILE_HPP
