@@ -17,39 +17,39 @@ addons_shortcuts:
   addons_clang35: &clang35
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.5' ]
-      packages: [ 'clang-3.5' ]
+      packages: [ 'libboost1.55-dev', 'clang-3.5' ]
   addons_clang38: &clang38
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.8' ]
-      packages: [ 'clang-3.8' ]
+      packages: [ 'libboost1.55-dev', 'clang-3.8' ]
   addons_clang39: &clang39
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-3.9' ]
-      packages: [ 'clang-3.9' ]
+      packages: [ 'libboost1.55-dev', 'clang-3.9' ]
   addons_clang40: &clang40
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-4.0' ]
-      packages: [ 'clang-4.0' ]
+      packages: [ 'libboost1.55-dev', 'clang-4.0' ]
   addons_clang50: &clang50
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0' ]
-      packages: [ 'clang-5.0', 'clang-tidy-5.0' ]
+      packages: [ 'libboost1.55-dev', 'clang-5.0', 'clang-tidy-5.0' ]
   addons_gcc48: &gcc48
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
-      packages: [ 'g++-4.8', 'gcc-4.8' ]
+      packages: [ 'libboost1.55-dev', 'g++-4.8', 'gcc-4.8' ]
   addons_gcc49: &gcc49
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
-      packages: [ 'g++-4.9', 'gcc-4.9' ]
+      packages: [ 'libboost1.55-dev', 'g++-4.9', 'gcc-4.9' ]
   addons_gcc5: &gcc5
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
-      packages: [ 'g++-5', 'gcc-5' ]
+      packages: [ 'libboost1.55-dev', 'g++-5', 'gcc-5' ]
   addons_gcc6: &gcc6
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
-      packages: [ 'g++-6', 'gcc-6' ]
+      packages: [ 'libboost1.55-dev', 'g++-6', 'gcc-6' ]
 
 #-----------------------------------------------------------------------------
 
