@@ -64,7 +64,7 @@ TEST_CASE("empty property_value_view") {
     vtzero::data_view dv{x, 0};
     vtzero::property_value_view pvv{dv};
     REQUIRE(pvv.valid());
-    REQUIRE_THROWS_AS(pvv.type(), vtzero::format_exception);
+    REQUIRE_THROWS_AS(pvv.type(), const vtzero::format_exception&);
 }
 
 TEST_CASE("string value") {
