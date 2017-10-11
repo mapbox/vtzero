@@ -52,7 +52,7 @@ namespace vtzero {
         using iterator_category = std::forward_iterator_tag;
         using value_type        = layer;
         using difference_type   = std::ptrdiff_t;
-        using pointer           = value_type*;
+        using pointer           = value_type;
         using reference         = value_type&;
 
         /**
@@ -79,6 +79,10 @@ namespace vtzero {
         layer operator*() const {
             vtzero_assert(m_data.data() != nullptr);
             return layer{m_data};
+        }
+
+        layer operator->() const {
+            return operator*();
         }
 
         /**

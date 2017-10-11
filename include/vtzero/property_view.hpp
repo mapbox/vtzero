@@ -54,6 +54,14 @@ namespace vtzero {
             return m_key.data() != nullptr;
         }
 
+        const property_view& operator*() const noexcept {
+            return *this;
+        }
+
+        const property_view* operator->() const noexcept {
+            return this;
+        }
+
         /**
          * Is this a valid view? Property views are valid if they were
          * constructed using the non-default constructor.

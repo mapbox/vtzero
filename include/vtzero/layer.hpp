@@ -54,7 +54,7 @@ namespace vtzero {
         using iterator_category = std::forward_iterator_tag;
         using value_type        = feature;
         using difference_type   = std::ptrdiff_t;
-        using pointer           = value_type*;
+        using pointer           = value_type;
         using reference         = value_type&;
 
         /**
@@ -82,6 +82,10 @@ namespace vtzero {
         feature operator*() const {
             vtzero_assert(m_data.data() != nullptr);
             return feature{m_layer, m_data};
+        }
+
+        feature operator->() const {
+            return operator*();
         }
 
         /**
@@ -230,6 +234,14 @@ namespace vtzero {
          */
         bool valid() const noexcept {
             return m_data.data() != nullptr;
+        }
+
+        const layer& operator*() const noexcept {
+            return *this;
+        }
+
+        const layer* operator->() const noexcept {
+            return this;
         }
 
         /**

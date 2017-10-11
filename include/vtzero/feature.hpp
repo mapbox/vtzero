@@ -42,7 +42,7 @@ namespace vtzero {
         using iterator_category = std::forward_iterator_tag;
         using value_type        = property_view;
         using difference_type   = std::ptrdiff_t;
-        using pointer           = value_type*;
+        using pointer           = value_type;
         using reference         = value_type&;
 
         properties_iterator(const protozero::pbf_reader::const_uint32_iterator begin,
@@ -53,6 +53,10 @@ namespace vtzero {
         }
 
         property_view operator*() const;
+
+        property_view operator->() const {
+            return operator*();
+        }
 
         properties_iterator& operator++() {
             ++m_it;
@@ -170,6 +174,14 @@ namespace vtzero {
          */
         bool valid() const noexcept {
             return m_geometry.data() != nullptr;
+        }
+
+        const feature& operator*() const noexcept {
+            return *this;
+        }
+
+        const feature* operator->() const noexcept {
+            return this;
         }
 
         /**

@@ -401,7 +401,7 @@ TEST_CASE("MVT test 026: Extra value type") {
     const auto feature = *layer.begin();
     REQUIRE(feature.empty());
 
-    const auto table = layer.value_table();
+    const auto& table = layer.value_table();
     REQUIRE(table.size() == 1);
 
     const auto pvv = table[0];
@@ -620,7 +620,24 @@ TEST_CASE("MVT test 043: A layer with six points that all share the same key but
     vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.size() == 1);
-    const auto layer = tile[0];
-    REQUIRE(layer.size() == 6);
+    const auto lit = tile.begin();
+    REQUIRE(lit->size() == 6);
+
+    auto fit = lit->begin();
+    REQUIRE(fit->size() == 1);
+
+    {
+        const auto pit = fit->begin();
+        REQUIRE(pit->key() == "poi");
+        REQUIRE(pit->value().string_value() == "swing");
+    }
+
+    ++fit;
+
+    {
+        const auto property = *fit->begin();
+        REQUIRE(property.key() == "poi");
+        REQUIRE(property.value().string_value() == "water_fountain");
+    }
 }
 
