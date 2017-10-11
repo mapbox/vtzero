@@ -57,6 +57,9 @@ TEST_CASE("default constructed property_value_view") {
     vtzero::property_value_view pvv;
     REQUIRE_FALSE(pvv.valid());
     REQUIRE(pvv.data().data() == nullptr);
+
+    REQUIRE(pvv == vtzero::property_value_view{});
+    REQUIRE_FALSE(pvv != vtzero::property_value_view{});
 }
 
 TEST_CASE("empty property_value_view") {
@@ -149,5 +152,54 @@ TEST_CASE("bool value") {
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
     REQUIRE(str == "1");
+}
+
+TEST_CASE("property_value_view equality comparisons") {
+    using pvv = vtzero::property_value_view;
+
+    vtzero::property_value t{true};
+    vtzero::property_value f{false};
+    vtzero::property_value v1{1l};
+    vtzero::property_value vs{"foo"};
+
+    REQUIRE(pvv{t.data()} == pvv{t.data()});
+    REQUIRE_FALSE(pvv{t.data()} != pvv{t.data()});
+    REQUIRE_FALSE(pvv{t.data()} == pvv{f.data()});
+    REQUIRE_FALSE(pvv{t.data()} == pvv{v1.data()});
+    REQUIRE_FALSE(pvv{t.data()} == pvv{vs.data()});
+}
+
+TEST_CASE("property_value_view ordering") {
+    using pvv = vtzero::property_value_view;
+
+    vtzero::property_value t{true};
+    vtzero::property_value f{false};
+
+    REQUIRE_FALSE(pvv{t.data()} <  pvv{f.data()});
+    REQUIRE_FALSE(pvv{t.data()} <= pvv{f.data()});
+    REQUIRE(pvv{t.data()} >  pvv{f.data()});
+    REQUIRE(pvv{t.data()} >= pvv{f.data()});
+
+    vtzero::property_value v1{22l};
+    vtzero::property_value v2{17l};
+
+    REQUIRE_FALSE(pvv{v1.data()} <  pvv{v2.data()});
+    REQUIRE_FALSE(pvv{v1.data()} <= pvv{v2.data()});
+    REQUIRE(pvv{v1.data()} >  pvv{v2.data()});
+    REQUIRE(pvv{v1.data()} >= pvv{v2.data()});
+
+    vtzero::property_value vsf{"foo"};
+    vtzero::property_value vsb{"bar"};
+    vtzero::property_value vsx{"foobar"};
+
+    REQUIRE_FALSE(pvv{vsf.data()} <  pvv{vsb.data()});
+    REQUIRE_FALSE(pvv{vsf.data()} <= pvv{vsb.data()});
+    REQUIRE(pvv{vsf.data()} >  pvv{vsb.data()});
+    REQUIRE(pvv{vsf.data()} >= pvv{vsb.data()});
+
+    REQUIRE(pvv{vsf.data()} <  pvv{vsx.data()});
+    REQUIRE(pvv{vsf.data()} <= pvv{vsx.data()});
+    REQUIRE_FALSE(pvv{vsf.data()} >  pvv{vsx.data()});
+    REQUIRE_FALSE(pvv{vsf.data()} >= pvv{vsx.data()});
 }
 
