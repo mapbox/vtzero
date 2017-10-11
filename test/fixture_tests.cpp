@@ -1,9 +1,9 @@
 
+#include <test.hpp>
+
 #include <vtzero/builder.hpp>
 #include <vtzero/geometry.hpp>
 #include <vtzero/vector_tile.hpp>
-
-#include <catch.hpp>
 
 #include <cstdlib>
 #include <fstream>

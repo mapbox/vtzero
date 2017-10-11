@@ -1,7 +1,7 @@
 
-#include <vtzero/types.hpp>
+#include <test.hpp>
 
-#include <catch.hpp>
+#include <vtzero/types.hpp>
 
 TEST_CASE("default constructed string_value_type") {
     vtzero::string_value_type v;
@@ -85,6 +85,18 @@ TEST_CASE("property_value_type names") {
     REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::uint_value)} == "uint");
     REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::sint_value)} == "sint");
     REQUIRE(std::string{vtzero::property_value_type_name(vtzero::property_value_type::bool_value)} == "bool");
+}
+
+TEST_CASE("default constructed index value") {
+    vtzero::index_value v;
+    REQUIRE_FALSE(v.valid());
+    REQUIRE_ASSERT(v.value());
+}
+
+TEST_CASE("valid index value") {
+    vtzero::index_value v{32};
+    REQUIRE(v.valid());
+    REQUIRE(v.value() == 32);
 }
 
 TEST_CASE("default constructed geometry") {

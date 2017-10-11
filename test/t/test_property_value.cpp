@@ -1,9 +1,9 @@
 
+#include <test.hpp>
+
 #include <vtzero/property_value.hpp>
 #include <vtzero/property_value_view.hpp>
 #include <vtzero/types.hpp>
-
-#include <catch.hpp>
 
 #ifdef VTZERO_TEST_WITH_VARIANT
 # include <boost/variant.hpp>

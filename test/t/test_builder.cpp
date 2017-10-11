@@ -1,9 +1,9 @@
 
+#include <test.hpp>
+
 #include <vtzero/builder.hpp>
 #include <vtzero/geometry.hpp>
 #include <vtzero/index.hpp>
-
-#include <catch.hpp>
 
 #include <map>
 #include <unordered_map>

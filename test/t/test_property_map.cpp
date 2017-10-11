@@ -1,7 +1,7 @@
 
-#include <vtzero/builder.hpp>
+#include <test.hpp>
 
-#include <catch.hpp>
+#include <vtzero/builder.hpp>
 
 #ifdef VTZERO_TEST_WITH_VARIANT
 # include <boost/variant.hpp>

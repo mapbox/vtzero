@@ -23,7 +23,6 @@ documentation.
 
 #include <protozero/pbf_builder.hpp>
 
-#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -315,7 +314,7 @@ namespace vtzero {
             template <typename ...TArgs>
             void add_property(TArgs&& ...args) {
                 if (m_pbf_geometry.valid()) {
-                    assert(m_num_points == 0 && "Not enough calls to set_point()");
+                    vtzero_assert(m_num_points == 0 && "Not enough calls to set_point()");
                     m_pbf_geometry.commit();
                 }
                 if (!m_pbf_tags.valid()) {
@@ -381,7 +380,7 @@ namespace vtzero {
         }
 
         ~point_feature_builder() {
-            assert(m_num_points == 0 && "has fewer points than expected");
+            vtzero_assert_in_noexcept_function(m_num_points == 0 && "has fewer points than expected");
         }
 
         point_feature_builder(const point_feature_builder&) = delete;
@@ -391,8 +390,8 @@ namespace vtzero {
         point_feature_builder& operator=(point_feature_builder&&) noexcept = default;
 
         void add_point(const point p) {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid());
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid());
             m_pbf_geometry.add_element(detail::command_move_to(1));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
@@ -409,17 +408,17 @@ namespace vtzero {
         }
 
         void add_points(uint32_t count) {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid());
-            assert(count > 0);
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid());
+            vtzero_assert(count > 0);
             m_num_points = count;
             m_pbf_geometry.add_element(detail::command_move_to(count));
         }
 
         void set_point(const point p) {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid() && "Call add_points() before set_point()");
-            assert(m_num_points > 0 && "Too many points");
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid() && "Call add_points() before set_point()");
+            vtzero_assert(m_num_points > 0 && "Too many points");
             --m_num_points;
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
@@ -453,7 +452,7 @@ namespace vtzero {
                 --count;
 #endif
             }
-            assert(count == 0 && "Iterators must yield exactly count points");
+            vtzero_assert(count == 0 && "Iterators must yield exactly count points");
             m_pbf_geometry.commit();
         }
 
@@ -481,7 +480,7 @@ namespace vtzero {
         }
 
         ~line_string_feature_builder() {
-            assert(m_num_points == 0 && "LineString has fewer points than expected");
+            vtzero_assert_in_noexcept_function(m_num_points == 0 && "LineString has fewer points than expected");
         }
 
         line_string_feature_builder(const line_string_feature_builder&) = delete;
@@ -491,18 +490,18 @@ namespace vtzero {
         line_string_feature_builder& operator=(line_string_feature_builder&&) noexcept = default;
 
         void add_linestring(const uint32_t count) {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid());
-            assert(count > 1);
-            assert(m_num_points == 0 && "LineString has fewer points than expected");
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid());
+            vtzero_assert(count > 1);
+            vtzero_assert(m_num_points == 0 && "LineString has fewer points than expected");
             m_num_points = count;
             m_start_line = true;
         }
 
         void set_point(const point p) {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid() && "Add full geometry before adding tags");
-            assert(m_num_points > 0 && "Too many calls to set_point()");
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid() && "Add full geometry before adding tags");
+            vtzero_assert(m_num_points > 0 && "Too many calls to set_point()");
             --m_num_points;
             if (m_start_line) {
                 m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -511,7 +510,7 @@ namespace vtzero {
                 m_pbf_geometry.add_element(detail::command_line_to(m_num_points));
                 m_start_line = false;
             } else {
-                assert(p != m_cursor); // no zero-length segments
+                vtzero_assert(p != m_cursor); // no zero-length segments
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
             }
@@ -548,7 +547,7 @@ namespace vtzero {
                 --count;
 #endif
             }
-            assert(count == 0 && "Iterators must yield exactly count points");
+            vtzero_assert(count == 0 && "Iterators must yield exactly count points");
         }
 
         template <typename TContainer>
@@ -575,7 +574,7 @@ namespace vtzero {
         }
 
         ~polygon_feature_builder() {
-            assert(m_num_points == 0 && "ring has fewer points than expected");
+            vtzero_assert_in_noexcept_function(m_num_points == 0 && "ring has fewer points than expected");
         }
 
         polygon_feature_builder(const polygon_feature_builder&) = delete;
@@ -585,18 +584,18 @@ namespace vtzero {
         polygon_feature_builder& operator=(polygon_feature_builder&&) noexcept = default;
 
         void add_ring(const uint32_t count) {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid());
-            assert(count > 3);
-            assert(m_num_points == 0 && "ring has fewer points than expected");
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid());
+            vtzero_assert(count > 3);
+            vtzero_assert(m_num_points == 0 && "ring has fewer points than expected");
             m_num_points = count;
             m_start_ring = true;
         }
 
         void set_point(const point p) {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid() && "Call ring_begin() before add_point()");
-            assert(m_num_points > 0 && "Too many calls to add_point()");
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid() && "Call ring_begin() before add_point()");
+            vtzero_assert(m_num_points > 0 && "Too many calls to add_point()");
             --m_num_points;
             if (m_start_ring) {
                 m_first_point = p;
@@ -607,11 +606,11 @@ namespace vtzero {
                 m_start_ring = false;
                 m_cursor = m_first_point;
             } else if (m_num_points == 0) {
-                assert(m_first_point == p); // XXX
+                vtzero_assert(m_first_point == p); // XXX
                 // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
                 m_pbf_geometry.add_element(detail::command_close_path(1));
             } else {
-                assert(m_cursor != p); // XXX
+                vtzero_assert(m_cursor != p); // XXX
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
                 m_cursor = p;
@@ -628,9 +627,9 @@ namespace vtzero {
         }
 
         void close_ring() {
-            assert(m_pbf_geometry.valid());
-            assert(!m_pbf_tags.valid() && "Call ring_begin() before add_point()");
-            assert(m_num_points == 1);
+            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(!m_pbf_tags.valid() && "Call ring_begin() before add_point()");
+            vtzero_assert(m_num_points == 1);
             m_pbf_geometry.add_element(detail::command_close_path(1));
             --m_num_points;
         }
@@ -652,7 +651,7 @@ namespace vtzero {
                 --count;
 #endif
             }
-            assert(count == 0 && "Iterators must yield exactly count points");
+            vtzero_assert(count == 0 && "Iterators must yield exactly count points");
         }
 
         template <typename TContainer>

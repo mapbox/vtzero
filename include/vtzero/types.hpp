@@ -13,6 +13,16 @@ documentation.
 #include <protozero/data_view.hpp>
 #include <protozero/types.hpp>
 
+#include <cassert>
+
+// Wrappers for assert() used for testing
+#ifndef vtzero_assert
+# define vtzero_assert(x) assert(x)
+#endif
+#ifndef vtzero_assert_in_noexcept_function
+# define vtzero_assert_in_noexcept_function(x) assert(x)
+#endif
+
 /**
  * @file types.hpp
  *
@@ -258,7 +268,7 @@ namespace vtzero {
          * @pre Must be valid.
          */
         uint32_t value() const noexcept {
-            assert(valid());
+            vtzero_assert_in_noexcept_function(valid());
             return m_value;
         }
 

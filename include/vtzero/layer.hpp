@@ -80,7 +80,7 @@ namespace vtzero {
          * @returns feature
          */
         feature operator*() const {
-            assert(m_data.data() != nullptr);
+            vtzero_assert(m_data.data() != nullptr);
             return feature{m_layer, m_data};
         }
 
@@ -251,7 +251,7 @@ namespace vtzero {
          * Return the name of the layer.
          */
         data_view name() const noexcept {
-            assert(valid());
+            vtzero_assert_in_noexcept_function(valid());
             return m_name;
         }
 
@@ -259,7 +259,7 @@ namespace vtzero {
          * Return the version of this layer.
          */
         std::uint32_t version() const noexcept {
-            assert(valid());
+            vtzero_assert_in_noexcept_function(valid());
             return m_version;
         }
 
@@ -267,7 +267,7 @@ namespace vtzero {
          * Return the extent of this layer.
          */
         std::uint32_t extent() const noexcept {
-            assert(valid());
+            vtzero_assert_in_noexcept_function(valid());
             return m_extent;
         }
 
@@ -361,7 +361,7 @@ namespace vtzero {
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
         feature operator[](uint64_t id) const {
-            assert(valid());
+            vtzero_assert(valid());
 
             protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
             while (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {

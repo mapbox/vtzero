@@ -77,7 +77,7 @@ namespace vtzero {
          * @returns layer
          */
         layer operator*() const {
-            assert(m_data.data() != nullptr);
+            vtzero_assert(m_data.data() != nullptr);
             return layer{m_data};
         }
 

@@ -85,7 +85,7 @@ namespace vtzero {
 
         template <typename T>
         typename T::type get_value() const {
-            assert(valid());
+            vtzero_assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
 
             typename T::type result{};
@@ -132,7 +132,7 @@ namespace vtzero {
          * @throws format_exception if the encoding is invalid
          */
         property_value_type type() const {
-            assert(valid());
+            vtzero_assert(valid());
             protozero::pbf_message<detail::pbf_value> value_message{m_value};
             if (value_message.next()) {
                 const auto tag_val = static_cast<protozero::pbf_tag_type>(value_message.tag());

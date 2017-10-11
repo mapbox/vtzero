@@ -138,7 +138,7 @@ namespace vtzero {
             }
 
             point next_point() {
-                assert(m_count > 0);
+                vtzero_assert(m_count > 0);
 
                 if (it == end || std::next(it) == end) {
                     throw geometry_exception{"too few points in geometry"};
@@ -166,7 +166,7 @@ namespace vtzero {
 
     template <typename TGeomHandler>
     void decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        assert(geometry.type() == GeomType::POINT);
+        vtzero_assert(geometry.type() == GeomType::POINT);
         detail::geometry_decoder decoder{geometry.data(), strict};
 
         // spec 4.3.4.2 "MUST consist of of a single MoveTo command"
@@ -194,7 +194,7 @@ namespace vtzero {
 
     template <typename TGeomHandler>
     void decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        assert(geometry.type() == GeomType::LINESTRING);
+        vtzero_assert(geometry.type() == GeomType::LINESTRING);
         detail::geometry_decoder decoder{geometry.data(), strict};
 
         // spec 4.3.4.3 "1. A MoveTo command"
@@ -228,7 +228,7 @@ namespace vtzero {
 
     template <typename TGeomHandler>
     void decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        assert(geometry.type() == GeomType::POLYGON);
+        vtzero_assert(geometry.type() == GeomType::POLYGON);
         detail::geometry_decoder decoder{geometry.data(), strict};
 
         // spec 4.3.4.4 "1. A MoveTo command"

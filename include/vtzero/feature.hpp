@@ -49,7 +49,7 @@ namespace vtzero {
                             const layer* layer) :
             m_it(begin),
             m_layer(layer) {
-            assert(layer);
+            vtzero_assert(layer);
         }
 
         property_view operator*() const;
@@ -111,8 +111,8 @@ namespace vtzero {
          */
         feature(const layer* layer, const data_view data) :
             m_layer(layer) {
-            assert(layer);
-            assert(data.data());
+            vtzero_assert(layer);
+            vtzero_assert(data.data());
 
             protozero::pbf_message<detail::pbf_feature> reader{data};
 
@@ -185,7 +185,7 @@ namespace vtzero {
          * in a layer if they are set (spec 4.2).
          */
         uint64_t id() const noexcept {
-            assert(valid());
+            vtzero_assert_in_noexcept_function(valid());
             return m_id;
         }
 
@@ -200,7 +200,7 @@ namespace vtzero {
          * The geometry type of this feature.
          */
         GeomType geometry_type() const noexcept {
-            assert(valid());
+            vtzero_assert_in_noexcept_function(valid());
             return m_geometry_type;
         }
 
@@ -208,7 +208,7 @@ namespace vtzero {
          * Get the geometry of this feature.
          */
         vtzero::geometry geometry() const noexcept {
-            assert(valid());
+            vtzero_assert_in_noexcept_function(valid());
             return {m_geometry, m_geometry_type};
         }
 

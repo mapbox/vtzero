@@ -13,7 +13,8 @@ else()
     message(STATUS "Boost library not found: disable testing with boost::variant")
 endif()
 
-include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/include")
+include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/catch")
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set(TEST_SOURCES builder
                  property_map
