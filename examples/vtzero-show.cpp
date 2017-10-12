@@ -168,7 +168,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
 }
 
 void print_layer_overview(const vtzero::layer& layer) {
-    std::cout << layer.name() << ' ' << layer.size() << '\n';
+    std::cout << layer.name() << ' ' << layer.num_features() << '\n';
 }
 
 void print_help() {

@@ -200,7 +200,7 @@ namespace vtzero {
          *
          * Always returns 0 for invalid features.
          */
-        std::size_t size() const noexcept {
+        std::size_t num_properties() const noexcept {
             return m_properties_size;
         }
 

@@ -281,7 +281,7 @@ namespace vtzero {
          *
          * Complexity: Constant.
          */
-        std::size_t size() const noexcept {
+        std::size_t num_features() const noexcept {
             return m_num_features;
         }
 

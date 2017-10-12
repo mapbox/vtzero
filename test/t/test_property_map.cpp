@@ -27,12 +27,12 @@ TEST_CASE("property map") {
     std::string data = tile.serialize();
 
     vtzero::vector_tile vt{data};
-    REQUIRE(vt.size() == 1);
+    REQUIRE(vt.count_layers() == 1);
     auto layer = vt.next_layer();
-    REQUIRE(layer.size() == 1);
+    REQUIRE(layer.num_features() == 1);
     const auto feature = layer.next_feature();
 
-    REQUIRE(feature.size() == 3);
+    REQUIRE(feature.num_properties() == 3);
 
 #ifdef VTZERO_TEST_WITH_VARIANT
     SECTION("std::map") {

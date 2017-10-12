@@ -73,7 +73,7 @@ TEST_CASE("Point builder") {
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
-    REQUIRE(layer.size() == 1);
+    REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
@@ -120,9 +120,9 @@ TEST_CASE("value index") {
 
     vtzero::vector_tile tile{data};
 
-    REQUIRE(tile.size() == 1);
+    REQUIRE(tile.count_layers() == 1);
     auto layer = tile.next_layer();
-    REQUIRE(layer.size() == 1);
+    REQUIRE(layer.num_features() == 1);
     auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
     const auto property = feature.next_property();

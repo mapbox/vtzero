@@ -18,9 +18,11 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set(TEST_SOURCES builder
                  exceptions
+                 layer
                  property_map
                  property_value
-                 types)
+                 types
+                 vector_tile)
 
 string(REGEX REPLACE "([^;]+)" "t/test_\\1.cpp" _test_sources "${TEST_SOURCES}")
 
@@ -28,7 +30,9 @@ add_executable(unit-tests test_main.cpp ${_test_sources})
 
 add_executable(fixture-tests test_main.cpp fixture_tests.cpp)
 
-add_test(NAME unit-tests COMMAND unit-tests)
+add_test(NAME unit-tests
+         COMMAND unit-tests
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(_fixtures ${CMAKE_CURRENT_SOURCE_DIR}/mvt-fixtures/fixtures)
 if(EXISTS ${_fixtures})

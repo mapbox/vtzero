@@ -98,7 +98,7 @@ namespace vtzero {
          * @returns the number of layers in this tile
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        std::size_t size() const {
+        std::size_t count_layers() const {
             std::size_t size = 0;
 
             protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
