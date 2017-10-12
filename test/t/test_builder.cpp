@@ -69,13 +69,13 @@ TEST_CASE("Point builder") {
 
     vtzero::vector_tile tile{data};
 
-    const auto layer = *tile.begin();
+    auto layer = tile.next_layer();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.size() == 1);
 
-    const auto feature = *layer.begin();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
 
     point_handler handler;
@@ -121,9 +121,9 @@ TEST_CASE("value index") {
     vtzero::vector_tile tile{data};
 
     REQUIRE(tile.size() == 1);
-    const auto layer = *tile.begin();
+    auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
-    const auto feature = *layer.begin();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
     const auto property = *feature.begin();
     REQUIRE(property.value().sint_value() == 12);

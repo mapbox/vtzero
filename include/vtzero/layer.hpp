@@ -31,102 +31,23 @@ documentation.
 namespace vtzero {
 
     /**
-     * Iterator for iterating over features in a layer. You usually do not
-     * create these but get them from calling vector_tile::begin()/end().
-     */
-    class layer_iterator {
-
-        const layer* m_layer = nullptr;
-        protozero::pbf_message<detail::pbf_layer> m_layer_reader;
-        data_view m_data{};
-
-        void next() {
-            if (m_layer_reader.next(detail::pbf_layer::features,
-                                    protozero::pbf_wire_type::length_delimited)) {
-                m_data = m_layer_reader.get_view();
-            } else {
-                m_data = data_view{};
-            }
-        }
-
-    public:
-
-        using iterator_category = std::forward_iterator_tag;
-        using value_type        = feature;
-        using difference_type   = std::ptrdiff_t;
-        using pointer           = value_type;
-        using reference         = value_type&;
-
-        /**
-         * Construct special "end" iterator.
-         */
-        layer_iterator() noexcept = default;
-
-        /**
-         * Construct feature iterator from specified vector tile data.
-         *
-         * @throws format_exception if the tile data is ill-formed.
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         */
-        layer_iterator(const layer* layer, const data_view tile_data) :
-            m_layer(layer),
-            m_layer_reader(tile_data) {
-            next();
-        }
-
-        /**
-         * Dereference operator to get the feature.
-         *
-         * @returns feature
-         */
-        feature operator*() const {
-            vtzero_assert(m_data.data() != nullptr);
-            return feature{m_layer, m_data};
-        }
-
-        feature operator->() const {
-            return operator*();
-        }
-
-        /**
-         * Prefix increment operator.
-         *
-         * @throws format_exception if the layer data is ill-formed.
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         */
-        layer_iterator& operator++() {
-            next();
-            return *this;
-        }
-
-        /**
-         * Postfix increment operator.
-         *
-         * @throws format_exception if the layer data is ill-formed.
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         */
-        layer_iterator operator++(int) {
-            const layer_iterator tmp{*this};
-            ++(*this);
-            return tmp;
-        }
-
-        /// Equality operator
-        bool operator==(const layer_iterator& other) const noexcept {
-            return m_data == other.m_data;
-        }
-
-        /// Inequality operator
-        bool operator!=(const layer_iterator& other) const noexcept {
-            return !(*this == other);
-        }
-
-    }; // layer_iterator
-
-    /**
      * A layer according to spec 4.1. It contains a version, the extent,
-     * and a name as well as a collection of features. Use the begin()/end()
-     * methods to get an iterator for accessing the features.
+     * and a name. For the most efficient way to access the features in this
+     * layer call next_feature() until it returns an invalid feature:
+     *
+     * @code
+     *   std::string data = ...;
+     *   vector_tile tile{data};
+     *   layer = tile.next_layer();
+     *   while (auto feature = layer.next_feature()) {
+     *     ...
+     *   }
+     * @endcode
+     *
+     * If you know the ID of a feature, you can get it directly with
+     * @code
+     *   layer.get_feature_by_id(7);
+     * @endcode
      */
     class layer {
 
@@ -135,6 +56,7 @@ namespace vtzero {
         uint32_t m_extent = 4096; // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
         std::size_t m_num_features = 0;
         data_view m_name{};
+        protozero::pbf_message<detail::pbf_layer> m_layer_reader{m_data};
         mutable std::vector<data_view> m_key_table;
         mutable std::vector<property_value_view> m_value_table;
         mutable std::size_t m_key_table_size = 0;
@@ -164,9 +86,6 @@ namespace vtzero {
         }
 
     public:
-
-        using iterator = layer_iterator;
-        using const_iterator = layer_iterator;
 
         /**
          * Construct an invalid layer object.
@@ -236,14 +155,6 @@ namespace vtzero {
             return m_data.data() != nullptr;
         }
 
-        const layer& operator*() const noexcept {
-            return *this;
-        }
-
-        const layer* operator->() const noexcept {
-            return this;
-        }
-
         /**
          * Is this a valid layer? Valid layers are those not created from the
          * default constructor.
@@ -261,25 +172,34 @@ namespace vtzero {
 
         /**
          * Return the name of the layer.
+         *
+         * @pre @code valid() @endcode
          */
         data_view name() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
+
             return m_name;
         }
 
         /**
          * Return the version of this layer.
+         *
+         * @pre @code valid() @endcode
          */
         std::uint32_t version() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
+
             return m_version;
         }
 
         /**
          * Return the extent of this layer.
+         *
+         * @pre @code valid() @endcode
          */
         std::uint32_t extent() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
+
             return m_extent;
         }
 
@@ -288,8 +208,12 @@ namespace vtzero {
          *
          * Complexity: Amortized constant. First time the table is needed
          *             it needs to be created.
+         *
+         * @pre @code valid() @endcode
          */
         const std::vector<data_view>& key_table() const {
+            vtzero_assert(valid());
+
             if (m_key_table_size > 0) {
                 initialize_tables();
             }
@@ -301,8 +225,12 @@ namespace vtzero {
          *
          * Complexity: Amortized constant. First time the table is needed
          *             it needs to be created.
+         *
+         * @pre @code valid() @endcode
          */
         const std::vector<property_value_view>& value_table() const {
+            vtzero_assert(valid());
+
             if (m_value_table_size > 0) {
                 initialize_tables();
             }
@@ -316,8 +244,11 @@ namespace vtzero {
          *             it needs to be created.
          *
          * @throws std::out_of_range if the index is out of range.
+         * @pre @code valid() @endcode
          */
         data_view key(index_value index) const {
+            vtzero_assert(valid());
+
             return key_table().at(index.value());
         }
 
@@ -328,8 +259,11 @@ namespace vtzero {
          *             it needs to be created.
          *
          * @throws std::out_of_range if the index is out of range.
+         * @pre @code valid() @endcode
          */
         property_value_view value(index_value index) const {
+            vtzero_assert(valid());
+
             return value_table().at(index.value());
         }
 
@@ -351,18 +285,43 @@ namespace vtzero {
             return m_num_features;
         }
 
-        /// Returns an iterator to the beginning of features.
-        layer_iterator begin() const {
-            return {this, m_data};
-        }
+        /**
+         * Get the next feature in this layer.
+         *
+         * Complexity: Constant.
+         *
+         * @returns layer The next feature or the invalid feature if there
+         *                are no more features.
+         * @throws format_exception if the layer data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
+         * @pre @code valid() @endcode
+         */
+        feature next_feature() {
+            vtzero_assert(valid());
 
-        /// Returns an iterator to the end of features.
-        layer_iterator end() const {
-            return {};
+            const bool has_next = m_layer_reader.next(detail::pbf_layer::features,
+                                                      protozero::pbf_wire_type::length_delimited);
+
+            return has_next ? feature{this, m_layer_reader.get_view()} : feature{};
         }
 
         /**
-         * Get the feature with the specified ID.
+         * Reset the feature iterator. The next time next_feature() is called,
+         * it will begin from the first feature again.
+         *
+         * Complexity: Constant.
+         *
+         * @pre @code valid() @endcode
+         */
+        void reset_feature() noexcept {
+            vtzero_assert_in_noexcept_function(valid());
+
+            m_layer_reader = protozero::pbf_message<detail::pbf_layer>{m_data};
+        }
+
+        /**
+         * Get the feature with the specified ID. If there are several features
+         * with the same ID, it is undefined which one you'll get.
          *
          * Complexity: Linear in the number of features.
          *
@@ -371,8 +330,9 @@ namespace vtzero {
          *          there is no feature with this ID.
          * @throws format_exception if the layer data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
+         * @pre @code valid() @endcode
          */
-        feature operator[](uint64_t id) const {
+        feature get_feature_by_id(uint64_t id) const {
             vtzero_assert(valid());
 
             protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};

@@ -57,7 +57,7 @@ vtzero::layer get_layer(vtzero::vector_tile& tile, const std::string& layer_name
 
     if (str_end == layer_name_or_num.data() + layer_name_or_num.size()) {
         if (num >= 0 && num < std::numeric_limits<long>::max()) { // NOLINT clang-tidy: google-runtime-int
-            layer = tile[num];
+            layer = tile.get_layer(static_cast<std::size_t>(num));
             if (!layer) {
                 std::cerr << "No such layer: " << num << '\n';
                 std::exit(1);
@@ -66,7 +66,7 @@ vtzero::layer get_layer(vtzero::vector_tile& tile, const std::string& layer_name
         }
     }
 
-    layer = tile[layer_name_or_num];
+    layer = tile.get_layer_by_name(layer_name_or_num);
     if (!layer) {
         std::cerr << "No layer named '" << layer_name_or_num << "'.\n";
         std::exit(1);

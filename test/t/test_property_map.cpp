@@ -28,9 +28,9 @@ TEST_CASE("property map") {
 
     vtzero::vector_tile vt{data};
     REQUIRE(vt.size() == 1);
-    auto layer = *vt.begin();
+    auto layer = vt.next_layer();
     REQUIRE(layer.size() == 1);
-    auto feature = *layer.begin();
+    auto feature = layer.next_feature();
 
     REQUIRE(feature.size() == 3);
 

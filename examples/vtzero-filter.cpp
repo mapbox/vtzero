@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
             print_usage(argv[0]);
         }
 
-        auto feature = layer[static_cast<uint32_t>(id)];
+        auto feature = layer.get_feature_by_id(static_cast<uint32_t>(id));
         if (!feature.valid()) {
             std::cerr << "No feature with that id\n";
             std::exit(1);
