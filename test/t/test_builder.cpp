@@ -123,9 +123,9 @@ TEST_CASE("value index") {
     REQUIRE(tile.size() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
-    const auto property = *feature.begin();
+    const auto property = feature.next_property();
     REQUIRE(property.value().sint_value() == 12);
 }
 

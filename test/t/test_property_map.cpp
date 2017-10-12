@@ -30,7 +30,7 @@ TEST_CASE("property map") {
     REQUIRE(vt.size() == 1);
     auto layer = vt.next_layer();
     REQUIRE(layer.size() == 1);
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
 
     REQUIRE(feature.size() == 3);
 

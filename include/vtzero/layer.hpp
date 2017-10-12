@@ -290,8 +290,8 @@ namespace vtzero {
          *
          * Complexity: Constant.
          *
-         * @returns layer The next feature or the invalid feature if there
-         *                are no more features.
+         * @returns The next feature or the invalid feature if there are no
+         *          more features.
          * @throws format_exception if the layer data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          * @pre @code valid() @endcode
@@ -351,8 +351,21 @@ namespace vtzero {
 
     }; // class layer
 
-    inline property_view properties_iterator::operator*() const {
-        return {m_layer->key(*m_it), m_layer->value(*std::next(m_it))};
+    inline property_view feature::next_property() {
+        const auto idxs = next_property_indexes();
+        return idxs.valid() ? property_view{m_layer->key(idxs.key()),
+                                            m_layer->value(idxs.value())}
+                            : property_view{};
+    }
+
+    template <typename TFunc>
+    void feature::for_each_property(TFunc&& func) const {
+        vtzero_assert(valid());
+        for (auto it = m_properties.begin(); it != m_properties.end();) {
+            const uint32_t ki = *it++;
+            const uint32_t vi = *it++;
+            std::forward<TFunc>(func)(property_view{m_layer->key(ki), m_layer->value(vi)});
+        }
     }
 
 } // namespace vtzero

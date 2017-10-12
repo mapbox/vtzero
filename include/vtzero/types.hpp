@@ -272,7 +272,39 @@ namespace vtzero {
             return m_value;
         }
 
-    }; // struct index_value
+    }; // class index_value
+
+    class index_value_pair {
+
+        index_value m_key{};
+        index_value m_value{};
+
+    public:
+
+        constexpr index_value_pair() noexcept = default;
+
+        constexpr index_value_pair(index_value key, index_value value) noexcept :
+            m_key(key),
+            m_value(value) {
+        }
+
+        constexpr bool valid() const noexcept {
+            return m_key.valid();
+        }
+
+        constexpr operator bool() const noexcept {
+            return valid();
+        }
+
+        constexpr index_value key() const noexcept {
+            return m_key;
+        }
+
+        constexpr index_value value() const noexcept {
+            return m_value;
+        }
+
+    }; // class index_value_pair
 
     class geometry {
 

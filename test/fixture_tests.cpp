@@ -440,16 +440,19 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
 
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.begin();
+    auto prop = feature.next_property();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().string_value() == "i am a string value");
 
-    const auto it = feature.begin();
-    REQUIRE(it.get_index_pair().first.value() == 0);
-    REQUIRE(it.get_index_pair().second.value() == 0);
+    feature.reset_property();
+    auto ii = feature.next_property_indexes();
+    REQUIRE(ii);
+    REQUIRE(ii.key().value() == 0);
+    REQUIRE(ii.value().value() == 0);
+    REQUIRE_FALSE(feature.next_property_indexes());
 }
 
 TEST_CASE("MVT test 033: Layer with single feature with float property value") {
@@ -460,10 +463,10 @@ TEST_CASE("MVT test 033: Layer with single feature with float property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
 
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.begin();
+    const auto prop = feature.next_property();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().float_value() == Approx(3.1));
 }
@@ -476,10 +479,10 @@ TEST_CASE("MVT test 034: Layer with single feature with double property value") 
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
 
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.begin();
+    const auto prop = feature.next_property();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().double_value() == Approx(1.23));
 }
@@ -492,10 +495,10 @@ TEST_CASE("MVT test 035: Layer with single feature with int property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
 
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.begin();
+    const auto prop = feature.next_property();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().int_value() == 6);
 }
@@ -508,10 +511,10 @@ TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
 
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.begin();
+    const auto prop = feature.next_property();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().uint_value() == 87948);
 }
@@ -524,10 +527,10 @@ TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
 
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
 
-    const auto prop = *feature.begin();
+    const auto prop = feature.next_property();
     REQUIRE(prop.key() == "key1");
     REQUIRE(prop.value().sint_value() == 87948);
 }
@@ -569,7 +572,7 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.size() == 1);
 
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE(feature.empty());
@@ -582,9 +585,9 @@ TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the 
     REQUIRE(tile.size() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
-    REQUIRE_THROWS_AS(*feature.begin(), const std::out_of_range&);
+    REQUIRE_THROWS_AS(feature.next_property(), const std::out_of_range&);
 }
 
 TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
@@ -594,8 +597,8 @@ TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
     REQUIRE(tile.size() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
-    const auto feature = layer.next_feature();
-    REQUIRE_THROWS_AS(*feature.begin(), const std::out_of_range&);
+    auto feature = layer.next_feature();
+    REQUIRE_THROWS_AS(feature.next_property(), const std::out_of_range&);
 }
 
 TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in the layer.") {
@@ -605,9 +608,9 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
     REQUIRE(tile.size() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 1);
-    const auto feature = layer.next_feature();
+    auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
-    REQUIRE_THROWS_AS(*feature.begin(), const std::out_of_range&);
+    REQUIRE_THROWS_AS(feature.next_property(), const std::out_of_range&);
 }
 
 TEST_CASE("MVT test 043: A layer with six points that all share the same key but each has a unique value.") {
@@ -621,18 +624,14 @@ TEST_CASE("MVT test 043: A layer with six points that all share the same key but
     auto feature = layer.next_feature();
     REQUIRE(feature.size() == 1);
 
-    {
-        const auto pit = feature.begin();
-        REQUIRE(pit->key() == "poi");
-        REQUIRE(pit->value().string_value() == "swing");
-    }
+    auto property = feature.next_property();
+    REQUIRE(property.key() == "poi");
+    REQUIRE(property.value().string_value() == "swing");
 
     feature = layer.next_feature();
 
-    {
-        const auto property = *feature.begin();
-        REQUIRE(property.key() == "poi");
-        REQUIRE(property.value().string_value() == "water_fountain");
-    }
+    property = feature.next_property();
+    REQUIRE(property.key() == "poi");
+    REQUIRE(property.value().string_value() == "water_fountain");
 }
 

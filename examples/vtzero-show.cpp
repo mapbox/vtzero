@@ -155,7 +155,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
                 std::cout << "UNKNOWN GEOMETRY TYPE\n";
         }
         std::cout << "    properties:\n";
-        for (auto property : feature) {
+        while (auto property = feature.next_property()) {
             std::cout << "      " << property.key() << '=';
             vtzero::apply_visitor(print_value{}, property.value());
             if (print_values_with_type) {

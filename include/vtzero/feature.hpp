@@ -32,59 +32,6 @@ namespace vtzero {
 
     class layer;
 
-    class properties_iterator {
-
-        protozero::pbf_reader::const_uint32_iterator m_it;
-        const layer* m_layer;
-
-    public:
-
-        using iterator_category = std::forward_iterator_tag;
-        using value_type        = property_view;
-        using difference_type   = std::ptrdiff_t;
-        using pointer           = value_type;
-        using reference         = value_type&;
-
-        properties_iterator(const protozero::pbf_reader::const_uint32_iterator begin,
-                            const layer* layer) :
-            m_it(begin),
-            m_layer(layer) {
-            vtzero_assert(layer);
-        }
-
-        property_view operator*() const;
-
-        property_view operator->() const {
-            return operator*();
-        }
-
-        properties_iterator& operator++() {
-            ++m_it;
-            ++m_it;
-            return *this;
-        }
-
-        properties_iterator operator++(int) {
-            const properties_iterator tmp{*this};
-            ++(*this);
-            return tmp;
-        }
-
-        bool operator==(const properties_iterator& other) const noexcept {
-            return m_it == other.m_it &&
-                   m_layer == other.m_layer;
-        }
-
-        bool operator!=(const properties_iterator& other) const noexcept {
-            return !(*this == other);
-        }
-
-        std::pair<index_value, index_value> get_index_pair() const noexcept {
-            return {*m_it, *std::next(m_it)};
-        }
-
-    }; // properties_iterator
-
     /**
      * A feature according to spec 4.2.
      */
@@ -95,6 +42,7 @@ namespace vtzero {
         const layer* m_layer = nullptr;
         uint64_t m_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         uint32_it_range m_properties{};
+        protozero::pbf_reader::const_uint32_iterator m_property_iterator;
         std::size_t m_properties_size = 0;
         data_view m_geometry{};
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
@@ -108,8 +56,7 @@ namespace vtzero {
         feature() = default;
 
         /**
-         * Construct a feature object. This is usually not something done in
-         * user code, because features are created by the layer_iterator.
+         * Construct a feature object.
          *
          * @throws format_exception if the layer data is ill-formed.
          */
@@ -131,6 +78,7 @@ namespace vtzero {
                             throw format_exception{"Feature has more than one tags field"};
                         }
                         m_properties = reader.get_packed_uint32();
+                        m_property_iterator = m_properties.begin();
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
                             const auto type = reader.get_enum();
@@ -171,22 +119,18 @@ namespace vtzero {
         /**
          * Is this a valid feature? Valid features are those not created from
          * the default constructor.
+         *
+         * Complexity: Constant.
          */
         bool valid() const noexcept {
             return m_geometry.data() != nullptr;
         }
 
-        const feature& operator*() const noexcept {
-            return *this;
-        }
-
-        const feature* operator->() const noexcept {
-            return this;
-        }
-
         /**
          * Is this a valid feature? Valid features are those not created from
          * the default constructor.
+         *
+         * Complexity: Constant.
          */
         explicit operator bool() const noexcept {
             return valid();
@@ -195,14 +139,21 @@ namespace vtzero {
         /**
          * The ID of this feature. According to the spec IDs should be unique
          * in a layer if they are set (spec 4.2).
+         *
+         * Complexity: Constant.
+         *
+         * Always returns 0 for invalid features.
          */
         uint64_t id() const noexcept {
-            vtzero_assert_in_noexcept_function(valid());
             return m_id;
         }
 
         /**
          * Does this feature have an ID?
+         *
+         * Complexity: Constant.
+         *
+         * Always returns false for invalid features.
          */
         bool has_id() const noexcept {
             return m_has_id;
@@ -210,14 +161,21 @@ namespace vtzero {
 
         /**
          * The geometry type of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * Always returns GeomType::UNKNOWN for invalid features.
          */
         GeomType geometry_type() const noexcept {
-            vtzero_assert_in_noexcept_function(valid());
             return m_geometry_type;
         }
 
         /**
          * Get the geometry of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * @pre @code valid() @endcode
          */
         vtzero::geometry geometry() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
@@ -228,6 +186,8 @@ namespace vtzero {
          * Returns true if this feature doesn't have any properties.
          *
          * Complexity: Constant.
+         *
+         * Always returns true for invalid features.
          */
         bool empty() const noexcept {
             return m_properties_size == 0;
@@ -237,20 +197,71 @@ namespace vtzero {
          * Returns the number of properties in this feature.
          *
          * Complexity: Constant.
+         *
+         * Always returns 0 for invalid features.
          */
         std::size_t size() const noexcept {
             return m_properties_size;
         }
 
-        /// Returns an iterator to the beginning of the properties.
-        properties_iterator begin() const noexcept {
-            return {m_properties.begin(), m_layer};
+        /**
+         * Get the next property in this feature.
+         *
+         * Complexity: Constant.
+         *
+         * @returns The next property_view or the invalid property_view if
+         *          there are no more properties.
+         * @throws format_exception if the feature data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
+         * @pre @code valid() @endcode
+         */
+        property_view next_property();
+
+        /**
+         * Get the indexes into the key/value table for the next property in
+         * this feature.
+         *
+         * Complexity: Constant.
+         *
+         * @returns The next property_view or the invalid property_view if
+         *          there are no more properties.
+         * @throws format_exception if the feature data is ill-formed.
+         * @throws any protozero exception if the protobuf encoding is invalid.
+         * @pre @code valid() @endcode
+         */
+        index_value_pair next_property_indexes() {
+            vtzero_assert(valid());
+            if (m_property_iterator == m_properties.end()) {
+                return {};
+            }
+            return {*m_property_iterator++, *m_property_iterator++};
         }
 
-        /// Returns an iterator to the end of the properties.
-        properties_iterator end() const noexcept {
-            return {m_properties.end(), m_layer};
+        /**
+         * Reset the property iterator. The next time next_property() or
+         * next_property_indexes() is called, it will begin from the first
+         * property again.
+         *
+         * Complexity: Constant.
+         *
+         * @pre @code valid() @endcode
+         */
+        void reset_property() noexcept {
+            vtzero_assert_in_noexcept_function(valid());
+            m_property_iterator = m_properties.begin();
         }
+
+        /**
+         * Call a function for each property of this feature.
+         *
+         * @tparam The type of the function. It must take a single argument
+         *         of type property_view and return void.
+         * @param func The function to call.
+         *
+         * @pre @code valid() @endcode
+         */
+        template <typename TFunc>
+        void for_each_property(TFunc&& func) const;
 
     }; // class feature
 
@@ -268,14 +279,17 @@ namespace vtzero {
      * @tparam TValue Value type, usally the value of the map type. The
      *                property_value_view is converted to this type before
      *                adding it to the map.
+     * @param feature The feature to get the properties from.
+     * @returns An object of type TMap with all the properties.
+     * @pre @code feature.valid() @endcode
      */
     template <typename TMap, typename TKey = typename TMap::key_type, typename TValue = typename TMap::mapped_type>
     TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
-        for (const auto& p : feature) {
+        feature.for_each_property([&](property_view p){
             map.emplace(TKey(p.key()), convert_property_value<TValue>(p.value()));
-        }
+        });
 
         return map;
     }
