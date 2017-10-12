@@ -13,7 +13,7 @@ documentation.
 /**
  * @file layer.hpp
  *
- * @brief Contains the layer and layer_iterator classes.
+ * @brief Contains the layer class.
  */
 
 #include "exception.hpp"

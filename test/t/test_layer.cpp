@@ -1,8 +1,8 @@
 
 #include <test.hpp>
 
-#include <vtzero/vector_tile.hpp>
 #include <vtzero/layer.hpp>
+#include <vtzero/vector_tile.hpp>
 
 TEST_CASE("default constructed layer") {
     vtzero::layer layer{};
@@ -22,6 +22,10 @@ TEST_CASE("default constructed layer") {
 
     REQUIRE_THROWS_AS(layer.key(0), const assert_error&);
     REQUIRE_THROWS_AS(layer.value(0), const assert_error&);
+
+    REQUIRE_THROWS_AS(layer.get_feature_by_id(0), const assert_error&);
+    REQUIRE_THROWS_AS(layer.next_feature(), const assert_error&);
+    REQUIRE_ASSERT(layer.reset_feature());
 }
 
 TEST_CASE("read a layer") {
@@ -61,5 +65,49 @@ TEST_CASE("read a layer") {
     REQUIRE(layer.value(2).string_value() == "primary");
     REQUIRE(layer.value(3).string_value() == "tertiary");
     REQUIRE_THROWS_AS(layer.value(4), const std::out_of_range&);
+}
+
+TEST_CASE("access features in a layer by id") {
+    const auto data = load_test_tile();
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.get_layer_by_name("building");
+    REQUIRE(layer);
+
+    REQUIRE(layer.num_features() == 937);
+
+    const auto feature = layer.get_feature_by_id(122);
+    REQUIRE(feature.id() == 122);
+    REQUIRE(feature.num_properties() == 0);
+    REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
+    REQUIRE(feature.geometry().type() == vtzero::GeomType::POLYGON);
+    REQUIRE(feature.geometry().data().size() > 0);
+
+    REQUIRE_FALSE(layer.get_feature_by_id(844));
+    REQUIRE_FALSE(layer.get_feature_by_id(999999));
+}
+
+TEST_CASE("iterate over features in a layer") {
+    const auto data = load_test_tile();
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.get_layer_by_name("building");
+    REQUIRE(layer);
+
+    std::size_t id_sum = 0;
+    while (auto feature = layer.next_feature()) {
+        if (feature.id() == 10) {
+            break;
+        }
+        id_sum += feature.id();
+    }
+
+    const std::size_t expected = (10 - 1) * 10 / 2;
+    REQUIRE(id_sum == expected);
+
+    layer.reset_feature();
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+    REQUIRE(feature.id() == 1);
 }
 

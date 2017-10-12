@@ -26,7 +26,7 @@ documentation.
 /**
  * @file types.hpp
  *
- * @brief Contains the declaration of low-level types used.
+ * @brief Contains the declaration of low-level types.
  */
 
 /**

@@ -13,7 +13,7 @@ documentation.
 /**
  * @file feature.hpp
  *
- * @brief Contains the feature and properties_iterator classes.
+ * @brief Contains the feature class.
  */
 
 #include "exception.hpp"
@@ -43,7 +43,7 @@ namespace vtzero {
         uint64_t m_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         uint32_it_range m_properties{};
         protozero::pbf_reader::const_uint32_iterator m_property_iterator;
-        std::size_t m_properties_size = 0;
+        std::size_t m_num_properties = 0;
         data_view m_geometry{};
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
         bool m_has_id = false;
@@ -113,7 +113,7 @@ namespace vtzero {
             if (size % 2 != 0) {
                 throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
             }
-            m_properties_size = size / 2;
+            m_num_properties = size / 2;
         }
 
         /**
@@ -190,7 +190,7 @@ namespace vtzero {
          * Always returns true for invalid features.
          */
         bool empty() const noexcept {
-            return m_properties_size == 0;
+            return m_num_properties == 0;
         }
 
         /**
@@ -201,7 +201,7 @@ namespace vtzero {
          * Always returns 0 for invalid features.
          */
         std::size_t num_properties() const noexcept {
-            return m_properties_size;
+            return m_num_properties;
         }
 
         /**

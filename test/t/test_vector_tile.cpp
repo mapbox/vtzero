@@ -71,7 +71,7 @@ TEST_CASE("iterate over layers") {
 
     std::vector<std::string> names;
     while (auto layer = tile.next_layer()) {
-        names.push_back(std::string(layer.name()));
+        names.emplace_back(layer.name());
     }
 
     REQUIRE(names.size() == 12);

@@ -13,7 +13,7 @@ documentation.
 /**
  * @file vector_tile.hpp
  *
- * @brief Contains the vector_tile classes.
+ * @brief Contains the vector_tile class.
  */
 
 #include "exception.hpp"

@@ -364,6 +364,7 @@ TEST_CASE("MVT test 023: Invalid layer: missing layer name") {
 
     REQUIRE(tile.count_layers() == 1);
     REQUIRE_THROWS_AS(tile.next_layer(), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(tile.get_layer_by_name("foo"), const vtzero::format_exception&);
 }
 
 TEST_CASE("MVT test 024: Missing layer version") {
