@@ -111,6 +111,7 @@ namespace vtzero {
     /// property value type holding a reference to a string
     struct string_value_type {
 
+        /// the underlying storage type
         using type = data_view;
 
         constexpr static const property_value_type pvtype = property_value_type::string_value;
@@ -129,6 +130,7 @@ namespace vtzero {
     /// property value type holding a float
     struct float_value_type {
 
+        /// the underlying storage type
         using type = float;
 
         constexpr static const property_value_type pvtype = property_value_type::float_value;
@@ -147,6 +149,7 @@ namespace vtzero {
     /// property value type holding a double
     struct double_value_type {
 
+        /// the underlying storage type
         using type = double;
 
         constexpr static const property_value_type pvtype = property_value_type::double_value;
@@ -165,6 +168,7 @@ namespace vtzero {
     /// property value type holding an int
     struct int_value_type {
 
+        /// the underlying storage type
         using type = int64_t;
 
         constexpr static const property_value_type pvtype = property_value_type::int_value;
@@ -183,6 +187,7 @@ namespace vtzero {
     /// property value type holding a uint
     struct uint_value_type {
 
+        /// the underlying storage type
         using type = uint64_t;
 
         constexpr static const property_value_type pvtype = property_value_type::uint_value;
@@ -201,6 +206,7 @@ namespace vtzero {
     /// property value type holding an sint
     struct sint_value_type {
 
+        /// the underlying storage type
         using type = int64_t;
 
         constexpr static const property_value_type pvtype = property_value_type::sint_value;
@@ -219,6 +225,7 @@ namespace vtzero {
     /// property value type holding a bool
     struct bool_value_type {
 
+        /// the underlying storage type
         using type = bool;
 
         constexpr static const property_value_type pvtype = property_value_type::bool_value;
@@ -274,6 +281,9 @@ namespace vtzero {
 
     }; // class index_value
 
+    /**
+     * This class holds two index_values, one for a key and one for a value.
+     */
     class index_value_pair {
 
         index_value m_key{};
@@ -281,31 +291,49 @@ namespace vtzero {
 
     public:
 
+        /// Default construct to an invalid value.
         constexpr index_value_pair() noexcept = default;
 
+        /// Construct with the given values.
         constexpr index_value_pair(index_value key, index_value value) noexcept :
             m_key(key),
             m_value(value) {
         }
 
+        /**
+         * Is this index value pair valid? Index values are valid if they have
+         * been initialized with something other than the default constructor.
+         */
         constexpr bool valid() const noexcept {
             return m_key.valid();
         }
 
+        /**
+         * Is this index value pair valid? Index values are valid if they have
+         * been initialized with something other than the default constructor.
+         */
         constexpr operator bool() const noexcept {
             return valid();
         }
 
+        /// Get the key index value.
         constexpr index_value key() const noexcept {
             return m_key;
         }
 
+        /// Get the value index value.
         constexpr index_value value() const noexcept {
             return m_value;
         }
 
     }; // class index_value_pair
 
+    /**
+     * The geometry class holds a geometry type and a reference to the data
+     * defining this geometry. To actually decode these geometries, use the
+     * decode_point_geometry(), decode_linestring_geometry(), and
+     * decode_polygon_geometry() classes.
+     */
     class geometry {
 
         data_view m_data{};
@@ -313,17 +341,21 @@ namespace vtzero {
 
     public:
 
+        /// Default construct to an invalid value.
         constexpr geometry() noexcept = default;
 
+        /// Construct with the given values.
         constexpr geometry(data_view data, GeomType type) noexcept :
             m_data(data),
             m_type(type) {
         }
 
+        /// The data of this geometry
         constexpr data_view data() const noexcept {
             return m_data;
         }
 
+        /// The type of this geometry
         constexpr GeomType type() const noexcept {
             return m_type;
         }

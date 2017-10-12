@@ -26,13 +26,19 @@ documentation.
 
 namespace vtzero {
 
+    /// A simple point class
     struct point {
 
+        /// X coordinate
         int32_t x = 0;
+
+        /// Y coordinate
         int32_t y = 0;
 
+        /// Default construct to 0 coordinates
         constexpr point() noexcept = default;
 
+        /// Constructor
         constexpr point(int32_t x_, int32_t y_) noexcept :
             x(x_),
             y(y_) {
@@ -40,20 +46,24 @@ namespace vtzero {
 
     }; // struct point
 
+    /// Overload of the << operator for points
     template <typename TChar, typename TTraits>
     std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, point p) {
         return out << '(' << p.x << ',' << p.y << ')';
     }
 
+    /// Helper function to create a point from any type that has members x and y
     template <typename T>
     point create_point(T p) noexcept {
         return {p.x, p.y};
     }
 
+    /// Points are equal if their coordinates are
     inline constexpr bool operator==(const point a, const point b) noexcept {
         return a.x == b.x && a.y == b.y;
     }
 
+    /// Points are not equal if their coordinates aren't
     inline constexpr bool operator!=(const point a, const point b) noexcept {
         return !(a==b);
     }

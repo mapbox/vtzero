@@ -29,10 +29,12 @@ class exception : public std::runtime_error {
 
 public:
 
+    /// Constructor
     explicit exception(const char* message) :
         std::runtime_error(message) {
     }
 
+    /// Constructor
     explicit exception(const std::string& message) :
         std::runtime_error(message) {
     }
@@ -47,10 +49,12 @@ class format_exception : public exception {
 
 public:
 
+    /// Constructor
     explicit format_exception(const char* message) :
         exception(message) {
     }
 
+    /// Constructor
     explicit format_exception(const std::string& message) :
         exception(message) {
     }
@@ -65,10 +69,12 @@ class geometry_exception : public format_exception {
 
 public:
 
+    /// Constructor
     explicit geometry_exception(const char* message) :
         format_exception(message) {
     }
 
+    /// Constructor
     explicit geometry_exception(const std::string& message) :
         format_exception(message) {
     }
@@ -83,6 +89,7 @@ class type_exception : public exception {
 
 public:
 
+    /// Constructor
     explicit type_exception() :
         exception("wrong property value type") {
     }
@@ -97,6 +104,7 @@ class version_exception : public exception {
 
 public:
 
+    /// Constructor
     explicit version_exception(uint32_t version) :
         exception(std::string{"unknown vector tile version "} + std::to_string(version)) {
     }
