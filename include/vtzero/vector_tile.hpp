@@ -249,7 +249,7 @@ namespace vtzero {
      *          true if this could be a vector tile
      */
     inline bool is_vector_tile(const data_view data) noexcept {
-        return data.size() > 0 && data.data()[0] == 0x1a;
+        return !data.empty() && data.data()[0] == 0x1a;
     }
 
 } // namespace vtzero

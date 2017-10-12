@@ -312,7 +312,7 @@ namespace vtzero {
          * Is this index value pair valid? Index values are valid if they have
          * been initialized with something other than the default constructor.
          */
-        constexpr operator bool() const noexcept {
+        constexpr explicit operator bool() const noexcept {
             return valid();
         }
 

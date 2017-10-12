@@ -234,7 +234,9 @@ namespace vtzero {
             if (m_property_iterator == m_properties.end()) {
                 return {};
             }
-            return {*m_property_iterator++, *m_property_iterator++};
+            const auto ki = *m_property_iterator++;
+            const auto vi = *m_property_iterator++;
+            return {ki, vi};
         }
 
         /**

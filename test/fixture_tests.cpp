@@ -616,21 +616,25 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
 TEST_CASE("MVT test 043: A layer with six points that all share the same key but each has a unique value.") {
     std::string buffer{open_tile("043/tile.mvt")};
     vtzero::vector_tile tile{buffer};
-
     REQUIRE(tile.size() == 1);
+
     auto layer = tile.next_layer();
     REQUIRE(layer.size() == 6);
 
     auto feature = layer.next_feature();
+    REQUIRE(feature);
     REQUIRE(feature.size() == 1);
 
     auto property = feature.next_property();
+    REQUIRE(property);
     REQUIRE(property.key() == "poi");
     REQUIRE(property.value().string_value() == "swing");
 
     feature = layer.next_feature();
+    REQUIRE(feature);
 
     property = feature.next_property();
+    REQUIRE(property);
     REQUIRE(property.key() == "poi");
     REQUIRE(property.value().string_value() == "water_fountain");
 }
