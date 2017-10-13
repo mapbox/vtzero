@@ -9,6 +9,7 @@
 if(Boost_FOUND)
     message(STATUS "Boost library found: enable testing with boost::variant")
     add_definitions(-DVTZERO_TEST_WITH_VARIANT)
+    include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
 else()
     message(STATUS "Boost library not found: disable testing with boost::variant")
 endif()
