@@ -204,6 +204,24 @@ namespace vtzero {
         }
 
         /**
+         * Does this layer contain any features?
+         *
+         * Complexity: Constant.
+         */
+        bool empty() const noexcept {
+            return m_num_features == 0;
+        }
+
+        /**
+         * The number of features in this layer.
+         *
+         * Complexity: Constant.
+         */
+        std::size_t num_features() const noexcept {
+            return m_num_features;
+        }
+
+        /**
          * Return a reference to the key table.
          *
          * Complexity: Amortized constant. First time the table is needed
@@ -265,24 +283,6 @@ namespace vtzero {
             vtzero_assert(valid());
 
             return value_table().at(index.value());
-        }
-
-        /**
-         * Does this layer contain any features?
-         *
-         * Complexity: Constant.
-         */
-        bool empty() const noexcept {
-            return m_num_features == 0;
-        }
-
-        /**
-         * The number of features in this layer.
-         *
-         * Complexity: Constant.
-         */
-        std::size_t num_features() const noexcept {
-            return m_num_features;
         }
 
         /**
