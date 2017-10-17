@@ -24,7 +24,7 @@ namespace vtzero {
     /**
      * A view of a vector tile property.
      *
-     * Doesn't hold any data itself, just references to the key and value.
+     * Doesn't hold any data itself, just views of the key and value.
      */
     class property_view {
 
@@ -36,12 +36,12 @@ namespace vtzero {
         /**
          * The default constructor creates an invalid (empty) property_view.
          */
-        property_view() noexcept = default;
+        constexpr property_view() noexcept = default;
 
         /**
          * Create a (valid) property_view from a key and value.
          */
-        property_view(const data_view key, const property_value_view value) noexcept :
+        constexpr property_view(const data_view key, const property_value_view value) noexcept :
             m_key(key),
             m_value(value) {
         }
@@ -50,7 +50,7 @@ namespace vtzero {
          * Is this a valid view? Property views are valid if they were
          * constructed using the non-default constructor.
          */
-        bool valid() const noexcept {
+        constexpr bool valid() const noexcept {
             return m_key.data() != nullptr;
         }
 
@@ -58,17 +58,17 @@ namespace vtzero {
          * Is this a valid view? Property views are valid if they were
          * constructed using the non-default constructor.
          */
-        explicit operator bool() const noexcept {
+        explicit constexpr operator bool() const noexcept {
             return valid();
         }
 
         /// Return the property key.
-        data_view key() const noexcept {
+        constexpr data_view key() const noexcept {
             return m_key;
         }
 
         /// Return the property value.
-        property_value_view value() const noexcept {
+        constexpr property_value_view value() const noexcept {
             return m_value;
         }
 

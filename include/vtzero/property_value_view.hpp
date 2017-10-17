@@ -30,7 +30,7 @@ namespace vtzero {
     /**
      * A view of a vector tile property value.
      *
-     * Doesn't hold any data itself, just references the value.
+     * Doesn't hold any data itself.
      */
     class property_value_view {
 

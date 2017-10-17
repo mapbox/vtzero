@@ -3,6 +3,7 @@
 
 #include <vtzero/property_value.hpp>
 #include <vtzero/property_value_view.hpp>
+#include <vtzero/property_view.hpp>
 #include <vtzero/types.hpp>
 
 #ifdef VTZERO_TEST_WITH_VARIANT
@@ -201,5 +202,23 @@ TEST_CASE("property_value_view ordering") {
     REQUIRE(pvv{vsf.data()} <= pvv{vsx.data()});
     REQUIRE_FALSE(pvv{vsf.data()} >  pvv{vsx.data()});
     REQUIRE_FALSE(pvv{vsf.data()} >= pvv{vsx.data()});
+}
+
+TEST_CASE("default constructed property_view") {
+    vtzero::property_view pv;
+    REQUIRE_FALSE(pv.valid());
+    REQUIRE_FALSE(pv);
+    REQUIRE(pv.key().data() == nullptr);
+    REQUIRE(pv.value().data().data() == nullptr);
+}
+
+TEST_CASE("valid property_view") {
+    vtzero::data_view k{"key"};
+    vtzero::property_value v{"value"};
+    vtzero::property_value_view vv{v.data()};
+
+    vtzero::property_view pv{k, vv};
+    REQUIRE(pv.key() == "key");
+    REQUIRE(pv.value().string_value() == "value");
 }
 
