@@ -69,6 +69,18 @@ over the layers again:
 tile.reset_layer();
 ```
 
+Instead of using this external interator, you can use a different function with
+an internal iterator that calls a function defined by you for each layer. Your
+function must take a `layer&&` as parameter and return `true` if the iteration
+should continue and `false` otherwise:
+
+```cpp
+tile.for_each_layer([&](layer&& l) {
+    // do something with layer
+    return true;
+});
+```
+
 You can also access layers through their index or name:
 
 ```cpp
@@ -119,6 +131,18 @@ while (auto feature = layer.next_feature()) {
 ```
 
 Use `reset_feature()` to restart the feature iterator from the beginning.
+
+Instead of using this external interator, you can use a different function with
+an internal iterator that calls a function defined by you for each feature.
+Your function must take a `feature&&` as parameter and return `true` if the
+iteration should continue and `false` otherwise:
+
+```cpp
+layer.for_each_feature([&](feature&& f) {
+    // do something with the feature
+    return true;
+});
+```
 
 If you know the ID of a feature you can get the feature using
 `get_feature_by_id()`, but note that this will do a linear search through

@@ -714,8 +714,9 @@ namespace vtzero {
 
     inline void layer_builder::add_feature(const feature& feature) {
         geometry_feature_builder feature_builder{*this, feature.geometry(), feature.id()};
-        feature.for_each_property([&](property_view p) {
+        feature.for_each_property([&](property_view&& p) {
             feature_builder.add_property(p);
+            return true;
         });
     }
 

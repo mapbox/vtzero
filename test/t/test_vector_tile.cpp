@@ -70,8 +70,19 @@ TEST_CASE("iterate over layers") {
     vtzero::vector_tile tile{data};
 
     std::vector<std::string> names;
-    while (auto layer = tile.next_layer()) {
-        names.emplace_back(layer.name());
+
+    SECTION("external iterator") {
+        while (auto layer = tile.next_layer()) {
+            names.emplace_back(layer.name());
+        }
+    }
+
+    SECTION("internal iterator") {
+        const bool done = tile.for_each_layer([&](const vtzero::layer&& layer) {
+            names.emplace_back(layer.name());
+            return true;
+        });
+        REQUIRE(done);
     }
 
     REQUIRE(names.size() == 12);

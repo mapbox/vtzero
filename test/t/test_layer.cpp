@@ -95,11 +95,25 @@ TEST_CASE("iterate over features in a layer") {
     REQUIRE(layer);
 
     std::size_t id_sum = 0;
-    while (auto feature = layer.next_feature()) {
-        if (feature.id() == 10) {
-            break;
+
+    SECTION("external iterator") {
+        while (auto feature = layer.next_feature()) {
+            if (feature.id() == 10) {
+                break;
+            }
+            id_sum += feature.id();
         }
-        id_sum += feature.id();
+    }
+
+    SECTION("internal iterator") {
+        const bool done = layer.for_each_feature([&](vtzero::feature&& feature) {
+            if (feature.id() == 10) {
+                return false;
+            }
+            id_sum += feature.id();
+            return true;
+        });
+        REQUIRE_FALSE(done);
     }
 
     const std::size_t expected = (10 - 1) * 10 / 2;

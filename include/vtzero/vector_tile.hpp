@@ -139,6 +139,29 @@ namespace vtzero {
         }
 
         /**
+         * Call a function for each layer in this tile.
+         *
+         * @tparam The type of the function. It must take a single argument
+         *         of type layer&& and return a bool. If the function returns
+         *         false, the iteration will be stopped.
+         * @param func The function to call.
+         * @returns true if the iteration was completed and false otherwise.
+         */
+        template <typename TFunc>
+        bool for_each_layer(TFunc&& func) const {
+            protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
+
+            while (tile_reader.next(detail::pbf_tile::layers,
+                                    protozero::pbf_wire_type::length_delimited)) {
+                if (!std::forward<TFunc>(func)(layer{tile_reader.get_view()})) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /**
          * Returns the layer with the specified zero-based index.
          *
          * Complexity: Linear in the number of layers.

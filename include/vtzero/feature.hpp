@@ -257,13 +257,14 @@ namespace vtzero {
          * Call a function for each property of this feature.
          *
          * @tparam The type of the function. It must take a single argument
-         *         of type property_view and return void.
+         *         of type property_view&& and return a bool. If the function
+         *         returns false, the iteration will be stopped.
          * @param func The function to call.
-         *
+         * @returns true if the iteration was completed and false otherwise.
          * @pre @code valid() @endcode
          */
         template <typename TFunc>
-        void for_each_property(TFunc&& func) const;
+        bool for_each_property(TFunc&& func) const;
 
     }; // class feature
 
@@ -289,8 +290,9 @@ namespace vtzero {
     TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
-        feature.for_each_property([&](property_view p){
+        feature.for_each_property([&](property_view&& p) {
             map.emplace(TKey(p.key()), convert_property_value<TValue>(p.value()));
+            return true;
         });
 
         return map;
