@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
         switch (c) {
             case 'h':
                 print_help();
-                std::exit(0);
+                return 0;
             case 'l':
                 layer_overview = true;
                 break;
@@ -219,36 +219,42 @@ int main(int argc, char* argv[]) {
                 print_values_with_type = true;
                 break;
             default:
-                std::exit(1);
+                return 1;
         }
     }
 
     const int remaining_args = argc - optind;
     if (remaining_args < 1 || remaining_args > 2) {
         std::cerr << "Usage: " << argv[0] << " [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n";
-        std::exit(1);
+        return 1;
     }
 
-    const auto data = read_file(argv[optind]);
+    try {
+        const auto data = read_file(argv[optind]);
 
-    vtzero::vector_tile tile{data};
+        vtzero::vector_tile tile{data};
 
-    if (remaining_args == 1) {
-        while (auto layer = tile.next_layer()) {
+        if (remaining_args == 1) {
+            while (auto layer = tile.next_layer()) {
+                if (layer_overview) {
+                    print_layer_overview(layer);
+                } else {
+                    print_layer(layer, strict, print_tables, print_values_with_type);
+                }
+            }
+        } else {
+            auto layer = get_layer(tile, argv[optind + 1]);
             if (layer_overview) {
                 print_layer_overview(layer);
             } else {
                 print_layer(layer, strict, print_tables, print_values_with_type);
             }
         }
-    } else {
-        auto layer = get_layer(tile, argv[optind + 1]);
-        if (layer_overview) {
-            print_layer_overview(layer);
-        } else {
-            print_layer(layer, strict, print_tables, print_values_with_type);
-        }
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        return 1;
     }
 
+    return 0;
 }
 
