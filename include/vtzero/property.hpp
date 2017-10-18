@@ -1,5 +1,5 @@
-#ifndef VTZERO_PROPERTY_VIEW_HPP
-#define VTZERO_PROPERTY_VIEW_HPP
+#ifndef VTZERO_PROPERTY_HPP
+#define VTZERO_PROPERTY_HPP
 
 /*****************************************************************************
 
@@ -11,43 +11,43 @@ documentation.
 *****************************************************************************/
 
 /**
- * @file property_view.hpp
+ * @file property.hpp
  *
- * @brief Contains the property_view class.
+ * @brief Contains the property class.
  */
 
-#include "property_value_view.hpp"
+#include "property_value.hpp"
 #include "types.hpp"
 
 namespace vtzero {
 
     /**
-     * A view of a vector tile property.
+     * A view of a vector tile property (key and value).
      *
      * Doesn't hold any data itself, just views of the key and value.
      */
-    class property_view {
+    class property {
 
         data_view m_key{};
-        property_value_view m_value{};
+        property_value m_value{};
 
     public:
 
         /**
-         * The default constructor creates an invalid (empty) property_view.
+         * The default constructor creates an invalid (empty) property.
          */
-        constexpr property_view() noexcept = default;
+        constexpr property() noexcept = default;
 
         /**
-         * Create a (valid) property_view from a key and value.
+         * Create a (valid) property from a key and value.
          */
-        constexpr property_view(const data_view key, const property_value_view value) noexcept :
+        constexpr property(const data_view key, const property_value value) noexcept :
             m_key(key),
             m_value(value) {
         }
 
         /**
-         * Is this a valid view? Property views are valid if they were
+         * Is this a valid property? Properties are valid if they were
          * constructed using the non-default constructor.
          */
         constexpr bool valid() const noexcept {
@@ -55,7 +55,7 @@ namespace vtzero {
         }
 
         /**
-         * Is this a valid view? Property views are valid if they were
+         * Is this a valid property? Properties are valid if they were
          * constructed using the non-default constructor.
          */
         explicit constexpr operator bool() const noexcept {
@@ -68,12 +68,12 @@ namespace vtzero {
         }
 
         /// Return the property value.
-        constexpr property_value_view value() const noexcept {
+        constexpr property_value value() const noexcept {
             return m_value;
         }
 
-    }; // class property_view
+    }; // class property
 
 } // namespace vtzero
 
-#endif // VTZERO_PROPERTY_VIEW_HPP
+#endif // VTZERO_PROPERTY_HPP

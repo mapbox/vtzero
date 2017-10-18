@@ -1,9 +1,9 @@
 
 #include <test.hpp>
 
+#include <vtzero/encoded_property_value.hpp>
+#include <vtzero/property.hpp>
 #include <vtzero/property_value.hpp>
-#include <vtzero/property_value_view.hpp>
-#include <vtzero/property_view.hpp>
 #include <vtzero/types.hpp>
 
 #ifdef VTZERO_TEST_WITH_VARIANT
@@ -54,171 +54,171 @@ struct visitor_test_to_string {
 
 };
 
-TEST_CASE("default constructed property_value_view") {
-    vtzero::property_value_view pvv;
-    REQUIRE_FALSE(pvv.valid());
-    REQUIRE(pvv.data().data() == nullptr);
+TEST_CASE("default constructed property_value") {
+    vtzero::property_value pv;
+    REQUIRE_FALSE(pv.valid());
+    REQUIRE(pv.data().data() == nullptr);
 
-    REQUIRE(pvv == vtzero::property_value_view{});
-    REQUIRE_FALSE(pvv != vtzero::property_value_view{});
+    REQUIRE(pv == vtzero::property_value{});
+    REQUIRE_FALSE(pv != vtzero::property_value{});
 }
 
-TEST_CASE("empty property_value_view") {
+TEST_CASE("empty property_value") {
     char x[1] = {0};
     vtzero::data_view dv{x, 0};
-    vtzero::property_value_view pvv{dv};
-    REQUIRE(pvv.valid());
-    REQUIRE_THROWS_AS(pvv.type(), const vtzero::format_exception&);
+    vtzero::property_value pv{dv};
+    REQUIRE(pv.valid());
+    REQUIRE_THROWS_AS(pv.type(), const vtzero::format_exception&);
 }
 
 TEST_CASE("string value") {
-    vtzero::property_value v{"foo"};
-    vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.string_value() == "foo");
+    vtzero::encoded_property_value epv{"foo"};
+    vtzero::property_value pv{epv.data()};
+    REQUIRE(pv.string_value() == "foo");
 
     visitor_test_void vt;
-    vtzero::apply_visitor(vt, vv);
+    vtzero::apply_visitor(vt, pv);
     REQUIRE(vt.x == 2);
 
-    const auto result = vtzero::apply_visitor(visitor_test_int{}, vv);
+    const auto result = vtzero::apply_visitor(visitor_test_int{}, pv);
     REQUIRE(result == 2);
 
-    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "foo");
 
 #ifdef VTZERO_TEST_WITH_VARIANT
-    const auto vari = vtzero::convert_property_value<variant_type>(vv);
+    const auto vari = vtzero::convert_property_value<variant_type>(pv);
     REQUIRE(boost::get<std::string>(vari) == "foo");
 #endif
 }
 
 TEST_CASE("float value") {
-    vtzero::property_value v{1.2f};
-    vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.float_value() == Approx(1.2));
+    vtzero::encoded_property_value epv{1.2f};
+    vtzero::property_value pv{epv.data()};
+    REQUIRE(pv.float_value() == Approx(1.2));
 
     visitor_test_void vt;
-    vtzero::apply_visitor(vt, vv);
+    vtzero::apply_visitor(vt, pv);
     REQUIRE(vt.x == 1);
 
-    const auto result = vtzero::apply_visitor(visitor_test_int{}, vv);
+    const auto result = vtzero::apply_visitor(visitor_test_int{}, pv);
     REQUIRE(result == 1);
 
 #ifdef VTZERO_TEST_WITH_VARIANT
-    const auto vari = vtzero::convert_property_value<variant_type, std::string>(vv);
+    const auto vari = vtzero::convert_property_value<variant_type, std::string>(pv);
     REQUIRE(boost::get<float>(vari) == Approx(1.2));
 #endif
 }
 
 TEST_CASE("double value") {
-    vtzero::property_value v{3.4};
-    vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.double_value() == Approx(3.4));
+    vtzero::encoded_property_value epv{3.4};
+    vtzero::property_value pv{epv.data()};
+    REQUIRE(pv.double_value() == Approx(3.4));
 
-    const auto result = vtzero::apply_visitor(visitor_test_int{}, vv);
+    const auto result = vtzero::apply_visitor(visitor_test_int{}, pv);
     REQUIRE(result == 1);
 }
 
 TEST_CASE("int value") {
-    vtzero::property_value v{vtzero::int_value_type{42}};
-    vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.int_value() == 42);
+    vtzero::encoded_property_value epv{vtzero::int_value_type{42}};
+    vtzero::property_value pv{epv.data()};
+    REQUIRE(pv.int_value() == 42);
 
-    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "42");
 }
 
 TEST_CASE("uint value") {
-    vtzero::property_value v{vtzero::uint_value_type{99}};
-    vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.uint_value() == 99);
+    vtzero::encoded_property_value epv{vtzero::uint_value_type{99}};
+    vtzero::property_value pv{epv.data()};
+    REQUIRE(pv.uint_value() == 99);
 
-    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "99");
 }
 
 TEST_CASE("sint value") {
-    vtzero::property_value v{vtzero::sint_value_type{42}};
-    vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.sint_value() == 42);
+    vtzero::encoded_property_value epv{vtzero::sint_value_type{42}};
+    vtzero::property_value pv{epv.data()};
+    REQUIRE(pv.sint_value() == 42);
 
-    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "42");
 }
 
 TEST_CASE("bool value") {
-    vtzero::property_value v{true};
-    vtzero::property_value_view vv{v.data()};
-    REQUIRE(vv.bool_value());
+    vtzero::encoded_property_value epv{true};
+    vtzero::property_value pv{epv.data()};
+    REQUIRE(pv.bool_value());
 
-    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, vv);
+    const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "1");
 }
 
 TEST_CASE("property_value_view equality comparisons") {
-    using pvv = vtzero::property_value_view;
+    using pv = vtzero::property_value;
 
-    vtzero::property_value t{true};
-    vtzero::property_value f{false};
-    vtzero::property_value v1{vtzero::int_value_type{1}};
-    vtzero::property_value vs{"foo"};
+    vtzero::encoded_property_value t{true};
+    vtzero::encoded_property_value f{false};
+    vtzero::encoded_property_value v1{vtzero::int_value_type{1}};
+    vtzero::encoded_property_value vs{"foo"};
 
-    REQUIRE(pvv{t.data()} == pvv{t.data()});
-    REQUIRE_FALSE(pvv{t.data()} != pvv{t.data()});
-    REQUIRE_FALSE(pvv{t.data()} == pvv{f.data()});
-    REQUIRE_FALSE(pvv{t.data()} == pvv{v1.data()});
-    REQUIRE_FALSE(pvv{t.data()} == pvv{vs.data()});
+    REQUIRE(pv{t.data()} == pv{t.data()});
+    REQUIRE_FALSE(pv{t.data()} != pv{t.data()});
+    REQUIRE_FALSE(pv{t.data()} == pv{f.data()});
+    REQUIRE_FALSE(pv{t.data()} == pv{v1.data()});
+    REQUIRE_FALSE(pv{t.data()} == pv{vs.data()});
 }
 
 TEST_CASE("property_value_view ordering") {
-    using pvv = vtzero::property_value_view;
+    using pv = vtzero::property_value;
 
-    vtzero::property_value t{true};
-    vtzero::property_value f{false};
+    vtzero::encoded_property_value t{true};
+    vtzero::encoded_property_value f{false};
 
-    REQUIRE_FALSE(pvv{t.data()} <  pvv{f.data()});
-    REQUIRE_FALSE(pvv{t.data()} <= pvv{f.data()});
-    REQUIRE(pvv{t.data()} >  pvv{f.data()});
-    REQUIRE(pvv{t.data()} >= pvv{f.data()});
+    REQUIRE_FALSE(pv{t.data()} <  pv{f.data()});
+    REQUIRE_FALSE(pv{t.data()} <= pv{f.data()});
+    REQUIRE(pv{t.data()} >  pv{f.data()});
+    REQUIRE(pv{t.data()} >= pv{f.data()});
 
-    vtzero::property_value v1{vtzero::int_value_type{22}};
-    vtzero::property_value v2{vtzero::int_value_type{17}};
+    vtzero::encoded_property_value v1{vtzero::int_value_type{22}};
+    vtzero::encoded_property_value v2{vtzero::int_value_type{17}};
 
-    REQUIRE_FALSE(pvv{v1.data()} <  pvv{v2.data()});
-    REQUIRE_FALSE(pvv{v1.data()} <= pvv{v2.data()});
-    REQUIRE(pvv{v1.data()} >  pvv{v2.data()});
-    REQUIRE(pvv{v1.data()} >= pvv{v2.data()});
+    REQUIRE_FALSE(pv{v1.data()} <  pv{v2.data()});
+    REQUIRE_FALSE(pv{v1.data()} <= pv{v2.data()});
+    REQUIRE(pv{v1.data()} >  pv{v2.data()});
+    REQUIRE(pv{v1.data()} >= pv{v2.data()});
 
-    vtzero::property_value vsf{"foo"};
-    vtzero::property_value vsb{"bar"};
-    vtzero::property_value vsx{"foobar"};
+    vtzero::encoded_property_value vsf{"foo"};
+    vtzero::encoded_property_value vsb{"bar"};
+    vtzero::encoded_property_value vsx{"foobar"};
 
-    REQUIRE_FALSE(pvv{vsf.data()} <  pvv{vsb.data()});
-    REQUIRE_FALSE(pvv{vsf.data()} <= pvv{vsb.data()});
-    REQUIRE(pvv{vsf.data()} >  pvv{vsb.data()});
-    REQUIRE(pvv{vsf.data()} >= pvv{vsb.data()});
+    REQUIRE_FALSE(pv{vsf.data()} <  pv{vsb.data()});
+    REQUIRE_FALSE(pv{vsf.data()} <= pv{vsb.data()});
+    REQUIRE(pv{vsf.data()} >  pv{vsb.data()});
+    REQUIRE(pv{vsf.data()} >= pv{vsb.data()});
 
-    REQUIRE(pvv{vsf.data()} <  pvv{vsx.data()});
-    REQUIRE(pvv{vsf.data()} <= pvv{vsx.data()});
-    REQUIRE_FALSE(pvv{vsf.data()} >  pvv{vsx.data()});
-    REQUIRE_FALSE(pvv{vsf.data()} >= pvv{vsx.data()});
+    REQUIRE(pv{vsf.data()} <  pv{vsx.data()});
+    REQUIRE(pv{vsf.data()} <= pv{vsx.data()});
+    REQUIRE_FALSE(pv{vsf.data()} >  pv{vsx.data()});
+    REQUIRE_FALSE(pv{vsf.data()} >= pv{vsx.data()});
 }
 
 TEST_CASE("default constructed property_view") {
-    vtzero::property_view pv;
-    REQUIRE_FALSE(pv.valid());
-    REQUIRE_FALSE(pv);
-    REQUIRE(pv.key().data() == nullptr);
-    REQUIRE(pv.value().data().data() == nullptr);
+    vtzero::property p;
+    REQUIRE_FALSE(p.valid());
+    REQUIRE_FALSE(p);
+    REQUIRE(p.key().data() == nullptr);
+    REQUIRE(p.value().data().data() == nullptr);
 }
 
 TEST_CASE("valid property_view") {
     vtzero::data_view k{"key"};
-    vtzero::property_value v{"value"};
-    vtzero::property_value_view vv{v.data()};
+    vtzero::encoded_property_value epv{"value"};
+    vtzero::property_value pv{epv.data()};
 
-    vtzero::property_view pv{k, vv};
-    REQUIRE(pv.key() == "key");
-    REQUIRE(pv.value().string_value() == "value");
+    vtzero::property p{k, pv};
+    REQUIRE(p.key() == "key");
+    REQUIRE(p.value().string_value() == "value");
 }
 

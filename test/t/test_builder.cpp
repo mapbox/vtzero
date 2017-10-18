@@ -109,7 +109,7 @@ TEST_CASE("value index") {
 
     SECTION("property_value_type index") {
         vtzero::value_index_internal<std::unordered_map> index{lbuilder};
-        fbuilder.add_property(key, index(vtzero::property_value{vtzero::sint_value_type{12}}));
+        fbuilder.add_property(key, index(vtzero::encoded_property_value{vtzero::sint_value_type{12}}));
     }
 
     fbuilder.commit();

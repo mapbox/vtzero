@@ -120,7 +120,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
         }
         std::cout << "  values:\n";
         n = 0;
-        for (const vtzero::property_value_view& value : layer.value_table()) {
+        for (const vtzero::property_value& value : layer.value_table()) {
             std::cout << "    " << n++ << ": ";
             vtzero::apply_visitor(print_value{}, value);
             if (print_values_with_type) {

@@ -17,8 +17,8 @@ documentation.
  */
 
 #include "exception.hpp"
-#include "property_value_view.hpp"
-#include "property_view.hpp"
+#include "property_value.hpp"
+#include "property.hpp"
 #include "types.hpp"
 
 #include <protozero/pbf_message.hpp>
@@ -209,13 +209,13 @@ namespace vtzero {
          *
          * Complexity: Constant.
          *
-         * @returns The next property_view or the invalid property_view if
-         *          there are no more properties.
+         * @returns The next property or the invalid property if there are no
+         *          more properties.
          * @throws format_exception if the feature data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          * @pre @code valid() @endcode
          */
-        property_view next_property();
+        property next_property();
 
         /**
          * Get the indexes into the key/value table for the next property in
@@ -223,8 +223,8 @@ namespace vtzero {
          *
          * Complexity: Constant.
          *
-         * @returns The next property_view or the invalid property_view if
-         *          there are no more properties.
+         * @returns The next index_value_pair or an invalid index_value_pair
+         *          if there are no more properties.
          * @throws format_exception if the feature data is ill-formed.
          * @throws any protozero exception if the protobuf encoding is invalid.
          * @pre @code valid() @endcode
@@ -257,7 +257,7 @@ namespace vtzero {
          * Call a function for each property of this feature.
          *
          * @tparam The type of the function. It must take a single argument
-         *         of type property_view&& and return a bool. If the function
+         *         of type property&& and return a bool. If the function
          *         returns false, the iteration will be stopped.
          * @param func The function to call.
          * @returns true if the iteration was completed and false otherwise.
@@ -280,7 +280,7 @@ namespace vtzero {
      *              of the property key is converted to this type before
      *              adding it to the map.
      * @tparam TValue Value type, usally the value of the map type. The
-     *                property_value_view is converted to this type before
+     *                property_value is converted to this type before
      *                adding it to the map.
      * @param feature The feature to get the properties from.
      * @returns An object of type TMap with all the properties.
@@ -290,7 +290,7 @@ namespace vtzero {
     TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
-        feature.for_each_property([&](property_view&& p) {
+        feature.for_each_property([&](property&& p) {
             map.emplace(TKey(p.key()), convert_property_value<TValue>(p.value()));
             return true;
         });

@@ -64,7 +64,7 @@ namespace vtzero {
         index_value operator()(const TExternal& v) {
             const auto it = m_index.find(v);
             if (it == m_index.end()) {
-                const auto idx = m_builder.add_value_without_dup_check(property_value{TInternal{v}}.data());
+                const auto idx = m_builder.add_value_without_dup_check(encoded_property_value{TInternal{v}}.data());
                 m_index.emplace(v, idx);
                 return idx;
             }
@@ -78,7 +78,7 @@ namespace vtzero {
 
         layer_builder& m_builder;
 
-        TMap<property_value, index_value> m_index;
+        TMap<encoded_property_value, index_value> m_index;
 
     public:
 
@@ -86,7 +86,7 @@ namespace vtzero {
             m_builder(builder) {
         }
 
-        index_value operator()(const property_value& v) {
+        index_value operator()(const encoded_property_value& v) {
             const auto it = m_index.find(v);
             if (it == m_index.end()) {
                 const auto idx = m_builder.add_value_without_dup_check(v.data());

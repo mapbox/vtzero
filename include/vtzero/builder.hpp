@@ -17,7 +17,7 @@ documentation.
  */
 
 #include "geometry.hpp"
-#include "property_value.hpp"
+#include "encoded_property_value.hpp"
 #include "types.hpp"
 #include "vector_tile.hpp"
 
@@ -227,13 +227,13 @@ namespace vtzero {
                 m_pbf_tags.add_element(idx.value());
             }
 
-            void add_value_internal(property_value_view value) {
+            void add_value_internal(property_value value) {
                 add_value_internal(m_layer.get_layer().add_value(value.data()));
             }
 
             template <typename T>
             void add_value_internal(T&& value) {
-                property_value v{std::forward<T>(value)};
+                encoded_property_value v{std::forward<T>(value)};
                 add_value_internal(m_layer.get_layer().add_value(v.data()));
             }
 
@@ -257,7 +257,7 @@ namespace vtzero {
             feature_builder_base(feature_builder_base&&) noexcept = default;
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
 
-            void add_property_impl(const property_view& property) {
+            void add_property_impl(const property& property) {
                 add_key_internal(property.key());
                 add_value_internal(property.value());
             }
@@ -714,7 +714,7 @@ namespace vtzero {
 
     inline void layer_builder::add_feature(const feature& feature) {
         geometry_feature_builder feature_builder{*this, feature.geometry(), feature.id()};
-        feature.for_each_property([&](property_view&& p) {
+        feature.for_each_property([&](property&& p) {
             feature_builder.add_property(p);
             return true;
         });

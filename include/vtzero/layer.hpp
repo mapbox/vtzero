@@ -19,7 +19,7 @@ documentation.
 #include "exception.hpp"
 #include "feature.hpp"
 #include "geometry.hpp"
-#include "property_value_view.hpp"
+#include "property_value.hpp"
 #include "types.hpp"
 
 #include <protozero/pbf_message.hpp>
@@ -58,7 +58,7 @@ namespace vtzero {
         data_view m_name{};
         protozero::pbf_message<detail::pbf_layer> m_layer_reader{m_data};
         mutable std::vector<data_view> m_key_table;
-        mutable std::vector<property_value_view> m_value_table;
+        mutable std::vector<property_value> m_value_table;
         mutable std::size_t m_key_table_size = 0;
         mutable std::size_t m_value_table_size = 0;
 
@@ -246,7 +246,7 @@ namespace vtzero {
          *
          * @pre @code valid() @endcode
          */
-        const std::vector<property_value_view>& value_table() const {
+        const std::vector<property_value>& value_table() const {
             vtzero_assert(valid());
 
             if (m_value_table_size > 0) {
@@ -279,7 +279,7 @@ namespace vtzero {
          * @throws std::out_of_range if the index is out of range.
          * @pre @code valid() @endcode
          */
-        property_value_view value(index_value index) const {
+        property_value value(index_value index) const {
             vtzero_assert(valid());
 
             return value_table().at(index.value());
@@ -376,11 +376,11 @@ namespace vtzero {
 
     }; // class layer
 
-    inline property_view feature::next_property() {
+    inline property feature::next_property() {
         const auto idxs = next_property_indexes();
-        return idxs.valid() ? property_view{m_layer->key(idxs.key()),
-                                            m_layer->value(idxs.value())}
-                            : property_view{};
+        return idxs.valid() ? property{m_layer->key(idxs.key()),
+                                       m_layer->value(idxs.value())}
+                            : property{};
     }
 
     template <typename TFunc>
@@ -390,7 +390,7 @@ namespace vtzero {
         for (auto it = m_properties.begin(); it != m_properties.end();) {
             const uint32_t ki = *it++;
             const uint32_t vi = *it++;
-            if (!std::forward<TFunc>(func)(property_view{m_layer->key(ki), m_layer->value(vi)})) {
+            if (!std::forward<TFunc>(func)(property{m_layer->key(ki), m_layer->value(vi)})) {
                 return false;
             }
         }
