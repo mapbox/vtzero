@@ -102,6 +102,18 @@ namespace vtzero {
             pbf_message_value.add_int64(detail::pbf_value::int_value, value);
         }
 
+        /// Construct from int32_t.
+        explicit encoded_property_value(int32_t value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_int64(detail::pbf_value::int_value, static_cast<int64_t>(value));
+        }
+
+        /// Construct from int16_t.
+        explicit encoded_property_value(int16_t value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_int64(detail::pbf_value::int_value, static_cast<int64_t>(value));
+        }
+
         // ------------------
 
         /// Construct from vtzero::uint_value_type.
@@ -114,6 +126,18 @@ namespace vtzero {
         explicit encoded_property_value(uint64_t value) {
             protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
             pbf_message_value.add_uint64(detail::pbf_value::uint_value, value);
+        }
+
+        /// Construct from uint32_t.
+        explicit encoded_property_value(uint32_t value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_uint64(detail::pbf_value::uint_value, static_cast<uint64_t>(value));
+        }
+
+        /// Construct from uint16_t.
+        explicit encoded_property_value(uint16_t value) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_uint64(detail::pbf_value::uint_value, static_cast<uint64_t>(value));
         }
 
         // ------------------

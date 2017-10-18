@@ -222,3 +222,72 @@ TEST_CASE("valid property_view") {
     REQUIRE(p.value().string_value() == "value");
 }
 
+TEST_CASE("create encoded property values from different string types") {
+    const std::string v{"value"};
+
+    vtzero::encoded_property_value epv1{vtzero::string_value_type{"value"}};
+    vtzero::encoded_property_value epv2{"value"};
+    vtzero::encoded_property_value epv3{v};
+    vtzero::encoded_property_value epv4{vtzero::data_view{v}};
+
+    REQUIRE(epv1 == epv2);
+    REQUIRE(epv1 == epv3);
+    REQUIRE(epv1 == epv4);
+}
+
+TEST_CASE("create encoded property values from different floating point types") {
+    vtzero::encoded_property_value f1{vtzero::float_value_type{3.2f}};
+    vtzero::encoded_property_value f2{3.2f};
+    vtzero::encoded_property_value d1{vtzero::double_value_type{3.2}};
+    vtzero::encoded_property_value d2{3.2};
+
+    REQUIRE(f1 == f2);
+    REQUIRE(d1 == d2);
+
+    vtzero::property_value pvf{f1.data()};
+    vtzero::property_value pvd{d1.data()};
+
+    REQUIRE(pvf.float_value() == Approx(pvd.double_value()));
+}
+
+TEST_CASE("create encoded property values from different integer types") {
+    vtzero::encoded_property_value i1{vtzero::int_value_type{7}};
+    vtzero::encoded_property_value i2{int64_t(7)};
+    vtzero::encoded_property_value i3{int32_t(7)};
+    vtzero::encoded_property_value i4{int16_t(7)};
+    vtzero::encoded_property_value u1{vtzero::uint_value_type{7}};
+    vtzero::encoded_property_value u2{uint64_t(7)};
+    vtzero::encoded_property_value u3{uint32_t(7)};
+    vtzero::encoded_property_value u4{uint16_t(7)};
+    vtzero::encoded_property_value s1{vtzero::sint_value_type{7}};
+
+    REQUIRE(i1 == i2);
+    REQUIRE(i1 == i3);
+    REQUIRE(i1 == i4);
+    REQUIRE(u1 == u2);
+    REQUIRE(u1 == u3);
+    REQUIRE(u1 == u4);
+
+    REQUIRE_FALSE(i1 == u1);
+    REQUIRE_FALSE(i1 == s1);
+    REQUIRE_FALSE(u1 == s1);
+
+    REQUIRE(i1.hash() == i2.hash());
+    REQUIRE(u1.hash() == u2.hash());
+
+    vtzero::property_value pvi{i1.data()};
+    vtzero::property_value pvu{u1.data()};
+    vtzero::property_value pvs{s1.data()};
+
+    REQUIRE(pvi.int_value() == pvu.uint_value());
+    REQUIRE(pvi.int_value() == pvs.sint_value());
+}
+
+TEST_CASE("create encoded property values from different bool types") {
+    vtzero::encoded_property_value b1{vtzero::bool_value_type{true}};
+    vtzero::encoded_property_value b2{true};
+
+    REQUIRE(b1 == b2);
+    REQUIRE(b1.hash() == b2.hash());
+}
+
