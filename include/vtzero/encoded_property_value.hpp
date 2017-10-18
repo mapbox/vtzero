@@ -154,31 +154,31 @@ namespace vtzero {
             return std::hash<std::string>{}(m_data);
         }
 
-        bool operator==(const encoded_property_value& other) const noexcept {
-            return m_data == other.m_data;
-        }
-
-        bool operator!=(const encoded_property_value& other) const noexcept {
-            return !(*this == other);
-        }
-
-        bool operator<(const encoded_property_value& other) const noexcept {
-            return this->m_data < other.m_data;
-        }
-
-        bool operator<=(const encoded_property_value& other) const noexcept {
-            return this->m_data <= other.m_data;
-        }
-
-        bool operator>(const encoded_property_value& other) const noexcept {
-            return this->m_data > other.m_data;
-        }
-
-        bool operator>=(const encoded_property_value& other) const noexcept {
-            return this->m_data >= other.m_data;
-        }
-
     }; // class encoded_property_value
+
+    inline bool operator==(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
+        return lhs.data() == rhs.data();
+    }
+
+    inline bool operator!=(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
+        return !(lhs == rhs);
+    }
+
+    inline bool operator<(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
+        return lhs.data() < rhs.data();
+    }
+
+    inline bool operator<=(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
+        return lhs.data() <= rhs.data();
+    }
+
+    inline bool operator>(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
+        return lhs.data() > rhs.data();
+    }
+
+    inline bool operator>=(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
+        return lhs.data() >= rhs.data();
+    }
 
 } // namespace vtzero
 
