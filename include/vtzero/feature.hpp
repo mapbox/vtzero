@@ -286,7 +286,9 @@ namespace vtzero {
      * @returns An object of type TMap with all the properties.
      * @pre @code feature.valid() @endcode
      */
-    template <typename TMap, typename TKey = typename TMap::key_type, typename TValue = typename TMap::mapped_type>
+    template <typename TMap,
+              typename TKey = typename TMap::key_type,
+              typename TValue = typename TMap::mapped_type>
     TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
