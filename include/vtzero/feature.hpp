@@ -17,8 +17,8 @@ documentation.
  */
 
 #include "exception.hpp"
-#include "property_value.hpp"
 #include "property.hpp"
+#include "property_value.hpp"
 #include "types.hpp"
 
 #include <protozero/pbf_message.hpp>
