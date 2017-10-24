@@ -101,7 +101,8 @@ namespace vtzero {
 
         /**
          * Decode a geometry as specified in spec 4.3 from a sequence of 32 bit
-         * unsigned integers.
+         * unsigned integers. This templated base class can be instantiated
+         * with a different iterator type for testing than for normal use.
          */
         template <typename T>
         class basic_geometry_decoder {
@@ -124,12 +125,6 @@ namespace vtzero {
                 m_strict(strict) {
             }
 
-            explicit basic_geometry_decoder(const data_view data, bool strict = true) :
-                m_it(data.data(), data.data() + data.size()),
-                m_end(data.data() + data.size(), data.data() + data.size()),
-                m_strict(strict) {
-            }
-
             uint32_t count() const noexcept {
                 return m_count;
             }
@@ -139,11 +134,21 @@ namespace vtzero {
             }
 
             bool next_command(const uint32_t expected_command) {
+                vtzero_assert(m_count == 0);
+
                 if (m_it == m_end) {
                     return false;
                 }
+
                 m_command_id = detail::get_command_id(*m_it);
-                m_count = detail::get_command_count(*m_it);
+                if (m_command_id == command_close_path()) {
+                    // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
+                    if (detail::get_command_count(*m_it) != 1) {
+                        throw geometry_exception{"ClosePath command count is not 1"};
+                    }
+                } else {
+                    m_count = detail::get_command_count(*m_it);
+                }
 
                 if (m_command_id != expected_command) {
                     throw geometry_exception{std::string{"expected command "} +
@@ -164,6 +169,7 @@ namespace vtzero {
                     throw geometry_exception{"too few points in geometry"};
                 }
 
+                // spec 4.3.2 "A ParameterInteger is zigzag encoded"
                 const int32_t x = protozero::decode_zigzag32(*m_it++);
                 const int32_t y = protozero::decode_zigzag32(*m_it++);
 
@@ -182,7 +188,17 @@ namespace vtzero {
 
         }; // class basic_geometry_decoder
 
-        using geometry_decoder = basic_geometry_decoder<protozero::pbf_reader::const_uint32_iterator>;
+        class geometry_decoder : public basic_geometry_decoder<protozero::pbf_reader::const_uint32_iterator> {
+
+        public:
+
+            explicit geometry_decoder(const data_view data, bool strict = true) :
+                basic_geometry_decoder({data.data(), data.data() + data.size()},
+                                       {data.data() + data.size(), data.data() + data.size()},
+                                       strict) {
+            }
+
+        }; // class geometry_decoder
 
     } // namespace detail
 
@@ -191,7 +207,7 @@ namespace vtzero {
         vtzero_assert(geometry.type() == GeomType::POINT);
         detail::geometry_decoder decoder{geometry.data(), strict};
 
-        // spec 4.3.4.2 "MUST consist of of a single MoveTo command"
+        // spec 4.3.4.2 "MUST consist of a single MoveTo command"
         if (!decoder.next_command(detail::command_move_to())) {
             throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
         }
@@ -287,11 +303,6 @@ namespace vtzero {
             // spec 4.3.4.4 "3. A ClosePath command"
             if (!decoder.next_command(detail::command_close_path())) {
                 throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
-            }
-
-            // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
-            if (decoder.count() != 1) {
-                throw geometry_exception{"ClosePath command count is not 1"};
             }
 
             sum += detail::det(last_point, start_point);
