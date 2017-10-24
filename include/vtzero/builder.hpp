@@ -529,7 +529,7 @@ namespace vtzero {
         template <typename TIter>
         void add_linestring(TIter begin, TIter end) {
             auto size = std::distance(begin, end);
-            if (size > (1u << 29)) {
+            if (size > (1 << 29)) {
                 throw format_exception{"a linestring can not contain more then 2^29 points"};
             }
             add_linestring(uint32_t(size));
