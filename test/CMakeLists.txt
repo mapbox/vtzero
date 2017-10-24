@@ -20,6 +20,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(TEST_SOURCES builder
                  exceptions
                  feature
+                 geometry
                  layer
                  property_map
                  property_value

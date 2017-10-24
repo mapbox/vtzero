@@ -94,18 +94,22 @@ namespace vtzero {
             return command_integer >> 3;
         }
 
-        inline constexpr int64_t det(const point& a, const point& b) noexcept {
-            return int64_t(a.x) * int64_t(b.y) - int64_t(b.x) * int64_t(a.y);
+        inline constexpr int64_t det(const point a, const point b) noexcept {
+            return static_cast<int64_t>(a.x) * static_cast<int64_t>(b.y) -
+                   static_cast<int64_t>(b.x) * static_cast<int64_t>(a.y);
         }
 
         /**
          * Decode a geometry as specified in spec 4.3 from a sequence of 32 bit
          * unsigned integers.
          */
-        class geometry_decoder {
+        template <typename T>
+        class basic_geometry_decoder {
 
-            protozero::pbf_reader::const_uint32_iterator it;
-            protozero::pbf_reader::const_uint32_iterator end;
+            using iterator_type = T;
+
+            iterator_type m_it;
+            iterator_type m_end;
 
             point m_cursor{0, 0};
             uint32_t m_command_id = 0;
@@ -114,9 +118,15 @@ namespace vtzero {
 
         public:
 
-            explicit geometry_decoder(const data_view data, bool strict = true) :
-                it(data.data(), data.data() + data.size()),
-                end(data.data() + data.size(), data.data() + data.size()),
+            explicit basic_geometry_decoder(T begin, T end, bool strict = true) :
+                m_it(begin),
+                m_end(end),
+                m_strict(strict) {
+            }
+
+            explicit basic_geometry_decoder(const data_view data, bool strict = true) :
+                m_it(data.data(), data.data() + data.size()),
+                m_end(data.data() + data.size(), data.data() + data.size()),
                 m_strict(strict) {
             }
 
@@ -125,24 +135,24 @@ namespace vtzero {
             }
 
             bool done() const noexcept {
-                return it == end;
+                return m_it == m_end;
             }
 
-            bool next_command(uint32_t expected_command) {
-                if (it == end) {
+            bool next_command(const uint32_t expected_command) {
+                if (m_it == m_end) {
                     return false;
                 }
-                m_command_id = detail::get_command_id(*it);
-                m_count = detail::get_command_count(*it);
+                m_command_id = detail::get_command_id(*m_it);
+                m_count = detail::get_command_count(*m_it);
 
                 if (m_command_id != expected_command) {
                     throw geometry_exception{std::string{"expected command "} +
-                                            std::to_string(expected_command) +
-                                            " but got " +
-                                            std::to_string(m_command_id)};
+                                             std::to_string(expected_command) +
+                                             " but got " +
+                                             std::to_string(m_command_id)};
                 }
 
-                ++it;
+                ++m_it;
 
                 return true;
             }
@@ -150,15 +160,15 @@ namespace vtzero {
             point next_point() {
                 vtzero_assert(m_count > 0);
 
-                if (it == end || std::next(it) == end) {
+                if (m_it == m_end || std::next(m_it) == m_end) {
                     throw geometry_exception{"too few points in geometry"};
                 }
 
-                const int32_t x = protozero::decode_zigzag32(*it++);
-                const int32_t y = protozero::decode_zigzag32(*it++);
+                const int32_t x = protozero::decode_zigzag32(*m_it++);
+                const int32_t y = protozero::decode_zigzag32(*m_it++);
 
                 // spec 4.3.3.2 "For any pair of (dX, dY) the dX and dY MUST NOT both be 0."
-                if (m_strict && x == 0 && y == 0) {
+                if (m_strict && m_command_id == command_line_to() && x == 0 && y == 0) {
                     throw geometry_exception{"found consecutive equal points (spec 4.3.3.2) (strict mode)"};
                 }
 
@@ -170,7 +180,9 @@ namespace vtzero {
                 return m_cursor;
             }
 
-        }; // class geometry_decoder
+        }; // class basic_geometry_decoder
+
+        using geometry_decoder = basic_geometry_decoder<protozero::pbf_reader::const_uint32_iterator>;
 
     } // namespace detail
 
