@@ -8,9 +8,13 @@
 #include <sstream>
 #include <string>
 
-struct geom_handler_points {
+class geom_handler {
 
-    void points_begin(uint32_t /*count*/) const noexcept {
+    std::string output{};
+
+public:
+
+    void points_begin(const uint32_t /*count*/) const noexcept {
     }
 
     void points_point(const vtzero::point point) const {
@@ -20,13 +24,7 @@ struct geom_handler_points {
     void points_end() const noexcept {
     }
 
-};
-
-struct geom_handler_linestrings {
-
-    std::string output{};
-
-    void linestring_begin(uint32_t count) {
+    void linestring_begin(const uint32_t count) {
         output = "      LINESTRING[count=";
         output += std::to_string(count);
         output += "](";
@@ -50,13 +48,7 @@ struct geom_handler_linestrings {
         std::cout << output;
     }
 
-};
-
-struct geom_handler_polygons {
-
-    std::string output{};
-
-    void ring_begin(uint32_t count) {
+    void ring_begin(const uint32_t count) {
         output = "      RING[count=";
         output += std::to_string(count);
         output += "](";
@@ -69,7 +61,7 @@ struct geom_handler_polygons {
         output += ',';
     }
 
-    void ring_end(bool is_outer) {
+    void ring_end(const bool is_outer) {
         if (output.empty()) {
             return;
         }
@@ -84,14 +76,13 @@ struct geom_handler_polygons {
         std::cout << output;
     }
 
-};
+}; // class geom_handler
 
 template <typename TChar, typename TTraits>
 std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, vtzero::data_view value) {
     out.write(value.data(), static_cast<std::streamsize>(value.size()));
     return out;
 }
-
 
 struct print_value {
 
@@ -141,19 +132,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
         }
         std::cout << "    geomtype: " << vtzero::geom_type_name(feature.geometry_type()) << '\n'
                   << "    geometry:\n";
-        switch (feature.geometry_type()) {
-            case vtzero::GeomType::POINT:
-                vtzero::decode_point_geometry(feature.geometry(), strict, geom_handler_points{});
-                break;
-            case vtzero::GeomType::LINESTRING:
-                vtzero::decode_linestring_geometry(feature.geometry(), strict, geom_handler_linestrings{});
-                break;
-            case vtzero::GeomType::POLYGON:
-                vtzero::decode_polygon_geometry(feature.geometry(), strict, geom_handler_polygons{});
-                break;
-            default:
-                std::cout << "UNKNOWN GEOMETRY TYPE\n";
-        }
+        vtzero::decode_geometry(feature.geometry(), strict, geom_handler{});
         std::cout << "    properties:\n";
         while (auto property = feature.next_property()) {
             std::cout << "      " << property.key() << '=';
