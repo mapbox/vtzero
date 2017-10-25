@@ -87,21 +87,22 @@ std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits
 struct print_value {
 
     template <typename T>
-    void operator()(const T& value) const {
+    void operator()(const T value) const {
         std::cout << value;
     }
 
-    void operator()(const vtzero::data_view& value) const {
+    void operator()(const vtzero::data_view value) const {
         std::cout << '"' << value << '"';
     }
 
 }; // struct print_value
 
-void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool print_values_with_type) {
-    std::cout << "layer:\n"
-              << "  name:    " << std::string(layer.name()) << '\n'
+void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool print_value_types) {
+    std::cout << "=============================================================\n"
+              << "layer:\n"
+              << "  name: " << std::string(layer.name()) << '\n'
               << "  version: " << layer.version() << '\n'
-              << "  extent:  " << layer.extent() << '\n';
+              << "  extent: " << layer.extent() << '\n';
 
     if (print_tables) {
         std::cout << "  keys:\n";
@@ -114,7 +115,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
         for (const vtzero::property_value& value : layer.value_table()) {
             std::cout << "    " << n++ << ": ";
             vtzero::apply_visitor(print_value{}, value);
-            if (print_values_with_type) {
+            if (print_value_types) {
                 std::cout << " [" << vtzero::property_value_type_name(value.type()) << "]\n";
             } else {
                 std::cout << '\n';
@@ -124,7 +125,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
 
     while (auto feature = layer.next_feature()) {
         std::cout << "  feature:\n"
-                  << "    id:       ";
+                  << "    id: ";
         if (feature.has_id()) {
             std::cout << feature.id() << '\n';
         } else {
@@ -137,7 +138,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
         while (auto property = feature.next_property()) {
             std::cout << "      " << property.key() << '=';
             vtzero::apply_visitor(print_value{}, property.value());
-            if (print_values_with_type) {
+            if (print_value_types) {
                 std::cout << " [" << vtzero::property_value_type_name(property.value().type()) << "]\n";
             } else {
                 std::cout << '\n';
@@ -155,23 +156,24 @@ void print_help() {
               << "Dump contents of vector tile.\n"
               << "\nOptions:\n"
               << "  -h, --help         This help message\n"
-              << "  -l, --layers       Show layer overview\n"
+              << "  -l, --layers       Show layer overview with feature count\n"
               << "  -s, --strict       Use strict geometry parser\n"
-              << "  -t, --tables       Also print key/value tables\n";
+              << "  -t, --tables       Also print key/value tables\n"
+              << "  -T, --value-types  Also show value types\n";
 }
 
 int main(int argc, char* argv[]) {
     bool layer_overview = false;
     bool strict = false;
     bool print_tables = false;
-    bool print_values_with_type = false;
+    bool print_value_types = false;
 
     static struct option long_options[] = {
-        {"help",             no_argument, nullptr, 'h'},
-        {"layers",           no_argument, nullptr, 'l'},
-        {"strict",           no_argument, nullptr, 's'},
-        {"tables",           no_argument, nullptr, 't'},
-        {"values-with-type", no_argument, nullptr, 'T'},
+        {"help",        no_argument, nullptr, 'h'},
+        {"layers",      no_argument, nullptr, 'l'},
+        {"strict",      no_argument, nullptr, 's'},
+        {"tables",      no_argument, nullptr, 't'},
+        {"value-types", no_argument, nullptr, 'T'},
         {nullptr, 0, nullptr, 0}
     };
 
@@ -195,7 +197,7 @@ int main(int argc, char* argv[]) {
                 print_tables = true;
                 break;
             case 'T':
-                print_values_with_type = true;
+                print_value_types = true;
                 break;
             default:
                 return 1;
@@ -218,7 +220,7 @@ int main(int argc, char* argv[]) {
                 if (layer_overview) {
                     print_layer_overview(layer);
                 } else {
-                    print_layer(layer, strict, print_tables, print_values_with_type);
+                    print_layer(layer, strict, print_tables, print_value_types);
                 }
             }
         } else {
@@ -226,7 +228,7 @@ int main(int argc, char* argv[]) {
             if (layer_overview) {
                 print_layer_overview(layer);
             } else {
-                print_layer(layer, strict, print_tables, print_values_with_type);
+                print_layer(layer, strict, print_tables, print_value_types);
             }
         }
     } catch (const std::exception& e) {
