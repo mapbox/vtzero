@@ -16,8 +16,8 @@ documentation.
  * @brief Contains the classes and functions to build vector tiles.
  */
 
-#include "geometry.hpp"
 #include "encoded_property_value.hpp"
+#include "geometry.hpp"
 #include "types.hpp"
 #include "vector_tile.hpp"
 
