@@ -24,6 +24,15 @@ struct dummy_geom_handler {
 
 }; // dummy_geom_handler
 
+TEST_CASE("Calling decode_point_geometry() with empty input") {
+    const container g;
+    dummy_geom_handler handler;
+    REQUIRE_THROWS_AS(vtzero::decode_point_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+                      const vtzero::geometry_exception&);
+    REQUIRE_THROWS_WITH(vtzero::decode_point_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+                        "expected MoveTo command (spec 4.3.4.2)");
+}
+
 TEST_CASE("Calling decode_point_geometry() with a valid point") {
     const container g = {9, 50, 34};
     dummy_geom_handler handler;

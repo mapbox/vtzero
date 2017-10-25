@@ -24,6 +24,13 @@ struct dummy_geom_handler {
 
 }; // dummy_geom_handler
 
+TEST_CASE("Calling decode_polygon_geometry() with empty input") {
+    const container g;
+    dummy_geom_handler handler;
+    vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{});
+    REQUIRE(handler.value == 0);
+}
+
 TEST_CASE("Calling decode_polygon_geometry() with a valid polygon") {
     const container g = {9, 6, 12, 18, 10, 12, 24, 44, 15};
     dummy_geom_handler handler;

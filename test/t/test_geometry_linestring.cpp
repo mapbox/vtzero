@@ -24,6 +24,13 @@ struct dummy_geom_handler {
 
 }; // dummy_geom_handler
 
+TEST_CASE("Calling decode_linestring_geometry() with empty input") {
+    const container g;
+    dummy_geom_handler handler;
+    vtzero::decode_linestring_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{});
+    REQUIRE(handler.value == 0);
+}
+
 TEST_CASE("Calling decode_linestring_geometry() with a valid linestring") {
     const container g = {9, 4, 4, 18, 0, 16, 16, 0};
     dummy_geom_handler handler;
