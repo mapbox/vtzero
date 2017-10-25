@@ -21,7 +21,11 @@ set(TEST_SOURCES builder
                  exceptions
                  feature
                  geometry
+                 geometry_linestring
+                 geometry_point
+                 geometry_polygon
                  layer
+                 point
                  property_map
                  property_value
                  types

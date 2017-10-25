@@ -10,8 +10,7 @@ documentation.
 
 *****************************************************************************/
 
-#include <protozero/data_view.hpp>
-#include <protozero/types.hpp>
+#include <protozero/pbf_reader.hpp>
 
 #include <cassert>
 
@@ -341,6 +340,12 @@ namespace vtzero {
 
     public:
 
+        /**
+         * A forward iterator yielding 32bit unsigned integers with the
+         * geometry encoded according to spec 4.3.
+         */
+        using const_iterator = protozero::pbf_reader::const_uint32_iterator;
+
         /// Default construct to an invalid value.
         constexpr geometry() noexcept = default;
 
@@ -358,6 +363,16 @@ namespace vtzero {
         /// The type of this geometry
         constexpr GeomType type() const noexcept {
             return m_type;
+        }
+
+        /// Return iterator to the beginning of the data.
+        const_iterator begin() const noexcept {
+            return {m_data.data(), m_data.data() + m_data.size()};
+        }
+
+        /// Return iterator to one past the end of the data.
+        const_iterator end() const noexcept {
+            return {m_data.data() + m_data.size(), m_data.data() + m_data.size()};
         }
 
     }; // class geometry

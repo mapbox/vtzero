@@ -70,27 +70,27 @@ namespace vtzero {
 
     namespace detail {
 
-        inline constexpr uint32_t command_integer(uint32_t id, uint32_t count) noexcept {
+        inline constexpr uint32_t command_integer(const uint32_t id, const uint32_t count) noexcept {
             return (id & 0x7) | (count << 3);
         }
 
-        inline constexpr uint32_t command_move_to(uint32_t count = 0) noexcept {
+        inline constexpr uint32_t command_move_to(const uint32_t count = 0) noexcept {
             return command_integer(1, count);
         }
 
-        inline constexpr uint32_t command_line_to(uint32_t count = 0) noexcept {
+        inline constexpr uint32_t command_line_to(const uint32_t count = 0) noexcept {
             return command_integer(2, count);
         }
 
-        inline constexpr uint32_t command_close_path(uint32_t count = 0) noexcept {
+        inline constexpr uint32_t command_close_path(const uint32_t count = 0) noexcept {
             return command_integer(7, count);
         }
 
-        inline constexpr uint32_t get_command_id(uint32_t command_integer) noexcept {
+        inline constexpr uint32_t get_command_id(const uint32_t command_integer) noexcept {
             return command_integer & 0x7;
         }
 
-        inline constexpr uint32_t get_command_count(uint32_t command_integer) noexcept {
+        inline constexpr uint32_t get_command_count(const uint32_t command_integer) noexcept {
             return command_integer >> 3;
         }
 
@@ -105,7 +105,7 @@ namespace vtzero {
          * with a different iterator type for testing than for normal use.
          */
         template <typename T>
-        class basic_geometry_decoder {
+        class geometry_decoder {
 
             using iterator_type = T;
 
@@ -113,13 +113,23 @@ namespace vtzero {
             iterator_type m_end;
 
             point m_cursor{0, 0};
+
+            // the last command read
             uint32_t m_command_id = 0;
+
+            /**
+             * The current count value is set from the CommandInteger and
+             * then counted down with each next_point() call. So it must be
+             * greater than 0 when next_point() is called and 0 when
+             * next_command() is called.
+             */
             uint32_t m_count = 0;
+
             bool m_strict = true;
 
         public:
 
-            explicit basic_geometry_decoder(T begin, T end, bool strict = true) :
+            explicit geometry_decoder(T begin, T end, bool strict = true) :
                 m_it(begin),
                 m_end(end),
                 m_strict(strict) {
@@ -186,26 +196,13 @@ namespace vtzero {
                 return m_cursor;
             }
 
-        }; // class basic_geometry_decoder
-
-        class geometry_decoder : public basic_geometry_decoder<protozero::pbf_reader::const_uint32_iterator> {
-
-        public:
-
-            explicit geometry_decoder(const data_view data, bool strict = true) :
-                basic_geometry_decoder({data.data(), data.data() + data.size()},
-                                       {data.data() + data.size(), data.data() + data.size()},
-                                       strict) {
-            }
-
         }; // class geometry_decoder
 
     } // namespace detail
 
-    template <typename TGeomHandler>
-    void decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        vtzero_assert(geometry.type() == GeomType::POINT);
-        detail::geometry_decoder decoder{geometry.data(), strict};
+    template <typename TIterator, typename TGeomHandler>
+    void decode_point_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
+        detail::geometry_decoder<TIterator> decoder{begin, end, strict};
 
         // spec 4.3.4.2 "MUST consist of a single MoveTo command"
         if (!decoder.next_command(detail::command_move_to())) {
@@ -230,10 +227,9 @@ namespace vtzero {
         std::forward<TGeomHandler>(geom_handler).points_end();
     }
 
-    template <typename TGeomHandler>
-    void decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        vtzero_assert(geometry.type() == GeomType::LINESTRING);
-        detail::geometry_decoder decoder{geometry.data(), strict};
+    template <typename TIterator, typename TGeomHandler>
+    void decode_linestring_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
+        detail::geometry_decoder<TIterator> decoder{begin, end, strict};
 
         // spec 4.3.4.3 "1. A MoveTo command"
         while (decoder.next_command(detail::command_move_to())) {
@@ -264,10 +260,9 @@ namespace vtzero {
         }
     }
 
-    template <typename TGeomHandler>
-    void decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        vtzero_assert(geometry.type() == GeomType::POLYGON);
-        detail::geometry_decoder decoder{geometry.data(), strict};
+    template <typename TIterator, typename TGeomHandler>
+    void decode_polygon_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
+        detail::geometry_decoder<TIterator> decoder{begin, end, strict};
 
         // spec 4.3.4.4 "1. A MoveTo command"
         while (decoder.next_command(detail::command_move_to())) {
@@ -276,8 +271,8 @@ namespace vtzero {
                 throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.4)"};
             }
 
-            point start_point{decoder.next_point()};
             int64_t sum = 0;
+            const point start_point = decoder.next_point();
             point last_point = start_point;
 
             // spec 4.3.4.4 "2. A LineTo command"
@@ -294,7 +289,7 @@ namespace vtzero {
             std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
 
             while (decoder.count() > 0) {
-                point p = decoder.next_point();
+                const point p = decoder.next_point();
                 sum += detail::det(last_point, p);
                 last_point = p;
                 std::forward<TGeomHandler>(geom_handler).ring_point(p);
@@ -309,6 +304,41 @@ namespace vtzero {
             std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
 
             std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0);
+        }
+    }
+
+    template <typename TGeomHandler>
+    void decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        vtzero_assert(geometry.type() == GeomType::POINT);
+        decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+    }
+
+    template <typename TGeomHandler>
+    void decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        vtzero_assert(geometry.type() == GeomType::LINESTRING);
+        decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+    }
+
+    template <typename TGeomHandler>
+    void decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        vtzero_assert(geometry.type() == GeomType::POLYGON);
+        decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+    }
+
+    template <typename TGeomHandler>
+    void decode_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        switch (geometry.type()) {
+            case GeomType::POINT:
+                decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+                break;
+            case GeomType::LINESTRING:
+                decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+                break;
+            case GeomType::POLYGON:
+                decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+                break;
+            default:
+                throw geometry_exception{"unknown geometry type"};
         }
     }
 
