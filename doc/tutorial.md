@@ -340,7 +340,107 @@ should also work with any other map type that has an `emplace()` method.
 
 ### Geometries
 
+Features must contain a geometry of type UNKNOWN, POINT, LINESTRING, or
+POLYGON. The UNKNOWN type is not further specified by the vector tile spec,
+this library doesn't allow you to do anything with this type. Note that
+multipoint, multilinestring, and multipolygon geometries are also possible,
+they don't have special types.
 
+You can get the geometry type with `feature.geometry_type()`, but usually
+you'll get the geometry with `feature.geometry()`. This will return an object
+of type `vtzero::geometry` which contains the geometry type and a view of
+the raw geometry data. To decode the data you have to call one of the decoder
+free functions `decode_geometry()`, `decode_point_geometry()`,
+`decode_linestring_geometry()`, or `decode_polygon_geometry()`. The first of
+these functions can decode any point, linestring, or polygon geometry. The
+others must be called with a geometry of the specified type and will only
+decode that type.
+
+For all the decoder functions the first parameter is the geometry (as returned
+by `feature.geometry()`), the second parameter decides whether the decoder
+should work in *strict mode* where more checks are performed (see below). The
+last parameter is a *handler* object that you must implement. The decoder
+function will call certain callbacks on this object that give you part of the
+geometry data which allows you to use this data in any kind of way you
+like.
+
+The handler for `decode_point_geometry()` must implement the following
+functions:
+
+* `void points_begin(uint32_t count)`: This is called once at the beginning
+  with the number of points. For a point geometry, this will be 1, for
+  multipoint geometries this will be larger.
+* `void points_point(vtzero::point point)`: This is called once for each
+  point.
+* `void points_end()`: This is called once at the end.
+
+The handler for `decode_linestring_geometry()` must implement the following
+functions:
+
+* `void linestring_begin(uint32_t count)`: This is called at the beginning
+  of each linestring with the number of points in this linestring. For a simple
+  linestring this function will only be called once, for a multilinestring
+  it will be called several times.
+* `void linestring_point(vtzero::point point)`: This is called once for each
+  point.
+* `void linestring_end()`: This is called at the end of each linestring.
+
+The handler for `decode_polygon_geometry` must implement the following
+functions:
+
+* `void ring_begin(uint32_t count)`: This is called at the beginning
+  of each ring with the number of points in this ring. For a simple polygon
+  with only one outer ring, this function will only be called once, if there
+  are inner rings or if this is a multipolygon, it will be called several
+  times.
+* `void ring_point(vtzero::point point)`: This is called once for each
+  point.
+* `void ring_end(bool is_outer)`: This is called at the end of each ring.
+  The parameter tells you whether the ring is an outer or inner ring.
+
+The handler for `decode_geometry()` must implement all of the functions
+mentioned above for the different types. It is guaranteed that only one
+set of functions will be called depending on the geometry type.
+
+Here is a typical implementation of a linestring handler:
+
+```cpp
+struct linestring_handler {
+
+    std::vector<my_point_type> points;
+
+    void linestring_begin(uint32_t count) {
+        points.reserve(count);
+    }
+
+    void linestring_point(vtzero::point point) noexcept {
+        points.push_back(conver_to_my_point(point));
+    }
+
+    void linestring_end() const noexcept {
+    }
+
+};
+```
+
+#### Strict interpretation of geometry encoding
+
+All the geometry decoder functions have a boolean parameter called `strict`.
+In strict mode the decoder does some additional checks:
+
+* Segments of zero-length between two consecutive points in a linestring or
+  ring are not allowed. In other words: Two consecutive points must not be
+  identical.
+* Rings must contain at least four points.
+* Rings must not have zero area.
+
+If those checks fail, a `geometry_exception` is thrown. In non-strict mode
+these conditions are ignored.
+
+See the [chapter 4.3.3.2](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#4332-lineto-command)
+and [4.3.4.4](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#4344-polygon-geometry-type)
+in the [vector tile specification](https://github.com/mapbox/vector-tile-spec/tree/master/2.1)
+for details.
 
 ### Accessing the key/value lookup tables in a layer
 

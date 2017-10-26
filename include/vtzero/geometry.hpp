@@ -297,31 +297,84 @@ namespace vtzero {
                 throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
             }
 
+            // spec 4.3.4.4 "The position of the cursor before calling the
+            // ClosePath command of a linear ring SHALL NOT repeat the same
+            // position as the first point in the linear ring"
+            if (strict && last_point == start_point) {
+                throw geometry_exception{"duplicate last point of ring"};
+            }
+
             sum += detail::det(last_point, start_point);
+
+            // spec 4.3.4.4 "A linear ring SHOULD NOT have an area ... equal to zero"
+            if (strict && sum == 0) {
+                throw geometry_exception{"area of ring is zero"};
+            }
+
             std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
 
             std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0);
         }
     }
 
+    /**
+     * Decode a point geometry.
+     *
+     * @tparam TGeomHandler Handler class. See tutorial for details.
+     * @param geometry The geometry as returned by feature.geometry().
+     * @param strict Use strict interpretation of geometry encoding.
+     * @param geom_handler An object of TGeomHandler.
+     * @throws geometry_error If there is a problem with the geometry.
+     * @pre Geometry must be a point geometry.
+     */
     template <typename TGeomHandler>
     void decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POINT);
         decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
     }
 
+    /**
+     * Decode a linestring geometry.
+     *
+     * @tparam TGeomHandler Handler class. See tutorial for details.
+     * @param geometry The geometry as returned by feature.geometry().
+     * @param strict Use strict interpretation of geometry encoding.
+     * @param geom_handler An object of TGeomHandler.
+     * @throws geometry_error If there is a problem with the geometry.
+     * @pre Geometry must be a linestring geometry.
+     */
     template <typename TGeomHandler>
     void decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::LINESTRING);
         decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
     }
 
+    /**
+     * Decode a polygon geometry.
+     *
+     * @tparam TGeomHandler Handler class. See tutorial for details.
+     * @param geometry The geometry as returned by feature.geometry().
+     * @param strict Use strict interpretation of geometry encoding.
+     * @param geom_handler An object of TGeomHandler.
+     * @throws geometry_error If there is a problem with the geometry.
+     * @pre Geometry must be a polygon geometry.
+     */
     template <typename TGeomHandler>
     void decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POLYGON);
         decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
     }
 
+    /**
+     * Decode a geometry.
+     *
+     * @tparam TGeomHandler Handler class. See tutorial for details.
+     * @param geometry The geometry as returned by feature.geometry().
+     * @param strict Use strict interpretation of geometry encoding.
+     * @param geom_handler An object of TGeomHandler.
+     * @throws geometry_error If the geometry has type UNKNOWN of if there is
+     *                        a problem with the geometry.
+     */
     template <typename TGeomHandler>
     void decode_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         switch (geometry.type()) {
