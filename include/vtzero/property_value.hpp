@@ -268,7 +268,7 @@ namespace vtzero {
      * will be the return type of this function.
      */
     template <typename V>
-    decltype(std::declval<V>()(string_value_type{})) apply_visitor(V&& visitor, const property_value value) {
+    decltype(std::declval<V>()(data_view{})) apply_visitor(V&& visitor, const property_value value) {
         switch (value.type()) {
             case property_value_type::string_value:
                 return std::forward<V>(visitor)(value.string_value());
@@ -289,21 +289,53 @@ namespace vtzero {
 
     namespace detail {
 
-        template <typename T, typename S>
+        template <typename TVariant, typename TMapping>
         struct convert_visitor {
 
-            template <typename V>
-            T operator()(V value) const {
-                return T{value};
+            TVariant operator()(data_view value) const {
+                return TVariant(typename TMapping::string_type(value));
             }
 
-            T operator()(data_view value) const {
-                return T{S(value)};
+            TVariant operator()(float value) const {
+                return TVariant(typename TMapping::float_type(value));
+            }
+
+            TVariant operator()(double value) const {
+                return TVariant(typename TMapping::double_type(value));
+            }
+
+            TVariant operator()(int64_t value) const {
+                return TVariant(typename TMapping::int_type(value));
+            }
+
+            TVariant operator()(uint64_t value) const {
+                return TVariant(typename TMapping::uint_type(value));
+            }
+
+            TVariant operator()(bool value) const {
+                return TVariant(typename TMapping::bool_type(value));
             }
 
         }; // struct convert_visitor
 
     } // namespace detail
+
+    /**
+     * Default mapping between the different types of a property_value to
+     * the types needed for a variant. Derive from this class, overwrite
+     * the types you want and use that class as second template parameter
+     * in the convert_property_value class.
+     */
+    struct property_value_mapping {
+
+        using string_type = std::string;
+        using float_type = float;
+        using double_type = double;
+        using int_type = int64_t;
+        using uint_type = uint64_t;
+        using bool_type = bool;
+
+    }; // struct property_value_mapping
 
     /**
      * Convert a property_value to a different (usually variant-based)
@@ -323,17 +355,31 @@ namespace vtzero {
      *
      * to convert the data.
      *
-     * @tparam T The variant type to convert to. Must contain the types float,
-     *           double, int64_t, uint64_t, and bool plus the string type S.
-     * @tparam S The string type to use in the variant. By default this is
-     *           std::string, but you can use anything that is convertible
-     *           from a vtzero::data_view.
+     * Usually your variant type has to support all of the following types:
+     * std::string, float, double, int64_t, uint64_t, and bool. If your type
+     * doesn't, you can add a second template parameter with a struct
+     * containing the mapping between the vtzero types and your types:
+     *
+     * @code
+     *   struct mapping : vtzero::property_value_mapping {
+     *     using float_type = double; // convert all floats to doubles
+     *     using bool_type = int; // convert all bools to ints
+     *     // use default types for the rest
+     *     // see the class vtzero::property_value_mapping for the defaults
+     *   };
+     *   property_value x = ...;
+     *   auto v = convert_property_value<variant_type, mapping>(x);
+     * @endcode
+     *
+     * @tparam TVariant The variant type to convert to.
+     * @tparam TMapping A struct derived from property_value_mapping with the
+     *         mapping for the types.
      * @param value The property value to convert.
      *
      */
-    template <typename T, typename S = std::string>
-    T convert_property_value(const property_value value) {
-        return apply_visitor(detail::convert_visitor<T, S>{}, value);
+    template <typename TVariant, typename TMapping = property_value_mapping>
+    TVariant convert_property_value(const property_value value) {
+        return vtzero::apply_visitor(vtzero::detail::convert_visitor<TVariant, TMapping>{}, value);
     }
 
 } // namespace vtzero

@@ -307,14 +307,21 @@ You can then use the following line to convert the data:
 variant_type v = vtzero::convert_property_value<variant_type>(pvalue);
 ```
 
-Your variant type must be constructible from all the types `float`, `double`,
-`int64_t`, `uint64_t`, and `bool`. It must also be either constructible from
-a `std::string`, or you must specify a type that's constructible from
-`data_view` as second template parameter:
+Your variant type must be constructible from all the types `std::string`,
+`float`, `double`, `int64_t`, `uint64_t`, and `bool`. If it is not, you can
+define a mapping between those types and the types you use in your variant
+class.
 
 ```cpp
-using variant_type = boost::variant<mystring, float, double, int64_t, uint64_t, bool>;
-variant_type v = vtzero::convert_property_value<variant_type, mystring>(pvalue);
+using variant_type = boost::variant<mystring, double, int64_t, uint64_t, bool>;
+
+struct mapping : vtzero::property_value_mapping {
+    using string_type = mystring; // use your own string type which must be
+                                  // convertible from data_view
+    using float_type = double; // no float in variant, so convert to double
+};
+
+variant_type v = vtzero::convert_property_value<variant_type, mapping>(pvalue);
 ```
 
 ### Creating a properties map

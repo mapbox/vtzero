@@ -54,6 +54,11 @@ struct visitor_test_to_string {
 
 };
 
+struct mapping : vtzero::property_value_mapping {
+    using float_type = int64_t;
+    using double_type = int64_t;
+};
+
 TEST_CASE("default constructed property_value") {
     vtzero::property_value pv;
     REQUIRE_FALSE(pv.valid());
@@ -89,6 +94,8 @@ TEST_CASE("string value") {
 #ifdef VTZERO_TEST_WITH_VARIANT
     const auto vari = vtzero::convert_property_value<variant_type>(pv);
     REQUIRE(boost::get<std::string>(vari) == "foo");
+    const auto conv = vtzero::convert_property_value<variant_type, mapping>(pv);
+    REQUIRE(boost::get<std::string>(conv) == "foo");
 #endif
 }
 
@@ -105,8 +112,10 @@ TEST_CASE("float value") {
     REQUIRE(result == 1);
 
 #ifdef VTZERO_TEST_WITH_VARIANT
-    const auto vari = vtzero::convert_property_value<variant_type, std::string>(pv);
+    const auto vari = vtzero::convert_property_value<variant_type>(pv);
     REQUIRE(boost::get<float>(vari) == Approx(1.2));
+    const auto conv = vtzero::convert_property_value<variant_type, mapping>(pv);
+    REQUIRE(boost::get<int64_t>(conv) == 1);
 #endif
 }
 
