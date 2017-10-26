@@ -27,7 +27,26 @@ std::string load_test_tile();
 struct mypoint {
     int64_t p1;
     int64_t p2;
+
+    mypoint() = default;
+    mypoint(int64_t x, int64_t y) :
+        p1(x),
+        p2(y) {
+   }
 };
+
+inline bool operator==(const mypoint lhs, const mypoint rhs) noexcept {
+    return lhs.p1 == rhs.p1 && lhs.p2 == rhs.p2;
+}
+
+inline bool operator!=(const mypoint lhs, const mypoint rhs) noexcept {
+    return !(lhs == rhs);
+}
+
+template <typename TChar, typename TTraits>
+std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, const mypoint p) {
+    return out << '(' << p.p1 << ',' << p.p2 << ')';
+}
 
 inline vtzero::point create_vtzero_point(mypoint p) noexcept {
     return {static_cast<int32_t>(p.p1),

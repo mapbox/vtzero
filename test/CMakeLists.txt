@@ -33,6 +33,7 @@ set(TEST_SOURCES builder
                  point
                  property_map
                  property_value
+                 tile
                  types
                  vector_tile)
 
