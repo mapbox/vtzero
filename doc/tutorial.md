@@ -501,4 +501,17 @@ categories:
 * If the protocol buffers data is okay, but the vector tile data is invalid
   in some way, you'll get an exception from vtzero library.
 
+All the exceptions in the vtzero library derive from `vtzero::exception`. The
+exceptions are:
+
+* `format_exception` is thrown when vector tile encoding isn't valid according
+  to the vector tile specification.
+* `geometry_exception` is thrown when a geometry encoding isn't valid according
+  to the vector tile specification.
+* `type_exception` is thrown when a property value is accessed using the wrong
+  type.
+* `version_exception` is thrown when an unknown version number is found in the
+  layer. Currently vtzero only supports version 1 and 2.
+* `out_of_range_exception` is thrown when an index into the key or value table
+  in a layer is out of range. This can only happen if the tile data is invalid.
 
