@@ -6,9 +6,11 @@
 using container = std::vector<uint32_t>;
 using iterator = container::const_iterator;
 
-struct dummy_geom_handler {
+class dummy_geom_handler {
 
     int value = 0;
+
+public:
 
     void linestring_begin(const uint32_t /*count*/) noexcept {
         ++value;
@@ -22,22 +24,24 @@ struct dummy_geom_handler {
         value += 10000;
     }
 
-}; // dummy_geom_handler
+    int result() const noexcept {
+        return value;
+    }
+
+}; // class dummy_geom_handler
 
 TEST_CASE("Calling decode_linestring_geometry() with empty input") {
     const container g;
 
     dummy_geom_handler handler;
     vtzero::decode_linestring_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{});
-    REQUIRE(handler.value == 0);
+    REQUIRE(handler.result() == 0);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a valid linestring") {
     const container g = {9, 4, 4, 18, 0, 16, 16, 0};
 
-    dummy_geom_handler handler;
-    vtzero::decode_linestring_geometry(g.cbegin(), g.cend(), true, handler);
-    REQUIRE(handler.value == 10301);
+    REQUIRE(vtzero::decode_linestring_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}) == 10301);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a valid multilinestring") {
@@ -45,7 +49,7 @@ TEST_CASE("Calling decode_linestring_geometry() with a valid multilinestring") {
 
     dummy_geom_handler handler;
     vtzero::decode_linestring_geometry(g.cbegin(), g.cend(), true, handler);
-    REQUIRE(handler.value == 20502);
+    REQUIRE(handler.result() == 20502);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a point geometry fails") {

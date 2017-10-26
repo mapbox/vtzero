@@ -6,9 +6,11 @@
 using container = std::vector<uint32_t>;
 using iterator = container::const_iterator;
 
-struct dummy_geom_handler {
+class dummy_geom_handler {
 
     int value = 0;
+
+public:
 
     void points_begin(const uint32_t /*count*/) noexcept {
         ++value;
@@ -22,7 +24,11 @@ struct dummy_geom_handler {
         value += 10000;
     }
 
-}; // dummy_geom_handler
+    int result() const noexcept {
+        return value;
+    }
+
+}; // class dummy_geom_handler
 
 TEST_CASE("Calling decode_point_geometry() with empty input") {
     const container g;
@@ -39,15 +45,13 @@ TEST_CASE("Calling decode_point_geometry() with a valid point") {
 
     dummy_geom_handler handler;
     vtzero::decode_point_geometry(g.cbegin(), g.cend(), true, handler);
-    REQUIRE(handler.value == 10101);
+    REQUIRE(handler.result() == 10101);
 }
 
 TEST_CASE("Calling decode_point_geometry() with a valid multipoint") {
     const container g = {17, 10, 14, 3, 9};
 
-    dummy_geom_handler handler;
-    vtzero::decode_point_geometry(g.cbegin(), g.cend(), true, handler);
-    REQUIRE(handler.value == 10201);
+    REQUIRE(vtzero::decode_point_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}) == 10201);
 }
 
 TEST_CASE("Calling decode_point_geometry() with a linestring geometry fails") {

@@ -22,6 +22,7 @@ documentation.
 #include <protozero/pbf_reader.hpp>
 
 #include <cstdint>
+#include <utility>
 
 namespace vtzero {
 
@@ -195,10 +196,33 @@ namespace vtzero {
 
         }; // class geometry_decoder
 
+        template <typename T, typename Enable = void>
+        struct get_result {
+
+            using type = void;
+
+            template <typename TGeomHandler>
+            void operator()(TGeomHandler&& /*geom_handler*/) {
+            }
+
+        };
+
+        template <typename T>
+        struct get_result<T, typename std::enable_if<!std::is_same<decltype(std::declval<T>().result()), void>::value>::type> {
+
+            using type = decltype(std::declval<T>().result());
+
+            template <typename TGeomHandler>
+            type operator()(TGeomHandler&& geom_handler) {
+                return std::forward<TGeomHandler>(geom_handler).result();
+            }
+
+        };
+
     } // namespace detail
 
     template <typename TIterator, typename TGeomHandler>
-    void decode_point_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_point_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
         detail::geometry_decoder<TIterator> decoder{begin, end, strict};
 
         // spec 4.3.4.2 "MUST consist of a single MoveTo command"
@@ -222,10 +246,12 @@ namespace vtzero {
         }
 
         std::forward<TGeomHandler>(geom_handler).points_end();
+
+        return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
     }
 
     template <typename TIterator, typename TGeomHandler>
-    void decode_linestring_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
         detail::geometry_decoder<TIterator> decoder{begin, end, strict};
 
         // spec 4.3.4.3 "1. A MoveTo command"
@@ -255,10 +281,12 @@ namespace vtzero {
 
             std::forward<TGeomHandler>(geom_handler).linestring_end();
         }
+
+        return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
     }
 
     template <typename TIterator, typename TGeomHandler>
-    void decode_polygon_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
         detail::geometry_decoder<TIterator> decoder{begin, end, strict};
 
         // spec 4.3.4.4 "1. A MoveTo command"
@@ -315,6 +343,8 @@ namespace vtzero {
 
             std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0);
         }
+
+        return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
     }
 
     /**
@@ -328,9 +358,9 @@ namespace vtzero {
      * @pre Geometry must be a point geometry.
      */
     template <typename TGeomHandler>
-    void decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POINT);
-        decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+        return decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
     }
 
     /**
@@ -340,13 +370,15 @@ namespace vtzero {
      * @param geometry The geometry as returned by feature.geometry().
      * @param strict Use strict interpretation of geometry encoding.
      * @param geom_handler An object of TGeomHandler.
+     * @returns whatever geom_handler.result() returns if that function exists,
+     *          void otherwise
      * @throws geometry_error If there is a problem with the geometry.
      * @pre Geometry must be a linestring geometry.
      */
     template <typename TGeomHandler>
-    void decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::LINESTRING);
-        decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+        return decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
     }
 
     /**
@@ -356,13 +388,15 @@ namespace vtzero {
      * @param geometry The geometry as returned by feature.geometry().
      * @param strict Use strict interpretation of geometry encoding.
      * @param geom_handler An object of TGeomHandler.
+     * @returns whatever geom_handler.result() returns if that function exists,
+     *          void otherwise
      * @throws geometry_error If there is a problem with the geometry.
      * @pre Geometry must be a polygon geometry.
      */
     template <typename TGeomHandler>
-    void decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POLYGON);
-        decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+        return decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
     }
 
     /**
@@ -372,24 +406,27 @@ namespace vtzero {
      * @param geometry The geometry as returned by feature.geometry().
      * @param strict Use strict interpretation of geometry encoding.
      * @param geom_handler An object of TGeomHandler.
+     * @returns whatever geom_handler.result() returns if that function exists,
+     *          void otherwise
      * @throws geometry_error If the geometry has type UNKNOWN of if there is
      *                        a problem with the geometry.
      */
     template <typename TGeomHandler>
-    void decode_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         switch (geometry.type()) {
             case GeomType::POINT:
-                decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+                return decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
                 break;
             case GeomType::LINESTRING:
-                decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+                return decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
                 break;
             case GeomType::POLYGON:
-                decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+                return decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
                 break;
             default:
-                throw geometry_exception{"unknown geometry type"};
+                break;
         }
+        throw geometry_exception{"unknown geometry type"};
     }
 
 } // namespace vtzero

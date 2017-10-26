@@ -361,8 +361,7 @@ by `feature.geometry()`), the second parameter decides whether the decoder
 should work in *strict mode* where more checks are performed (see below). The
 last parameter is a *handler* object that you must implement. The decoder
 function will call certain callbacks on this object that give you part of the
-geometry data which allows you to use this data in any kind of way you
-like.
+geometry data which allows you to use this data in any way you like.
 
 The handler for `decode_point_geometry()` must implement the following
 functions:
@@ -402,22 +401,33 @@ The handler for `decode_geometry()` must implement all of the functions
 mentioned above for the different types. It is guaranteed that only one
 set of functions will be called depending on the geometry type.
 
+If your handler implements the `result()` method, the decode functions will
+have the return type of the `result()` method and will return whatever
+result returns. If the `result()` method is not available, the decode functions
+return void.
+
 Here is a typical implementation of a linestring handler:
 
 ```cpp
 struct linestring_handler {
 
-    std::vector<my_point_type> points;
+    using linestring = std::vector<my_point_type>;
+
+    linestring points;
 
     void linestring_begin(uint32_t count) {
         points.reserve(count);
     }
 
     void linestring_point(vtzero::point point) noexcept {
-        points.push_back(conver_to_my_point(point));
+        points.push_back(convert_to_my_point(point));
     }
 
     void linestring_end() const noexcept {
+    }
+
+    linestring result() {
+        return std::move(points);
     }
 
 };
