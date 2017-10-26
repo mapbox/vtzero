@@ -87,6 +87,50 @@ struct polygon_handler {
 
 // ---------------------------------------------------------------------------
 
+struct geom_handler {
+
+    std::vector<vtzero::point> point_data;
+    std::vector<std::vector<vtzero::point>> line_data;
+
+    void points_begin(uint32_t count) {
+        point_data.reserve(count);
+    }
+
+    void points_point(const vtzero::point point) {
+        point_data.push_back(point);
+    }
+
+    void points_end() const noexcept {
+    }
+
+    void linestring_begin(uint32_t count) {
+        line_data.emplace_back();
+        line_data.back().reserve(count);
+    }
+
+    void linestring_point(const vtzero::point point) {
+        line_data.back().push_back(point);
+    }
+
+    void linestring_end() const noexcept {
+    }
+
+    void ring_begin(uint32_t count) {
+        line_data.emplace_back();
+        line_data.back().reserve(count);
+    }
+
+    void ring_point(const vtzero::point point) {
+        line_data.back().push_back(point);
+    }
+
+    void ring_end(bool /*dummy*/) const noexcept {
+    }
+
+}; // struct geom_handler
+
+// ---------------------------------------------------------------------------
+
 vtzero::feature check_layer(vtzero::vector_tile& tile) {
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 1);
@@ -123,8 +167,8 @@ TEST_CASE("MVT test 002: Tile with single point feature without id") {
     point_handler handler;
     vtzero::decode_point_geometry(feature.geometry(), true, handler);
 
-    std::vector<vtzero::point> result = {{25, 17}};
-    REQUIRE(handler.data == result);
+    std::vector<vtzero::point> expected = {{25, 17}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("MVT test 003: Tile with single point with missing geometry type") {
@@ -266,12 +310,19 @@ TEST_CASE("MVT test 017: Valid point geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
-    point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), true, handler);
+    const std::vector<vtzero::point> expected = {{25, 17}};
 
-    const std::vector<vtzero::point> result = {{25, 17}};
+    SECTION("decode_point_geometry") {
+        point_handler handler;
+        vtzero::decode_point_geometry(feature.geometry(), true, handler);
+        REQUIRE(handler.data == expected);
+    }
 
-    REQUIRE(handler.data == result);
+    SECTION("decode_geometry") {
+        geom_handler handler;
+        vtzero::decode_geometry(feature.geometry(), true, handler);
+        REQUIRE(handler.point_data == expected);
+    }
 }
 
 TEST_CASE("MVT test 018: Valid linestring geometry") {
@@ -282,12 +333,19 @@ TEST_CASE("MVT test 018: Valid linestring geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
 
-    linestring_handler handler;
-    vtzero::decode_linestring_geometry(feature.geometry(), true, handler);
+    const std::vector<std::vector<vtzero::point>> expected = {{{2, 2}, {2,10}, {10, 10}}};
 
-    const std::vector<std::vector<vtzero::point>> result = {{{2, 2}, {2,10}, {10, 10}}};
+    SECTION("decode_linestring_geometry") {
+        linestring_handler handler;
+        vtzero::decode_linestring_geometry(feature.geometry(), true, handler);
+        REQUIRE(handler.data == expected);
+    }
 
-    REQUIRE(handler.data == result);
+    SECTION("decode_geometry") {
+        geom_handler handler;
+        vtzero::decode_geometry(feature.geometry(), true, handler);
+        REQUIRE(handler.line_data == expected);
+    }
 }
 
 TEST_CASE("MVT test 019: Valid polygon geometry") {
@@ -298,12 +356,19 @@ TEST_CASE("MVT test 019: Valid polygon geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
 
-    polygon_handler handler;
-    vtzero::decode_polygon_geometry(feature.geometry(), true, handler);
+    const std::vector<std::vector<vtzero::point>> expected = {{{3, 6}, {8,12}, {20, 34}, {3, 6}}};
 
-    const std::vector<std::vector<vtzero::point>> result = {{{3, 6}, {8,12}, {20, 34}, {3, 6}}};
+    SECTION("deocode_polygon_geometry") {
+        polygon_handler handler;
+        vtzero::decode_polygon_geometry(feature.geometry(), true, handler);
+        REQUIRE(handler.data == expected);
+    }
 
-    REQUIRE(handler.data == result);
+    SECTION("deocode_geometry") {
+        geom_handler handler;
+        vtzero::decode_geometry(feature.geometry(), true, handler);
+        REQUIRE(handler.line_data == expected);
+    }
 }
 
 TEST_CASE("MVT test 020: Valid multipoint geometry") {
@@ -317,9 +382,9 @@ TEST_CASE("MVT test 020: Valid multipoint geometry") {
     point_handler handler;
     vtzero::decode_point_geometry(feature.geometry(), true, handler);
 
-    const std::vector<vtzero::point> result = {{5, 7}, {3,2}};
+    const std::vector<vtzero::point> expected = {{5, 7}, {3,2}};
 
-    REQUIRE(handler.data == result);
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("MVT test 021: Valid multilinestring geometry") {
@@ -333,9 +398,9 @@ TEST_CASE("MVT test 021: Valid multilinestring geometry") {
     linestring_handler handler;
     vtzero::decode_linestring_geometry(feature.geometry(), true, handler);
 
-    const std::vector<std::vector<vtzero::point>> result = {{{2, 2}, {2,10}, {10, 10}}, {{1,1}, {3, 5}}};
+    const std::vector<std::vector<vtzero::point>> expected = {{{2, 2}, {2,10}, {10, 10}}, {{1,1}, {3, 5}}};
 
-    REQUIRE(handler.data == result);
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("MVT test 022: Valid multipolygon geometry") {
@@ -349,13 +414,13 @@ TEST_CASE("MVT test 022: Valid multipolygon geometry") {
     polygon_handler handler;
     vtzero::decode_polygon_geometry(feature.geometry(), false, handler);
 
-    const std::vector<std::vector<vtzero::point>> result = {
+    const std::vector<std::vector<vtzero::point>> expected = {
         {{0, 0}, {10, 0}, {10, 10}, {0,10}, {0, 0}},
         {{11, 11}, {20, 11}, {20, 20}, {11, 20}, {11, 11}},
         {{13, 13}, {13, 17}, {17, 17}, {17, 13}, {13, 13}}
     };
 
-    REQUIRE(handler.data == result);
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("MVT test 023: Invalid layer: missing layer name") {
@@ -577,6 +642,8 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
     REQUIRE(feature.id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE(feature.empty());
+
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(feature.geometry(), true, geom_handler{}), const vtzero::geometry_exception&);
 }
 
 TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the layer.") {
