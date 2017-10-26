@@ -22,7 +22,6 @@ documentation.
 #include <protozero/pbf_reader.hpp>
 
 #include <cstdint>
-#include <iosfwd>
 
 namespace vtzero {
 
@@ -45,12 +44,6 @@ namespace vtzero {
         }
 
     }; // struct point
-
-    /// Overload of the << operator for points
-    template <typename TChar, typename TTraits>
-    std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, point p) {
-        return out << '(' << p.x << ',' << p.y << ')';
-    }
 
     /// Helper function to create a point from any type that has members x and y
     template <typename T>

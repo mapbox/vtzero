@@ -25,6 +25,7 @@ set(TEST_SOURCES builder
                  geometry_point
                  geometry_polygon
                  layer
+                 output
                  point
                  property_map
                  property_value

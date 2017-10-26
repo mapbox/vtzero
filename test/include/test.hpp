@@ -20,6 +20,8 @@ extern bool got_an_assert;
 
 #define REQUIRE_ASSERT(x) x; REQUIRE(got_an_assert); got_an_assert = false;
 
+#include <vtzero/output.hpp>
+
 std::string load_test_tile();
 
 #endif // TEST_HPP

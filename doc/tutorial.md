@@ -23,6 +23,17 @@ On the writing side it means that you have to call the API in a specific order
 when adding more data to a vector tile. This allows vtzero to avoid multiple
 copies of the data.
 
+## Basic types
+
+Vtzero contains several basic small (value) types such as `GeomType`,
+`property_value_type`, `index_value`, `index_value_pair`, and `point` which
+hold basic values in a type-safe way. Most of them are defined in `types.hpp`
+(`point` is in `geometry.hpp`).
+
+Sometimes it is useful to be able to print the values of those types, for
+instance when debugging. For this overloads of `operator<<` on `basic_ostream`
+are available in `output.hpp`. Include this file and you can use the usual
+`std::cout << some_value;` to print those values.
 
 ## Reading vector tiles
 
