@@ -379,7 +379,7 @@ namespace vtzero {
      */
     template <typename TVariant, typename TMapping = property_value_mapping>
     TVariant convert_property_value(const property_value value) {
-        return vtzero::apply_visitor(vtzero::detail::convert_visitor<TVariant, TMapping>{}, value);
+        return apply_visitor(detail::convert_visitor<TVariant, TMapping>{}, value);
     }
 
 } // namespace vtzero

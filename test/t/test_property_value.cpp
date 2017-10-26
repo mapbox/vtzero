@@ -9,6 +9,12 @@
 #ifdef VTZERO_TEST_WITH_VARIANT
 # include <boost/variant.hpp>
 using variant_type = boost::variant<std::string, float, double, int64_t, uint64_t, bool>;
+
+struct variant_mapping : vtzero::property_value_mapping {
+    using float_type = int64_t;
+    using double_type = int64_t;
+};
+
 #endif
 
 #include <string>
@@ -54,9 +60,28 @@ struct visitor_test_to_string {
 
 };
 
-struct mapping : vtzero::property_value_mapping {
-    using float_type = int64_t;
-    using double_type = int64_t;
+struct string_conv {
+
+    std::string s;
+
+    template <typename T>
+    string_conv(T value) :
+        s(std::to_string(value)) {
+    }
+
+    operator std::string() {
+        return s;
+    }
+
+};
+
+struct string_mapping : vtzero::property_value_mapping {
+    using string_type = std::string;
+    using float_type  = string_conv;
+    using double_type = string_conv;
+    using int_type    = string_conv;
+    using uint_type   = string_conv;
+    using bool_type   = string_conv;
 };
 
 TEST_CASE("default constructed property_value") {
@@ -91,10 +116,13 @@ TEST_CASE("string value") {
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "foo");
 
+    const std::string cs = vtzero::convert_property_value<std::string, string_mapping>(pv);
+    REQUIRE(cs == "foo");
+
 #ifdef VTZERO_TEST_WITH_VARIANT
     const auto vari = vtzero::convert_property_value<variant_type>(pv);
     REQUIRE(boost::get<std::string>(vari) == "foo");
-    const auto conv = vtzero::convert_property_value<variant_type, mapping>(pv);
+    const auto conv = vtzero::convert_property_value<variant_type, variant_mapping>(pv);
     REQUIRE(boost::get<std::string>(conv) == "foo");
 #endif
 }
@@ -111,10 +139,13 @@ TEST_CASE("float value") {
     const auto result = vtzero::apply_visitor(visitor_test_int{}, pv);
     REQUIRE(result == 1);
 
+    const std::string cs = vtzero::convert_property_value<std::string, string_mapping>(pv);
+    REQUIRE(cs == "1.200000");
+
 #ifdef VTZERO_TEST_WITH_VARIANT
     const auto vari = vtzero::convert_property_value<variant_type>(pv);
     REQUIRE(boost::get<float>(vari) == Approx(1.2));
-    const auto conv = vtzero::convert_property_value<variant_type, mapping>(pv);
+    const auto conv = vtzero::convert_property_value<variant_type, variant_mapping>(pv);
     REQUIRE(boost::get<int64_t>(conv) == 1);
 #endif
 }
@@ -126,6 +157,9 @@ TEST_CASE("double value") {
 
     const auto result = vtzero::apply_visitor(visitor_test_int{}, pv);
     REQUIRE(result == 1);
+
+    const std::string cs = vtzero::convert_property_value<std::string, string_mapping>(pv);
+    REQUIRE(cs == "3.400000");
 }
 
 TEST_CASE("int value") {
@@ -135,6 +169,9 @@ TEST_CASE("int value") {
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "42");
+
+    const std::string cs = vtzero::convert_property_value<std::string, string_mapping>(pv);
+    REQUIRE(cs == "42");
 }
 
 TEST_CASE("uint value") {
@@ -144,6 +181,9 @@ TEST_CASE("uint value") {
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "99");
+
+    const std::string cs = vtzero::convert_property_value<std::string, string_mapping>(pv);
+    REQUIRE(cs == "99");
 }
 
 TEST_CASE("sint value") {
@@ -153,6 +193,9 @@ TEST_CASE("sint value") {
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "42");
+
+    const std::string cs = vtzero::convert_property_value<std::string, string_mapping>(pv);
+    REQUIRE(cs == "42");
 }
 
 TEST_CASE("bool value") {
@@ -162,6 +205,9 @@ TEST_CASE("bool value") {
 
     const auto str = vtzero::apply_visitor(visitor_test_to_string{}, pv);
     REQUIRE(str == "1");
+
+    const std::string cs = vtzero::convert_property_value<std::string, string_mapping>(pv);
+    REQUIRE(cs == "1");
 }
 
 TEST_CASE("property_value_view equality comparisons") {
