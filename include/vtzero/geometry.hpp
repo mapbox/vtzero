@@ -97,10 +97,14 @@ namespace vtzero {
          * unsigned integers. This templated base class can be instantiated
          * with a different iterator type for testing than for normal use.
          */
-        template <typename T>
+        template <typename TIterator>
         class geometry_decoder {
 
-            using iterator_type = T;
+        public:
+
+            using iterator_type = TIterator;
+
+        private:
 
             iterator_type m_it;
             iterator_type m_end;
@@ -122,7 +126,7 @@ namespace vtzero {
 
         public:
 
-            explicit geometry_decoder(T begin, T end, bool strict = true) :
+            explicit geometry_decoder(iterator_type begin, iterator_type end, bool strict = true) :
                 m_it(begin),
                 m_end(end),
                 m_strict(strict) {

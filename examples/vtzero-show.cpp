@@ -87,7 +87,7 @@ std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits
 struct print_value {
 
     template <typename T>
-    void operator()(const T value) const {
+    void operator()(T value) const {
         std::cout << value;
     }
 

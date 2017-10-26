@@ -21,6 +21,7 @@ documentation.
 
 #include <protozero/pbf_message.hpp>
 
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <utility>
@@ -37,8 +38,7 @@ namespace vtzero {
         data_view m_value{};
 
         static bool check_tag_and_type(protozero::pbf_tag_type tag, protozero::pbf_wire_type type) noexcept {
-            static constexpr const protozero::pbf_wire_type types[] = {
-                protozero::pbf_wire_type::length_delimited, // dummy 0 value
+            static constexpr const std::array<protozero::pbf_wire_type, 7> types{{
                 string_value_type::wire_type,
                 float_value_type::wire_type,
                 double_value_type::wire_type,
@@ -46,13 +46,13 @@ namespace vtzero {
                 uint_value_type::wire_type,
                 sint_value_type::wire_type,
                 bool_value_type::wire_type,
-            };
+            }};
 
-            if (tag < 1 || tag > 7) {
+            if (tag < 1 || tag > types.size()) {
                 return false;
             }
 
-            return types[tag] == type; // NOLINT clang-tidy: cppcoreguidelines-pro-bounds-constant-array-index
+            return types[tag - 1] == type; // NOLINT clang-tidy: cppcoreguidelines-pro-bounds-constant-array-index
         }
 
         static data_view get_value_impl(protozero::pbf_message<detail::pbf_value>& value_message, string_value_type /* dummy */) {
