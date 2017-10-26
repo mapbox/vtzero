@@ -261,13 +261,18 @@ namespace vtzero {
          * Complexity: Amortized constant. First time the table is needed
          *             it needs to be created.
          *
-         * @throws std::out_of_range if the index is out of range.
+         * @throws out_of_range_exception if the index is out of range.
          * @pre @code valid() @endcode
          */
         data_view key(index_value index) const {
             vtzero_assert(valid());
 
-            return key_table().at(index.value());
+            const auto& table = key_table();
+            if (index.value() >= table.size()) {
+                throw out_of_range_exception{index.value()};
+            }
+
+            return table[index.value()];
         }
 
         /**
@@ -276,13 +281,18 @@ namespace vtzero {
          * Complexity: Amortized constant. First time the table is needed
          *             it needs to be created.
          *
-         * @throws std::out_of_range if the index is out of range.
+         * @throws out_of_range_exception if the index is out of range.
          * @pre @code valid() @endcode
          */
         property_value value(index_value index) const {
             vtzero_assert(valid());
 
-            return value_table().at(index.value());
+            const auto& table = value_table();
+            if (index.value() >= table.size()) {
+                throw out_of_range_exception{index.value()};
+            }
+
+            return table[index.value()];
         }
 
         /**

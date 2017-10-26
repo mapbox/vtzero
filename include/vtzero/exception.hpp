@@ -16,6 +16,7 @@ documentation.
  * @brief Contains the exceptions used in the vtzero library.
  */
 
+#include <cstdint>
 #include <stdexcept>
 #include <string>
 
@@ -105,12 +106,29 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit version_exception(uint32_t version) :
-            exception(std::string{"unknown vector tile version "} +
+        explicit version_exception(const uint32_t version) :
+            exception(std::string{"unknown vector tile version: "} +
                       std::to_string(version)) {
         }
 
     }; // version_exception
+
+    /**
+     * This exception is thrown when an index into the key or value table
+     * in a layer is out of range. This can only happen if the tile data is
+     * invalid.
+     */
+    class out_of_range_exception : public exception {
+
+    public:
+
+        /// Constructor
+        explicit out_of_range_exception(const uint32_t index) :
+            exception(std::string{"index out of range: "} +
+                      std::to_string(index)) {
+        }
+
+    }; // out_of_range_exception
 
 } // namespace vtzero
 

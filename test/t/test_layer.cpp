@@ -58,13 +58,13 @@ TEST_CASE("read a layer") {
     REQUIRE(layer.key(1) == "oneway");
     REQUIRE(layer.key(2) == "osm_id");
     REQUIRE(layer.key(3) == "type");
-    REQUIRE_THROWS_AS(layer.key(4), const std::out_of_range&);
+    REQUIRE_THROWS_AS(layer.key(4), const vtzero::out_of_range_exception&);
 
     REQUIRE(layer.value(0).string_value() == "main");
     REQUIRE(layer.value(1).int_value() == 0);
     REQUIRE(layer.value(2).string_value() == "primary");
     REQUIRE(layer.value(3).string_value() == "tertiary");
-    REQUIRE_THROWS_AS(layer.value(4), const std::out_of_range&);
+    REQUIRE_THROWS_AS(layer.value(4), const vtzero::out_of_range_exception&);
 }
 
 TEST_CASE("access features in a layer by id") {

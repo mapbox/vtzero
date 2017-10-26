@@ -588,7 +588,7 @@ TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the 
     REQUIRE(layer.num_features() == 1);
     auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
-    REQUIRE_THROWS_AS(feature.next_property(), const std::out_of_range&);
+    REQUIRE_THROWS_AS(feature.next_property(), const vtzero::out_of_range_exception&);
 }
 
 TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
@@ -599,7 +599,7 @@ TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
     auto feature = layer.next_feature();
-    REQUIRE_THROWS_AS(feature.next_property(), const std::out_of_range&);
+    REQUIRE_THROWS_AS(feature.next_property(), const vtzero::out_of_range_exception&);
 }
 
 TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in the layer.") {
@@ -611,7 +611,7 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
     REQUIRE(layer.num_features() == 1);
     auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
-    REQUIRE_THROWS_AS(feature.next_property(), const std::out_of_range&);
+    REQUIRE_THROWS_AS(feature.next_property(), const vtzero::out_of_range_exception&);
 }
 
 TEST_CASE("MVT test 043: A layer with six points that all share the same key but each has a unique value.") {
