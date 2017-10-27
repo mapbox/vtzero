@@ -69,7 +69,7 @@ struct string_conv {
         s(std::to_string(value)) {
     }
 
-    operator std::string() {
+    explicit operator std::string() {
         return s;
     }
 
