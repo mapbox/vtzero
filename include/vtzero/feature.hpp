@@ -96,11 +96,7 @@ namespace vtzero {
                         m_geometry = reader.get_view();
                         break;
                     default:
-                        throw format_exception{"unknown field in feature (tag=" +
-                                               std::to_string(static_cast<uint32_t>(reader.tag())) +
-                                               ", type=" +
-                                               std::to_string(static_cast<uint32_t>(reader.wire_type())) +
-                                               ")"};
+                        reader.skip(); // ignore unknown fields
                 }
             }
 

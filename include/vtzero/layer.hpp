@@ -79,8 +79,7 @@ namespace vtzero {
                         m_value_table.emplace_back(reader.get_view());
                         break;
                     default:
-                        reader.skip();
-                        break;
+                        reader.skip(); // ignore unknown fields
                 }
             }
         }
