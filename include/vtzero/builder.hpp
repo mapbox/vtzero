@@ -46,6 +46,8 @@ namespace vtzero {
         layer_builder_base(layer_builder_base&&) noexcept = default;
         layer_builder_base& operator=(layer_builder_base&&) noexcept = default;
 
+        virtual std::size_t estimated_size() const = 0;
+
         virtual void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const = 0;
 
     }; // class layer_builder_base
@@ -145,6 +147,14 @@ namespace vtzero {
             ++m_num_features;
         }
 
+        std::size_t estimated_size() const override {
+            constexpr const std::size_t estimated_overhead_for_pbf_encoding = 8;
+            return data().size() +
+                   keys_data().size() +
+                   values_data().size() +
+                   estimated_overhead_for_pbf_encoding;
+        }
+
         void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const override {
             if (m_num_features > 0) {
                 pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
@@ -165,6 +175,11 @@ namespace vtzero {
 
         explicit layer_builder_existing(const data_view data) :
             m_data(data) {
+        }
+
+        std::size_t estimated_size() const override {
+            constexpr const std::size_t estimated_overhead_for_pbf_encoding = 8;
+            return m_data.size() + estimated_overhead_for_pbf_encoding;
         }
 
         void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const override {
@@ -756,6 +771,13 @@ namespace vtzero {
          * @param buffer Buffer to append the encoded vector tile to.
          */
         void serialize(std::string& buffer) const {
+            std::size_t estimated_size = 0;
+            for (const auto& layer : m_layers) {
+                estimated_size += layer->estimated_size();
+            }
+
+            buffer.reserve(buffer.size() + estimated_size);
+
             protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{buffer};
             for (const auto& layer : m_layers) {
                 layer->build(pbf_tile_builder);
