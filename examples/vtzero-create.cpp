@@ -11,7 +11,10 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/index.hpp>
 
+#include <cstdint>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 int main() {
     vtzero::tile_builder tile;

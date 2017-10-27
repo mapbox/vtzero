@@ -10,10 +10,10 @@
 
 #include <vtzero/vector_tile.hpp>
 
-#include <fstream>
+#include <cstdint>
+#include <exception>
 #include <getopt.h>
 #include <iostream>
-#include <sstream>
 #include <string>
 
 void print_help() {

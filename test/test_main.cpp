@@ -2,6 +2,7 @@
 #include "catch.hpp"
 
 #include <fstream>
+#include <stdexcept>
 #include <string>
 
 bool got_an_assert = false;

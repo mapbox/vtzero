@@ -1,8 +1,11 @@
 
 #include "utils.hpp"
 
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <limits>
+#include <stdexcept>
 
 std::string read_file(const std::string& filename) {
     std::ifstream stream{filename, std::ios_base::in | std::ios_base::binary};

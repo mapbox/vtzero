@@ -11,12 +11,13 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/vector_tile.hpp>
 
-#include <fstream>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
 #include <getopt.h>
 #include <iostream>
-#include <sstream>
+#include <limits>
 #include <string>
-#include <unistd.h>
 
 void print_help() {
     std::cout << "vtzero-filter [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n\n"
