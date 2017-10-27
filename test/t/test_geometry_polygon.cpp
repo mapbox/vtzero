@@ -34,26 +34,26 @@ TEST_CASE("Calling decode_polygon_geometry() with empty input") {
     const container g;
 
     dummy_geom_handler handler;
-    vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{});
+    vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{});
     REQUIRE(handler.result() == 0);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a valid polygon") {
     const container g = {9, 6, 12, 18, 10, 12, 24, 44, 15};
 
-    REQUIRE(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}) == 10401);
+    REQUIRE(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}) == 10401);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a duplicate end point") {
     const container g = {9, 6, 12, 26, 10, 12, 24, 44, 33, 55, 15};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "duplicate last point of ring");
 
     dummy_geom_handler handler;
-    vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), false, handler);
+    vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), false, handler);
     REQUIRE(handler.result() == 10501);
 }
 
@@ -62,52 +62,52 @@ TEST_CASE("Calling decode_polygon_geometry() with a valid multipolygon") {
                          0, 0, 18, 17, 0, 15, 9, 4, 13, 26, 0, 8, 8, 0, 0, 7, 15};
 
     dummy_geom_handler handler;
-    vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, handler);
+    vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, handler);
     REQUIRE(handler.result() == 31503);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a point geometry fails") {
     const container g = {9, 50, 34}; // this is a point geometry
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "expected LineTo command (spec 4.3.4.4)");
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a linestring geometry fails") {
     const container g = {9, 4, 4, 18, 0, 16, 16, 0}; // this is a linestring geometry
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "expected ClosePath command (4.3.4.4)");
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with something other than MoveTo command") {
     const container g = {vtzero::detail::command_line_to(3)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "expected command 1 but got 2");
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a count of 0") {
     const container g = {vtzero::detail::command_move_to(0)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "MoveTo command count is not 1 (spec 4.3.4.4)");
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a count of 2") {
     const container g = {vtzero::detail::command_move_to(2)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "MoveTo command count is not 1 (spec 4.3.4.4)");
 }
 
@@ -115,9 +115,9 @@ TEST_CASE("Calling decode_polygon_geometry() with 2nd command not a LineTo") {
     const container g = {vtzero::detail::command_move_to(1), 3, 4,
                          vtzero::detail::command_move_to(1)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "expected command 2 but got 1");
 }
 
@@ -125,9 +125,9 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
     const container g = {vtzero::detail::command_move_to(1), 3, 4,
                          vtzero::detail::command_line_to(0)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "LineTo command count is not greater than 1 (spec 4.3.4.4)");
 }
 
@@ -136,13 +136,13 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
                          vtzero::detail::command_line_to(1), 5, 6,
                          vtzero::detail::command_close_path(1)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "LineTo command count is not greater than 1 (spec 4.3.4.4)");
 
     dummy_geom_handler handler;
-    vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), false, handler);
+    vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), false, handler);
     REQUIRE(handler.result() == 10301);
 }
 
@@ -151,9 +151,9 @@ TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") 
                          vtzero::detail::command_line_to(2), 4, 5, 6, 7,
                          vtzero::detail::command_line_to(0)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "expected command 7 but got 2");
 }
 
@@ -162,13 +162,13 @@ TEST_CASE("Calling decode_polygon_geometry() on polygon with zero area") {
                          vtzero::detail::command_line_to(3), 2, 0, 0, 4, 2, 0,
                          vtzero::detail::command_close_path(1)};
 
-    REQUIRE_THROWS_AS(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_AS(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                       const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
+    REQUIRE_THROWS_WITH(vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), true, dummy_geom_handler{}),
                         "area of ring is zero");
 
     dummy_geom_handler handler;
-    vtzero::decode_polygon_geometry(g.cbegin(), g.cend(), false, handler);
+    vtzero::detail::decode_polygon_geometry(g.cbegin(), g.cend(), false, handler);
     REQUIRE(handler.result() == 10501);
 }
 
