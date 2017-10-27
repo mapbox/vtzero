@@ -8,6 +8,7 @@ using iterator = container::const_iterator;
 
 TEST_CASE("geometry_decoder") {
     const container g = {};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
 
     REQUIRE(decoder.count() == 0);
@@ -18,6 +19,7 @@ TEST_CASE("geometry_decoder") {
 
 TEST_CASE("geometry_decoder with point") {
     const container g = {9, 50, 34};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -66,6 +68,7 @@ TEST_CASE("geometry_decoder with incomplete point") {
 
 TEST_CASE("geometry_decoder with multipoint") {
     const container g = {17, 10, 14, 3, 9};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -83,6 +86,7 @@ TEST_CASE("geometry_decoder with multipoint") {
 
 TEST_CASE("geometry_decoder with linestring") {
     const container g = {9, 4, 4, 18, 0, 16, 16, 0};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -113,6 +117,7 @@ TEST_CASE("geometry_decoder with linestring with equal points") {
     }
 
     const container g = {9, 4, 4, 18, 0, 16, 0, 0};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend(), strict};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -137,6 +142,7 @@ TEST_CASE("geometry_decoder with linestring with equal points") {
 
 TEST_CASE("geometry_decoder with multilinestring") {
     const container g = {9, 4, 4, 18, 0, 16, 16, 0, 9, 17, 17, 10, 4, 8};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -166,6 +172,7 @@ TEST_CASE("geometry_decoder with multilinestring") {
 
 TEST_CASE("geometry_decoder with polygon") {
     const container g = {9, 6, 12, 18, 10, 12, 24, 44, 15};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -188,6 +195,7 @@ TEST_CASE("geometry_decoder with polygon") {
 
 TEST_CASE("geometry_decoder with polygon with wrong ClosePath count") {
     const container g = {9, 6, 12, 18, 10, 12, 24, 44, 23};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -203,6 +211,7 @@ TEST_CASE("geometry_decoder with polygon with wrong ClosePath count") {
 TEST_CASE("geometry_decoder with multipolygon") {
     const container g = {9, 0, 0, 26, 20, 0, 0, 20, 19, 0, 15, 9, 22, 2, 26, 18,
                          0, 0, 18, 17, 0, 15, 9, 4, 13, 26, 0, 8, 8, 0, 0, 7, 15};
+
     vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
