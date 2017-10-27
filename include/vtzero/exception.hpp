@@ -23,8 +23,7 @@ documentation.
 namespace vtzero {
 
     /**
-     * All exceptions directly thrown by the functions of the vtzero library
-     * derive from this exception.
+     * Base class for all exceptions directly thrown by the vtzero library.
      */
     class exception : public std::runtime_error {
 

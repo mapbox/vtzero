@@ -1,5 +1,5 @@
 
-# vtzero Tutorial
+# Vtzero Tutorial
 
 The vtzero header-only library is used to read and write vector tile data
 as specified in the [Mapbox Vector Tile
@@ -62,6 +62,10 @@ tile data. You have to make sure this data stays available through the whole
 lifetime of the `vector_tile` object and all the other objects we'll create
 in this tutorial for accessing parts of the vector tile. The data is **not**
 copied by vtzero when accessing vector tiles.
+
+You can think of the `vector_tile` class as a "proxy" class giving you access
+to the decoded data, similarly the classes `layer`, `feature`, and
+`property` described in the next chapters are "proxy" classes, too.
 
 ### Accessing layers
 
@@ -489,8 +493,7 @@ long as you are not accessing those tables directly or by looking up any
 properties in a feature, the tables are not created and no extra memory is
 used.
 
-
-### Error handling
+## Error handling
 
 Many vtzero functions can throw exceptions. Most of them fall into two
 categories:
@@ -498,20 +501,22 @@ categories:
 * If the underlying protocol buffers data has some kind of problem, you'll
   get an exception from the [protozero
   library](https://github.com/mapbox/protozero/blob/master/doc/tutorial.md#asserts-and-exceptions-in-the-protozero-library).
+  They are all derived from `protozero::exception`.
 * If the protocol buffers data is okay, but the vector tile data is invalid
   in some way, you'll get an exception from vtzero library.
 
-All the exceptions in the vtzero library derive from `vtzero::exception`. The
-exceptions are:
+All the exceptions in the vtzero library are derived from `vtzero::exception`.
+The exceptions are:
 
-* `format_exception` is thrown when vector tile encoding isn't valid according
-  to the vector tile specification.
-* `geometry_exception` is thrown when a geometry encoding isn't valid according
-  to the vector tile specification.
-* `type_exception` is thrown when a property value is accessed using the wrong
-  type.
-* `version_exception` is thrown when an unknown version number is found in the
-  layer. Currently vtzero only supports version 1 and 2.
-* `out_of_range_exception` is thrown when an index into the key or value table
-  in a layer is out of range. This can only happen if the tile data is invalid.
+* A `format_exception` is thrown when vector tile encoding isn't valid
+  according to the vector tile specification.
+* A `geometry_exception` is thrown when a geometry encoding isn't valid
+  according to the vector tile specification.
+* A `type_exception` is thrown when a property value is accessed using the
+  wrong type.
+* A `version_exception` is thrown when an unknown version number is found in
+  the layer. Currently vtzero only supports version 1 and 2.
+* An `out_of_range_exception` is thrown when an index into the key or value
+  table in a layer is out of range. This can only happen if the tile data is
+  invalid.
 

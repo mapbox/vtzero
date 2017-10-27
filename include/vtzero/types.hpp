@@ -37,7 +37,7 @@ namespace vtzero {
 
     /**
      * Using data_view class from protozero. See the protozero documentation
-     * on how to change this to use different implementations.
+     * on how to change this to use a different implementation.
      * https://github.com/mapbox/protozero/blob/master/doc/advanced.md#protozero_use_view
      */
     using data_view = protozero::data_view;
