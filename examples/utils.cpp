@@ -1,56 +1,38 @@
 
 #include "utils.hpp"
 
-#include <fcntl.h>
 #include <fstream>
 #include <iostream>
-#include <sstream>
-#include <sys/stat.h>
-#include <sys/types.h>
-
-#ifdef _MSC_VER
-# include <io.h>
-#else
-# include <unistd.h>
-#endif
 
 std::string read_file(const std::string& filename) {
-    std::ifstream t{filename};
-    if (!t) {
+    std::ifstream stream{filename, std::ios_base::in | std::ios_base::binary};
+    if (!stream) {
         throw std::runtime_error{std::string{"Can not open file '"} + filename + "'"};
     }
-    std::stringstream buffer;
-    buffer << t.rdbuf();
-    return buffer.str();
+
+    stream.exceptions(std::ifstream::failbit);
+
+    std::string buffer{std::istreambuf_iterator<char>(stream.rdbuf()),
+                       std::istreambuf_iterator<char>()};
+    stream.close();
+
+    return buffer;
 }
 
-void write_data_to_file(const std::string& data, const std::string& filename) {
-    int flags = O_WRONLY | O_CREAT | O_TRUNC;
-
-#ifdef _WIN32
-    flags |= O_BINARY;
-#else
-    flags |= O_CLOEXEC;
-#endif
-
-    const int fd = ::open(filename.c_str(), flags, 0644); // NOLINT clang-tidy: cppcoreguidelines-pro-type-vararg
-    if (fd < 0) {
-        throw std::runtime_error{"Can not open output file"};
+void write_data_to_file(const std::string& buffer, const std::string& filename) {
+    std::ofstream stream{filename, std::ios_base::out | std::ios_base::binary};
+    if (!stream) {
+        throw std::runtime_error{std::string{"Can not open file '"} + filename + "'"};
     }
 
-#ifdef _WIN32
-    using write_size_type = unsigned int;
-#else
-    using write_size_type = std::size_t;
-#endif
+    stream.exceptions(std::ifstream::failbit);
 
-    const auto len = ::write(fd, data.c_str(), write_size_type(data.size()));
-    if (static_cast<std::size_t>(len) != data.size()) {
-        throw std::runtime_error{"Error writing to output file"};
-    }
+    stream.write(buffer.data(), buffer.size());
+
+    stream.close();
 }
 
-vtzero::layer get_layer(vtzero::vector_tile& tile, const std::string& layer_name_or_num) {
+vtzero::layer get_layer(const vtzero::vector_tile& tile, const std::string& layer_name_or_num) {
     vtzero::layer layer;
     char* str_end = nullptr;
     const long num = std::strtol(layer_name_or_num.c_str(), &str_end, 10); // NOLINT clang-tidy: google-runtime-int

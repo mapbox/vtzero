@@ -1,3 +1,11 @@
+/*****************************************************************************
+
+  Example program for vtzero library.
+
+  vtzero-show - Show content of vector tile
+
+*****************************************************************************/
+
 #include "utils.hpp"
 
 #include <vtzero/vector_tile.hpp>
@@ -7,6 +15,21 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+
+void print_help() {
+    std::cout << "vtzero-show [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n\n"
+              << "Show contents of vector tile.\n\n"
+              << "Options:\n"
+              << "  -h, --help         This help message\n"
+              << "  -l, --layers       Show layer overview with feature count\n"
+              << "  -s, --strict       Use strict geometry parser\n"
+              << "  -t, --tables       Also print key/value tables\n"
+              << "  -T, --value-types  Also show value types\n";
+}
+
+void print_usage(const char* command) {
+    std::cerr << "Usage: " << command << " [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n";
+}
 
 class geom_handler {
 
@@ -151,17 +174,6 @@ void print_layer_overview(const vtzero::layer& layer) {
     std::cout << layer.name() << ' ' << layer.num_features() << '\n';
 }
 
-void print_help() {
-    std::cout << "vtzero-show [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n\n"
-              << "Dump contents of vector tile.\n"
-              << "\nOptions:\n"
-              << "  -h, --help         This help message\n"
-              << "  -l, --layers       Show layer overview with feature count\n"
-              << "  -s, --strict       Use strict geometry parser\n"
-              << "  -t, --tables       Also print key/value tables\n"
-              << "  -T, --value-types  Also show value types\n";
-}
-
 int main(int argc, char* argv[]) {
     bool layer_overview = false;
     bool strict = false;
@@ -206,7 +218,7 @@ int main(int argc, char* argv[]) {
 
     const int remaining_args = argc - optind;
     if (remaining_args < 1 || remaining_args > 2) {
-        std::cerr << "Usage: " << argv[0] << " [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n";
+        print_usage(argv[0]);
         return 1;
     }
 
