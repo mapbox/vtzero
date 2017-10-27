@@ -46,7 +46,7 @@ namespace vtzero {
         layer_builder_base(layer_builder_base&&) noexcept = default;
         layer_builder_base& operator=(layer_builder_base&&) noexcept = default;
 
-        virtual void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) = 0;
+        virtual void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const = 0;
 
     }; // class layer_builder_base
 
@@ -145,7 +145,7 @@ namespace vtzero {
             ++m_num_features;
         }
 
-        void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) override {
+        void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const override {
             if (m_num_features > 0) {
                 pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
                     data(),
@@ -167,7 +167,7 @@ namespace vtzero {
             m_data(data) {
         }
 
-        void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) override {
+        void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const override {
             pbf_tile_builder.add_bytes(detail::pbf_tile::layers, m_data);
         }
 
@@ -699,7 +699,7 @@ namespace vtzero {
 
         void serialize(std::string& data) const {
             protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{data};
-            for (auto& layer : m_layers) {
+            for (const auto& layer : m_layers) {
                 layer->build(pbf_tile_builder);
             }
         }
