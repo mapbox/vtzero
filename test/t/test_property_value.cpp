@@ -65,7 +65,7 @@ struct string_conv {
     std::string s;
 
     template <typename T>
-    string_conv(T value) :
+    explicit string_conv(T value) :
         s(std::to_string(value)) {
     }
 
