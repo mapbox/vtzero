@@ -180,26 +180,32 @@ namespace vtzero {
 
     }; // class encoded_property_value
 
+    /// Encoded property values are equal if they contain the same data.
     inline bool operator==(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
         return lhs.data() == rhs.data();
     }
 
+    /// Encoded property values are unequal if they are not equal.
     inline bool operator!=(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
         return !(lhs == rhs);
     }
 
+    /// Arbitrary ordering based on internal data.
     inline bool operator<(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
         return lhs.data() < rhs.data();
     }
 
+    /// Arbitrary ordering based on internal data.
     inline bool operator<=(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
         return lhs.data() <= rhs.data();
     }
 
+    /// Arbitrary ordering based on internal data.
     inline bool operator>(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
         return lhs.data() > rhs.data();
     }
 
+    /// Arbitrary ordering based on internal data.
     inline bool operator>=(const encoded_property_value& lhs, const encoded_property_value& rhs) noexcept {
         return lhs.data() >= rhs.data();
     }
@@ -213,12 +219,19 @@ namespace std {
      */
     template <>
     struct hash<vtzero::encoded_property_value> {
+
+        /// key vtzero::encoded_property_value
         using argument_type = vtzero::encoded_property_value;
+
+        /// hash result: size_t
         using result_type = std::size_t;
+
+        /// calculate the hash of the argument
         std::size_t operator()(const vtzero::encoded_property_value& value) const noexcept {
             return value.hash();
         }
-    };
+
+    }; // struct hash
 
 } // namespace std
 

@@ -14,6 +14,7 @@ documentation.
 
 #include <cassert>
 
+// @cond internal
 // Wrappers for assert() used for testing
 #ifndef vtzero_assert
 # define vtzero_assert(x) assert(x)
@@ -21,6 +22,7 @@ documentation.
 #ifndef vtzero_assert_in_noexcept_function
 # define vtzero_assert_in_noexcept_function(x) assert(x)
 #endif
+// @endcond
 
 /**
  * @file types.hpp
@@ -113,13 +115,18 @@ namespace vtzero {
         /// the underlying storage type
         using type = data_view;
 
+        /// @cond internal
         constexpr static const property_value_type pvtype = property_value_type::string_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::length_delimited;
+        /// @endcond
 
+        /// value
         data_view value{};
 
+        /// Construct empty string_value_type
         constexpr string_value_type() noexcept = default;
 
+        /// Construct string_value_type
         explicit constexpr string_value_type(data_view v) :
             value(v) {
         }
@@ -132,13 +139,18 @@ namespace vtzero {
         /// the underlying storage type
         using type = float;
 
+        /// @cond internal
         constexpr static const property_value_type pvtype = property_value_type::float_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed32;
+        /// @endcond
 
+        /// value
         float value = 0.0f;
 
+        /// Construct float_value_type with value 0.0
         constexpr float_value_type() noexcept = default;
 
+        /// Construct float_value_type
         explicit constexpr float_value_type(float v) :
             value(v) {
         }
@@ -151,13 +163,18 @@ namespace vtzero {
         /// the underlying storage type
         using type = double;
 
+        /// @cond internal
         constexpr static const property_value_type pvtype = property_value_type::double_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::fixed64;
+        /// @endcond
 
+        /// value
         double value = 0.0;
 
+        /// Construct double_value_type with value 0.0
         constexpr double_value_type() noexcept = default;
 
+        /// Construct double_value_type
         explicit constexpr double_value_type(double v) :
             value(v) {
         }
@@ -170,13 +187,18 @@ namespace vtzero {
         /// the underlying storage type
         using type = int64_t;
 
+        /// @cond internal
         constexpr static const property_value_type pvtype = property_value_type::int_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
+        /// @endcond
 
+        /// value
         int64_t value = 0;
 
+        /// Construct int_value_type with value 0
         constexpr int_value_type() noexcept = default;
 
+        /// Construct int_value_type
         explicit constexpr int_value_type(int64_t v) :
             value(v) {
         }
@@ -189,13 +211,18 @@ namespace vtzero {
         /// the underlying storage type
         using type = uint64_t;
 
+        /// @cond internal
         constexpr static const property_value_type pvtype = property_value_type::uint_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
+        /// @endcond
 
+        /// value
         uint64_t value = 0;
 
+        /// Construct uint_value_type with value 0
         constexpr uint_value_type() noexcept = default;
 
+        /// Construct uint_value_type
         explicit constexpr uint_value_type(uint64_t v) :
             value(v) {
         }
@@ -208,13 +235,18 @@ namespace vtzero {
         /// the underlying storage type
         using type = int64_t;
 
+        /// @cond internal
         constexpr static const property_value_type pvtype = property_value_type::sint_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
+        /// @endcond
 
+        /// value
         int64_t value = 0;
 
+        /// Construct sint_value_type with value 0
         constexpr sint_value_type() noexcept = default;
 
+        /// Construct sint_value_type
         explicit constexpr sint_value_type(int64_t v) :
             value(v) {
         }
@@ -227,13 +259,18 @@ namespace vtzero {
         /// the underlying storage type
         using type = bool;
 
+        /// @cond internal
         constexpr static const property_value_type pvtype = property_value_type::bool_value;
         constexpr static const protozero::pbf_wire_type wire_type = protozero::pbf_wire_type::varint;
+        /// @endcond
 
+        /// value
         bool value = false;
 
+        /// Construct bool_value_type with false value
         constexpr bool_value_type() noexcept = default;
 
+        /// Construct bool_value_type
         explicit constexpr bool_value_type(bool v) :
             value(v) {
         }
