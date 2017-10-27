@@ -103,3 +103,29 @@ TEST_CASE("iterate over layers") {
     REQUIRE(num == 12);
 }
 
+TEST_CASE("iterate over some of the layers") {
+    const auto data = load_test_tile();
+    vtzero::vector_tile tile{data};
+
+    int num_layers = 0;
+
+    SECTION("external iterator") {
+        while (auto layer = tile.next_layer()) {
+            ++num_layers;
+            if (layer.name() == "water") {
+                break;
+            }
+        }
+    }
+
+    SECTION("internal iterator") {
+        const bool done = tile.for_each_layer([&](const vtzero::layer&& layer) {
+            ++num_layers;
+            return layer.name() != "water";
+        });
+        REQUIRE_FALSE(done);
+    }
+
+    REQUIRE(num_layers == 3);
+}
+
