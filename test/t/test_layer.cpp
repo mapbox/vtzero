@@ -87,7 +87,33 @@ TEST_CASE("access features in a layer by id") {
     REQUIRE_FALSE(layer.get_feature_by_id(999999));
 }
 
-TEST_CASE("iterate over features in a layer") {
+TEST_CASE("iterate over all features in a layer") {
+    const auto data = load_test_tile();
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.get_layer_by_name("building");
+    REQUIRE(layer);
+
+    std::size_t count = 0;
+
+    SECTION("external iterator") {
+        while (auto feature = layer.next_feature()) {
+            ++count;
+        }
+    }
+
+    SECTION("internal iterator") {
+        const bool done = layer.for_each_feature([&](vtzero::feature&& /*feature*/) {
+            ++count;
+            return true;
+        });
+        REQUIRE(done);
+    }
+
+    REQUIRE(count == 937);
+}
+
+TEST_CASE("iterate over some features in a layer") {
     const auto data = load_test_tile();
     vtzero::vector_tile tile{data};
 
