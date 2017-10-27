@@ -664,12 +664,25 @@ namespace vtzero {
 
     }; // class polygon_feature_builder
 
+    /**
+     * Used to build vector tiles. Whenever you are building a new vector
+     * tile, start with an object of this class and add layers. After all
+     * the data is added, call serialize().
+     *
+     * @code
+     * tile_builder builder;
+     * builder.add_layer(...);
+     * ...
+     * std::string data = builder.serialize();
+     * @endcode
+     */
     class tile_builder {
 
         std::vector<std::unique_ptr<layer_builder_base>> m_layers;
 
     public:
 
+        /// Constructor
         tile_builder() = default;
 
         ~tile_builder() noexcept = default;
@@ -680,30 +693,84 @@ namespace vtzero {
         tile_builder(tile_builder&&) = default;
         tile_builder& operator=(tile_builder&&) = default;
 
+        /**
+         * Add a new layer to the vector tile based on an existing layer. The
+         * new layer will have the same name, version, and extent as the
+         * existing layer. The new layer will not contain any features. This
+         * method is handy when copying some (but not all) data from an
+         * existing layer.
+         */
         layer_builder_impl* add_layer(layer& layer) {
             const auto ptr = new layer_builder_impl{layer.name(), layer.version(), layer.extent()};
             m_layers.emplace_back(ptr);
             return ptr;
         }
 
-        template <typename T>
-        layer_builder_impl* add_layer(T&& name, uint32_t version = 2, uint32_t extent = 4096) {
-            const auto ptr = new layer_builder_impl{std::forward<T>(name), version, extent};
+        /**
+         * Add a new layer to the vector tile with the specified name, version,
+         * and extent.
+         *
+         * @tparam TString Some string type (const char*, std::string,
+         *         vtzero::data_view) or something that converts to one of
+         *         these types.
+         * @param name Name of this layer.
+         * @param version Version of this layer (only version 1 and 2 are
+         *                supported)
+         * @param extent Extent used for this layer.
+         */
+        template <typename TString>
+        layer_builder_impl* add_layer(TString&& name, uint32_t version = 2, uint32_t extent = 4096) {
+            const auto ptr = new layer_builder_impl{std::forward<TString>(name), version, extent};
             m_layers.emplace_back(ptr);
             return ptr;
         }
 
-        void add_layer(data_view&& data) {
+        /**
+         * Add an existing layer to the vector tile. The layer data will be
+         * copied over into the new vector_tile when the serialize() method
+         * is called. Until then, the data referenced here must stay available.
+         *
+         * @param data Reference to some data that must be a valid encoded
+         *        layer.
+         */
+        void add_existing_layer(data_view&& data) {
             m_layers.emplace_back(new layer_builder_existing{std::forward<data_view>(data)});
         }
 
-        void serialize(std::string& data) const {
-            protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{data};
+        /**
+         * Add an existing layer to the vector tile. The layer data will be
+         * copied over into the new vector_tile when the serialize() method
+         * is called. Until then, the data referenced here must stay available.
+         *
+         * @param layer Reference to the layer to be copied.
+         */
+        void add_existing_layer(const layer& layer) {
+            add_existing_layer(layer.data());
+        }
+
+        /**
+         * Serialize the data accumulated in this builder into a vector_tile.
+         * The data will be appended to the specified buffer. The buffer
+         * doesn't have to be empty.
+         *
+         * @param buffer Buffer to append the encoded vector tile to.
+         */
+        void serialize(std::string& buffer) const {
+            protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{buffer};
             for (const auto& layer : m_layers) {
                 layer->build(pbf_tile_builder);
             }
         }
 
+        /**
+         * Serialize the data accumulated in this builder into a vector_tile
+         * and return it.
+         *
+         * If you want to use an existing buffer instead, use the serialize()
+         * method taking a std::string& as parameter.
+         *
+         * @returns std::string Buffer with encoded vector_tile data.
+         */
         std::string serialize() const {
             std::string data;
             serialize(data);

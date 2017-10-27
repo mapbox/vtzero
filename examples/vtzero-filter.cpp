@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     std::string output;
     if (remaining_args == 2) {
         vtzero::tile_builder tb;
-        tb.add_layer(layer.data());
+        tb.add_existing_layer(layer);
         tb.serialize(output);
     } else {
         char* str_end = nullptr;
