@@ -60,11 +60,13 @@ if(EXISTS ${_fixtures})
                              ${_real_world_dir}/sanfrancisco/*
                              ${_real_world_dir}/uruguay/*)
 
-        execute_process(COMMAND cat ${real_world}
-                        OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/real-world-all.mvt)
+        if(NOT "${real_world}" STREQUAL "")
+            execute_process(COMMAND cat ${real_world}
+                            OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/real-world-all.mvt)
 
-        add_test(NAME vtzero-show-real-world
-                COMMAND vtzero-show ${CMAKE_BINARY_DIR}/test/real-world-all.mvt)
+            add_test(NAME vtzero-show-real-world
+                    COMMAND vtzero-show ${CMAKE_BINARY_DIR}/test/real-world-all.mvt)
+        endif()
     endif()
 else()
     message(WARNING "Disabled mvt fixture tests, because fixtures not found.\n  Install them by calling 'git submodule update --init'.")
