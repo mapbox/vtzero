@@ -337,16 +337,16 @@ namespace vtzero {
         }
 
         /**
-         * Is this index value pair valid? Index values are valid if they have
-         * been initialized with something other than the default constructor.
+         * Is this index value pair valid? Index values pairs are valid if
+         * both the key and the value index value are valid.
          */
         constexpr bool valid() const noexcept {
-            return m_key.valid();
+            return m_key.valid() && m_value.valid();
         }
 
         /**
-         * Is this index value pair valid? Index values are valid if they have
-         * been initialized with something other than the default constructor.
+         * Is this index value pair valid? Index values pairs are valid if
+         * both the key and the value index value are valid.
          */
         constexpr explicit operator bool() const noexcept {
             return valid();

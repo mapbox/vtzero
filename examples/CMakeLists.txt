@@ -64,6 +64,16 @@ if(NOT MSVC)
     set_tests_properties(vtzero-show-layer-name PROPERTIES
                          PASS_REGULAR_EXPRESSION "layer:\n  name: water\n")
 
+    #-------------------------------------------------------------
+
+    file(GLOB ext_tests RELATIVE ${CMAKE_SOURCE_DIR}/test/data/ ${CMAKE_SOURCE_DIR}/test/data/ext*)
+
+    foreach(_test IN LISTS ext_tests)
+        message(STATUS "Adding ext test: ${_test}")
+        add_test(NAME ext-tests-${_test}
+                 COMMAND vtzero-show ${CMAKE_SOURCE_DIR}/test/data/${_test})
+    endforeach()
+
 endif()
 
 
