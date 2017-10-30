@@ -50,9 +50,26 @@ if(EXISTS ${_fixtures})
 
     set_tests_properties(fixture-tests PROPERTIES
                          ENVIRONMENT "FIXTURES_DIR=${_fixtures}")
+
+    if(NOT WIN32)
+        set(_real_world_dir ${CMAKE_CURRENT_SOURCE_DIR}/mvt-fixtures/real-world)
+        file(GLOB real_world ${_real_world_dir}/bangkok/*
+                             ${_real_world_dir}/chicago/*
+                             ${_real_world_dir}/nepal/*
+                             ${_real_world_dir}/norway/*
+                             ${_real_world_dir}/sanfrancisco/*
+                             ${_real_world_dir}/uruguay/*)
+
+        execute_process(COMMAND cat ${real_world}
+                        OUTPUT_FILE ${CMAKE_CURRENT_BINARY_DIR}/real-world-all.mvt)
+
+        add_test(NAME vtzero-show-real-world
+                COMMAND vtzero-show ${CMAKE_BINARY_DIR}/test/real-world-all.mvt)
+    endif()
 else()
     message(WARNING "Disabled mvt fixture tests, because fixtures not found.\n  Install them by calling 'git submodule update --init'.")
 endif()
+
 
 
 #-----------------------------------------------------------------------------
