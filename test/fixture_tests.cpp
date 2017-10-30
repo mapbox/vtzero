@@ -227,7 +227,21 @@ TEST_CASE("MVT test 008: Tile layer extent encoded as string") {
     REQUIRE_THROWS_AS(tile.next_layer(), const vtzero::format_exception&);
 }
 
-// missing 009
+TEST_CASE("MVT test 009: Tile layer extent missing") {
+    std::string buffer{open_tile("009/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+
+    REQUIRE(tile.count_layers() == 1);
+    auto layer = tile.next_layer();
+
+    REQUIRE(layer.name() == "hello");
+    REQUIRE(layer.version() == 2);
+    REQUIRE(layer.extent() == 4096);
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature.id() == 1);
+}
 
 TEST_CASE("MVT test 010: Tile layer value is encoded as int, but pretends to be string") {
     std::string buffer{open_tile("010/tile.mvt")};
@@ -615,7 +629,7 @@ TEST_CASE("MVT test 038: Layer with all types of property value") {
     REQUIRE(vtab[2].int_value() == 6);
     REQUIRE(vtab[3].double_value() == Approx(1.23));
     REQUIRE(vtab[4].float_value() == Approx(3.1));
-    REQUIRE(vtab[5].sint_value() == 87948);
+    REQUIRE(vtab[5].sint_value() == -87948);
     REQUIRE(vtab[6].uint_value() == 87948);
 
     REQUIRE_THROWS_AS(vtab[0].bool_value(), const vtzero::type_exception&);
@@ -705,5 +719,20 @@ TEST_CASE("MVT test 043: A layer with six points that all share the same key but
     REQUIRE(property);
     REQUIRE(property.key() == "poi");
     REQUIRE(property.value().string_value() == "water_fountain");
+}
+
+TEST_CASE("MVT test 044: Geometry field begins with a ClosePath command, which is invalid") {
+    std::string buffer{open_tile("044/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, false, geom_handler{}), const vtzero::geometry_exception&);
 }
 
