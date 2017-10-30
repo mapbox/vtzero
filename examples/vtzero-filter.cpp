@@ -76,20 +76,21 @@ int main(int argc, char* argv[]) {
     if (remaining_args == 2) {
         tb.add_existing_layer(layer);
     } else {
+        std::string idstr{argv[optind + 2]};
         char* str_end = nullptr;
-        const long id = std::strtol(argv[optind + 2], &str_end, 10); // NOLINT clang-tidy: google-runtime-int
-        if (str_end != argv[optind + 2] + std::strlen(argv[optind + 2])) {
-            print_usage(argv[0]);
+        const int64_t id = std::strtoll(idstr.c_str(), &str_end, 10);
+        if (str_end != idstr.c_str() + idstr.size()) {
+            std::cerr << "Feature ID must be numeric.\n";
             return 1;
         }
-        if (id < 0 || id > std::numeric_limits<long>::max()) { // NOLINT clang-tidy: google-runtime-int
-            print_usage(argv[0]);
+        if (id < 0) {
+            std::cerr << "Feature ID must be >= 0.\n";
             return 1;
         }
 
-        auto feature = layer.get_feature_by_id(static_cast<uint32_t>(id));
+        const auto feature = layer.get_feature_by_id(static_cast<uint64_t>(id));
         if (!feature.valid()) {
-            std::cerr << "No feature with that id\n";
+            std::cerr << "No feature with that id: " << id << '\n';
             return 1;
         }
 

@@ -24,8 +24,18 @@ if(NOT MSVC)
     set_tests_properties(vtzero-filter-help PROPERTIES
                          PASS_REGULAR_EXPRESSION "^vtzero-filter ")
 
-    add_test(NAME vtzero-filter-file
+    add_test(NAME vtzero-filter-layer
              COMMAND vtzero-filter -o ${CMAKE_CURRENT_BINARY_DIR}/bridges.mvt ${TEST_FILE} bridge)
+
+    add_test(NAME vtzero-filter-feature
+             COMMAND vtzero-filter -o ${CMAKE_CURRENT_BINARY_DIR}/bridges.mvt ${TEST_FILE} waterway_label 221925711)
+
+    add_test(NAME vtzero-filter-invalid-id
+             COMMAND vtzero-filter -o ${CMAKE_CURRENT_BINARY_DIR}/bridges.mvt ${TEST_FILE} waterway_label abc)
+    set_tests_properties(vtzero-filter-invalid-id PROPERTIES
+                         WILL_FAIL true)
+
+    #-------------------------------------------------------------
 
     add_executable(vtzero-show vtzero-show.cpp utils.cpp)
 
