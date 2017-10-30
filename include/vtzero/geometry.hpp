@@ -178,16 +178,26 @@ namespace vtzero {
                 }
 
                 // spec 4.3.2 "A ParameterInteger is zigzag encoded"
-                const int32_t x = protozero::decode_zigzag32(*m_it++);
-                const int32_t y = protozero::decode_zigzag32(*m_it++);
+                int64_t x = protozero::decode_zigzag32(*m_it++);
+                int64_t y = protozero::decode_zigzag32(*m_it++);
 
                 // spec 4.3.3.2 "For any pair of (dX, dY) the dX and dY MUST NOT both be 0."
                 if (m_strict && m_command_id == command_line_to() && x == 0 && y == 0) {
                     throw geometry_exception{"found consecutive equal points (spec 4.3.3.2) (strict mode)"};
                 }
 
-                m_cursor.x += x;
-                m_cursor.y += y;
+                x += m_cursor.x;
+                y += m_cursor.y;
+
+                if (x < std::numeric_limits<int32_t>::min() ||
+                    x > std::numeric_limits<int32_t>::max() ||
+                    y < std::numeric_limits<int32_t>::min() ||
+                    y > std::numeric_limits<int32_t>::max()) {
+                    throw geometry_exception{"coordinates out of bounds"};
+                }
+
+                m_cursor.x = static_cast<int32_t>(x);
+                m_cursor.y = static_cast<int32_t>(y);
 
                 --m_count;
 

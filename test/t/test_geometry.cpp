@@ -262,3 +262,45 @@ TEST_CASE("geometry_decoder with multipolygon") {
     REQUIRE_FALSE(decoder.next_command(vtzero::detail::command_move_to()));
 }
 
+TEST_CASE("geometry_decoder decoding linestring with int32 overflow in x coordinate") {
+    const container g = {vtzero::detail::command_move_to(1),
+                           protozero::encode_zigzag32(std::numeric_limits<int32_t>::max()),
+                           protozero::encode_zigzag32(0),
+                         vtzero::detail::command_line_to(1),
+                           protozero::encode_zigzag32(1),
+                           protozero::encode_zigzag32(1)
+                         };
+
+    vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
+    REQUIRE(decoder.count() == 0);
+    REQUIRE_FALSE(decoder.done());
+
+    REQUIRE(decoder.next_command(vtzero::detail::command_move_to()));
+    REQUIRE(decoder.count() == 1);
+    REQUIRE(decoder.next_point() == vtzero::point(std::numeric_limits<int32_t>::max(), 0));
+    REQUIRE(decoder.next_command(vtzero::detail::command_line_to()));
+    REQUIRE(decoder.count() == 1);
+    REQUIRE_THROWS_AS(decoder.next_point(), const vtzero::geometry_exception&);
+}
+
+TEST_CASE("geometry_decoder decoding linestring with int32 overflow in y coordinate") {
+    const container g = {vtzero::detail::command_move_to(1),
+                           protozero::encode_zigzag32(0),
+                           protozero::encode_zigzag32(std::numeric_limits<int32_t>::min()),
+                         vtzero::detail::command_line_to(1),
+                           protozero::encode_zigzag32(-1),
+                           protozero::encode_zigzag32(-1)
+                         };
+
+    vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
+    REQUIRE(decoder.count() == 0);
+    REQUIRE_FALSE(decoder.done());
+
+    REQUIRE(decoder.next_command(vtzero::detail::command_move_to()));
+    REQUIRE(decoder.count() == 1);
+    REQUIRE(decoder.next_point() == vtzero::point(0, std::numeric_limits<int32_t>::min()));
+    REQUIRE(decoder.next_command(vtzero::detail::command_line_to()));
+    REQUIRE(decoder.count() == 1);
+    REQUIRE_THROWS_AS(decoder.next_point(), const vtzero::geometry_exception&);
+}
+
