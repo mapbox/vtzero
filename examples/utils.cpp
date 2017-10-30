@@ -8,6 +8,11 @@
 #include <stdexcept>
 
 std::string read_file(const std::string& filename) {
+    if (filename.empty() || filename[0] == '-') {
+        return std::string{std::istreambuf_iterator<char>(std::cin.rdbuf()),
+                           std::istreambuf_iterator<char>()};
+    }
+
     std::ifstream stream{filename, std::ios_base::in | std::ios_base::binary};
     if (!stream) {
         throw std::runtime_error{std::string{"Can not open file '"} + filename + "'"};
