@@ -43,6 +43,15 @@ namespace vtzero {
 
         vtzero::detail::layer_builder_impl* m_layer;
 
+        friend class geometry_feature_builder;
+        friend class point_feature_builder;
+        friend class line_string_feature_builder;
+        friend class polygon_feature_builder;
+
+        vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {
+            return *m_layer;
+        };
+
     public:
 
         /**
@@ -66,10 +75,6 @@ namespace vtzero {
          */
         template <typename TString, typename std::enable_if<!std::is_same<typename std::remove_cv<typename std::remove_reference<TString>::type>::type, layer>{}, int>::type = 0>
         layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096);
-
-        vtzero::detail::layer_builder_impl& get_layer() noexcept {
-            return *m_layer;
-        };
 
         index_value add_key_without_dup_check(const data_view text) {
             return m_layer->add_key_without_dup_check(text);
@@ -101,7 +106,7 @@ namespace vtzero {
     public:
 
         geometry_feature_builder(layer_builder layer, const geometry geometry, uint64_t id = 0) :
-            feature_builder_base(&layer.get_layer(), id) {
+            feature_builder_base(&layer.get_layer_impl(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
             m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
             m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
@@ -129,7 +134,7 @@ namespace vtzero {
     public:
 
         explicit point_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(&layer.get_layer(), id) {
+            feature_builder(&layer.get_layer_impl(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
@@ -229,7 +234,7 @@ namespace vtzero {
     public:
 
         explicit line_string_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(&layer.get_layer(), id) {
+            feature_builder(&layer.get_layer_impl(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
@@ -323,7 +328,7 @@ namespace vtzero {
     public:
 
         explicit polygon_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(&layer.get_layer(), id) {
+            feature_builder(&layer.get_layer_impl(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
