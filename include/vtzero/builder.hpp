@@ -100,7 +100,7 @@ namespace vtzero {
 
         class feature_builder_base {
 
-            layer_builder m_layer;
+            layer_builder_impl* m_layer;
 
             void add_key_internal(index_value idx) {
                 m_pbf_tags.add_element(idx.value());
@@ -108,7 +108,7 @@ namespace vtzero {
 
             template <typename T>
             void add_key_internal(T&& key) {
-                add_key_internal(m_layer.get_layer().add_key(data_view{std::forward<T>(key)}));
+                add_key_internal(m_layer->add_key(data_view{std::forward<T>(key)}));
             }
 
             void add_value_internal(index_value idx) {
@@ -116,13 +116,13 @@ namespace vtzero {
             }
 
             void add_value_internal(property_value value) {
-                add_value_internal(m_layer.get_layer().add_value(value.data()));
+                add_value_internal(m_layer->add_value(value.data()));
             }
 
             template <typename T>
             void add_value_internal(T&& value) {
                 encoded_property_value v{std::forward<T>(value)};
-                add_value_internal(m_layer.get_layer().add_value(v.data()));
+                add_value_internal(m_layer->add_value(v.data()));
             }
 
         protected:
@@ -130,9 +130,9 @@ namespace vtzero {
             protozero::pbf_builder<detail::pbf_feature> m_feature_writer;
             protozero::packed_field_uint32 m_pbf_tags;
 
-            feature_builder_base(layer_builder layer, uint64_t id) :
+            feature_builder_base(layer_builder_impl* layer, uint64_t id) :
                 m_layer(layer),
-                m_feature_writer(layer.get_layer().message(), detail::pbf_layer::features) {
+                m_feature_writer(layer->message(), detail::pbf_layer::features) {
                 m_feature_writer.add_uint64(detail::pbf_feature::id, id);
             }
 
@@ -162,7 +162,7 @@ namespace vtzero {
                 }
                 if (m_feature_writer.valid()) {
                     m_feature_writer.commit();
-                    m_layer.get_layer().increment_feature_count();
+                    m_layer->increment_feature_count();
                 }
             }
 
@@ -185,7 +185,7 @@ namespace vtzero {
 
         public:
 
-            feature_builder(layer_builder layer, uint64_t id) :
+            feature_builder(layer_builder_impl* layer, uint64_t id) :
                 feature_builder_base(layer, id) {
             }
 
@@ -234,7 +234,7 @@ namespace vtzero {
     public:
 
         geometry_feature_builder(layer_builder layer, const geometry geometry, uint64_t id = 0) :
-            feature_builder_base(layer, id) {
+            feature_builder_base(&layer.get_layer(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
             m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
             m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
@@ -262,7 +262,7 @@ namespace vtzero {
     public:
 
         explicit point_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(layer, id) {
+            feature_builder(&layer.get_layer(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
@@ -362,7 +362,7 @@ namespace vtzero {
     public:
 
         explicit line_string_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(layer, id) {
+            feature_builder(&layer.get_layer(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
@@ -456,7 +456,7 @@ namespace vtzero {
     public:
 
         explicit polygon_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(layer, id) {
+            feature_builder(&layer.get_layer(), id) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
