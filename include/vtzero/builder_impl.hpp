@@ -22,6 +22,8 @@ documentation.
 #include <protozero/pbf_message.hpp>
 
 #include <cstdlib>
+#include <string>
+#include <utility>
 
 namespace vtzero {
 
