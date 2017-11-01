@@ -105,6 +105,9 @@ tile.for_each_layer([&](layer&& l) {
 });
 ```
 
+Both the external and internal iteration do basically the same and have the
+same performance characteristics.
+
 You can also access layers through their index or name:
 
 ```cpp
@@ -168,6 +171,9 @@ layer.for_each_feature([&](feature&& f) {
 });
 ```
 
+Both the external and internal iteration do basically the same and have the
+same performance characteristics.
+
 If you know the ID of a feature you can get the feature using
 `get_feature_by_id()`, but note that this will do a linear search through
 all the features in the layer, decoding each one until it finds the right ID.
@@ -220,6 +226,9 @@ feature.for_each_property([&](property&& p) {
     return true;
 });
 ```
+
+Both the external and internal iteration do basically the same and have the
+same performance characteristics.
 
 ### The property
 
