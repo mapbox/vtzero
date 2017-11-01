@@ -181,23 +181,22 @@ namespace vtzero {
                 int64_t x = protozero::decode_zigzag32(*m_it++);
                 int64_t y = protozero::decode_zigzag32(*m_it++);
 
-                // spec 4.3.3.2 "For any pair of (dX, dY) the dX and dY MUST NOT both be 0."
-                if (m_strict && m_command_id == command_line_to() && x == 0 && y == 0) {
-                    throw geometry_exception{"found consecutive equal points (spec 4.3.3.2) (strict mode)"};
-                }
+                const auto last_cursor = m_cursor;
 
+                // x and y are int64_t so this addition can never overflow
                 x += m_cursor.x;
                 y += m_cursor.y;
 
-                if (x < std::numeric_limits<int32_t>::min() ||
-                    x > std::numeric_limits<int32_t>::max() ||
-                    y < std::numeric_limits<int32_t>::min() ||
-                    y > std::numeric_limits<int32_t>::max()) {
-                    throw geometry_exception{"coordinates out of bounds"};
-                }
-
+                // The cast is okay, because a valid vector tile can never
+                // contain values that would overflow here and we don't care
+                // what happens to invalid tiles here.
                 m_cursor.x = static_cast<int32_t>(x);
                 m_cursor.y = static_cast<int32_t>(y);
+
+                // spec 4.3.3.2 "For any pair of (dX, dY) the dX and dY MUST NOT both be 0."
+                if (m_strict && m_command_id == command_line_to() && m_cursor == last_cursor) {
+                    throw geometry_exception{"found consecutive equal points (spec 4.3.3.2) (strict mode)"};
+                }
 
                 --m_count;
 
