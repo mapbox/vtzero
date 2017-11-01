@@ -149,20 +149,20 @@ namespace vtzero {
                 }
 
                 m_command_id = detail::get_command_id(*m_it);
-                if (m_command_id == command_close_path()) {
+                if (m_command_id != expected_command) {
+                    throw geometry_exception{std::string{"expected command "} +
+                                             std::to_string(expected_command) +
+                                             " but got " +
+                                             std::to_string(m_command_id)};
+                }
+
+                if (expected_command == command_close_path()) {
                     // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
                     if (detail::get_command_count(*m_it) != 1) {
                         throw geometry_exception{"ClosePath command count is not 1"};
                     }
                 } else {
                     m_count = detail::get_command_count(*m_it);
-                }
-
-                if (m_command_id != expected_command) {
-                    throw geometry_exception{std::string{"expected command "} +
-                                             std::to_string(expected_command) +
-                                             " but got " +
-                                             std::to_string(m_command_id)};
                 }
 
                 ++m_it;
