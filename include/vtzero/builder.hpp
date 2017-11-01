@@ -16,11 +16,11 @@ documentation.
  * @brief Contains the classes and functions to build vector tiles.
  */
 
-#include "encoded_property_value.hpp"
+#include "builder_impl.hpp"
+#include "feature_builder_impl.hpp"
 #include "geometry.hpp"
 #include "types.hpp"
 #include "vector_tile.hpp"
-#include "builder_impl.hpp"
 
 #include <protozero/pbf_builder.hpp>
 
@@ -95,139 +95,6 @@ namespace vtzero {
         void add_feature(const feature& feature);
 
     }; // class layer_builder
-
-    namespace detail {
-
-        class feature_builder_base {
-
-            layer_builder_impl* m_layer;
-
-            void add_key_internal(index_value idx) {
-                m_pbf_tags.add_element(idx.value());
-            }
-
-            template <typename T>
-            void add_key_internal(T&& key) {
-                add_key_internal(m_layer->add_key(data_view{std::forward<T>(key)}));
-            }
-
-            void add_value_internal(index_value idx) {
-                m_pbf_tags.add_element(idx.value());
-            }
-
-            void add_value_internal(property_value value) {
-                add_value_internal(m_layer->add_value(value.data()));
-            }
-
-            template <typename T>
-            void add_value_internal(T&& value) {
-                encoded_property_value v{std::forward<T>(value)};
-                add_value_internal(m_layer->add_value(v.data()));
-            }
-
-        protected:
-
-            protozero::pbf_builder<detail::pbf_feature> m_feature_writer;
-            protozero::packed_field_uint32 m_pbf_tags;
-
-            feature_builder_base(layer_builder_impl* layer, uint64_t id) :
-                m_layer(layer),
-                m_feature_writer(layer->message(), detail::pbf_layer::features) {
-                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
-            }
-
-            ~feature_builder_base() noexcept = default;
-
-            feature_builder_base(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
-            feature_builder_base& operator=(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
-                                                                                   // The check wants these functions to be public...
-
-            feature_builder_base(feature_builder_base&&) noexcept = default;
-            feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
-
-            void add_property_impl(const property& property) {
-                add_key_internal(property.key());
-                add_value_internal(property.value());
-            }
-
-            template <typename TKey, typename TValue>
-            void add_property_impl(TKey&& key, TValue&& value) {
-                add_key_internal(std::forward<TKey>(key));
-                add_value_internal(std::forward<TValue>(value));
-            }
-
-            void do_commit() {
-                if (m_pbf_tags.valid()) {
-                    m_pbf_tags.commit();
-                }
-                if (m_feature_writer.valid()) {
-                    m_feature_writer.commit();
-                    m_layer->increment_feature_count();
-                }
-            }
-
-            void do_rollback() {
-                if (m_pbf_tags.valid()) {
-                    m_pbf_tags.commit();
-                }
-                m_feature_writer.rollback();
-            }
-
-        }; // class feature_builder_base
-
-        class feature_builder : public feature_builder_base {
-
-        protected:
-
-            protozero::packed_field_uint32 m_pbf_geometry{};
-            uint32_t m_num_points = 0;
-            point m_cursor{0, 0};
-
-        public:
-
-            feature_builder(layer_builder_impl* layer, uint64_t id) :
-                feature_builder_base(layer, id) {
-            }
-
-            ~feature_builder() {
-                commit(); // XXX exceptions?
-            }
-
-            feature_builder(const feature_builder&) = delete;
-            feature_builder& operator=(const feature_builder&) = delete;
-
-            feature_builder(feature_builder&&) noexcept = default;
-            feature_builder& operator=(feature_builder&&) noexcept = default;
-
-            template <typename ...TArgs>
-            void add_property(TArgs&& ...args) {
-                if (m_pbf_geometry.valid()) {
-                    vtzero_assert(m_num_points == 0 && "Not enough calls to set_point()");
-                    m_pbf_geometry.commit();
-                }
-                if (!m_pbf_tags.valid()) {
-                    m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
-                }
-                add_property_impl(std::forward<TArgs>(args)...);
-            }
-
-            void commit() {
-                if (m_pbf_geometry.valid()) {
-                    m_pbf_geometry.commit();
-                }
-                do_commit();
-            }
-
-            void rollback() {
-                if (m_pbf_geometry.valid()) {
-                    m_pbf_geometry.commit();
-                }
-                do_rollback();
-            }
-
-        }; // class feature_builder
-
-    } // namespace detail
 
     class geometry_feature_builder : public detail::feature_builder_base {
 
