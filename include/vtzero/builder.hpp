@@ -83,13 +83,13 @@ namespace vtzero {
 
     public:
 
-        template <typename T>
-        layer_builder_impl(T&& name, uint32_t version, uint32_t extent) :
+        template <typename TString>
+        layer_builder_impl(TString&& name, uint32_t version, uint32_t extent) :
             m_pbf_message_layer(m_data),
             m_pbf_message_keys(m_keys_data),
             m_pbf_message_values(m_values_data) {
             m_pbf_message_layer.add_uint32(detail::pbf_layer::version, version);
-            m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<T>(name));
+            m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<TString>(name));
             m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
         }
 
@@ -190,14 +190,37 @@ namespace vtzero {
 
     class tile_builder;
 
+    /**
+     * The layer_builder is used to add a new layer to a vector tile that is
+     * being built.
+     */
     class layer_builder {
 
         vtzero::layer_builder_impl* m_layer;
 
     public:
 
-        template <typename ...TArgs>
-        explicit layer_builder(vtzero::tile_builder& tile, TArgs&& ...args);
+        /**
+         * Construct a layer_builder to build a new layer with the same name,
+         * version, and extent as an existing layer.
+         *
+         * @param tile The tile builder we want to create this layer in.
+         * @param layer Existing layer we want to use the name, version, and
+         *        extent from
+         */
+        layer_builder(vtzero::tile_builder& tile, const layer& layer);
+
+        /**
+         * Construct a layer_builder to build a completely new layer.
+         *
+         * @tparam TString Some string type (such as std::string or const char*)
+         * @param tile The tile builder we want to create this layer in.
+         * @param name The name of the new layer.
+         * @param version The vector tile spec version of the new layer.
+         * @param extent The extent of the new layer.
+         */
+        template <typename TString, typename std::enable_if<!std::is_same<typename std::remove_cv<typename std::remove_reference<TString>::type>::type, layer>{}, int>::type = 0>
+        layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096);
 
         vtzero::layer_builder_impl& get_layer() noexcept {
             return *m_layer;
@@ -219,6 +242,11 @@ namespace vtzero {
             return m_layer->add_value(text);
         }
 
+        /**
+         * Add a feature from an existing layer to the new layer. The feature
+         * will be copied completely over to the new layer including its
+         * geometry and all its properties.
+         */
         void add_feature(const feature& feature);
 
     }; // class layer_builder
@@ -685,28 +713,20 @@ namespace vtzero {
      * the data is added, call serialize().
      *
      * @code
+     * layer some_existing_layer = ...;
+     *
      * tile_builder builder;
-     * builder.add_layer(...);
+     * layer_builder layer_roads{builder, "roads"};
+     * builder.add_existing_layer(some_existing_layer);
      * ...
      * std::string data = builder.serialize();
      * @endcode
      */
     class tile_builder {
 
+        friend class layer_builder;
+
         std::vector<std::unique_ptr<layer_builder_base>> m_layers;
-
-    public:
-
-        /// Constructor
-        tile_builder() = default;
-
-        ~tile_builder() noexcept = default;
-
-        tile_builder(const tile_builder&) = delete;
-        tile_builder& operator=(const tile_builder&) = delete;
-
-        tile_builder(tile_builder&&) = default;
-        tile_builder& operator=(tile_builder&&) = default;
 
         /**
          * Add a new layer to the vector tile based on an existing layer. The
@@ -715,7 +735,7 @@ namespace vtzero {
          * method is handy when copying some (but not all) data from an
          * existing layer.
          */
-        layer_builder_impl* add_layer(layer& layer) {
+        layer_builder_impl* add_layer(const layer& layer) {
             const auto ptr = new layer_builder_impl{layer.name(), layer.version(), layer.extent()};
             m_layers.emplace_back(ptr);
             return ptr;
@@ -734,11 +754,24 @@ namespace vtzero {
          * @param extent Extent used for this layer.
          */
         template <typename TString>
-        layer_builder_impl* add_layer(TString&& name, uint32_t version = 2, uint32_t extent = 4096) {
+        layer_builder_impl* add_layer(TString&& name, uint32_t version, uint32_t extent) {
             const auto ptr = new layer_builder_impl{std::forward<TString>(name), version, extent};
             m_layers.emplace_back(ptr);
             return ptr;
         }
+
+    public:
+
+        /// Constructor
+        tile_builder() = default;
+
+        ~tile_builder() noexcept = default;
+
+        tile_builder(const tile_builder&) = delete;
+        tile_builder& operator=(const tile_builder&) = delete;
+
+        tile_builder(tile_builder&&) = default;
+        tile_builder& operator=(tile_builder&&) = default;
 
         /**
          * Add an existing layer to the vector tile. The layer data will be
@@ -764,7 +797,7 @@ namespace vtzero {
         }
 
         /**
-         * Serialize the data accumulated in this builder into a vector_tile.
+         * Serialize the data accumulated in this builder into a vector tile.
          * The data will be appended to the specified buffer. The buffer
          * doesn't have to be empty.
          *
@@ -809,9 +842,13 @@ namespace vtzero {
         });
     }
 
-    template <typename ...TArgs>
-    layer_builder::layer_builder(vtzero::tile_builder& tile, TArgs&& ...args) :
-        m_layer(tile.add_layer(std::forward<TArgs>(args)...)) {
+    inline layer_builder::layer_builder(vtzero::tile_builder& tile, const layer& layer) :
+        m_layer(tile.add_layer(layer)) {
+    }
+
+    template <typename TString, typename std::enable_if<!std::is_same<typename std::remove_cv<typename std::remove_reference<TString>::type>::type, layer>{}, int>::type>
+    layer_builder::layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version, uint32_t extent) :
+        m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
     }
 
 } // namespace vtzero

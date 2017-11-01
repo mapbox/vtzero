@@ -502,6 +502,86 @@ long as you are not accessing those tables directly or by looking up any
 properties in a feature, the tables are not created and no extra memory is
 used.
 
+## Writing vector tiles
+
+Writing vector tiles start with creating a `tile_builder`. This builder will
+then be used to add layers and features in those layers. Once all this is done,
+you call `serialize()` to actually build the vector tile from the data you
+provided to the builders:
+
+```cpp
+vtzero::tile_builder tbuilder;
+// add lots of data to builder...
+std::string buffer = tbuilder.serialize();
+```
+
+You can also serialize the data into an existing buffer instead:
+
+```cpp
+std::string buffer; // got buffer from somewhere
+tbuilder.serialize(buffer);
+```
+
+### Adding layers
+
+Once you have a tile builder, you'll first need some layers:
+
+```cpp
+vtzero::tile_builder tbuilder;
+vtzero::layer_builder layer_pois{tbuilder, "pois", 2, 4096};
+vtzero::layer_builder layer_roads{tbuilder, "roads"};
+vtzero::layer_builder layer_forests{tbuilder, "forests"};
+```
+
+Here three layers called "pois", "roads", and "forests" are added. The first
+one explicitly specifies the vector tile version used and the extent. The
+values specified here are the default, so all layers in this example will have
+a version of 2 and an extent of 4096.
+
+If you have read a layer from an existing vector tile and want to copy over
+some of the data, you can use this layer to initialize the new layer in the
+new vector tile with the name, version and extent from the existing layer like
+this:
+
+```cpp
+vtzero::layer some_layer = ...;
+vtzero::layer_builder layer_pois{tbuilder, some_layer};
+// same as...
+vtzero::layer_builder layer_pois{tbuilder, some_layer.name(),
+                                           some_layer.version(),
+                                           some_layer.extent()};
+```
+
+If you want to copy over an existing layer completely, you can use the
+`add_existing_layer()` function instead:
+
+```cpp
+vtzero::layer some_layer = ...;
+vtzero::tile_builder tbuilder;
+tbuilder.add_existing_layer(some_layer);
+```
+
+Or, if you have the encoded layer data available in a `data_view` this also
+works:
+
+```cpp
+vtzero::data_view layer_data = ...;
+vtzero::tile_builder tbuilder;
+tbuilder.add_existing_layer(layer_data);
+```
+
+Note that this call will only store a reference to the data to be added in the
+tile builder. The data will only be copied when the final `serialize()` is
+called, so the input data must still be available then!
+
+You can mix any of the ways of adding a layer to the tile mentioned above. The
+layers will be added to the tile in the order you add them to the
+`tile_builder`.
+
+The tile builder is smart enough to not add empty layers, so you can start
+out with all the layers you might need and if some of them stay empty, they
+will not be added to the tile when `serialize()` is called.
+
 ## Error handling
 
 Many vtzero functions can throw exceptions. Most of them fall into two
