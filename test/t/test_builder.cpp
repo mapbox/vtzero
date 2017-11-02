@@ -48,6 +48,48 @@ namespace vtzero {
 
 } // namespace vtzero
 
+TEST_CASE("Create tile from existing layers") {
+    const auto buffer = load_test_tile();
+    vtzero::vector_tile tile{buffer};
+
+    vtzero::tile_builder tbuilder;
+
+    SECTION("add_existing_layer(layer)") {
+        while (auto layer = tile.next_layer()) {
+            tbuilder.add_existing_layer(layer);
+        }
+    }
+
+    SECTION("add_existing_layer(data_view)") {
+        while (auto layer = tile.next_layer()) {
+            tbuilder.add_existing_layer(layer.data());
+        }
+    }
+
+    std::string data = tbuilder.serialize();
+
+    REQUIRE(data == buffer);
+}
+
+TEST_CASE("Create layer based on existing layer") {
+    const auto buffer = load_test_tile();
+    vtzero::vector_tile tile{buffer};
+    const auto layer = tile.get_layer_by_name("place_label");
+
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, layer};
+    vtzero::point_feature_builder fbuilder{lbuilder, 42};
+    fbuilder.add_point(10, 20);
+    fbuilder.commit();
+
+    std::string data = tbuilder.serialize();
+    vtzero::vector_tile new_tile{data};
+    const auto new_layer = new_tile.next_layer();
+    REQUIRE(std::string(new_layer.name()) == "place_label");
+    REQUIRE(new_layer.version() == 1);
+    REQUIRE(new_layer.extent() == 4096);
+}
+
 TEST_CASE("Point builder") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
