@@ -3,6 +3,8 @@
 
 #include <vtzero/types.hpp>
 
+#include <string>
+
 TEST_CASE("default constructed string_value_type") {
     vtzero::string_value_type v;
     REQUIRE(v.value.data() == nullptr);

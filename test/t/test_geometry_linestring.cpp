@@ -3,6 +3,9 @@
 
 #include <vtzero/geometry.hpp>
 
+#include <cstdint>
+#include <vector>
+
 using container = std::vector<uint32_t>;
 using iterator = container::const_iterator;
 

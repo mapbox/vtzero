@@ -2,6 +2,7 @@
 #include <test.hpp>
 
 #include <sstream>
+#include <string>
 
 template <typename T>
 std::string get_output(T v) {

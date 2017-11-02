@@ -4,6 +4,8 @@
 #include <vtzero/layer.hpp>
 #include <vtzero/vector_tile.hpp>
 
+#include <cstddef>
+
 TEST_CASE("default constructed layer") {
     vtzero::layer layer{};
     REQUIRE_FALSE(layer.valid());

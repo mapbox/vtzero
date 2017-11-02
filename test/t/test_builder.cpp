@@ -5,8 +5,11 @@
 #include <vtzero/geometry.hpp>
 #include <vtzero/index.hpp>
 
+#include <cstdint>
 #include <map>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 struct point_handler {
 
