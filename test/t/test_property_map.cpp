@@ -16,7 +16,8 @@ TEST_CASE("property map") {
     vtzero::tile_builder tile;
     vtzero::layer_builder layer_points{tile, "points"};
     {
-        vtzero::point_feature_builder feature{layer_points, 1};
+        vtzero::point_feature_builder feature{layer_points};
+        feature.set_id(1);
         feature.add_points(1);
         feature.set_point(10, 10);
         feature.add_property("foo", "bar");

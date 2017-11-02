@@ -60,10 +60,9 @@ namespace vtzero {
             protozero::pbf_builder<detail::pbf_feature> m_feature_writer;
             protozero::packed_field_uint32 m_pbf_tags;
 
-            feature_builder_base(layer_builder_impl* layer, uint64_t id) :
+            feature_builder_base(layer_builder_impl* layer) :
                 m_layer(layer),
                 m_feature_writer(layer->message(), detail::pbf_layer::features) {
-                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
             }
 
             ~feature_builder_base() noexcept = default;
@@ -115,8 +114,8 @@ namespace vtzero {
 
         public:
 
-            feature_builder(layer_builder_impl* layer, uint64_t id) :
-                feature_builder_base(layer, id) {
+            feature_builder(layer_builder_impl* layer) :
+                feature_builder_base(layer) {
             }
 
             ~feature_builder() {
@@ -128,6 +127,17 @@ namespace vtzero {
 
             feature_builder(feature_builder&&) noexcept = default;
             feature_builder& operator=(feature_builder&&) noexcept = default;
+
+            void set_id(uint64_t id) {
+                vtzero_assert(!m_pbf_geometry.valid());
+                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+            }
+
+            void init_geometry() {
+                if (!m_pbf_geometry.valid()) {
+                    m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
+                }
+            }
 
             template <typename ...TArgs>
             void add_property(TArgs&& ...args) {

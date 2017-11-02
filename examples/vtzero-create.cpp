@@ -25,7 +25,8 @@ int main() {
     vtzero::key_index<std::unordered_map> idx{layer_points};
 
     {
-        vtzero::point_feature_builder feature{layer_points, 1 /* id */};
+        vtzero::point_feature_builder feature{layer_points};
+        feature.set_id(1);
         feature.add_points(1);
         feature.set_point(10, 10);
         feature.add_property("foo", "bar");
@@ -36,31 +37,36 @@ int main() {
     const auto some = idx("some");
 
     {
-        vtzero::point_feature_builder feature{layer_points, 2 /* id */};
+        vtzero::point_feature_builder feature{layer_points};
+        feature.set_id(2);
         feature.add_point(20, 20);
         feature.add_property(some, "attr");
     }
     {
-        vtzero::point_feature_builder feature{layer_points, 3 /* id */};
+        vtzero::point_feature_builder feature{layer_points};
+        feature.set_id(3);
         feature.add_point(20, 20);
         feature.add_property(idx("some"), "attr");
     }
 
     {
-        vtzero::point_feature_builder feature{layer_points, 4 /* id */};
+        vtzero::point_feature_builder feature{layer_points};
+        feature.set_id(4);
         feature.add_point(20, 20);
         feature.add_property(idx("some"), "otherattr");
     }
 
 
-    vtzero::point_feature_builder feature1{layer_points, 5 /* id */};
+    vtzero::point_feature_builder feature1{layer_points};
+    feature1.set_id(5);
     feature1.add_point(vtzero::point{20, 20});
     feature1.add_property("otherkey", "attr");
     feature1.commit();
 
     vtzero::value_index<vtzero::sint_value_type, int32_t, std::unordered_map> maxspeed_index{layer_lines};
     {
-        vtzero::line_string_feature_builder feature{layer_lines, 6 /* id */};
+        vtzero::line_string_feature_builder feature{layer_lines};
+        feature.set_id(6);
         feature.add_linestring(3);
         feature.set_point(10, 10);
         feature.set_point(10, 20);
@@ -72,7 +78,8 @@ int main() {
     }
 
     {
-        vtzero::polygon_feature_builder feature{layer_polygons, 7 /* id */};
+        vtzero::polygon_feature_builder feature{layer_polygons};
+        feature.set_id(7);
         feature.add_ring(5);
         feature.set_point(0, 0);
         feature.set_point(10, 0);

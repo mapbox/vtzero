@@ -78,7 +78,8 @@ TEST_CASE("Create layer based on existing layer") {
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, layer};
-    vtzero::point_feature_builder fbuilder{lbuilder, 42};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+    fbuilder.set_id(42);
     fbuilder.add_point(10, 20);
     fbuilder.commit();
 
@@ -94,7 +95,8 @@ TEST_CASE("Point builder") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
-    vtzero::point_feature_builder fbuilder{lbuilder, 17};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+    fbuilder.set_id(17);
 
     SECTION("add point using coordinates") {
         fbuilder.add_point(10, 20);
@@ -135,7 +137,8 @@ TEST_CASE("value index") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     const auto key = lbuilder.add_key("some_key");
 
-    vtzero::point_feature_builder fbuilder{lbuilder, 17};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+    fbuilder.set_id(17);
     fbuilder.add_point(10, 20);
 
     SECTION("no index") {

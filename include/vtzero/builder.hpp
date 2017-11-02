@@ -106,11 +106,8 @@ namespace vtzero {
 
     public:
 
-        geometry_feature_builder(layer_builder layer, const geometry geometry, uint64_t id = 0) :
-            feature_builder_base(&layer.get_layer_impl(), id) {
-            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
-            m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
-            m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+        geometry_feature_builder(layer_builder layer) :
+            feature_builder_base(&layer.get_layer_impl()) {
         }
 
         ~geometry_feature_builder() {
@@ -123,6 +120,17 @@ namespace vtzero {
         geometry_feature_builder(geometry_feature_builder&&) noexcept = default;
         geometry_feature_builder& operator=(geometry_feature_builder&&) noexcept = default;
 
+        void set_id(uint64_t id) {
+            vtzero_assert(!m_pbf_tags.valid());
+            m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+        }
+
+        void set_geometry(const geometry geometry) {
+            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
+            m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
+            m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+        }
+
         template <typename ...TArgs>
         void add_property(TArgs&& ...args) {
             add_property_impl(std::forward<TArgs>(args)...);
@@ -134,10 +142,9 @@ namespace vtzero {
 
     public:
 
-        explicit point_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(&layer.get_layer_impl(), id) {
+        explicit point_feature_builder(layer_builder layer) :
+            feature_builder(&layer.get_layer_impl()) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
-            m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
 
         ~point_feature_builder() {
@@ -150,32 +157,80 @@ namespace vtzero {
         point_feature_builder(point_feature_builder&&) noexcept = default;
         point_feature_builder& operator=(point_feature_builder&&) noexcept = default;
 
+        /**
+         * Add a single point as the geometry to this feature.
+         *
+         * @param p The point to add.
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         void add_point(const point p) {
-            vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid());
+            init_geometry();
             m_pbf_geometry.add_element(detail::command_move_to(1));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
             m_pbf_geometry.commit();
         }
 
+        /**
+         * Add a single point as the geometry to this feature.
+         *
+         * @param x X coordinate of the point to add.
+         * @param y Y coordinate of the point to add.
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         void add_point(const int32_t x, const int32_t y) {
             add_point(point{x, y});
         }
 
+        /**
+         * Add a single point as the geometry to this feature.
+         *
+         * @tparam T A type that can be converted to vtzero::point using the
+         *         create_point function.
+         * @param p The point to add.
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         template <typename T>
         void add_point(T p) {
             add_point(create_point(p));
         }
 
+        /**
+         * Declare the intent to add multipoint geometry with *count* points
+         * to this feature.
+         *
+         * @param count The number of points in the multipolygon geometry.
+         * @pre @code count > 0 @endcode
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         void add_points(uint32_t count) {
-            vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid());
             vtzero_assert(count > 0);
+            init_geometry();
             m_num_points = count;
             m_pbf_geometry.add_element(detail::command_move_to(count));
         }
 
+        /**
+         * Set a point in the multipolygon geometry.
+         *
+         * @param p The point.
+         *
+         * @pre There must have been less than *count* calls to set_point()
+         *      already after a call to add_points(count).
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         void set_point(const point p) {
             vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid() && "Call add_points() before set_point()");
@@ -186,15 +241,55 @@ namespace vtzero {
             m_cursor = p;
         }
 
+        /**
+         * Set a point in the multipolygon geometry.
+         *
+         * @param x X coordinate of the point to set.
+         * @param y Y coordinate of the point to set.
+         *
+         * @pre There must have been less than *count* calls to set_point()
+         *      already after a call to add_points(count).
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point{x, y});
         }
 
+        /**
+         * Set a point in the multipolygon geometry.
+         *
+         * @tparam T A type that can be converted to vtzero::point using the
+         *         create_point function.
+         * @param p The point to add.
+         *
+         * @pre There must have been less than *count* calls to set_point()
+         *      already after a call to add_points(count).
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         template <typename T>
         void set_point(T p) {
             set_point(create_point(p));
         }
 
+        /**
+         * Add the points from an iterator range as multipolygon geometry
+         * to this feature. This will determine the number of points in the
+         * range using std::distance(), so it will not work on an input
+         * iterator and might be more expensive than calling the overload
+         * of this function taking a third parameter with the count.
+         *
+         * @tparam TIter Forward iterator type. Dereferencing must yield
+         *         a vtzero::point or something convertible to it.
+         * @param begin Iterator to the beginning of the range.
+         * @param end Iterator one past the end of the range.
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         template <typename TIter>
         void add_points(TIter begin, TIter end) {
             add_points(std::distance(begin, end));
@@ -204,6 +299,20 @@ namespace vtzero {
             m_pbf_geometry.commit();
         }
 
+        /**
+         * Add the points from an iterator range as multipolygon geometry
+         * to this feature. Use this function if you know the number of
+         * points in the range.
+         *
+         * @tparam TIter Foward iterator type. Dereferencing must yield
+         *         a vtzero::point or something convertible to it.
+         * @param begin Iterator to the beginning of the range.
+         * @param end Iterator one past the end of the range.
+         * @param count The number of points in the range.
+         *
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         template <typename TIter>
         void add_points(TIter begin, TIter end, uint32_t count) {
             add_points(count);
@@ -217,6 +326,18 @@ namespace vtzero {
             m_pbf_geometry.commit();
         }
 
+        /**
+         * Add the points from the specified container as multipolygon geometry
+         * to this feature.
+         *
+         * @tparam TContainer The container type. Must support the size()
+         *         method, be iterable using a range for loop, and contain
+         *         objects of type vtzero::point or something convertible to
+         *         it.
+         * @param container The container to read the points from.
+         * @pre You must no have any calls to add_property() before calling
+         *      this method.
+         */
         template <typename TContainer>
         void add_points_from_container(const TContainer& container) {
             add_points(container.size());
@@ -234,10 +355,9 @@ namespace vtzero {
 
     public:
 
-        explicit line_string_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(&layer.get_layer_impl(), id) {
+        explicit line_string_feature_builder(layer_builder layer) :
+            feature_builder(&layer.get_layer_impl()) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
-            m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
 
         ~line_string_feature_builder() {
@@ -251,10 +371,10 @@ namespace vtzero {
         line_string_feature_builder& operator=(line_string_feature_builder&&) noexcept = default;
 
         void add_linestring(const uint32_t count) {
-            vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid());
             vtzero_assert(count > 1);
             vtzero_assert(m_num_points == 0 && "LineString has fewer points than expected");
+            init_geometry();
             m_num_points = count;
             m_start_line = true;
         }
@@ -328,10 +448,9 @@ namespace vtzero {
 
     public:
 
-        explicit polygon_feature_builder(layer_builder layer, uint64_t id = 0) :
-            feature_builder(&layer.get_layer_impl(), id) {
+        explicit polygon_feature_builder(layer_builder layer) :
+            feature_builder(&layer.get_layer_impl()) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
-            m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
         }
 
         ~polygon_feature_builder() {
@@ -345,17 +464,17 @@ namespace vtzero {
         polygon_feature_builder& operator=(polygon_feature_builder&&) noexcept = default;
 
         void add_ring(const uint32_t count) {
-            vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid());
             vtzero_assert(count > 3);
             vtzero_assert(m_num_points == 0 && "ring has fewer points than expected");
+            init_geometry();
             m_num_points = count;
             m_start_ring = true;
         }
 
         void set_point(const point p) {
             vtzero_assert(m_pbf_geometry.valid());
-            vtzero_assert(!m_pbf_tags.valid() && "Call ring_begin() before add_point()");
+            vtzero_assert(!m_pbf_tags.valid() && "Call add_ring() before add_point()");
             vtzero_assert(m_num_points > 0 && "Too many calls to add_point()");
             --m_num_points;
             if (m_start_ring) {
@@ -553,7 +672,11 @@ namespace vtzero {
     }; // class tile_builder
 
     inline void layer_builder::add_feature(const feature& feature) {
-        geometry_feature_builder feature_builder{*this, feature.geometry(), feature.id()};
+        geometry_feature_builder feature_builder{*this};
+        if (feature.has_id()) {
+            feature_builder.set_id(feature.id());
+        }
+        feature_builder.set_geometry(feature.geometry());
         feature.for_each_property([&](property&& p) {
             feature_builder.add_property(p);
             return true;
