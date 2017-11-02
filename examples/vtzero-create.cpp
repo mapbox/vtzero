@@ -65,7 +65,7 @@ int main() {
 
     vtzero::value_index<vtzero::sint_value_type, int32_t, std::unordered_map> maxspeed_index{layer_lines};
     {
-        vtzero::line_string_feature_builder feature{layer_lines};
+        vtzero::linestring_feature_builder feature{layer_lines};
         feature.set_id(6);
         feature.add_linestring(3);
         feature.set_point(10, 10);

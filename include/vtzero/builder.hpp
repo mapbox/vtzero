@@ -46,7 +46,7 @@ namespace vtzero {
 
         friend class geometry_feature_builder;
         friend class point_feature_builder;
-        friend class line_string_feature_builder;
+        friend class linestring_feature_builder;
         friend class polygon_feature_builder;
 
         vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {
@@ -349,26 +349,26 @@ namespace vtzero {
 
     }; // class point_feature_builder
 
-    class line_string_feature_builder : public detail::feature_builder {
+    class linestring_feature_builder : public detail::feature_builder {
 
         bool m_start_line = false;
 
     public:
 
-        explicit line_string_feature_builder(layer_builder layer) :
+        explicit linestring_feature_builder(layer_builder layer) :
             feature_builder(&layer.get_layer_impl()) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
         }
 
-        ~line_string_feature_builder() {
+        ~linestring_feature_builder() {
             vtzero_assert_in_noexcept_function(m_num_points == 0 && "LineString has fewer points than expected");
         }
 
-        line_string_feature_builder(const line_string_feature_builder&) = delete;
-        line_string_feature_builder& operator=(const line_string_feature_builder&) = delete;
+        linestring_feature_builder(const linestring_feature_builder&) = delete;
+        linestring_feature_builder& operator=(const linestring_feature_builder&) = delete;
 
-        line_string_feature_builder(line_string_feature_builder&&) noexcept = default;
-        line_string_feature_builder& operator=(line_string_feature_builder&&) noexcept = default;
+        linestring_feature_builder(linestring_feature_builder&&) noexcept = default;
+        linestring_feature_builder& operator=(linestring_feature_builder&&) noexcept = default;
 
         void add_linestring(const uint32_t count) {
             vtzero_assert(!m_pbf_tags.valid());
@@ -439,7 +439,7 @@ namespace vtzero {
             }
         }
 
-    }; // class line_string_feature_builder
+    }; // class linestring_feature_builder
 
     class polygon_feature_builder : public detail::feature_builder {
 
