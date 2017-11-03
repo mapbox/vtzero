@@ -582,6 +582,137 @@ The tile builder is smart enough to not add empty layers, so you can start
 out with all the layers you might need and if some of them stay empty, they
 will not be added to the tile when `serialize()` is called.
 
+## Adding features
+
+Once we have one or more `layer_builder`s instantiated, we can add features
+to them. This is done through the following feature builder classes:
+
+* `point_feature_builder` to add a feature with a (multi)point geometry,
+* `linestring_feature_builder` to add a feature with a (multi)linestring
+  geometry,
+* `polygon_feature_builder` to add a feature with a (multi)polygon geometry, or
+* `geometry_feature_builder` to add a feature with an existing geometry you
+  got from reading a vector tile.
+
+In all cases you need to instantiate the feature builder class, optionally
+add the feature ID using the `set_id()` method, add the geometry and then
+add all the properties of this feature. You have to keep to this order!
+
+```cpp
+...
+vtzero::layer_builder lbuilder{...};
+{
+    vtzero::point_feature_builder fbuilder{lbuilder};
+    // optionally set the ID
+    fbuilder.set_id(23);
+    // add the geometry (exact calls are different for different feature builders)
+    fbuilder.add_point(99, 33);
+    // add the properties
+    fbuilder.add_property("highway", "primary");
+    fbuilder.add_property("maxspeed", 80);
+}
+```
+
+Once the feature builder is destructed, the feature is "committed" to the
+layer. Instead you can also call `commit()` on the feature builder to do this.
+(After calling `commit()` you can't change the feature builder object any
+more.)
+
+If you decide that you do not want to add this feature to the layer after all,
+you can call `rollback()` on the feature builder. This can happen for instance
+if you detect that you have an invalid geometry while you are adding the
+geometry to the feature builder.
+
+There are different ways of adding the geometry to the feature, depending on
+the geometry type.
+
+### Adding a point geometry
+
+Simply call `add_point()` to set the point geometry. There are three different
+overloads for this function. One takes a `vtzero::point`, one takes two
+`uint32_t`s with the x and y coordinates and one takes any type `T` that can
+be converted to a `vtzero::point` using the `create_point` function. This
+templated function works on any type that has `x` and `y` members.
+
+### Adding a multipoint geometry
+
+Call `add_points()` with the number of points in the geometry as only argument.
+After that call `set_point()` for each of those points. `set_point()` has
+multiple overloads just like the `add_point()` method described above.
+
+There are two other versions of the `add_points()` function. They take two
+iterators defining a range to get the points from. Dereferencing those
+iterators must yield a `vtzero::point` or something convertible to it. One
+of these functions takes a third argument, the number of points the iterator
+will yield. If this is not available `std::distance(begin, end)` is called
+which internally by the `add_points()` function which might be slow depending
+on your iterator type.
+
+There is also a `add_points_from_container()` function which copies the
+point from any container type supporting the `size()` function and which
+iterator yields a `vtzero::point` or something convertible to it.
+
+### Adding a linestring geometry
+
+Call `add_linestring()` with the number of points in the linestring as only
+argument. After that call `set_point()` for each of those points. `set_point()`
+has multiple overloads just like the `add_point()` method described above.
+
+There are two other versions of the `add_linestring()` function. They take two
+iterators defining a range to get the points from. Dereferencing those
+iterators must yield a `vtzero::point` or something convertible to it. One of
+these functions takes a third argument, the number of points the iterator will
+yield. If this is not available `std::distance(begin, end)` is called which
+internally by the `add_linestring()` function which might be slow depending on
+your iterator type.
+
+### Adding a multilinestring geometry
+
+Adding a multilinestring works just like adding a linestring, just do the
+calls to `add_linestring()` etc. repeatedly for each of the linestrings.
+
+### Adding a polygon geometry
+
+A polygon consists of one outer ring and zero or more inner rings. You have
+to first add the outer ring and then the inner rings, if any.
+
+Call `add_ring()` with the number of points in the ring as only argument. After
+that call `set_point()` for each of those points. `set_point()` has multiple
+overloads just like the `add_point()` method described above.
+
+There are two other versions of the `add_ring()` function. They take two
+iterators defining a range to get the points from. Dereferencing those
+iterators must yield a `vtzero::point` or something convertible to it. One of
+these functions takes a third argument, the number of points the iterator will
+yield. If this is not available `std::distance(begin, end)` is called which
+internally by the `add_ring()` function which might be slow depending on your
+iterator type.
+
+### Adding a multipolygon geometry
+
+Adding a multipolygon works just like adding a polygon, just do the calls to
+`add_ring()` etc. repeatedly for each of the rings. Make sure to always first
+add an outer ring, then the inner rings in this outer ring, then the next
+outer ring and so on.
+
+### Adding an existing geometry
+
+The `geometry_feature_builder` class is used to add geometries you got from
+reading a vector tile. This is useful when you want to copy over a geometry
+from a feature without decoding it.
+
+```cpp
+auto geom = ... // get geometry from a feature you are reading
+...
+vtzero::tile_builder tb;
+vtzero::layer_builder lb{tb};
+vtzero::geometry_feature_builder fb{lb};
+fb.set_id(123); // optionally set ID
+fb.add_geometry(geom) // add geometry
+fb.add_property("foo", "bar"); // add properties
+...
+```
+
 ## Error handling
 
 Many vtzero functions can throw exceptions. Most of them fall into two
