@@ -106,7 +106,7 @@ namespace vtzero {
 
     public:
 
-        geometry_feature_builder(layer_builder layer) :
+        explicit geometry_feature_builder(layer_builder layer) :
             feature_builder_base(&layer.get_layer_impl()) {
         }
 

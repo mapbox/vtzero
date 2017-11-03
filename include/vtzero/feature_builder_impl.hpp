@@ -60,7 +60,7 @@ namespace vtzero {
             protozero::pbf_builder<detail::pbf_feature> m_feature_writer;
             protozero::packed_field_uint32 m_pbf_tags;
 
-            feature_builder_base(layer_builder_impl* layer) :
+            explicit feature_builder_base(layer_builder_impl* layer) :
                 m_layer(layer),
                 m_feature_writer(layer->message(), detail::pbf_layer::features) {
             }
@@ -114,7 +114,7 @@ namespace vtzero {
 
         public:
 
-            feature_builder(layer_builder_impl* layer) :
+            explicit feature_builder(layer_builder_impl* layer) :
                 feature_builder_base(layer) {
             }
 
