@@ -8,8 +8,23 @@
 #include <cstdint>
 #include <map>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
+
+template <typename T>
+struct movable_not_copyable {
+    constexpr static bool value = !std::is_copy_constructible<T>::value &&
+                                  !std::is_copy_assignable<T>::value    &&
+                                   std::is_nothrow_move_constructible<T>::value &&
+                                   std::is_nothrow_move_assignable<T>::value;
+};
+
+static_assert(movable_not_copyable<vtzero::tile_builder>::value, "tile_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::point_feature_builder>::value, "point_feature_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::linestring_feature_builder>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::polygon_feature_builder>::value, "polygon_feature_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::geometry_feature_builder>::value, "geometry_feature_builder should be nothrow movable, but not copyable");
 
 struct point_handler {
 
