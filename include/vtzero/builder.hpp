@@ -235,6 +235,138 @@ namespace vtzero {
     }; // class layer_builder
 
     /**
+     * Parent class for the point_feature_builder, linestring_feature_builder
+     * and polygon_feature_builder classes. You can not instantiate this class
+     * directly, use it through its derived classes.
+     */
+    class feature_builder : public detail::feature_builder_base {
+
+        class countdown_value {
+
+            uint32_t m_value = 0;
+
+        public:
+
+            countdown_value() noexcept = default;
+
+            ~countdown_value() noexcept {
+                assert_is_zero();
+            }
+
+            countdown_value(const countdown_value&) = delete;
+
+            countdown_value& operator=(const countdown_value&) = delete;
+
+            countdown_value(countdown_value&& other) noexcept :
+                m_value(other.m_value) {
+                other.m_value = 0;
+            }
+
+            countdown_value& operator=(countdown_value&& other) noexcept {
+                m_value = other.m_value;
+                other.m_value = 0;
+                return *this;
+            }
+
+            uint32_t value() const noexcept {
+                return m_value;
+            }
+
+            void set(const uint32_t value) noexcept {
+                m_value = value;
+            }
+
+            void decrement() noexcept {
+                vtzero_assert_in_noexcept_function(m_value > 0 &&
+                                                    "too many calls to set_point()");
+                --m_value;
+            }
+
+            void assert_is_zero() const noexcept {
+                vtzero_assert_in_noexcept_function(m_value == 0 &&
+                                                    "not enough calls to set_point()");
+            }
+
+        }; // countdown_value
+
+    protected:
+
+        protozero::packed_field_uint32 m_pbf_geometry{};
+        countdown_value m_num_points;
+        point m_cursor{0, 0};
+
+        explicit feature_builder(detail::layer_builder_impl* layer) :
+            feature_builder_base(layer) {
+        }
+
+        void init_geometry() {
+            if (!m_pbf_geometry.valid()) {
+                m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
+            }
+        }
+
+    public:
+
+        ~feature_builder() {
+            try {
+                commit();
+            } catch (...) {
+                // ignore exceptions
+            }
+        }
+
+        // Builder classes can not be copied
+        feature_builder(const feature_builder&) = delete;
+
+        // Builder classes can not be copied
+        feature_builder& operator=(const feature_builder&) = delete;
+
+        // Builder classes can be moved
+        feature_builder(feature_builder&& other) noexcept = default;
+
+        // Builder classes can be moved
+        feature_builder& operator=(feature_builder&& other) noexcept = default;
+
+        /**
+         * Set the ID of this feature. Call before calling any other functions
+         * on the feature builder.
+         *
+         * @param id The ID.
+         */
+        void set_id(uint64_t id) {
+            vtzero_assert(!m_pbf_geometry.valid());
+            m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+        }
+
+        template <typename ...TArgs>
+        void add_property(TArgs&& ...args) {
+            if (m_pbf_geometry.valid()) {
+                m_num_points.assert_is_zero();
+                m_pbf_geometry.commit();
+            }
+            if (!m_pbf_tags.valid()) {
+                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+            }
+            add_property_impl(std::forward<TArgs>(args)...);
+        }
+
+        void commit() {
+            if (m_pbf_geometry.valid()) {
+                m_pbf_geometry.commit();
+            }
+            do_commit();
+        }
+
+        void rollback() {
+            if (m_pbf_geometry.valid()) {
+                m_pbf_geometry.commit();
+            }
+            do_rollback();
+        }
+
+    }; // class feature_builder
+
+    /**
      * Used for adding a feature with a point geometry to a layer. After
      * creating an object of this class you can add data to the feature in a
      * specific order:
@@ -253,7 +385,7 @@ namespace vtzero {
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
-    class point_feature_builder : public detail::feature_builder {
+    class point_feature_builder : public feature_builder {
 
     public:
 
@@ -481,7 +613,7 @@ namespace vtzero {
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
-    class linestring_feature_builder : public detail::feature_builder {
+    class linestring_feature_builder : public feature_builder {
 
         bool m_start_line = false;
 
@@ -562,7 +694,7 @@ namespace vtzero {
 
     }; // class linestring_feature_builder
 
-    class polygon_feature_builder : public detail::feature_builder {
+    class polygon_feature_builder : public feature_builder {
 
         point m_first_point{0, 0};
         bool m_start_ring = false;
@@ -662,8 +794,12 @@ namespace vtzero {
             feature_builder_base(&layer.get_layer_impl()) {
         }
 
-        ~geometry_feature_builder() {
-            do_commit(); // XXX exceptions?
+        ~geometry_feature_builder() noexcept {
+            try {
+                do_commit();
+            } catch (...) {
+                // ignore exceptions
+            }
         }
 
         geometry_feature_builder(const geometry_feature_builder&) = delete;
@@ -672,6 +808,12 @@ namespace vtzero {
         geometry_feature_builder(geometry_feature_builder&&) noexcept = default;
         geometry_feature_builder& operator=(geometry_feature_builder&&) noexcept = default;
 
+        /**
+         * Set the ID of this feature. Call before calling any other functions
+         * on the feature builder.
+         *
+         * @param id The ID.
+         */
         void set_id(uint64_t id) {
             vtzero_assert(!m_pbf_tags.valid());
             m_feature_writer.add_uint64(detail::pbf_feature::id, id);
