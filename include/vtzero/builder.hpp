@@ -34,14 +34,132 @@ documentation.
 
 namespace vtzero {
 
-    namespace detail {
+    /**
+     * Used to build vector tiles. Whenever you are building a new vector
+     * tile, start with an object of this class and add layers. After all
+     * the data is added, call serialize().
+     *
+     * @code
+     * layer some_existing_layer = ...;
+     *
+     * tile_builder builder;
+     * layer_builder layer_roads{builder, "roads"};
+     * builder.add_existing_layer(some_existing_layer);
+     * ...
+     * std::string data = builder.serialize();
+     * @endcode
+     */
+    class tile_builder {
 
-        template <typename T>
-        using is_layer = std::is_same<typename std::remove_cv<typename std::remove_reference<T>::type>::type, layer>;
+        friend class layer_builder;
 
-    } // namespace detail
+        std::vector<std::unique_ptr<detail::layer_builder_base>> m_layers;
 
-    class tile_builder;
+        /**
+         * Add a new layer to the vector tile based on an existing layer. The
+         * new layer will have the same name, version, and extent as the
+         * existing layer. The new layer will not contain any features. This
+         * method is handy when copying some (but not all) data from an
+         * existing layer.
+         */
+        detail::layer_builder_impl* add_layer(const layer& layer) {
+            const auto ptr = new detail::layer_builder_impl{layer.name(), layer.version(), layer.extent()};
+            m_layers.emplace_back(ptr);
+            return ptr;
+        }
+
+        /**
+         * Add a new layer to the vector tile with the specified name, version,
+         * and extent.
+         *
+         * @tparam TString Some string type (const char*, std::string,
+         *         vtzero::data_view) or something that converts to one of
+         *         these types.
+         * @param name Name of this layer.
+         * @param version Version of this layer (only version 1 and 2 are
+         *                supported)
+         * @param extent Extent used for this layer.
+         */
+        template <typename TString>
+        detail::layer_builder_impl* add_layer(TString&& name, uint32_t version, uint32_t extent) {
+            const auto ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, extent};
+            m_layers.emplace_back(ptr);
+            return ptr;
+        }
+
+    public:
+
+        /// Constructor
+        tile_builder() = default;
+
+        ~tile_builder() noexcept = default;
+
+        tile_builder(const tile_builder&) = delete;
+        tile_builder& operator=(const tile_builder&) = delete;
+
+        tile_builder(tile_builder&&) = default;
+        tile_builder& operator=(tile_builder&&) = default;
+
+        /**
+         * Add an existing layer to the vector tile. The layer data will be
+         * copied over into the new vector_tile when the serialize() method
+         * is called. Until then, the data referenced here must stay available.
+         *
+         * @param data Reference to some data that must be a valid encoded
+         *        layer.
+         */
+        void add_existing_layer(data_view&& data) {
+            m_layers.emplace_back(new detail::layer_builder_existing{std::forward<data_view>(data)});
+        }
+
+        /**
+         * Add an existing layer to the vector tile. The layer data will be
+         * copied over into the new vector_tile when the serialize() method
+         * is called. Until then, the data referenced here must stay available.
+         *
+         * @param layer Reference to the layer to be copied.
+         */
+        void add_existing_layer(const layer& layer) {
+            add_existing_layer(layer.data());
+        }
+
+        /**
+         * Serialize the data accumulated in this builder into a vector tile.
+         * The data will be appended to the specified buffer. The buffer
+         * doesn't have to be empty.
+         *
+         * @param buffer Buffer to append the encoded vector tile to.
+         */
+        void serialize(std::string& buffer) const {
+            std::size_t estimated_size = 0;
+            for (const auto& layer : m_layers) {
+                estimated_size += layer->estimated_size();
+            }
+
+            buffer.reserve(buffer.size() + estimated_size);
+
+            protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{buffer};
+            for (const auto& layer : m_layers) {
+                layer->build(pbf_tile_builder);
+            }
+        }
+
+        /**
+         * Serialize the data accumulated in this builder into a vector_tile
+         * and return it.
+         *
+         * If you want to use an existing buffer instead, use the serialize()
+         * method taking a std::string& as parameter.
+         *
+         * @returns std::string Buffer with encoded vector_tile data.
+         */
+        std::string serialize() const {
+            std::string data;
+            serialize(data);
+            return data;
+        }
+
+    }; // class tile_builder
 
     /**
      * The layer_builder is used to add a new layer to a vector tile that is
@@ -60,6 +178,9 @@ namespace vtzero {
             return *m_layer;
         };
 
+        template <typename T>
+        using is_layer = std::is_same<typename std::remove_cv<typename std::remove_reference<T>::type>::type, layer>;
+
     public:
 
         /**
@@ -70,7 +191,9 @@ namespace vtzero {
          * @param layer Existing layer we want to use the name, version, and
          *        extent from
          */
-        layer_builder(vtzero::tile_builder& tile, const layer& layer);
+        layer_builder(vtzero::tile_builder& tile, const layer& layer) :
+            m_layer(tile.add_layer(layer)) {
+        }
 
         /**
          * Construct a layer_builder to build a completely new layer.
@@ -81,8 +204,10 @@ namespace vtzero {
          * @param version The vector tile spec version of the new layer.
          * @param extent The extent of the new layer.
          */
-        template <typename TString, typename std::enable_if<!detail::is_layer<TString>::value, int>::type = 0>
-        layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096);
+        template <typename TString, typename std::enable_if<!is_layer<TString>::value, int>::type = 0>
+        layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096):
+            m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
+        }
 
         index_value add_key_without_dup_check(const data_view text) {
             return m_layer->add_key_without_dup_check(text);
@@ -108,42 +233,6 @@ namespace vtzero {
         void add_feature(const feature& feature);
 
     }; // class layer_builder
-
-    class geometry_feature_builder : public detail::feature_builder_base {
-
-    public:
-
-        explicit geometry_feature_builder(layer_builder layer) :
-            feature_builder_base(&layer.get_layer_impl()) {
-        }
-
-        ~geometry_feature_builder() {
-            do_commit(); // XXX exceptions?
-        }
-
-        geometry_feature_builder(const geometry_feature_builder&) = delete;
-        geometry_feature_builder& operator=(const geometry_feature_builder&) = delete;
-
-        geometry_feature_builder(geometry_feature_builder&&) noexcept = default;
-        geometry_feature_builder& operator=(geometry_feature_builder&&) noexcept = default;
-
-        void set_id(uint64_t id) {
-            vtzero_assert(!m_pbf_tags.valid());
-            m_feature_writer.add_uint64(detail::pbf_feature::id, id);
-        }
-
-        void set_geometry(const geometry geometry) {
-            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
-            m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
-            m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
-        }
-
-        template <typename ...TArgs>
-        void add_property(TArgs&& ...args) {
-            add_property_impl(std::forward<TArgs>(args)...);
-        }
-
-    }; // class geometry_feature_builder
 
     class point_feature_builder : public detail::feature_builder {
 
@@ -551,132 +640,41 @@ namespace vtzero {
 
     }; // class polygon_feature_builder
 
-    /**
-     * Used to build vector tiles. Whenever you are building a new vector
-     * tile, start with an object of this class and add layers. After all
-     * the data is added, call serialize().
-     *
-     * @code
-     * layer some_existing_layer = ...;
-     *
-     * tile_builder builder;
-     * layer_builder layer_roads{builder, "roads"};
-     * builder.add_existing_layer(some_existing_layer);
-     * ...
-     * std::string data = builder.serialize();
-     * @endcode
-     */
-    class tile_builder {
-
-        friend class layer_builder;
-
-        std::vector<std::unique_ptr<detail::layer_builder_base>> m_layers;
-
-        /**
-         * Add a new layer to the vector tile based on an existing layer. The
-         * new layer will have the same name, version, and extent as the
-         * existing layer. The new layer will not contain any features. This
-         * method is handy when copying some (but not all) data from an
-         * existing layer.
-         */
-        detail::layer_builder_impl* add_layer(const layer& layer) {
-            const auto ptr = new detail::layer_builder_impl{layer.name(), layer.version(), layer.extent()};
-            m_layers.emplace_back(ptr);
-            return ptr;
-        }
-
-        /**
-         * Add a new layer to the vector tile with the specified name, version,
-         * and extent.
-         *
-         * @tparam TString Some string type (const char*, std::string,
-         *         vtzero::data_view) or something that converts to one of
-         *         these types.
-         * @param name Name of this layer.
-         * @param version Version of this layer (only version 1 and 2 are
-         *                supported)
-         * @param extent Extent used for this layer.
-         */
-        template <typename TString>
-        detail::layer_builder_impl* add_layer(TString&& name, uint32_t version, uint32_t extent) {
-            const auto ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, extent};
-            m_layers.emplace_back(ptr);
-            return ptr;
-        }
+    class geometry_feature_builder : public detail::feature_builder_base {
 
     public:
 
-        /// Constructor
-        tile_builder() = default;
-
-        ~tile_builder() noexcept = default;
-
-        tile_builder(const tile_builder&) = delete;
-        tile_builder& operator=(const tile_builder&) = delete;
-
-        tile_builder(tile_builder&&) = default;
-        tile_builder& operator=(tile_builder&&) = default;
-
-        /**
-         * Add an existing layer to the vector tile. The layer data will be
-         * copied over into the new vector_tile when the serialize() method
-         * is called. Until then, the data referenced here must stay available.
-         *
-         * @param data Reference to some data that must be a valid encoded
-         *        layer.
-         */
-        void add_existing_layer(data_view&& data) {
-            m_layers.emplace_back(new detail::layer_builder_existing{std::forward<data_view>(data)});
+        explicit geometry_feature_builder(layer_builder layer) :
+            feature_builder_base(&layer.get_layer_impl()) {
         }
 
-        /**
-         * Add an existing layer to the vector tile. The layer data will be
-         * copied over into the new vector_tile when the serialize() method
-         * is called. Until then, the data referenced here must stay available.
-         *
-         * @param layer Reference to the layer to be copied.
-         */
-        void add_existing_layer(const layer& layer) {
-            add_existing_layer(layer.data());
+        ~geometry_feature_builder() {
+            do_commit(); // XXX exceptions?
         }
 
-        /**
-         * Serialize the data accumulated in this builder into a vector tile.
-         * The data will be appended to the specified buffer. The buffer
-         * doesn't have to be empty.
-         *
-         * @param buffer Buffer to append the encoded vector tile to.
-         */
-        void serialize(std::string& buffer) const {
-            std::size_t estimated_size = 0;
-            for (const auto& layer : m_layers) {
-                estimated_size += layer->estimated_size();
-            }
+        geometry_feature_builder(const geometry_feature_builder&) = delete;
+        geometry_feature_builder& operator=(const geometry_feature_builder&) = delete;
 
-            buffer.reserve(buffer.size() + estimated_size);
+        geometry_feature_builder(geometry_feature_builder&&) noexcept = default;
+        geometry_feature_builder& operator=(geometry_feature_builder&&) noexcept = default;
 
-            protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{buffer};
-            for (const auto& layer : m_layers) {
-                layer->build(pbf_tile_builder);
-            }
+        void set_id(uint64_t id) {
+            vtzero_assert(!m_pbf_tags.valid());
+            m_feature_writer.add_uint64(detail::pbf_feature::id, id);
         }
 
-        /**
-         * Serialize the data accumulated in this builder into a vector_tile
-         * and return it.
-         *
-         * If you want to use an existing buffer instead, use the serialize()
-         * method taking a std::string& as parameter.
-         *
-         * @returns std::string Buffer with encoded vector_tile data.
-         */
-        std::string serialize() const {
-            std::string data;
-            serialize(data);
-            return data;
+        void set_geometry(const geometry geometry) {
+            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
+            m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
+            m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
         }
 
-    }; // class tile_builder
+        template <typename ...TArgs>
+        void add_property(TArgs&& ...args) {
+            add_property_impl(std::forward<TArgs>(args)...);
+        }
+
+    }; // class geometry_feature_builder
 
     inline void layer_builder::add_feature(const feature& feature) {
         geometry_feature_builder feature_builder{*this};
@@ -688,15 +686,6 @@ namespace vtzero {
             feature_builder.add_property(p);
             return true;
         });
-    }
-
-    inline layer_builder::layer_builder(vtzero::tile_builder& tile, const layer& layer) :
-        m_layer(tile.add_layer(layer)) {
-    }
-
-    template <typename TString, typename std::enable_if<!detail::is_layer<TString>::value, int>::type>
-    layer_builder::layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version, uint32_t extent) :
-        m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
     }
 
 } // namespace vtzero
