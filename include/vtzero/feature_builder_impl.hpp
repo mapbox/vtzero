@@ -68,10 +68,12 @@ namespace vtzero {
             ~feature_builder_base() noexcept = default;
 
             feature_builder_base(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
+
             feature_builder_base& operator=(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
                                                                                    // The check wants these functions to be public...
 
             feature_builder_base(feature_builder_base&&) noexcept = default;
+
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
 
             void add_property_impl(const property& property) {
@@ -106,10 +108,58 @@ namespace vtzero {
 
         class feature_builder : public feature_builder_base {
 
+            class countdown_value {
+
+                uint32_t m_value = 0;
+
+            public:
+
+                countdown_value() noexcept = default;
+
+                ~countdown_value() noexcept {
+                    assert_is_zero();
+                }
+
+                countdown_value(const countdown_value&) = delete;
+
+                countdown_value& operator=(const countdown_value&) = delete;
+
+                countdown_value(countdown_value&& other) noexcept :
+                    m_value(other.m_value) {
+                    other.m_value = 0;
+                }
+
+                countdown_value& operator=(countdown_value&& other) noexcept {
+                    m_value = other.m_value;
+                    other.m_value = 0;
+                    return *this;
+                }
+
+                uint32_t value() const noexcept {
+                    return m_value;
+                }
+
+                void set(const uint32_t value) noexcept {
+                    m_value = value;
+                }
+
+                void decrement() noexcept {
+                    vtzero_assert_in_noexcept_function(m_value > 0 &&
+                                                       "too many calls to set_point()");
+                    --m_value;
+                }
+
+                void assert_is_zero() const noexcept {
+                    vtzero_assert_in_noexcept_function(m_value == 0 &&
+                                                       "not enough calls to set_point()");
+                }
+
+            }; // countdown_value
+
         protected:
 
             protozero::packed_field_uint32 m_pbf_geometry{};
-            uint32_t m_num_points = 0;
+            countdown_value m_num_points;
             point m_cursor{0, 0};
 
         public:
@@ -122,11 +172,17 @@ namespace vtzero {
                 commit(); // XXX exceptions?
             }
 
+            // Builder classes can not be copied
             feature_builder(const feature_builder&) = delete;
+
+            // Builder classes can not be copied
             feature_builder& operator=(const feature_builder&) = delete;
 
-            feature_builder(feature_builder&&) noexcept = default;
-            feature_builder& operator=(feature_builder&&) noexcept = default;
+            // Builder classes can be moved
+            feature_builder(feature_builder&& other) noexcept = default;
+
+            // Builder classes can be moved
+            feature_builder& operator=(feature_builder&& other) noexcept = default;
 
             void set_id(uint64_t id) {
                 vtzero_assert(!m_pbf_geometry.valid());
@@ -142,7 +198,7 @@ namespace vtzero {
             template <typename ...TArgs>
             void add_property(TArgs&& ...args) {
                 if (m_pbf_geometry.valid()) {
-                    vtzero_assert(m_num_points == 0 && "Not enough calls to set_point()");
+                    m_num_points.assert_is_zero();
                     m_pbf_geometry.commit();
                 }
                 if (!m_pbf_tags.valid()) {
@@ -166,7 +222,6 @@ namespace vtzero {
             }
 
         }; // class feature_builder
-
 
     } // namespace detail
 

@@ -234,24 +234,38 @@ namespace vtzero {
 
     }; // class layer_builder
 
+    /**
+     * Used for adding a feature with a point geometry to a layer. After
+     * creating an object of this class you can add data to the feature in a
+     * specific order:
+     *
+     * * Optionally add the ID using setid().
+     * * Add the (multi)point geometry using add_point(), add_points(), and
+     *   set_point().
+     * * Optionally add any number of properties using add_property().
+     *
+     * @code
+     * vtzero::tile_builder tb;
+     * vtzero::layer_builder lb{tb};
+     * vtzero::point_feature_builder fb{lb};
+     * fb.set_id(123); // optionally set ID
+     * fb.add_point(10, 20) // add point geometry
+     * fb.add_property("foo", "bar"); // add property
+     * @endcode
+     */
     class point_feature_builder : public detail::feature_builder {
 
     public:
 
+        /**
+         * Constructor
+         *
+         * @param layer The layer we want to create this feature in.
+         */
         explicit point_feature_builder(layer_builder layer) :
             feature_builder(&layer.get_layer_impl()) {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
         }
-
-        ~point_feature_builder() {
-            vtzero_assert_in_noexcept_function(m_num_points == 0 && "has fewer points than expected");
-        }
-
-        point_feature_builder(const point_feature_builder&) = delete;
-        point_feature_builder& operator=(const point_feature_builder&) = delete;
-
-        point_feature_builder(point_feature_builder&&) noexcept = default;
-        point_feature_builder& operator=(point_feature_builder&&) noexcept = default;
 
         /**
          * Add a single point as the geometry to this feature.
@@ -262,8 +276,9 @@ namespace vtzero {
          *      this method.
          */
         void add_point(const point p) {
+            vtzero_assert(!m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid());
-            init_geometry();
+            m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
             m_pbf_geometry.add_element(detail::command_move_to(1));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
@@ -309,10 +324,11 @@ namespace vtzero {
          *      this method.
          */
         void add_points(uint32_t count) {
+            vtzero_assert(!m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid());
             vtzero_assert(count > 0);
-            init_geometry();
-            m_num_points = count;
+            m_num_points.set(count);
+            m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
             m_pbf_geometry.add_element(detail::command_move_to(count));
         }
 
@@ -330,8 +346,7 @@ namespace vtzero {
         void set_point(const point p) {
             vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid() && "Call add_points() before set_point()");
-            vtzero_assert(m_num_points > 0 && "Too many points");
-            --m_num_points;
+            m_num_points.decrement();
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
             m_cursor = p;
@@ -445,6 +460,27 @@ namespace vtzero {
 
     }; // class point_feature_builder
 
+    /**
+     * Used for adding a feature with a linestring geometry to a layer.
+     * After creating an object of this class you can add data to the
+     * feature in a specific order:
+     *
+     * * Optionally add the ID using setid().
+     * * Add the (multi)linestring geometry using add_linestring() and
+     *   set_point().
+     * * Optionally add any number of properties using add_property().
+     *
+     * @code
+     * vtzero::tile_builder tb;
+     * vtzero::layer_builder lb{tb};
+     * vtzero::linestring_feature_builder fb{lb};
+     * fb.set_id(123); // optionally set ID
+     * fb.add_linestring(2);
+     * fb.set_point(10, 10);
+     * fb.set_point(10, 20);
+     * fb.add_property("foo", "bar"); // add property
+     * @endcode
+     */
     class linestring_feature_builder : public detail::feature_builder {
 
         bool m_start_line = false;
@@ -456,35 +492,24 @@ namespace vtzero {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
         }
 
-        ~linestring_feature_builder() {
-            vtzero_assert_in_noexcept_function(m_num_points == 0 && "LineString has fewer points than expected");
-        }
-
-        linestring_feature_builder(const linestring_feature_builder&) = delete;
-        linestring_feature_builder& operator=(const linestring_feature_builder&) = delete;
-
-        linestring_feature_builder(linestring_feature_builder&&) noexcept = default;
-        linestring_feature_builder& operator=(linestring_feature_builder&&) noexcept = default;
-
         void add_linestring(const uint32_t count) {
             vtzero_assert(!m_pbf_tags.valid());
             vtzero_assert(count > 1);
-            vtzero_assert(m_num_points == 0 && "LineString has fewer points than expected");
+            m_num_points.assert_is_zero();
             init_geometry();
-            m_num_points = count;
+            m_num_points.set(count);
             m_start_line = true;
         }
 
         void set_point(const point p) {
             vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid() && "Add full geometry before adding tags");
-            vtzero_assert(m_num_points > 0 && "Too many calls to set_point()");
-            --m_num_points;
+            m_num_points.decrement();
             if (m_start_line) {
                 m_pbf_geometry.add_element(detail::command_move_to(1));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
-                m_pbf_geometry.add_element(detail::command_line_to(m_num_points));
+                m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value()));
                 m_start_line = false;
             } else {
                 vtzero_assert(p != m_cursor); // no zero-length segments
@@ -549,39 +574,28 @@ namespace vtzero {
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
         }
 
-        ~polygon_feature_builder() {
-            vtzero_assert_in_noexcept_function(m_num_points == 0 && "ring has fewer points than expected");
-        }
-
-        polygon_feature_builder(const polygon_feature_builder&) = delete;
-        polygon_feature_builder& operator=(const polygon_feature_builder&) = delete;
-
-        polygon_feature_builder(polygon_feature_builder&&) noexcept = default;
-        polygon_feature_builder& operator=(polygon_feature_builder&&) noexcept = default;
-
         void add_ring(const uint32_t count) {
             vtzero_assert(!m_pbf_tags.valid());
             vtzero_assert(count > 3);
-            vtzero_assert(m_num_points == 0 && "ring has fewer points than expected");
+            m_num_points.assert_is_zero();
             init_geometry();
-            m_num_points = count;
+            m_num_points.set(count);
             m_start_ring = true;
         }
 
         void set_point(const point p) {
             vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid() && "Call add_ring() before add_point()");
-            vtzero_assert(m_num_points > 0 && "Too many calls to add_point()");
-            --m_num_points;
+            m_num_points.decrement();
             if (m_start_ring) {
                 m_first_point = p;
                 m_pbf_geometry.add_element(detail::command_move_to(1));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
-                m_pbf_geometry.add_element(detail::command_line_to(m_num_points - 1));
+                m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value() - 1));
                 m_start_ring = false;
                 m_cursor = m_first_point;
-            } else if (m_num_points == 0) {
+            } else if (m_num_points.value() == 0) {
                 vtzero_assert(m_first_point == p); // XXX
                 // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
                 m_pbf_geometry.add_element(detail::command_close_path(1));
@@ -605,9 +619,9 @@ namespace vtzero {
         void close_ring() {
             vtzero_assert(m_pbf_geometry.valid());
             vtzero_assert(!m_pbf_tags.valid() && "Call ring_begin() before add_point()");
-            vtzero_assert(m_num_points == 1);
+            vtzero_assert(m_num_points.value() == 1);
             m_pbf_geometry.add_element(detail::command_close_path(1));
-            --m_num_points;
+            m_num_points.decrement();
         }
 
         template <typename TIter>
