@@ -308,3 +308,18 @@ TEST_CASE("geometry_decoder decoding linestring with int32 overflow in y coordin
     decoder.next_point();
 }
 
+TEST_CASE("geometry_decoder with multipoint with a huge count") {
+    const uint32_t huge_value = 1 << 29 - 1;
+    const container g = {vtzero::detail::command_move_to(huge_value), 10, 10};
+
+    vtzero::detail::geometry_decoder<iterator> decoder{g.cbegin(), g.cend()};
+    REQUIRE(decoder.count() == 0);
+    REQUIRE_FALSE(decoder.done());
+
+    REQUIRE(decoder.next_command(vtzero::detail::command_move_to()));
+    REQUIRE(decoder.count() == huge_value);
+    REQUIRE(decoder.next_point() == vtzero::point(5, 5));
+    REQUIRE(decoder.count() == huge_value - 1);
+    REQUIRE_THROWS_AS(decoder.next_point(), const vtzero::geometry_exception&);
+}
+
