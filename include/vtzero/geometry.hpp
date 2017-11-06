@@ -146,6 +146,7 @@ namespace vtzero {
              */
             uint32_t m_count = 0;
 
+            /// In strict mode some extra tests are done.
             bool m_strict = true;
 
         public:
@@ -307,7 +308,7 @@ namespace vtzero {
 
                     // spec 4.3.4.4 "with a command count greater than 1"
                     if (m_strict && count() <= 1) {
-                        throw geometry_exception{"LineTo command count is not greater than 1 (spec 4.3.4.4)"};
+                        throw geometry_exception{"LineTo command count is not greater than 1 (spec 4.3.4.4) (strict mode)"};
                     }
 
                     std::forward<TGeomHandler>(geom_handler).ring_begin(count() + 2);
@@ -330,14 +331,14 @@ namespace vtzero {
                     // ClosePath command of a linear ring SHALL NOT repeat the same
                     // position as the first point in the linear ring"
                     if (m_strict && last_point == start_point) {
-                        throw geometry_exception{"duplicate last point of ring"};
+                        throw geometry_exception{"duplicate last point of ring (strict mode)"};
                     }
 
                     sum += detail::det(last_point, start_point);
 
                     // spec 4.3.4.4 "A linear ring SHOULD NOT have an area ... equal to zero"
                     if (m_strict && sum == 0) {
-                        throw geometry_exception{"area of ring is zero"};
+                        throw geometry_exception{"area of ring is zero (strict mode)"};
                     }
 
                     std::forward<TGeomHandler>(geom_handler).ring_point(start_point);

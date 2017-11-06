@@ -60,7 +60,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a duplicate end point") {
     SECTION("check exception message") {
         vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), true};
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "duplicate last point of ring");
+                            "duplicate last point of ring (strict mode)");
     }
     SECTION("okay in non-strict mode") {
         vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), false};
@@ -176,7 +176,7 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "LineTo command count is not greater than 1 (spec 4.3.4.4)");
+                            "LineTo command count is not greater than 1 (spec 4.3.4.4) (strict mode)");
     }
 }
 
@@ -193,7 +193,7 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
     SECTION("check exception message") {
         vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), true};
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "LineTo command count is not greater than 1 (spec 4.3.4.4)");
+                            "LineTo command count is not greater than 1 (spec 4.3.4.4) (strict mode)");
     }
     SECTION("okay in non-strict mode") {
         vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), false};
@@ -232,7 +232,7 @@ TEST_CASE("Calling decode_polygon_geometry() on polygon with zero area") {
     SECTION("check exception message") {
         vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), true};
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "area of ring is zero");
+                            "area of ring is zero (strict mode)");
     }
     SECTION("okay in non-strict mode") {
         vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), false};
