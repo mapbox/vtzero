@@ -453,6 +453,10 @@ struct linestring_handler {
 };
 ```
 
+Note that the `count` given to the `linestring_begin()` method is used here to
+reserve memory. This is potentially problematic if the count is large. Please
+keep this in mind.
+
 #### Strict interpretation of geometry encoding
 
 All the geometry decoder functions have a boolean parameter called `strict`.

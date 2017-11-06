@@ -18,3 +18,33 @@ clearly says that you can not have two layers with the same
 name in a vector tile. For performance reasons this is neither checked on
 reading nor on writing.
 
+## Protection against huge memory use
+
+When decoding a vector tile we got from an unknown source, we don't know what
+surprises it might contain. Building data structures based on the vector tile
+sometimes means we have to allocate memory and in the worst case this might be
+quite a lot of memory. Vtzero usually doesn't allocate any memory when decoding
+a tile, except when reading properties, when there is space for lookup tables
+allocated. The memory use for these lookup tables is `sizeof(data_view)` times
+the number of entries in the key/value table. In the worst case, when a vector
+tile basically only contains such a table, memory use is proportional to the
+size of the vector tile. But memory use can be an order of magnitude larger
+than the tile size! If you are concerned about memory use, limit the size
+of the vector tiles you give to vtzero.
+
+When reading geometries from vector tiles, vtzero doesn't need much memory
+itself, but the users of vtzero might. In a typical case you might reserve
+enough memory to store, say, a linestring, and then fill that memory. To allow
+you to do this, vtzero tells you about the number of points in the linestring.
+This number comes from the tile and it might be rather large. Vtzero does a
+consistency check comparing the number of points the geometry says it has with
+the number of bytes used for the geometry and it will throw an exception if the
+numbers can't fit. So you are protected against tiny tiles pretending to
+contain a huge geometry. But there still could be a medium-sized tile which
+gets "blown up" into a huge memory hog. Your representation of a linestring
+can be an order of magnitude larger than the minimum 2 bytes per point
+needed in the encoded tile.
+
+So again: If you are concerned about memory use, limit the size of the vector
+tiles you give to vtzero.
+

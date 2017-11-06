@@ -22,6 +22,7 @@ documentation.
 #include <protozero/pbf_reader.hpp>
 
 #include <cstdint>
+#include <limits>
 #include <utility>
 
 namespace vtzero {
@@ -88,6 +89,11 @@ namespace vtzero {
             return command_integer >> 3;
         }
 
+        // The maximum value for the command count according to the spec.
+        inline constexpr uint32_t max_command_count() noexcept {
+            return get_command_count(std::numeric_limits<uint32_t>::max());
+        }
+
         inline constexpr int64_t det(const point a, const point b) noexcept {
             return static_cast<int64_t>(a.x) * static_cast<int64_t>(b.y) -
                    static_cast<int64_t>(b.x) * static_cast<int64_t>(a.y);
@@ -135,6 +141,9 @@ namespace vtzero {
 
             point m_cursor{0, 0};
 
+            // maximum value for m_count before we throw an exception
+            uint32_t m_max_count;
+
             // the last command read
             uint32_t m_command_id = 0;
 
@@ -151,10 +160,12 @@ namespace vtzero {
 
         public:
 
-            explicit geometry_decoder(iterator_type begin, iterator_type end, bool strict = true) :
+            geometry_decoder(iterator_type begin, iterator_type end, bool strict, std::size_t max) :
                 m_it(begin),
                 m_end(end),
+                m_max_count(static_cast<uint32_t>(max)),
                 m_strict(strict) {
+                vtzero_assert(max <= detail::max_command_count());
             }
 
             uint32_t count() const noexcept {
@@ -187,6 +198,9 @@ namespace vtzero {
                     }
                 } else {
                     m_count = detail::get_command_count(*m_it);
+                    if (m_count > m_max_count) {
+                        throw geometry_exception{"Max count too large"};
+                    }
                 }
 
                 ++m_it;
@@ -366,7 +380,7 @@ namespace vtzero {
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POINT);
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
         return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
     }
 
@@ -385,7 +399,7 @@ namespace vtzero {
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::LINESTRING);
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
         return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
     }
 
@@ -404,7 +418,7 @@ namespace vtzero {
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POLYGON);
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
         return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
     }
 
@@ -422,7 +436,7 @@ namespace vtzero {
      */
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
         switch (geometry.type()) {
             case GeomType::POINT:
                 return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
