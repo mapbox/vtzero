@@ -93,6 +93,29 @@ namespace vtzero {
                    static_cast<int64_t>(b.x) * static_cast<int64_t>(a.y);
         }
 
+        template <typename T, typename Enable = void>
+        struct get_result {
+
+            using type = void;
+
+            template <typename TGeomHandler>
+            void operator()(TGeomHandler&& /*geom_handler*/) const noexcept {
+            }
+
+        };
+
+        template <typename T>
+        struct get_result<T, typename std::enable_if<!std::is_same<decltype(std::declval<T>().result()), void>::value>::type> {
+
+            using type = decltype(std::declval<T>().result());
+
+            template <typename TGeomHandler>
+            type operator()(TGeomHandler&& geom_handler) {
+                return std::forward<TGeomHandler>(geom_handler).result();
+            }
+
+        };
+
         /**
          * Decode a geometry as specified in spec 4.3 from a sequence of 32 bit
          * unsigned integers. This templated base class can be instantiated
@@ -203,156 +226,129 @@ namespace vtzero {
                 return m_cursor;
             }
 
+            template <typename TGeomHandler>
+            typename detail::get_result<TGeomHandler>::type decode_point(TGeomHandler&& geom_handler) {
+                // spec 4.3.4.2 "MUST consist of a single MoveTo command"
+                if (!next_command(detail::command_move_to())) {
+                    throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
+                }
+
+                // spec 4.3.4.2 "command count greater than 0"
+                if (count() == 0) {
+                    throw geometry_exception{"MoveTo command count is zero (spec 4.3.4.2)"};
+                }
+
+                std::forward<TGeomHandler>(geom_handler).points_begin(count());
+                while (count() > 0) {
+                    std::forward<TGeomHandler>(geom_handler).points_point(next_point());
+                }
+
+                // spec 4.3.4.2 "MUST consist of of a single ... command"
+                if (!done()) {
+                    throw geometry_exception{"additional data after end of geometry (spec 4.3.4.2)"};
+                }
+
+                std::forward<TGeomHandler>(geom_handler).points_end();
+
+                return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
+            }
+
+            template <typename TGeomHandler>
+            typename detail::get_result<TGeomHandler>::type decode_linestring(TGeomHandler&& geom_handler) {
+                // spec 4.3.4.3 "1. A MoveTo command"
+                while (next_command(detail::command_move_to())) {
+                    // spec 4.3.4.3 "with a command count of 1"
+                    if (count() != 1) {
+                        throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.3)"};
+                    }
+
+                    const auto first_point = next_point();
+
+                    // spec 4.3.4.3 "2. A LineTo command"
+                    if (!next_command(detail::command_line_to())) {
+                        throw geometry_exception{"expected LineTo command (spec 4.3.4.3)"};
+                    }
+
+                    // spec 4.3.4.3 "with a command count greater than 0"
+                    if (count() == 0) {
+                        throw geometry_exception{"LineTo command count is zero (spec 4.3.4.3)"};
+                    }
+
+                    std::forward<TGeomHandler>(geom_handler).linestring_begin(count() + 1);
+
+                    std::forward<TGeomHandler>(geom_handler).linestring_point(first_point);
+                    while (count() > 0) {
+                        std::forward<TGeomHandler>(geom_handler).linestring_point(next_point());
+                    }
+
+                    std::forward<TGeomHandler>(geom_handler).linestring_end();
+                }
+
+                return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
+            }
+
+            template <typename TGeomHandler>
+            typename detail::get_result<TGeomHandler>::type decode_polygon(TGeomHandler&& geom_handler) {
+                // spec 4.3.4.4 "1. A MoveTo command"
+                while (next_command(detail::command_move_to())) {
+                    // spec 4.3.4.4 "with a command count of 1"
+                    if (count() != 1) {
+                        throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.4)"};
+                    }
+
+                    int64_t sum = 0;
+                    const point start_point = next_point();
+                    point last_point = start_point;
+
+                    // spec 4.3.4.4 "2. A LineTo command"
+                    if (!next_command(detail::command_line_to())) {
+                        throw geometry_exception{"expected LineTo command (spec 4.3.4.4)"};
+                    }
+
+                    // spec 4.3.4.4 "with a command count greater than 1"
+                    if (m_strict && count() <= 1) {
+                        throw geometry_exception{"LineTo command count is not greater than 1 (spec 4.3.4.4)"};
+                    }
+
+                    std::forward<TGeomHandler>(geom_handler).ring_begin(count() + 2);
+
+                    std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
+
+                    while (count() > 0) {
+                        const point p = next_point();
+                        sum += detail::det(last_point, p);
+                        last_point = p;
+                        std::forward<TGeomHandler>(geom_handler).ring_point(p);
+                    }
+
+                    // spec 4.3.4.4 "3. A ClosePath command"
+                    if (!next_command(detail::command_close_path())) {
+                        throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
+                    }
+
+                    // spec 4.3.4.4 "The position of the cursor before calling the
+                    // ClosePath command of a linear ring SHALL NOT repeat the same
+                    // position as the first point in the linear ring"
+                    if (m_strict && last_point == start_point) {
+                        throw geometry_exception{"duplicate last point of ring"};
+                    }
+
+                    sum += detail::det(last_point, start_point);
+
+                    // spec 4.3.4.4 "A linear ring SHOULD NOT have an area ... equal to zero"
+                    if (m_strict && sum == 0) {
+                        throw geometry_exception{"area of ring is zero"};
+                    }
+
+                    std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
+
+                    std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0);
+                }
+
+                return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
+            }
+
         }; // class geometry_decoder
-
-        template <typename T, typename Enable = void>
-        struct get_result {
-
-            using type = void;
-
-            template <typename TGeomHandler>
-            void operator()(TGeomHandler&& /*geom_handler*/) const noexcept {
-            }
-
-        };
-
-        template <typename T>
-        struct get_result<T, typename std::enable_if<!std::is_same<decltype(std::declval<T>().result()), void>::value>::type> {
-
-            using type = decltype(std::declval<T>().result());
-
-            template <typename TGeomHandler>
-            type operator()(TGeomHandler&& geom_handler) {
-                return std::forward<TGeomHandler>(geom_handler).result();
-            }
-
-        };
-
-        template <typename TIterator, typename TGeomHandler>
-        typename detail::get_result<TGeomHandler>::type decode_point_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
-            detail::geometry_decoder<TIterator> decoder{begin, end, strict};
-
-            // spec 4.3.4.2 "MUST consist of a single MoveTo command"
-            if (!decoder.next_command(detail::command_move_to())) {
-                throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
-            }
-
-            // spec 4.3.4.2 "command count greater than 0"
-            if (decoder.count() == 0) {
-                throw geometry_exception{"MoveTo command count is zero (spec 4.3.4.2)"};
-            }
-
-            std::forward<TGeomHandler>(geom_handler).points_begin(decoder.count());
-            while (decoder.count() > 0) {
-                std::forward<TGeomHandler>(geom_handler).points_point(decoder.next_point());
-            }
-
-            // spec 4.3.4.2 "MUST consist of of a single ... command"
-            if (!decoder.done()) {
-                throw geometry_exception{"additional data after end of geometry (spec 4.3.4.2)"};
-            }
-
-            std::forward<TGeomHandler>(geom_handler).points_end();
-
-            return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
-        }
-
-        template <typename TIterator, typename TGeomHandler>
-        typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
-            detail::geometry_decoder<TIterator> decoder{begin, end, strict};
-
-            // spec 4.3.4.3 "1. A MoveTo command"
-            while (decoder.next_command(detail::command_move_to())) {
-                // spec 4.3.4.3 "with a command count of 1"
-                if (decoder.count() != 1) {
-                    throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.3)"};
-                }
-
-                const auto first_point = decoder.next_point();
-
-                // spec 4.3.4.3 "2. A LineTo command"
-                if (!decoder.next_command(detail::command_line_to())) {
-                    throw geometry_exception{"expected LineTo command (spec 4.3.4.3)"};
-                }
-
-                // spec 4.3.4.3 "with a command count greater than 0"
-                if (decoder.count() == 0) {
-                    throw geometry_exception{"LineTo command count is zero (spec 4.3.4.3)"};
-                }
-
-                std::forward<TGeomHandler>(geom_handler).linestring_begin(decoder.count() + 1);
-                std::forward<TGeomHandler>(geom_handler).linestring_point(first_point);
-                while (decoder.count() > 0) {
-                    std::forward<TGeomHandler>(geom_handler).linestring_point(decoder.next_point());
-                }
-
-                std::forward<TGeomHandler>(geom_handler).linestring_end();
-            }
-
-            return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
-        }
-
-        template <typename TIterator, typename TGeomHandler>
-        typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(TIterator begin, TIterator end, bool strict, TGeomHandler&& geom_handler) {
-            detail::geometry_decoder<TIterator> decoder{begin, end, strict};
-
-            // spec 4.3.4.4 "1. A MoveTo command"
-            while (decoder.next_command(detail::command_move_to())) {
-                // spec 4.3.4.4 "with a command count of 1"
-                if (decoder.count() != 1) {
-                    throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.4)"};
-                }
-
-                int64_t sum = 0;
-                const point start_point = decoder.next_point();
-                point last_point = start_point;
-
-                // spec 4.3.4.4 "2. A LineTo command"
-                if (!decoder.next_command(detail::command_line_to())) {
-                    throw geometry_exception{"expected LineTo command (spec 4.3.4.4)"};
-                }
-
-                // spec 4.3.4.4 "with a command count greater than 1"
-                if (strict && decoder.count() <= 1) {
-                    throw geometry_exception{"LineTo command count is not greater than 1 (spec 4.3.4.4)"};
-                }
-
-                std::forward<TGeomHandler>(geom_handler).ring_begin(decoder.count() + 2);
-                std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
-
-                while (decoder.count() > 0) {
-                    const point p = decoder.next_point();
-                    sum += detail::det(last_point, p);
-                    last_point = p;
-                    std::forward<TGeomHandler>(geom_handler).ring_point(p);
-                }
-
-                // spec 4.3.4.4 "3. A ClosePath command"
-                if (!decoder.next_command(detail::command_close_path())) {
-                    throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
-                }
-
-                // spec 4.3.4.4 "The position of the cursor before calling the
-                // ClosePath command of a linear ring SHALL NOT repeat the same
-                // position as the first point in the linear ring"
-                if (strict && last_point == start_point) {
-                    throw geometry_exception{"duplicate last point of ring"};
-                }
-
-                sum += detail::det(last_point, start_point);
-
-                // spec 4.3.4.4 "A linear ring SHOULD NOT have an area ... equal to zero"
-                if (strict && sum == 0) {
-                    throw geometry_exception{"area of ring is zero"};
-                }
-
-                std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
-
-                std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0);
-            }
-
-            return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
-        }
 
     } // namespace detail
 
@@ -369,7 +365,8 @@ namespace vtzero {
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POINT);
-        return detail::decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
+        return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
     }
 
     /**
@@ -387,7 +384,8 @@ namespace vtzero {
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::LINESTRING);
-        return detail::decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
+        return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
     }
 
     /**
@@ -405,7 +403,8 @@ namespace vtzero {
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POLYGON);
-        return detail::decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
+        return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
     }
 
     /**
@@ -422,16 +421,14 @@ namespace vtzero {
      */
     template <typename TGeomHandler>
     typename detail::get_result<TGeomHandler>::type decode_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict};
         switch (geometry.type()) {
             case GeomType::POINT:
-                return detail::decode_point_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
-                break;
+                return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
             case GeomType::LINESTRING:
-                return detail::decode_linestring_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
-                break;
+                return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
             case GeomType::POLYGON:
-                return detail::decode_polygon_geometry(geometry.begin(), geometry.end(), strict, std::forward<TGeomHandler>(geom_handler));
-                break;
+                return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
             default:
                 break;
         }
