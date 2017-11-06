@@ -48,6 +48,12 @@ namespace vtzero {
             pbf_message_value.add_string(detail::pbf_value::string_value, value);
         }
 
+        /// Construct from const char* and size_t.
+        explicit encoded_property_value(const char* value, std::size_t size) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_string(detail::pbf_value::string_value, value, size);
+        }
+
         /// Construct from std::string.
         explicit encoded_property_value(const std::string& value) {
             protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};

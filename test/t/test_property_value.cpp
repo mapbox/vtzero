@@ -284,10 +284,12 @@ TEST_CASE("create encoded property values from different string types") {
     vtzero::encoded_property_value epv2{"value"};
     vtzero::encoded_property_value epv3{v};
     vtzero::encoded_property_value epv4{vtzero::data_view{v}};
+    vtzero::encoded_property_value epv5{"valuexxxxxxxxx", 5};
 
     REQUIRE(epv1 == epv2);
     REQUIRE(epv1 == epv3);
     REQUIRE(epv1 == epv4);
+    REQUIRE(epv1 == epv5);
 }
 
 TEST_CASE("create encoded property values from different floating point types") {
