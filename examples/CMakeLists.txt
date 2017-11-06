@@ -10,6 +10,8 @@ set(TEST_FILE "${CMAKE_SOURCE_DIR}/test/data/mapbox-streets-v6-14-8714-8017.mvt"
 
 add_executable(vtzero-create vtzero-create.cpp utils.cpp)
 
+add_executable(vtzero-streets vtzero-streets.cpp utils.cpp)
+
 # disable building of examples that need getopt lib on MSVC
 if(NOT MSVC)
     add_executable(vtzero-filter vtzero-filter.cpp utils.cpp)
