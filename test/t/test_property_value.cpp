@@ -210,14 +210,19 @@ TEST_CASE("bool value") {
     REQUIRE(cs == "1");
 }
 
-TEST_CASE("property_value_view equality comparisons") {
-    using pv = vtzero::property_value;
-
+TEST_CASE("property and property_value equality comparisons") {
     vtzero::encoded_property_value t{true};
     vtzero::encoded_property_value f{false};
     vtzero::encoded_property_value v1{vtzero::int_value_type{1}};
     vtzero::encoded_property_value vs{"foo"};
 
+    REQUIRE(t == t);
+    REQUIRE_FALSE(t != t);
+    REQUIRE_FALSE(t == f);
+    REQUIRE_FALSE(t == v1);
+    REQUIRE_FALSE(t == vs);
+
+    using pv = vtzero::property_value;
     REQUIRE(pv{t.data()} == pv{t.data()});
     REQUIRE_FALSE(pv{t.data()} != pv{t.data()});
     REQUIRE_FALSE(pv{t.data()} == pv{f.data()});
@@ -225,11 +230,16 @@ TEST_CASE("property_value_view equality comparisons") {
     REQUIRE_FALSE(pv{t.data()} == pv{vs.data()});
 }
 
-TEST_CASE("property_value_view ordering") {
+TEST_CASE("property and property_value ordering") {
     using pv = vtzero::property_value;
 
     vtzero::encoded_property_value t{true};
     vtzero::encoded_property_value f{false};
+
+    REQUIRE_FALSE(t <  f);
+    REQUIRE_FALSE(t <= f);
+    REQUIRE(t >  f);
+    REQUIRE(t >= f);
 
     REQUIRE_FALSE(pv{t.data()} <  pv{f.data()});
     REQUIRE_FALSE(pv{t.data()} <= pv{f.data()});
@@ -238,6 +248,11 @@ TEST_CASE("property_value_view ordering") {
 
     vtzero::encoded_property_value v1{vtzero::int_value_type{22}};
     vtzero::encoded_property_value v2{vtzero::int_value_type{17}};
+
+    REQUIRE_FALSE(v1 <  v2);
+    REQUIRE_FALSE(v1 <= v2);
+    REQUIRE(v1 >  v2);
+    REQUIRE(v1 >= v2);
 
     REQUIRE_FALSE(pv{v1.data()} <  pv{v2.data()});
     REQUIRE_FALSE(pv{v1.data()} <= pv{v2.data()});
@@ -248,10 +263,20 @@ TEST_CASE("property_value_view ordering") {
     vtzero::encoded_property_value vsb{"bar"};
     vtzero::encoded_property_value vsx{"foobar"};
 
+    REQUIRE_FALSE(vsf <  vsb);
+    REQUIRE_FALSE(vsf <= vsb);
+    REQUIRE(vsf >  vsb);
+    REQUIRE(vsf >= vsb);
+
     REQUIRE_FALSE(pv{vsf.data()} <  pv{vsb.data()});
     REQUIRE_FALSE(pv{vsf.data()} <= pv{vsb.data()});
     REQUIRE(pv{vsf.data()} >  pv{vsb.data()});
     REQUIRE(pv{vsf.data()} >= pv{vsb.data()});
+
+    REQUIRE(vsf <  vsx);
+    REQUIRE(vsf <= vsx);
+    REQUIRE_FALSE(vsf >  vsx);
+    REQUIRE_FALSE(vsf >= vsx);
 
     REQUIRE(pv{vsf.data()} <  pv{vsx.data()});
     REQUIRE(pv{vsf.data()} <= pv{vsx.data()});
@@ -259,7 +284,7 @@ TEST_CASE("property_value_view ordering") {
     REQUIRE_FALSE(pv{vsf.data()} >= pv{vsx.data()});
 }
 
-TEST_CASE("default constructed property_view") {
+TEST_CASE("default constructed property") {
     vtzero::property p;
     REQUIRE_FALSE(p.valid());
     REQUIRE_FALSE(p);
@@ -267,7 +292,7 @@ TEST_CASE("default constructed property_view") {
     REQUIRE(p.value().data().data() == nullptr);
 }
 
-TEST_CASE("valid property_view") {
+TEST_CASE("valid property") {
     vtzero::data_view k{"key"};
     vtzero::encoded_property_value epv{"value"};
     vtzero::property_value pv{epv.data()};
