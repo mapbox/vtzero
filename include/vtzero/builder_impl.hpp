@@ -23,6 +23,7 @@ documentation.
 
 #include <cstdlib>
 #include <string>
+#include <unordered_map>
 #include <utility>
 
 namespace vtzero {
@@ -73,6 +74,14 @@ namespace vtzero {
             // The number of values in the values table
             uint32_t m_num_values = 0;
 
+            // Below this value, no index will be used to find entries in the
+            // key/value tables. XXX This probably needs some tuning.
+            static constexpr const uint32_t max_entries_flat = 20;
+
+            using map_type = std::unordered_map<std::string, index_value>;
+            map_type m_keys_index;
+            map_type m_values_index;
+
             static index_value find_in_table(const data_view text, const std::string& data) {
                 uint32_t index = 0;
                 protozero::pbf_message<detail::pbf_layer> pbf_table{data};
@@ -86,6 +95,50 @@ namespace vtzero {
                 }
 
                 return index_value{};
+            }
+
+            // Read the key or value table and populate an index from its
+            // entries. This is done once the table becomes too large to do
+            // linear search in it.
+            static void populate_index(const std::string& data, map_type& map) {
+                uint32_t index = 0;
+                protozero::pbf_message<detail::pbf_layer> pbf_table{data};
+
+                while (pbf_table.next()) {
+                    map[pbf_table.get_string()] = index++;
+                }
+            }
+
+            index_value find_in_keys_table(const data_view text) {
+                if (m_num_keys < max_entries_flat) {
+                    return find_in_table(text, m_keys_data);
+                }
+
+                if (m_keys_index.empty()) {
+                    populate_index(m_keys_data, m_keys_index);
+                }
+
+                auto& v = m_keys_index[std::string(text)];
+                if (!v.valid()) {
+                    v = add_key_without_dup_check(text);
+                }
+                return v;
+            }
+
+            index_value find_in_values_table(const data_view text) {
+                if (m_num_values < max_entries_flat) {
+                    return find_in_table(text, m_values_data);
+                }
+
+                if (m_values_index.empty()) {
+                    populate_index(m_values_data, m_values_index);
+                }
+
+                auto& v = m_values_index[std::string(text)];
+                if (!v.valid()) {
+                    v = add_value_without_dup_check(text);
+                }
+                return v;
             }
 
         public:
@@ -114,7 +167,7 @@ namespace vtzero {
             }
 
             index_value add_key(const data_view text) {
-                const auto index = find_in_table(text, m_keys_data);
+                const auto index = find_in_keys_table(text);
                 if (index.valid()) {
                     return index;
                 }
@@ -127,7 +180,7 @@ namespace vtzero {
             }
 
             index_value add_value(const data_view text) {
-                const auto index = find_in_table(text, m_values_data);
+                const auto index = find_in_values_table(text);
                 if (index.valid()) {
                     return index;
                 }
