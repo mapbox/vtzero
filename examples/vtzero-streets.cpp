@@ -12,12 +12,7 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/vector_tile.hpp>
 
-#include <cstdint>
-#include <cstdlib>
-#include <cstring>
-#include <getopt.h>
 #include <iostream>
-#include <limits>
 #include <string>
 
 static bool keep_feature(vtzero::feature& feature) {
