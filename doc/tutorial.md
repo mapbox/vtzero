@@ -717,6 +717,141 @@ fb.add_property("foo", "bar"); // add properties
 ...
 ```
 
+## Adding properties
+
+A feature can have any number of properties. They are added with the
+`add_property()` method called on the feature builder. There are two different
+ways of doing this. The *simple approach* which does all the work for you and
+the *advanced approach* which can be more performant, but you have to to some
+more work. It is recommended that you start out with the simple approach and
+only switch to the advanced approach once you have a working program and want
+to get the last bit of performance out of it.
+
+The difference stems from the way properties are encoded in vector tiles. While
+properties "belong" to features, they are really stored in two tables (for the
+keys and values) in the layer. The individual feature only references the
+entries in those tables by index. This make the encoded tile smaller, but it
+means somebody has to manage those tables. In the simple approach this is done
+behind the scenes by the `layer_builder` object, in the advanced approach you
+handle that yourself.
+
+Do not mix the simple and the advanced approach unless you know what you are
+doing.
+
+### The simple approach to adding properties
+
+For the simple approach call `add_property()` with two arguments. The first is
+the key, it must have some kind of string type (`std::string`, `const char*`,
+`vtzero::data_view`, anything really that converts to a `data_view`). The
+second argument is the value, for which most basic C++ types are allowed
+(string types, integer types, double, ...). See the API documentation for the
+constructors of the `encoded_property_value` class for a list.
+
+```cpp
+vtzero::layer_builder lb{...};
+vtzero::linestring_feature_builder fb{lb};
+...
+fb.add_property("waterway", "stream"); // string value
+fb.add_property("name", "Little Creek");
+fb.add_property("width", 1.5); // double value
+...
+```
+
+Sometimes you need to specify exactly which type should be used in the
+encoding. The `encoded_property_value` constructor can take special types for
+that like in the following example, where you force the `sint` encoding:
+
+```cpp
+fb.add_property("layer", vtzero::sint_value_type(2));
+```
+
+You can also call `add_property()` with a single `vtzero::property` argument
+(which is handy if you are copying this property over from a tile you are
+reading):
+
+```cpp
+while (auto property = feature.next_property()) {
+    if (property.key() == "name") {
+        feature_builder.add_property(property);
+    }
+}
+```
+
+### The advanced approach to adding properties
+
+In the advanced approach you have to do the indexing yourself. Here is a very
+basic example:
+
+```cpp
+vtzero::tile_builder tbuilder;
+vtzero::layer_builder lbuilder{tbuilder, "test"};
+const vtzero::index_value highway = lbuilder.add_key("highway");
+const vtzero::index_value primary = lbuilder.add_value("primary");
+...
+vtzero::point_feature_builder fbuilder{lbuilder};
+...
+fbuilder.add_property(highway, primary);
+...
+```
+
+The methods `add_key()` and `add_value()` on the layer builder are used to add
+keys and values to the tables in the layer. They both return the index (of type
+`vtzero::index_value`) of those keys or values in the tables. You store
+those index values somewhere (in this case in the `highway` and `primary`
+variables) and use them when calling `add_property()` on the feature builder.
+
+In some cases you only have a few property keys and know them beforehand,
+then storing the key indexes in individual variables might work. But for
+values this usually doesn't make much sense, and if all your keys and values
+are only known at runtime, it doesn't work either. For this you need some kind
+of index datastructure mapping from keys/values to index values. You can
+implement this yourself, but it is easier to use some classes provided by
+vtzero. Then the code looks like this:
+
+```cpp
+#include <vtzero/index.hpp> // use this include to get the index classes
+...
+vtzero::layer_builder lb{...};
+vtzero::key_index<std::map> key_index{lb};
+vtzero::value_index_internal<std::unordered_map> value_index{lb};
+...
+vtzero::point_feature_builder fb{lb};
+...
+fb.add_property(key_index("highway"), value_index("primary"));
+...
+```
+
+In this example the `key_index` template class is used for keys, it uses
+`std::map` internally as can be seen by its template argument. The
+`value_index_internal` template class is used for values, it uses
+`std::unordered_map` internally in this example. Whether you specify `std::map`
+or `std::unordered_map` or something else (that needs to be compatible to those
+classes) is up to you. Benchmark your use case and decide then.
+
+Keys are always strings, so they are easy to handle. For keys there is only the
+single `key_index` in vtzero.
+
+For values this is more difficult. Basically there are two choices:
+
+1. Encode the value according to the vector tile encoding rules which results
+   in a string and store this in the index. This is what the
+   `value_index_internal` class does.
+2. Store the unencoded value in the index. The index lookup will be faster,
+   but you need a different index type for each value type. This is what the
+   `value_index` classes do.
+
+The `value_index` template classes need three template arguments: The type
+used internally to encode the value, the type used externally, and the map
+type.
+
+In this example the user program has the values as `int`, the index will store
+them in a `std::map<int>`. The integer value is then encoded in an `sint`
+int the vector tile:
+
+```cpp
+vtzero::value_index<vtzero::sint_value:type, int, std::map> index;
+```
+
 ## Error handling
 
 Many vtzero functions can throw exceptions. Most of them fall into two
