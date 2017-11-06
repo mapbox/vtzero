@@ -216,18 +216,52 @@ namespace vtzero {
             m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
         }
 
+        /**
+         * Add key to the keys table without checking for duplicates. This
+         * function is usually used when an external index is used which takes
+         * care of the duplication check.
+         *
+         * @param text The key.
+         * @returns The index value of this key.
+         */
         index_value add_key_without_dup_check(const data_view text) {
             return m_layer->add_key_without_dup_check(text);
         }
 
+        /**
+         * Add key to the keys table. This function will consult the internal
+         * index in the layer to make sure the key is only in the table once.
+         * It will either return the index value of an existing key or add the
+         * new key and return its index value.
+         *
+         * @param text The key.
+         * @returns The index value of this key.
+         */
         index_value add_key(const data_view text) {
             return m_layer->add_key(text);
         }
 
+        /**
+         * Add value to the values table without checking for duplicates. This
+         * function is usually used when an external index is used which takes
+         * care of the duplication check.
+         *
+         * @param text The value.
+         * @returns The index value of this value.
+         */
         index_value add_value_without_dup_check(const data_view text) {
             return m_layer->add_value_without_dup_check(text);
         }
 
+        /**
+         * Add value to the values table. This function will consult the
+         * internal index in the layer to make sure the value is only in the
+         * table once. It will either return the index value of an existing
+         * value or add the new value and return its index value.
+         *
+         * @param text The value.
+         * @returns The index value of this value.
+         */
         index_value add_value(const data_view text) {
             return m_layer->add_value(text);
         }
