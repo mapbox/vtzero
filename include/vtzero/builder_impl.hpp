@@ -51,17 +51,27 @@ namespace vtzero {
 
         class layer_builder_impl : public layer_builder_base {
 
+            // Buffer containing the encoded layer metadata and features
             std::string m_data;
+
+            // Buffer containing the encoded keys table
             std::string m_keys_data;
+
+            // Buffer containing the encoded values table
             std::string m_values_data;
 
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys;
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_values;
 
+            // The number of features in the layer
             std::size_t m_num_features = 0;
-            uint32_t m_max_key = 0;
-            uint32_t m_max_value = 0;
+
+            // The number of keys in the keys table
+            uint32_t m_num_keys = 0;
+
+            // The number of values in the values table
+            uint32_t m_num_values = 0;
 
             static index_value find_in_table(const data_view text, const std::string& data) {
                 uint32_t index = 0;
@@ -100,7 +110,7 @@ namespace vtzero {
 
             index_value add_key_without_dup_check(const data_view text) {
                 m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
-                return m_max_key++;
+                return m_num_keys++;
             }
 
             index_value add_key(const data_view text) {
@@ -113,7 +123,7 @@ namespace vtzero {
 
             index_value add_value_without_dup_check(const data_view text) {
                 m_pbf_message_values.add_string(detail::pbf_layer::values, text);
-                return m_max_value++;
+                return m_num_values++;
             }
 
             index_value add_value(const data_view text) {
