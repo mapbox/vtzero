@@ -16,7 +16,7 @@
 #include <iostream>
 #include <string>
 
-void print_help() {
+static void print_help() {
     std::cout << "vtzero-show [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n\n"
               << "Show contents of vector tile.\n\n"
               << "Options:\n"
@@ -27,7 +27,7 @@ void print_help() {
               << "  -T, --value-types  Also show value types\n";
 }
 
-void print_usage(const char* command) {
+static void print_usage(const char* command) {
     std::cerr << "Usage: " << command << " [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n";
 }
 
@@ -120,7 +120,7 @@ struct print_value {
 
 }; // struct print_value
 
-void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool print_value_types) {
+static void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool print_value_types) {
     std::cout << "=============================================================\n"
               << "layer:\n"
               << "  name: " << std::string(layer.name()) << '\n'
@@ -170,7 +170,7 @@ void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool prin
     }
 }
 
-void print_layer_overview(const vtzero::layer& layer) {
+static void print_layer_overview(const vtzero::layer& layer) {
     std::cout << layer.name() << ' ' << layer.num_features() << '\n';
 }
 

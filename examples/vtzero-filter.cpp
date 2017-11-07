@@ -19,7 +19,7 @@
 #include <limits>
 #include <string>
 
-void print_help() {
+static void print_help() {
     std::cout << "vtzero-filter [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n\n"
               << "Filter contents of vector tile.\n"
               << "Options:\n"
@@ -27,7 +27,7 @@ void print_help() {
               << "  -o, --output=FILE  Write output to file FILE\n";
 }
 
-void print_usage(const char* command) {
+static void print_usage(const char* command) {
     std::cerr << "Usage: " << command << " [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n";
 }
 

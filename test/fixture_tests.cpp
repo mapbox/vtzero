@@ -133,7 +133,7 @@ struct geom_handler {
 
 // ---------------------------------------------------------------------------
 
-vtzero::feature check_layer(vtzero::vector_tile& tile) {
+static vtzero::feature check_layer(vtzero::vector_tile& tile) {
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 1);
 
