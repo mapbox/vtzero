@@ -120,9 +120,9 @@ struct print_value {
 
 }; // struct print_value
 
-static void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool print_value_types) {
+static void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
     std::cout << "=============================================================\n"
-              << "layer:\n"
+              << "layer: " << layer_num << '\n'
               << "  name: " << std::string(layer.name()) << '\n'
               << "  version: " << layer.version() << '\n'
               << "  extent: " << layer.extent() << '\n';
@@ -146,8 +146,9 @@ static void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bo
         }
     }
 
+    feature_num = 0;
     while (auto feature = layer.next_feature()) {
-        std::cout << "  feature:\n"
+        std::cout << "  feature: " << feature_num << '\n'
                   << "    id: ";
         if (feature.has_id()) {
             std::cout << feature.id() << '\n';
@@ -167,6 +168,7 @@ static void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bo
                 std::cout << '\n';
             }
         }
+        ++feature_num;
     }
 }
 
@@ -222,6 +224,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    int layer_num = 0;
+    int feature_num = 0;
     try {
         const auto data = read_file(argv[optind]);
 
@@ -232,19 +236,20 @@ int main(int argc, char* argv[]) {
                 if (layer_overview) {
                     print_layer_overview(layer);
                 } else {
-                    print_layer(layer, strict, print_tables, print_value_types);
+                    print_layer(layer, strict, print_tables, print_value_types, layer_num, feature_num);
                 }
+                ++layer_num;
             }
         } else {
             auto layer = get_layer(tile, argv[optind + 1]);
             if (layer_overview) {
                 print_layer_overview(layer);
             } else {
-                print_layer(layer, strict, print_tables, print_value_types);
+                print_layer(layer, strict, print_tables, print_value_types, layer_num, feature_num);
             }
         }
     } catch (const std::exception& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "Error in layer " << layer_num << " (feature " << feature_num << "): " << e.what() << '\n';
         return 1;
     }
 
