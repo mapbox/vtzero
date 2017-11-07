@@ -346,6 +346,13 @@ namespace vtzero {
             feature_builder_base(layer) {
         }
 
+        uint32_t check_container_size(const std::size_t size) {
+            if (size > std::numeric_limits<uint32_t>::max()) {
+                throw geometry_exception{"Too many members in container."};
+            }
+            return static_cast<uint32_t>(size);
+        }
+
     public:
 
         /**
@@ -644,12 +651,15 @@ namespace vtzero {
          *         it.
          * @param container The container to read the points from.
          *
+         * @throws geometry_exception If there are more than 2^32-1 members in
+         *         the container.
+         *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
         template <typename TContainer>
         void add_points_from_container(const TContainer& container) {
-            add_points(container.size());
+            add_points(check_container_size(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
@@ -846,12 +856,15 @@ namespace vtzero {
          *         it.
          * @param container The container to read the points from.
          *
+         * @throws geometry_exception If there are more than 2^32-1 members in
+         *         the container.
+         *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
         template <typename TContainer>
         void add_linestring_from_container(const TContainer& container) {
-            add_linestring(container.size());
+            add_linestring(check_container_size(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
@@ -1065,12 +1078,15 @@ namespace vtzero {
          *         it.
          * @param container The container to read the points from.
          *
+         * @throws geometry_exception If there are more than 2^32-1 members in
+         *         the container.
+         *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
         template <typename TContainer>
         void add_ring_from_container(const TContainer& container) {
-            add_ring(container.size());
+            add_ring(check_container_size(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
