@@ -81,7 +81,7 @@ TEST_CASE("Create tile from existing layers") {
         }
     }
 
-    std::string data = tbuilder.serialize();
+    const std::string data = tbuilder.serialize();
 
     REQUIRE(data == buffer);
 }
@@ -98,7 +98,7 @@ TEST_CASE("Create layer based on existing layer") {
     fbuilder.add_point(10, 20);
     fbuilder.commit();
 
-    std::string data = tbuilder.serialize();
+    const std::string data = tbuilder.serialize();
     vtzero::vector_tile new_tile{data};
     const auto new_layer = new_tile.next_layer();
     REQUIRE(std::string(new_layer.name()) == "place_label");
@@ -159,7 +159,7 @@ TEST_CASE("Point builder") {
 
     fbuilder.commit();
 
-    std::string data = tbuilder.serialize();
+    const std::string data = tbuilder.serialize();
 
     vtzero::vector_tile tile{data};
 
@@ -177,6 +177,45 @@ TEST_CASE("Point builder") {
 
     std::vector<vtzero::point> result = {{10, 20}};
     REQUIRE(handler.data == result);
+}
+
+TEST_CASE("Rollback feature") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+
+    {
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(1);
+        fbuilder.add_point(10, 10);
+        fbuilder.commit();
+    }
+
+    {
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(2);
+        fbuilder.add_point(20, 20);
+        fbuilder.rollback();
+    }
+
+    {
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(3);
+        fbuilder.add_point(30, 30);
+    }
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+    auto layer = tile.next_layer();
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature.id() == 1);
+
+    feature = layer.next_feature();
+    REQUIRE(feature.id() == 3);
+
+    feature = layer.next_feature();
+    REQUIRE_FALSE(feature);
 }
 
 TEST_CASE("value index") {
@@ -209,7 +248,7 @@ TEST_CASE("value index") {
 
     fbuilder.commit();
 
-    std::string data = tbuilder.serialize();
+    const std::string data = tbuilder.serialize();
 
     // ============
 
