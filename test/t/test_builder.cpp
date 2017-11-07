@@ -145,16 +145,21 @@ TEST_CASE("Point builder") {
     vtzero::point_feature_builder fbuilder{lbuilder};
     fbuilder.set_id(17);
 
-    SECTION("add point using coordinates") {
+    SECTION("add point using coordinates / property using key/value") {
         fbuilder.add_point(10, 20);
+        fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
-    SECTION("add point using vtzero::point") {
+    SECTION("add point using vtzero::point / property using key/value") {
         fbuilder.add_point(vtzero::point{10, 20});
+        fbuilder.add_property("foo", vtzero::encoded_property_value{22});
     }
 
-    SECTION("add point using mypoint") {
+    SECTION("add point using mypoint / property using property") {
+        vtzero::encoded_property_value pv{3.5};
+        vtzero::property p{"foo", vtzero::property_value{pv.data()}};
         fbuilder.add_point(mypoint{10, 20});
+        fbuilder.add_property(p);
     }
 
     fbuilder.commit();
