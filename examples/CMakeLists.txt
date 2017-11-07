@@ -59,12 +59,12 @@ if(NOT MSVC)
     add_test(NAME vtzero-show-layer-num
              COMMAND vtzero-show ${TEST_FILE} 2)
     set_tests_properties(vtzero-show-layer-num PROPERTIES
-                         PASS_REGULAR_EXPRESSION "layer:\n  name: water\n")
+                         PASS_REGULAR_EXPRESSION "layer: [0-9]+\n  name: water\n")
 
     add_test(NAME vtzero-show-layer-name
              COMMAND vtzero-show ${CMAKE_SOURCE_DIR}/test/data/mapbox-streets-v6-14-8714-8017.mvt water)
     set_tests_properties(vtzero-show-layer-name PROPERTIES
-                         PASS_REGULAR_EXPRESSION "layer:\n  name: water\n")
+                         PASS_REGULAR_EXPRESSION "layer: [0-9]+\n  name: water\n")
 
     #-------------------------------------------------------------
 
