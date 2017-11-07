@@ -346,6 +346,7 @@ namespace vtzero {
             feature_builder_base(layer) {
         }
 
+        /// Helper function to check size isn't too large
         uint32_t check_container_size(const std::size_t size) {
             if (size > std::numeric_limits<uint32_t>::max()) {
                 throw geometry_exception{"Too many members in container."};

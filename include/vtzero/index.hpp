@@ -22,6 +22,13 @@ documentation.
 
 namespace vtzero {
 
+    /**
+     * Used to store the mapping between property keys and the index value
+     * in the table stored in a layer.
+     *
+     * @tparam TMap The map class to use (std::map, std::unordered_map or
+     *         something compatible).
+     */
     template <template<typename...> class TMap>
     class key_index {
 
@@ -31,15 +38,28 @@ namespace vtzero {
 
     public:
 
+        /**
+         * Construct index.
+         *
+         * @param builder The layer we are building containing the key table
+         *        we are creating the index for.
+         */
         explicit key_index(layer_builder& builder) :
             m_builder(builder) {
         }
 
-        index_value operator()(const data_view v) {
-            std::string text(v);
+        /**
+         * Get the index value for the specified key. If the key was not in
+         * the table, it will be added.
+         *
+         * @param key The key to store.
+         * @returns The index value of they key.
+         */
+        index_value operator()(const data_view key) {
+            std::string text(key);
             const auto it = m_index.find(text);
             if (it == m_index.end()) {
-                const auto idx = m_builder.add_key_without_dup_check(v);
+                const auto idx = m_builder.add_key_without_dup_check(key);
                 m_index.emplace(std::move(text), idx);
                 return idx;
             }
@@ -48,6 +68,19 @@ namespace vtzero {
 
     }; // class key_index
 
+    /**
+     * Used to store the mapping between property values and the index value
+     * in the table stored in a layer. Stores the values in their original
+     * form (as type TExternal) which is more efficient than the way
+     * value_index_internal does it, but you need an instance of this class
+     * for each value type you use.
+     *
+     * @tparam TInternal The type used in the vector tile to encode the value.
+     *         Must be one of string/float/double/int/uint/sint/bool_value_type.
+     * @tparam TExternal The type for the value used by the user of this class.
+     * @tparam TMap The map class to use (std::map, std::unordered_map or
+     *         something compatible).
+     */
     template <typename TInternal, typename TExternal, template<typename...> class TMap>
     class value_index {
 
@@ -57,15 +90,28 @@ namespace vtzero {
 
     public:
 
+        /**
+         * Construct index.
+         *
+         * @param builder The layer we are building containing the value
+         *        table we are creating the index for.
+         */
         explicit value_index(layer_builder& builder) :
             m_builder(builder) {
         }
 
-        index_value operator()(const TExternal& v) {
-            const auto it = m_index.find(v);
+        /**
+         * Get the index value for the specified value. If the value was not in
+         * the table, it will be added.
+         *
+         * @param value The key to store.
+         * @returns The index value of they value.
+         */
+        index_value operator()(const TExternal& value) {
+            const auto it = m_index.find(value);
             if (it == m_index.end()) {
-                const auto idx = m_builder.add_value_without_dup_check(encoded_property_value{TInternal{v}}.data());
-                m_index.emplace(v, idx);
+                const auto idx = m_builder.add_value_without_dup_check(encoded_property_value{TInternal{value}}.data());
+                m_index.emplace(value, idx);
                 return idx;
             }
             return it->second;
@@ -73,6 +119,15 @@ namespace vtzero {
 
     }; // class value_index
 
+    /**
+     * Used to store the mapping between property values and the index value
+     * in the table stored in a layer. Stores the values in the already
+     * encoded form. This is simpler to use than the value_index class, but
+     * has a higher overhead.
+     *
+     * @tparam TMap The map class to use (std::map, std::unordered_map or
+     *         something compatible).
+     */
     template <template<typename...> class TMap>
     class value_index_internal {
 
@@ -82,15 +137,28 @@ namespace vtzero {
 
     public:
 
+        /**
+         * Construct index.
+         *
+         * @param builder The layer we are building containing the value
+         *        table we are creating the index for.
+         */
         explicit value_index_internal(layer_builder& builder) :
             m_builder(builder) {
         }
 
-        index_value operator()(const encoded_property_value& v) {
-            const auto it = m_index.find(v);
+        /**
+         * Get the index value for the specified value. If the value was not in
+         * the table, it will be added.
+         *
+         * @param value The key to store.
+         * @returns The index value of they value.
+         */
+        index_value operator()(const encoded_property_value& value) {
+            const auto it = m_index.find(value);
             if (it == m_index.end()) {
-                const auto idx = m_builder.add_value_without_dup_check(v.data());
-                m_index.emplace(v, idx);
+                const auto idx = m_builder.add_value_without_dup_check(value.data());
+                m_index.emplace(value, idx);
                 return idx;
             }
             return it->second;
