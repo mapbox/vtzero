@@ -246,11 +246,23 @@ namespace vtzero {
          * function is usually used when an external index is used which takes
          * care of the duplication check.
          *
-         * @param text The value.
+         * @param value The property value.
          * @returns The index value of this value.
          */
-        index_value add_value_without_dup_check(const data_view text) {
-            return m_layer->add_value_without_dup_check(text);
+        index_value add_value_without_dup_check(const property_value value) {
+            return m_layer->add_value_without_dup_check(value);
+        }
+
+        /**
+         * Add value to the values table without checking for duplicates. This
+         * function is usually used when an external index is used which takes
+         * care of the duplication check.
+         *
+         * @param value The property value.
+         * @returns The index value of this value.
+         */
+        index_value add_value_without_dup_check(const encoded_property_value& value) {
+            return m_layer->add_value_without_dup_check(value);
         }
 
         /**
@@ -259,11 +271,24 @@ namespace vtzero {
          * table once. It will either return the index value of an existing
          * value or add the new value and return its index value.
          *
-         * @param text The value.
+         * @param value The property value.
          * @returns The index value of this value.
          */
-        index_value add_value(const data_view text) {
-            return m_layer->add_value(text);
+        index_value add_value(const property_value value) {
+            return m_layer->add_value(value);
+        }
+
+        /**
+         * Add value to the values table. This function will consult the
+         * internal index in the layer to make sure the value is only in the
+         * table once. It will either return the index value of an existing
+         * value or add the new value and return its index value.
+         *
+         * @param value The property value.
+         * @returns The index value of this value.
+         */
+        index_value add_value(const encoded_property_value& value) {
+            return m_layer->add_value(value);
         }
 
         /**

@@ -110,7 +110,7 @@ namespace vtzero {
         constexpr property_value() noexcept = default;
 
         /**
-         * Create a (valid) property from a data_view.
+         * Create a (valid) property_value from a data_view.
          */
         explicit constexpr property_value(const data_view value) noexcept :
             m_value(value) {

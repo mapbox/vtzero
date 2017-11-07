@@ -110,7 +110,7 @@ namespace vtzero {
         index_value operator()(const TExternal& value) {
             const auto it = m_index.find(value);
             if (it == m_index.end()) {
-                const auto idx = m_builder.add_value_without_dup_check(encoded_property_value{TInternal{value}}.data());
+                const auto idx = m_builder.add_value_without_dup_check(encoded_property_value{TInternal{value}});
                 m_index.emplace(value, idx);
                 return idx;
             }
@@ -157,7 +157,7 @@ namespace vtzero {
         index_value operator()(const encoded_property_value& value) {
             const auto it = m_index.find(value);
             if (it == m_index.end()) {
-                const auto idx = m_builder.add_value_without_dup_check(value.data());
+                const auto idx = m_builder.add_value_without_dup_check(value);
                 m_index.emplace(value, idx);
                 return idx;
             }

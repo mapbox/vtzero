@@ -106,6 +106,38 @@ TEST_CASE("Create layer based on existing layer") {
     REQUIRE(new_layer.extent() == 4096);
 }
 
+TEST_CASE("Create layer and add keys/values") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "name"};
+
+    const auto ki1 = lbuilder.add_key_without_dup_check("key1");
+    const auto ki2 = lbuilder.add_key("key2");
+    const auto ki3 = lbuilder.add_key("key1");
+
+    REQUIRE(ki1.value() != ki2.value());
+    REQUIRE(ki1.value() == ki3.value());
+
+    const auto vi1 = lbuilder.add_value_without_dup_check(vtzero::encoded_property_value{"value1"});
+    vtzero::encoded_property_value value2{"value2"};
+    const auto vi2 = lbuilder.add_value_without_dup_check(vtzero::property_value{value2.data()});
+
+    const auto vi3 = lbuilder.add_value(vtzero::encoded_property_value{"value1"});
+    const auto vi4 = lbuilder.add_value(vtzero::encoded_property_value{19});
+    const auto vi5 = lbuilder.add_value(vtzero::encoded_property_value{19.0});
+    const auto vi6 = lbuilder.add_value(vtzero::encoded_property_value{22});
+    vtzero::encoded_property_value nineteen{19};
+    const auto vi7 = lbuilder.add_value(vtzero::property_value{nineteen.data()});
+
+    REQUIRE(vi1.value() != vi2.value());
+    REQUIRE(vi1.value() == vi3.value());
+    REQUIRE(vi1.value() != vi4.value());
+    REQUIRE(vi1.value() != vi5.value());
+    REQUIRE(vi1.value() != vi6.value());
+    REQUIRE(vi4.value() != vi5.value());
+    REQUIRE(vi4.value() != vi6.value());
+    REQUIRE(vi4.value() == vi7.value());
+}
+
 TEST_CASE("Point builder") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};

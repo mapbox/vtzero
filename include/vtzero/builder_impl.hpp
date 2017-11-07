@@ -16,6 +16,8 @@ documentation.
  * @brief Contains classes internal to the builder.
  */
 
+#include "encoded_property_value.hpp"
+#include "property_value.hpp"
 #include "types.hpp"
 
 #include <protozero/pbf_builder.hpp>
@@ -109,6 +111,19 @@ namespace vtzero {
                 }
             }
 
+            index_value add_value_without_dup_check(const data_view text) {
+                m_pbf_message_values.add_string(detail::pbf_layer::values, text);
+                return m_num_values++;
+            }
+
+            index_value add_value(const data_view text) {
+                const auto index = find_in_values_table(text);
+                if (index.valid()) {
+                    return index;
+                }
+                return add_value_without_dup_check(text);
+            }
+
             index_value find_in_keys_table(const data_view text) {
                 if (m_num_keys < max_entries_flat) {
                     return find_in_table(text, m_keys_data);
@@ -174,17 +189,20 @@ namespace vtzero {
                 return add_key_without_dup_check(text);
             }
 
-            index_value add_value_without_dup_check(const data_view text) {
-                m_pbf_message_values.add_string(detail::pbf_layer::values, text);
-                return m_num_values++;
+            index_value add_value_without_dup_check(const property_value value) {
+                return add_value_without_dup_check(value.data());
             }
 
-            index_value add_value(const data_view text) {
-                const auto index = find_in_values_table(text);
-                if (index.valid()) {
-                    return index;
-                }
-                return add_value_without_dup_check(text);
+            index_value add_value_without_dup_check(const encoded_property_value& value) {
+                return add_value_without_dup_check(value.data());
+            }
+
+            index_value add_value(const property_value value) {
+                return add_value(value.data());
+            }
+
+            index_value add_value(const encoded_property_value& value) {
+                return add_value(value.data());
             }
 
             const std::string& data() const noexcept {
