@@ -183,7 +183,7 @@ namespace vtzero {
 
         vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {
             return *m_layer;
-        };
+        }
 
         template <typename T>
         using is_layer = std::is_same<typename std::remove_cv<typename std::remove_reference<T>::type>::type, layer>;

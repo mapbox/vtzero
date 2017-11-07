@@ -252,9 +252,9 @@ namespace vtzero {
         /**
          * Call a function for each property of this feature.
          *
-         * @tparam The type of the function. It must take a single argument
-         *         of type property&& and return a bool. If the function
-         *         returns false, the iteration will be stopped.
+         * @tparam TFunc The type of the function. It must take a single
+         *         argument of type property&& and return a bool. If the
+         *         function returns false, the iteration will be stopped.
          * @param func The function to call.
          * @returns true if the iteration was completed and false otherwise.
          * @pre @code valid() @endcode

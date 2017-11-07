@@ -1,6 +1,8 @@
 #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include <test.hpp>
+
 #include <fstream>
 #include <stdexcept>
 #include <string>
