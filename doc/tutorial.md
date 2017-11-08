@@ -833,6 +833,16 @@ int the vector tile:
 vtzero::value_index<vtzero::sint_value:type, int, std::map> index;
 ```
 
+Sometimes these generic indexes based on `std::map` or `std::unordered_map`
+are inefficient, that's why there are specialized indexes for special cases:
+
+* The `value_index_bool` class can only index bool values.
+* The `value_index_small_uint` class can only index small unsigned integer
+  values (up to `uint16_t`). It uses a vector internally, so if all your
+  numbers are small and densly packed, this is very efficient. This is
+  especially useful for enum types.
+
+
 ## Error handling
 
 Many vtzero functions can throw exceptions. Most of them fall into two

@@ -148,18 +148,21 @@ TEST_CASE("external value index") {
     vtzero::value_index<vtzero::string_value_type, std::string, std::map> string_index{lbuilder};
     vtzero::value_index<vtzero::int_value_type, int, std::unordered_map> int_index{lbuilder};
     vtzero::value_index<vtzero::sint_value_type, int, std::unordered_map> sint_index{lbuilder};
+    vtzero::value_index_bool bool_index{lbuilder};
 
     const auto i01 = string_index("foo");
     const auto i02 = string_index("bar");
     const auto i03 = int_index(6);
     const auto i04 = sint_index(6);
-    const auto i05 = int_index(5);
+    const auto i05 = bool_index(true);
     const auto i06 = string_index(std::string{"foo"});
     const auto i07 = int_index(6);
     const auto i08 = sint_index(2);
     const auto i09 = sint_index(5);
     const auto i10 = sint_index(6);
     const auto i11 = string_index("baz");
+    const auto i12 = bool_index(false);
+    const auto i13 = bool_index(true);
 
     REQUIRE(i01 != i02);
     REQUIRE(i01 != i03);
@@ -171,6 +174,8 @@ TEST_CASE("external value index") {
     REQUIRE(i01 != i09);
     REQUIRE(i01 != i10);
     REQUIRE(i01 != i11);
+    REQUIRE(i01 != i12);
+    REQUIRE(i01 != i13);
 
     REQUIRE(i02 != i03);
     REQUIRE(i02 != i04);
@@ -181,6 +186,8 @@ TEST_CASE("external value index") {
     REQUIRE(i02 != i09);
     REQUIRE(i02 != i10);
     REQUIRE(i02 != i11);
+    REQUIRE(i02 != i12);
+    REQUIRE(i02 != i13);
 
     REQUIRE(i03 != i04);
     REQUIRE(i03 != i05);
@@ -190,6 +197,8 @@ TEST_CASE("external value index") {
     REQUIRE(i03 != i09);
     REQUIRE(i03 != i10);
     REQUIRE(i03 != i11);
+    REQUIRE(i03 != i12);
+    REQUIRE(i03 != i13);
 
     REQUIRE(i04 != i05);
     REQUIRE(i04 != i06);
@@ -198,6 +207,8 @@ TEST_CASE("external value index") {
     REQUIRE(i04 != i09);
     REQUIRE(i04 == i10);
     REQUIRE(i04 != i11);
+    REQUIRE(i04 != i12);
+    REQUIRE(i04 != i13);
 
     REQUIRE(i05 != i06);
     REQUIRE(i05 != i07);
@@ -205,26 +216,76 @@ TEST_CASE("external value index") {
     REQUIRE(i05 != i09);
     REQUIRE(i05 != i10);
     REQUIRE(i05 != i11);
+    REQUIRE(i05 != i12);
+    REQUIRE(i05 == i13);
 
     REQUIRE(i06 != i07);
     REQUIRE(i06 != i08);
     REQUIRE(i06 != i09);
     REQUIRE(i06 != i10);
     REQUIRE(i06 != i11);
+    REQUIRE(i06 != i12);
+    REQUIRE(i06 != i13);
 
     REQUIRE(i07 != i08);
     REQUIRE(i07 != i09);
     REQUIRE(i07 != i10);
     REQUIRE(i07 != i11);
+    REQUIRE(i07 != i12);
+    REQUIRE(i07 != i13);
 
     REQUIRE(i08 != i09);
     REQUIRE(i08 != i10);
     REQUIRE(i08 != i11);
+    REQUIRE(i08 != i12);
+    REQUIRE(i08 != i13);
 
     REQUIRE(i09 != i10);
     REQUIRE(i09 != i11);
+    REQUIRE(i09 != i12);
+    REQUIRE(i09 != i13);
 
     REQUIRE(i10 != i11);
+    REQUIRE(i10 != i12);
+    REQUIRE(i10 != i13);
+
+    REQUIRE(i11 != i12);
+    REQUIRE(i11 != i13);
+
+    REQUIRE(i12 != i13);
+}
+
+TEST_CASE("small unsigned int value index") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::value_index_small_uint index{lbuilder};
+
+    const auto i1 = index(12);
+    const auto i2 = index(4);
+    const auto i3 = index(0);
+    const auto i4 = index(100);
+    const auto i5 = index(4);
+    const auto i6 = index(12);
+
+    REQUIRE(i1 != i2);
+    REQUIRE(i1 != i3);
+    REQUIRE(i1 != i4);
+    REQUIRE(i1 != i5);
+    REQUIRE(i1 == i6);
+
+    REQUIRE(i2 != i3);
+    REQUIRE(i2 != i4);
+    REQUIRE(i2 == i5);
+    REQUIRE(i2 != i6);
+
+    REQUIRE(i3 != i4);
+    REQUIRE(i3 != i5);
+    REQUIRE(i3 != i6);
+
+    REQUIRE(i4 != i5);
+    REQUIRE(i4 != i6);
+
+    REQUIRE(i5 != i6);
 }
 
 TEST_CASE("add features using a key index") {

@@ -18,7 +18,9 @@ documentation.
 
 #include "builder.hpp"
 
+#include <array>
 #include <cstdint>
+#include <vector>
 
 namespace vtzero {
 
@@ -104,7 +106,7 @@ namespace vtzero {
          * Get the index value for the specified value. If the value was not in
          * the table, it will be added.
          *
-         * @param value The key to store.
+         * @param value The value to store.
          * @returns The index value of they value.
          */
         index_value operator()(const TExternal& value) {
@@ -118,6 +120,95 @@ namespace vtzero {
         }
 
     }; // class value_index
+
+    /**
+     * Used to store the mapping between bool property values and the index
+     * value in the table stored in a layer.
+     *
+     * This is the most efficient index if you know that your property values
+     * are bools.
+     */
+    class value_index_bool {
+
+        layer_builder& m_builder;
+
+        std::array<index_value, 2> m_index;
+
+    public:
+
+        /**
+         * Construct index.
+         *
+         * @param builder The layer we are building containing the value
+         *        table we are creating the index for.
+         */
+        explicit value_index_bool(layer_builder& builder) :
+            m_builder(builder) {
+        }
+
+        /**
+         * Get the index value for the specified value. If the value was not in
+         * the table, it will be added.
+         *
+         * @param value The value to store.
+         * @returns The index value of they value.
+         */
+        index_value operator()(const bool value) {
+            if (!m_index[value].valid()) {
+                m_index[value] = m_builder.add_value_without_dup_check(encoded_property_value{value});
+            }
+            return m_index[value];
+        }
+
+    }; // class value_index_bool
+
+    /**
+     * Used to store the mapping between small unsigned int property values and
+     * the index value in the table stored in a layer.
+     *
+     * This is the most efficient index if you know that your property values
+     * are densly used small unsigned integers. This is usually the case for
+     * enums.
+     *
+     * Interally a simple vector<index_value> is used and the value is used
+     * as is to look up the index value in the vector.
+     */
+    class value_index_small_uint {
+
+        layer_builder& m_builder;
+
+        std::vector<index_value> m_index;
+
+    public:
+
+        /**
+         * Construct index.
+         *
+         * @param builder The layer we are building containing the value
+         *        table we are creating the index for.
+         */
+        explicit value_index_small_uint(layer_builder& builder) :
+            m_builder(builder) {
+        }
+
+        /**
+         * Get the index value for the specified value. If the value was not in
+         * the table, it will be added.
+         *
+         * @param value The value to store.
+         * @returns The index value of they value.
+         */
+        index_value operator()(const uint16_t value) {
+            if (value >= m_index.size()) {
+                m_index.resize(value + 1);
+            }
+            if (!m_index[value].valid()) {
+                m_index[value] = m_builder.add_value_without_dup_check(encoded_property_value{value});
+            }
+            return m_index[value];
+        }
+
+    }; // class value_index_small_uint
 
     /**
      * Used to store the mapping between property values and the index value
@@ -151,7 +242,7 @@ namespace vtzero {
          * Get the index value for the specified value. If the value was not in
          * the table, it will be added.
          *
-         * @param value The key to store.
+         * @param value The value to store.
          * @returns The index value of they value.
          */
         index_value operator()(const encoded_property_value& value) {
