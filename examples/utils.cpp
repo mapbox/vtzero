@@ -1,3 +1,8 @@
+/*****************************************************************************
+
+  Utility functions for vtzero example programs.
+
+*****************************************************************************/
 
 #include "utils.hpp"
 
@@ -6,9 +11,19 @@
 #include <iostream>
 #include <limits>
 #include <stdexcept>
+#include <string>
 
+/**
+ * Read complete contents of a file into a string.
+ *
+ * The file is read in binary mode.
+ *
+ * @param filename The file name. Can be empty or "-" to read from STDIN.
+ * @returns a string with the contents of the file.
+ * @throws various exceptions if there is an error
+ */
 std::string read_file(const std::string& filename) {
-    if (filename.empty() || filename[0] == '-') {
+    if (filename.empty() || (filename.size() == 1 && filename[0] == '-')) {
         return std::string{std::istreambuf_iterator<char>(std::cin.rdbuf()),
                            std::istreambuf_iterator<char>()};
     }
@@ -27,6 +42,15 @@ std::string read_file(const std::string& filename) {
     return buffer;
 }
 
+/**
+ * Write contents of a buffer into a file.
+ *
+ * The file is written in binary mode.
+ *
+ * @param buffer The data to be written.
+ * @param filename The file name.
+ * @throws various exceptions if there is an error
+ */
 void write_data_to_file(const std::string& buffer, const std::string& filename) {
     std::ofstream stream{filename, std::ios_base::out | std::ios_base::binary};
     if (!stream) {
@@ -40,6 +64,16 @@ void write_data_to_file(const std::string& buffer, const std::string& filename) 
     stream.close();
 }
 
+/**
+ * Get a specific layer from a vector tile. The layer can be specified as a
+ * number n in which case the nth layer in this tile is returned. Or it can
+ * be specified as text, in which case the layer with that name is returned.
+ *
+ * Calls exit(1) if there is an error.
+ *
+ * @param tile The vector tile.
+ * @param layer_name_or_num specifies the layer.
+ */
 vtzero::layer get_layer(const vtzero::vector_tile& tile, const std::string& layer_name_or_num) {
     vtzero::layer layer;
     char* str_end = nullptr;
