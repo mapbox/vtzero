@@ -14,9 +14,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 project(vtzero)
 
-set(VTZERO_VERSION_MAJOR 0)
+set(VTZERO_VERSION_MAJOR 1)
 set(VTZERO_VERSION_MINOR 0)
-set(VTZERO_VERSION_PATCH 1)
+set(VTZERO_VERSION_PATCH 0)
 
 set(VTZERO_VERSION
     "${VTZERO_VERSION_MAJOR}.${VTZERO_VERSION_MINOR}.${VTZERO_VERSION_PATCH}")
@@ -52,7 +52,7 @@ endif()
 #
 #-----------------------------------------------------------------------------
 
-find_package(Protozero 1.5.3 REQUIRED)
+find_package(Protozero 1.6.0 REQUIRED)
 
 include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIR})
 
