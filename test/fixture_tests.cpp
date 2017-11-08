@@ -82,7 +82,7 @@ struct polygon_handler {
         data.back().push_back(point);
     }
 
-    void ring_end(bool /*dummy*/) const noexcept {
+    void ring_end(vtzero::ring_type /*dummy*/) const noexcept {
     }
 
 }; // struct polygon_handler
@@ -126,7 +126,7 @@ struct geom_handler {
         line_data.back().push_back(point);
     }
 
-    void ring_end(bool /*dummy*/) const noexcept {
+    void ring_end(vtzero::ring_type /*dummy*/) const noexcept {
     }
 
 }; // struct geom_handler

@@ -23,7 +23,7 @@ public:
         value += 100;
     }
 
-    void ring_end(const bool /*is_outer*/) noexcept {
+    void ring_end(vtzero::ring_type /*is_outer*/) noexcept {
         value += 10000;
     }
 

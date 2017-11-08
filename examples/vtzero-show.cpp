@@ -84,17 +84,22 @@ public:
         output += ',';
     }
 
-    void ring_end(const bool is_outer) {
+    void ring_end(const vtzero::ring_type rt) {
         if (output.empty()) {
             return;
         }
         if (output.back() == ',') {
             output.back() = ')';
         }
-        if (is_outer) {
-            output += "[OUTER]\n";
-        } else {
-            output += "[INNER]\n";
+        switch (rt) {
+            case vtzero::ring_type::outer:
+                output += "[OUTER]\n";
+                break;
+            case vtzero::ring_type::inner:
+                output += "[INNER]\n";
+                break;
+            default:
+                output += "[INVALID]\n";
         }
         std::cout << output;
     }

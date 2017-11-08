@@ -47,6 +47,16 @@ namespace vtzero {
 
     }; // struct point
 
+    /**
+     * Type of a polygon ring. This can either be "outer", "inner", or
+     * "invalid". Invalid is used when the area of the ring is 0.
+     */
+    enum class ring_type {
+        outer = 0,
+        inner = 1,
+        invalid = 2
+    }; // enum class ring_type
+
     /// Helper function to create a point from any type that has members x and y
     template <typename T>
     point create_point(T p) noexcept {
@@ -357,7 +367,8 @@ namespace vtzero {
 
                     std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
 
-                    std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0);
+                    std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0 ? ring_type::outer :
+                                                                      sum < 0 ? ring_type::inner : ring_type::invalid);
                 }
 
                 return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
