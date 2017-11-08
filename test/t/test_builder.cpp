@@ -112,8 +112,8 @@ TEST_CASE("Create layer and add keys/values") {
     const auto ki2 = lbuilder.add_key("key2");
     const auto ki3 = lbuilder.add_key("key1");
 
-    REQUIRE(ki1.value() != ki2.value());
-    REQUIRE(ki1.value() == ki3.value());
+    REQUIRE(ki1 != ki2);
+    REQUIRE(ki1 == ki3);
 
     const auto vi1 = lbuilder.add_value_without_dup_check(vtzero::encoded_property_value{"value1"});
     vtzero::encoded_property_value value2{"value2"};
@@ -126,14 +126,14 @@ TEST_CASE("Create layer and add keys/values") {
     vtzero::encoded_property_value nineteen{19};
     const auto vi7 = lbuilder.add_value(vtzero::property_value{nineteen.data()});
 
-    REQUIRE(vi1.value() != vi2.value());
-    REQUIRE(vi1.value() == vi3.value());
-    REQUIRE(vi1.value() != vi4.value());
-    REQUIRE(vi1.value() != vi5.value());
-    REQUIRE(vi1.value() != vi6.value());
-    REQUIRE(vi4.value() != vi5.value());
-    REQUIRE(vi4.value() != vi6.value());
-    REQUIRE(vi4.value() == vi7.value());
+    REQUIRE(vi1 != vi2);
+    REQUIRE(vi1 == vi3);
+    REQUIRE(vi1 != vi4);
+    REQUIRE(vi1 != vi5);
+    REQUIRE(vi1 != vi6);
+    REQUIRE(vi4 != vi5);
+    REQUIRE(vi4 != vi6);
+    REQUIRE(vi4 == vi7);
 }
 
 TEST_CASE("Point builder") {

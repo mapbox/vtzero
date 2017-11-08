@@ -317,6 +317,16 @@ namespace vtzero {
 
     }; // class index_value
 
+    /// Index values are equal if their values are.
+    inline bool operator==(const index_value lhs, const index_value rhs) noexcept {
+        return lhs.value() == rhs.value();
+    }
+
+    /// Index values are not equal if their values are not equal.
+    inline bool operator!=(const index_value lhs, const index_value rhs) noexcept {
+        return lhs.value() != rhs.value();
+    }
+
     /**
      * This class holds two index_values, one for a key and one for a value.
      */
