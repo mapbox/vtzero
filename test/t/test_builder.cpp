@@ -193,10 +193,30 @@ TEST_CASE("Rollback feature") {
         fbuilder.commit();
     }
 
-    {
+    { // immediate rollback
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(2);
+        fbuilder.rollback();
+    }
+
+    { // rollback after setting id
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(2);
+        fbuilder.rollback();
+    }
+
+    { // rollback after geometry
         vtzero::point_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(2);
         fbuilder.add_point(20, 20);
+        fbuilder.rollback();
+    }
+
+    { // rollback after properties
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(2);
+        fbuilder.add_point(20, 20);
+        fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
         fbuilder.rollback();
     }
 
