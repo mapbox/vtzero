@@ -24,6 +24,7 @@ set(TEST_SOURCES builder
                  geometry_linestring
                  geometry_point
                  geometry_polygon
+                 index
                  layer
                  output
                  point
