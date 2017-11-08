@@ -8,6 +8,8 @@
 
 set(TEST_FILE "${CMAKE_SOURCE_DIR}/test/data/mapbox-streets-v6-14-8714-8017.mvt")
 
+add_executable(vtzero-check vtzero-check.cpp utils.cpp)
+
 add_executable(vtzero-create vtzero-create.cpp utils.cpp)
 
 add_executable(vtzero-streets vtzero-streets.cpp utils.cpp)
