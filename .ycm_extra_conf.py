@@ -37,6 +37,7 @@ flags = [
 '-I%s/../protozero/include' % basedir,
 '-I%s/include' % basedir,
 '-I%s/test/include' % basedir,
+'-I%s/test/catch' % basedir,
 ]
 
 # youcompleteme is calling this function to get flags
