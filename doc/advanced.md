@@ -18,6 +18,27 @@ clearly says that you can not have two layers with the same
 name in a vector tile. For performance reasons this is neither checked on
 reading nor on writing.
 
+## The `create_vtzero_point` customization point
+
+The vtzero builder classes have several functions which take a `vtzero::point`
+as argument. But chances are that you are using a different point type in your
+code. That's why these functions have overloads taking any type `TPoint` that
+can be converted to a `vtzero::point`. This conversion is done by calling the
+function `create_vtzero_point()`. Vtzero supplies a version of this function
+which will work with any type with members `x` and `y`:
+
+```cpp
+template <typename TPoint>
+vtzero::point create_vtzero_point(TPoint p) noexcept {
+    return {p.x, p.y};
+}
+```
+
+You can define your own overload of that function taking your own point type
+as parameter and returning a `vtzero::point`. Vtzero will find your function
+using [ADL](http://en.cppreference.com/w/cpp/language/adl) which magically
+makes the vtzero builders work with your point type.
+
 ## Protection against huge memory use
 
 When decoding a vector tile we got from an unknown source, we don't know what

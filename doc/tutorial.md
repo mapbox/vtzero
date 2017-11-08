@@ -616,8 +616,10 @@ the geometry type.
 Simply call `add_point()` to set the point geometry. There are three different
 overloads for this function. One takes a `vtzero::point`, one takes two
 `uint32_t`s with the x and y coordinates and one takes any type `T` that can
-be converted to a `vtzero::point` using the `create_point` function. This
-templated function works on any type that has `x` and `y` members.
+be converted to a `vtzero::point` using the `create_vtzero_point` function.
+This templated function works on any type that has `x` and `y` members and
+you can create your own overload of this function. See the
+[advanced.md](advanced topics documentation).
 
 ### Adding a multipoint geometry
 

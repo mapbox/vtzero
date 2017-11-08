@@ -537,16 +537,16 @@ namespace vtzero {
         /**
          * Add a single point as the geometry to this feature.
          *
-         * @tparam T A type that can be converted to vtzero::point using the
-         *         create_point function.
+         * @tparam TPoint A type that can be converted to vtzero::point using
+         *         the create_vtzero_point function.
          * @param p The point to add.
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
-        template <typename T>
-        void add_point(T p) {
-            add_point(create_point(p));
+        template <typename TPoint>
+        void add_point(TPoint&& p) {
+            add_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
         /**
@@ -613,8 +613,8 @@ namespace vtzero {
         /**
          * Set a point in the multipoint geometry.
          *
-         * @tparam T A type that can be converted to vtzero::point using the
-         *         create_point function.
+         * @tparam TPoint A type that can be converted to vtzero::point using
+         *         the create_vtzero_point function.
          * @param p The point to add.
          *
          * @pre There must have been less than *count* calls to set_point()
@@ -623,9 +623,9 @@ namespace vtzero {
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
-        template <typename T>
-        void set_point(T p) {
-            set_point(create_point(p));
+        template <typename TPoint>
+        void set_point(TPoint&& p) {
+            set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
         /**
@@ -816,8 +816,8 @@ namespace vtzero {
          * Set a point in the multilinestring geometry opened with
          * add_linestring().
          *
-         * @tparam T A type that can be converted to vtzero::point using the
-         *         create_point function.
+         * @tparam TPoint A type that can be converted to vtzero::point using
+         *         the create_vtzero_point function.
          * @param p The point to add.
          *
          * @pre There must have been less than *count* calls to set_point()
@@ -826,9 +826,9 @@ namespace vtzero {
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
-        template <typename T>
-        void set_point(T p) {
-            set_point(create_point(p));
+        template <typename TPoint>
+        void set_point(TPoint&& p) {
+            set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
         /**
@@ -1027,8 +1027,8 @@ namespace vtzero {
         /**
          * Set a point in the ring opened with add_ring().
          *
-         * @tparam T A type that can be converted to vtzero::point using the
-         *         create_point function.
+         * @tparam TPoint A type that can be converted to vtzero::point using
+         *         the create_vtzero_point function.
          * @param p The point to add.
          *
          * @pre There must have been less than *count* calls to set_point()
@@ -1037,9 +1037,9 @@ namespace vtzero {
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
-        template <typename T>
-        void set_point(T p) {
-            set_point(create_point(p));
+        template <typename TPoint>
+        void set_point(TPoint&& p) {
+            set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
         /**
@@ -1083,7 +1083,7 @@ namespace vtzero {
         void add_ring(TIter begin, TIter end) {
             add_ring(std::distance(begin, end));
             for (; begin != end; ++begin) {
-                set_point(create_point(*begin));
+                set_point(create_vtzero_point(*begin));
             }
         }
 

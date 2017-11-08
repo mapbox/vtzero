@@ -32,20 +32,10 @@ struct mypoint {
     int64_t p2;
 };
 
-/*inline vtzero::point create_point(mypoint p) noexcept {
+inline vtzero::point create_vtzero_point(mypoint p) noexcept {
     return {static_cast<int32_t>(p.p1),
             static_cast<int32_t>(p.p2)};
-}*/
-
-namespace vtzero {
-
-    template <>
-    point create_point<::mypoint>(::mypoint p) noexcept {
-        return {static_cast<int32_t>(p.p1),
-                static_cast<int32_t>(p.p2)};
-    }
-
-} // namespace vtzero
+}
 
 TEST_CASE("Point builder") {
     vtzero::tile_builder tbuilder;
