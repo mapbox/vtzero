@@ -18,6 +18,7 @@ include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/catch")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set(TEST_SOURCES builder
+                 builder_point
                  exceptions
                  feature
                  geometry

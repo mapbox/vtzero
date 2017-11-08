@@ -2,13 +2,11 @@
 #include <test.hpp>
 
 #include <vtzero/builder.hpp>
-#include <vtzero/geometry.hpp>
 #include <vtzero/index.hpp>
 
 #include <cstdint>
 #include <string>
 #include <type_traits>
-#include <vector>
 
 template <typename T>
 struct movable_not_copyable {
@@ -23,43 +21,6 @@ static_assert(movable_not_copyable<vtzero::point_feature_builder>::value, "point
 static_assert(movable_not_copyable<vtzero::linestring_feature_builder>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::polygon_feature_builder>::value, "polygon_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::geometry_feature_builder>::value, "geometry_feature_builder should be nothrow movable, but not copyable");
-
-struct point_handler {
-
-    std::vector<vtzero::point> data;
-
-    void points_begin(uint32_t count) {
-        data.reserve(count);
-    }
-
-    void points_point(const vtzero::point point) {
-        data.push_back(point);
-    }
-
-    void points_end() const noexcept {
-    }
-
-};
-
-struct mypoint {
-    int64_t p1;
-    int64_t p2;
-};
-
-/*inline vtzero::point create_point(mypoint p) noexcept {
-    return {static_cast<int32_t>(p.p1),
-            static_cast<int32_t>(p.p2)};
-}*/
-
-namespace vtzero {
-
-    template <>
-    point create_point<::mypoint>(::mypoint p) noexcept {
-        return {static_cast<int32_t>(p.p1),
-                static_cast<int32_t>(p.p2)};
-    }
-
-} // namespace vtzero
 
 TEST_CASE("Create tile from existing layers") {
     const auto buffer = load_test_tile();
@@ -136,50 +97,86 @@ TEST_CASE("Create layer and add keys/values") {
     REQUIRE(vi4 == vi7);
 }
 
-TEST_CASE("Point builder") {
+TEST_CASE("Committing a feature succeeds after a geometry was added") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
-    vtzero::point_feature_builder fbuilder{lbuilder};
-    fbuilder.set_id(17);
+    { // explicit commit after geometry
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(1);
+        fbuilder.add_point(10, 10);
+        fbuilder.commit();
+    }
 
-    SECTION("add point using coordinates / property using key/value") {
-        fbuilder.add_point(10, 20);
+    { // explicit commit after properties
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(2);
+        fbuilder.add_point(10, 10);
+        fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
+        fbuilder.commit();
+    }
+
+    { // implicit commit after geometry
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(3);
+        fbuilder.add_point(10, 10);
+    }
+
+    { // implicit commit after properties
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(4);
+        fbuilder.add_point(10, 10);
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
-    SECTION("add point using vtzero::point / property using key/value") {
-        fbuilder.add_point(vtzero::point{10, 20});
-        fbuilder.add_property("foo", vtzero::encoded_property_value{22});
+    { // multiple commits is okay
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(5);
+        fbuilder.add_point(10, 10);
+        fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
+        fbuilder.commit();
+        fbuilder.commit();
     }
-
-    SECTION("add point using mypoint / property using property") {
-        vtzero::encoded_property_value pv{3.5};
-        vtzero::property p{"foo", vtzero::property_value{pv.data()}};
-        fbuilder.add_point(mypoint{10, 20});
-        fbuilder.add_property(p);
-    }
-
-    fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
 
     vtzero::vector_tile tile{data};
-
     auto layer = tile.next_layer();
-    REQUIRE(layer.name() == "test");
-    REQUIRE(layer.version() == 2);
-    REQUIRE(layer.extent() == 4096);
-    REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
-    REQUIRE(feature.id() == 17);
+    uint64_t n = 1;
+    while (auto feature = layer.next_feature()) {
+        REQUIRE(feature.id() == n++);
+    }
+}
 
-    point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), handler);
+TEST_CASE("Committing a feature fails with assert if no geometry was added") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
 
-    std::vector<vtzero::point> result = {{10, 20}};
-    REQUIRE(handler.data == result);
+    SECTION("explicit immediate commit") {
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        REQUIRE_ASSERT(fbuilder.commit());
+    }
+
+    SECTION("explicit commit after setting id") {
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(2);
+        REQUIRE_ASSERT(fbuilder.commit());
+    }
+
+    SECTION("implicit immediate commit") {
+        const auto lambda = [&](){
+            vtzero::point_feature_builder fbuilder{lbuilder};
+        };
+        REQUIRE_ASSERT(lambda());
+    }
+    SECTION("implicit commit after setting id") {
+        const auto lambda = [&](){
+            vtzero::point_feature_builder fbuilder{lbuilder};
+            fbuilder.set_id(2);
+        };
+        REQUIRE_ASSERT(lambda());
+    }
 }
 
 TEST_CASE("Rollback feature") {
@@ -239,5 +236,16 @@ TEST_CASE("Rollback feature") {
 
     feature = layer.next_feature();
     REQUIRE_FALSE(feature);
+}
+
+TEST_CASE("Rolling back an already committed feature fails with asserts") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+
+    vtzero::point_feature_builder fbuilder{lbuilder};
+    fbuilder.set_id(1);
+    fbuilder.add_point(10, 10);
+    fbuilder.commit();
+    REQUIRE_THROWS_AS(fbuilder.rollback(), const assert_error&);
 }
 

@@ -414,8 +414,9 @@ namespace vtzero {
          * @param id The ID.
          */
         void set_id(uint64_t id) {
-            vtzero_assert(!m_pbf_geometry.valid());
-            vtzero_assert(!m_pbf_tags.valid());
+            vtzero_assert(!m_pbf_geometry.valid() &&
+                          !m_pbf_tags.valid() &&
+                          "Call set_id() before setting the geometry or adding properties");
             m_feature_writer.add_uint64(detail::pbf_feature::id, id);
         }
 
@@ -442,10 +443,14 @@ namespace vtzero {
          * called.
          */
         void commit() {
-            if (m_pbf_geometry.valid()) {
-                m_pbf_geometry.commit();
+            if (m_feature_writer.valid()) {
+                vtzero_assert_in_noexcept_function((m_pbf_geometry.valid() || m_pbf_tags.valid()) &&
+                                                   "Can not call commit before geometry was added");
+                if (m_pbf_geometry.valid()) {
+                    m_pbf_geometry.commit();
+                }
+                do_commit();
             }
-            do_commit();
         }
 
         /**
@@ -455,6 +460,8 @@ namespace vtzero {
          * it.
          */
         void rollback() {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call rollback() after commit()");
             if (m_pbf_geometry.valid()) {
                 m_pbf_geometry.commit();
             }
@@ -505,13 +512,13 @@ namespace vtzero {
          *      this method.
          */
         void add_point(const point p) {
-            vtzero_assert(!m_pbf_geometry.valid());
-            vtzero_assert(!m_pbf_tags.valid());
+            vtzero_assert(!m_pbf_geometry.valid() &&
+                          !m_pbf_tags.valid() &&
+                          "add_point() can only be called once");
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
             m_pbf_geometry.add_element(detail::command_move_to(1));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
-            m_pbf_geometry.commit();
         }
 
         /**
@@ -554,9 +561,12 @@ namespace vtzero {
          *      this method.
          */
         void add_points(uint32_t count) {
-            vtzero_assert(!m_pbf_geometry.valid());
-            vtzero_assert(!m_pbf_tags.valid());
-            vtzero_assert(count > 0);
+            vtzero_assert(!m_pbf_tags.valid() &&
+                          "add_points() has to be called before properties are added");
+            if (m_pbf_geometry.valid()) {
+                m_pbf_geometry.commit();
+            }
+            vtzero_assert(count > 0 && "add_points() must be called with count > 0");
             m_num_points.set(count);
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
             m_pbf_geometry.add_element(detail::command_move_to(count));
@@ -574,8 +584,10 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(m_pbf_geometry.valid());
-            vtzero_assert(!m_pbf_tags.valid() && "Call add_points() before set_point()");
+            vtzero_assert(m_pbf_geometry.valid() &&
+                          "call add_points() before set_point()");
+            vtzero_assert(!m_pbf_tags.valid() &&
+                          "set_point() has to be called before properties are added");
             m_num_points.decrement();
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
             m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
@@ -637,7 +649,6 @@ namespace vtzero {
             for (; begin != end; ++begin) {
                 set_point(*begin);
             }
-            m_pbf_geometry.commit();
         }
 
         /**
@@ -664,7 +675,6 @@ namespace vtzero {
 #endif
             }
             vtzero_assert(count == 0 && "Iterators must yield exactly count points");
-            m_pbf_geometry.commit();
         }
 
         /**
@@ -689,7 +699,6 @@ namespace vtzero {
             for (const auto& element : container) {
                 set_point(element);
             }
-            m_pbf_geometry.commit();
         }
 
     }; // class point_feature_builder
@@ -743,8 +752,9 @@ namespace vtzero {
          *      this method.
          */
         void add_linestring(const uint32_t count) {
-            vtzero_assert(!m_pbf_tags.valid());
-            vtzero_assert(count > 1);
+            vtzero_assert(!m_pbf_tags.valid() &&
+                          "add_linestring() has to be called before properties are added");
+            vtzero_assert(count > 1 && "add_linestring() must be called with count > 1");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -766,8 +776,10 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(!m_pbf_tags.valid());
-            vtzero_assert(m_pbf_geometry.valid());
+            vtzero_assert(m_pbf_geometry.valid() &&
+                          "call add_linestring() before set_point()");
+            vtzero_assert(!m_pbf_tags.valid() &&
+                          "set_point() has to be called before properties are added");
             m_num_points.decrement();
             if (m_start_line) {
                 m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -948,8 +960,9 @@ namespace vtzero {
          *      this method.
          */
         void add_ring(const uint32_t count) {
-            vtzero_assert(!m_pbf_tags.valid());
-            vtzero_assert(count > 3);
+            vtzero_assert(!m_pbf_tags.valid() &&
+                          "add_ring() has to be called before properties are added");
+            vtzero_assert(count > 3 && "add_ring() must be called with count > 3");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -970,8 +983,10 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(m_pbf_geometry.valid());
-            vtzero_assert(!m_pbf_tags.valid() && "Call add_ring() before add_point()");
+            vtzero_assert(m_pbf_geometry.valid() &&
+                          "call add_ring() before set_point()");
+            vtzero_assert(!m_pbf_tags.valid() &&
+                          "set_point() has to be called before properties are added");
             m_num_points.decrement();
             if (m_start_ring) {
                 m_first_point = p;
@@ -1039,9 +1054,12 @@ namespace vtzero {
          *      this method.
          */
         void close_ring() {
-            vtzero_assert(m_pbf_geometry.valid());
-            vtzero_assert(!m_pbf_tags.valid());
-            vtzero_assert(m_num_points.value() == 1);
+            vtzero_assert(m_pbf_geometry.valid() &&
+                          "Call add_ring() before you can call close_ring()");
+            vtzero_assert(!m_pbf_tags.valid() &&
+                          "close_ring() has to be called before properties are added");
+            vtzero_assert(m_num_points.value() == 1 &&
+                          "wrong number of points in ring");
             m_pbf_geometry.add_element(detail::command_close_path(1));
             m_num_points.decrement();
         }
