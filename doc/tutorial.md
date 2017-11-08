@@ -377,11 +377,10 @@ others must be called with a geometry of the specified type and will only
 decode that type.
 
 For all the decoder functions the first parameter is the geometry (as returned
-by `feature.geometry()`), the second parameter decides whether the decoder
-should work in *strict mode* where more checks are performed (see below). The
-last parameter is a *handler* object that you must implement. The decoder
-function will call certain callbacks on this object that give you part of the
-geometry data which allows you to use this data in any way you like.
+by `feature.geometry()`), the second parameter is a *handler* object that you
+must implement. The decoder function will call certain callbacks on this object
+that give you part of the geometry data which allows you to use this data in
+any way you like.
 
 The handler for `decode_point_geometry()` must implement the following
 functions:
@@ -457,25 +456,6 @@ struct linestring_handler {
 Note that the `count` given to the `linestring_begin()` method is used here to
 reserve memory. This is potentially problematic if the count is large. Please
 keep this in mind.
-
-#### Strict interpretation of geometry encoding
-
-All the geometry decoder functions have a boolean parameter called `strict`.
-In strict mode the decoder does some additional checks:
-
-* Segments of zero-length between two consecutive points in a linestring or
-  ring are not allowed. In other words: Two consecutive points must not be
-  identical.
-* Rings must contain at least four points.
-* Rings must not have zero area.
-
-If those checks fail, a `geometry_exception` is thrown. In non-strict mode
-these conditions are ignored.
-
-See the [chapter 4.3.3.2](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#4332-lineto-command)
-and [4.3.4.4](https://github.com/mapbox/vector-tile-spec/tree/master/2.1#4344-polygon-geometry-type)
-in the [vector tile specification](https://github.com/mapbox/vector-tile-spec/tree/master/2.1)
-for details.
 
 ### Accessing the key/value lookup tables in a layer
 

@@ -167,7 +167,7 @@ TEST_CASE("MVT test 002: Tile with single point feature without id") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
     point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), true, handler);
+    vtzero::decode_point_geometry(feature.geometry(), handler);
 
     std::vector<vtzero::point> expected = {{25, 17}};
     REQUIRE(handler.data == expected);
@@ -330,13 +330,13 @@ TEST_CASE("MVT test 017: Valid point geometry") {
 
     SECTION("decode_point_geometry") {
         point_handler handler;
-        vtzero::decode_point_geometry(feature.geometry(), true, handler);
+        vtzero::decode_point_geometry(feature.geometry(), handler);
         REQUIRE(handler.data == expected);
     }
 
     SECTION("decode_geometry") {
         geom_handler handler;
-        vtzero::decode_geometry(feature.geometry(), true, handler);
+        vtzero::decode_geometry(feature.geometry(), handler);
         REQUIRE(handler.point_data == expected);
     }
 }
@@ -353,13 +353,13 @@ TEST_CASE("MVT test 018: Valid linestring geometry") {
 
     SECTION("decode_linestring_geometry") {
         linestring_handler handler;
-        vtzero::decode_linestring_geometry(feature.geometry(), true, handler);
+        vtzero::decode_linestring_geometry(feature.geometry(), handler);
         REQUIRE(handler.data == expected);
     }
 
     SECTION("decode_geometry") {
         geom_handler handler;
-        vtzero::decode_geometry(feature.geometry(), true, handler);
+        vtzero::decode_geometry(feature.geometry(), handler);
         REQUIRE(handler.line_data == expected);
     }
 }
@@ -376,13 +376,13 @@ TEST_CASE("MVT test 019: Valid polygon geometry") {
 
     SECTION("deocode_polygon_geometry") {
         polygon_handler handler;
-        vtzero::decode_polygon_geometry(feature.geometry(), true, handler);
+        vtzero::decode_polygon_geometry(feature.geometry(), handler);
         REQUIRE(handler.data == expected);
     }
 
     SECTION("deocode_geometry") {
         geom_handler handler;
-        vtzero::decode_geometry(feature.geometry(), true, handler);
+        vtzero::decode_geometry(feature.geometry(), handler);
         REQUIRE(handler.line_data == expected);
     }
 }
@@ -396,7 +396,7 @@ TEST_CASE("MVT test 020: Valid multipoint geometry") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
     point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), true, handler);
+    vtzero::decode_point_geometry(feature.geometry(), handler);
 
     const std::vector<vtzero::point> expected = {{5, 7}, {3,2}};
 
@@ -412,7 +412,7 @@ TEST_CASE("MVT test 021: Valid multilinestring geometry") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
 
     linestring_handler handler;
-    vtzero::decode_linestring_geometry(feature.geometry(), true, handler);
+    vtzero::decode_linestring_geometry(feature.geometry(), handler);
 
     const std::vector<std::vector<vtzero::point>> expected = {{{2, 2}, {2,10}, {10, 10}}, {{1,1}, {3, 5}}};
 
@@ -428,7 +428,7 @@ TEST_CASE("MVT test 022: Valid multipolygon geometry") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
 
     polygon_handler handler;
-    vtzero::decode_polygon_geometry(feature.geometry(), false, handler);
+    vtzero::decode_polygon_geometry(feature.geometry(), handler);
 
     const std::vector<std::vector<vtzero::point>> expected = {
         {{0, 0}, {10, 0}, {10, 10}, {0,10}, {0, 0}},
@@ -659,7 +659,7 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE(feature.empty());
 
-    REQUIRE_THROWS_AS(vtzero::decode_geometry(feature.geometry(), true, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(feature.geometry(), geom_handler{}), const vtzero::geometry_exception&);
 }
 
 TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the layer.") {
@@ -735,6 +735,6 @@ TEST_CASE("MVT test 044: Geometry field begins with a ClosePath command, which i
     REQUIRE(feature);
 
     auto geometry = feature.geometry();
-    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, false, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
 }
 

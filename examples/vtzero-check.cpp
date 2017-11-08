@@ -197,7 +197,7 @@ int main(int argc, char* argv[]) {
             feature_num = 0;
             while (auto feature = layer.next_feature()) {
                 CheckGeomHandler handler{layer.extent(), layer_num, feature_num};
-                vtzero::decode_geometry(feature.geometry(), false, handler);
+                vtzero::decode_geometry(feature.geometry(), handler);
                 ++feature_num;
             }
             if (feature_num == 0) {

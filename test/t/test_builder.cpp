@@ -178,7 +178,7 @@ TEST_CASE("Point builder") {
     REQUIRE(feature.id() == 17);
 
     point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), true, handler);
+    vtzero::decode_point_geometry(feature.geometry(), handler);
 
     std::vector<vtzero::point> result = {{10, 20}};
     REQUIRE(handler.data == result);

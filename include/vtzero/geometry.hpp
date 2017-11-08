@@ -165,16 +165,12 @@ namespace vtzero {
              */
             uint32_t m_count = 0;
 
-            /// In strict mode some extra tests are done.
-            bool m_strict = true;
-
         public:
 
-            geometry_decoder(iterator_type begin, iterator_type end, bool strict, std::size_t max) :
+            geometry_decoder(iterator_type begin, iterator_type end, std::size_t max) :
                 m_it(begin),
                 m_end(end),
-                m_max_count(static_cast<uint32_t>(max)),
-                m_strict(strict) {
+                m_max_count(static_cast<uint32_t>(max)) {
                 vtzero_assert(max <= detail::max_command_count());
             }
 
@@ -229,8 +225,6 @@ namespace vtzero {
                 int64_t x = protozero::decode_zigzag32(*m_it++);
                 int64_t y = protozero::decode_zigzag32(*m_it++);
 
-                const auto last_cursor = m_cursor;
-
                 // x and y are int64_t so this addition can never overflow
                 x += m_cursor.x;
                 y += m_cursor.y;
@@ -240,11 +234,6 @@ namespace vtzero {
                 // what happens to invalid tiles here.
                 m_cursor.x = static_cast<int32_t>(x);
                 m_cursor.y = static_cast<int32_t>(y);
-
-                // spec 4.3.3.2 "For any pair of (dX, dY) the dX and dY MUST NOT both be 0."
-                if (m_strict && m_command_id == command_line_to() && m_cursor == last_cursor) {
-                    throw geometry_exception{"found consecutive equal points (spec 4.3.3.2) (strict mode)"};
-                }
 
                 --m_count;
 
@@ -330,11 +319,6 @@ namespace vtzero {
                         throw geometry_exception{"expected LineTo command (spec 4.3.4.4)"};
                     }
 
-                    // spec 4.3.4.4 "with a command count greater than 1"
-                    if (m_strict && count() <= 1) {
-                        throw geometry_exception{"LineTo command count is not greater than 1 (spec 4.3.4.4) (strict mode)"};
-                    }
-
                     std::forward<TGeomHandler>(geom_handler).ring_begin(count() + 2);
 
                     std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
@@ -351,19 +335,7 @@ namespace vtzero {
                         throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
                     }
 
-                    // spec 4.3.4.4 "The position of the cursor before calling the
-                    // ClosePath command of a linear ring SHALL NOT repeat the same
-                    // position as the first point in the linear ring"
-                    if (m_strict && last_point == start_point) {
-                        throw geometry_exception{"duplicate last point of ring (strict mode)"};
-                    }
-
                     sum += detail::det(last_point, start_point);
-
-                    // spec 4.3.4.4 "A linear ring SHOULD NOT have an area ... equal to zero"
-                    if (m_strict && sum == 0) {
-                        throw geometry_exception{"area of ring is zero (strict mode)"};
-                    }
 
                     std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
 
@@ -383,15 +355,14 @@ namespace vtzero {
      *
      * @tparam TGeomHandler Handler class. See tutorial for details.
      * @param geometry The geometry as returned by feature.geometry().
-     * @param strict Use strict interpretation of geometry encoding.
      * @param geom_handler An object of TGeomHandler.
      * @throws geometry_error If there is a problem with the geometry.
      * @pre Geometry must be a point geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_point_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_point_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POINT);
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
     }
 
@@ -400,7 +371,6 @@ namespace vtzero {
      *
      * @tparam TGeomHandler Handler class. See tutorial for details.
      * @param geometry The geometry as returned by feature.geometry().
-     * @param strict Use strict interpretation of geometry encoding.
      * @param geom_handler An object of TGeomHandler.
      * @returns whatever geom_handler.result() returns if that function exists,
      *          void otherwise
@@ -408,9 +378,9 @@ namespace vtzero {
      * @pre Geometry must be a linestring geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::LINESTRING);
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
     }
 
@@ -419,7 +389,6 @@ namespace vtzero {
      *
      * @tparam TGeomHandler Handler class. See tutorial for details.
      * @param geometry The geometry as returned by feature.geometry().
-     * @param strict Use strict interpretation of geometry encoding.
      * @param geom_handler An object of TGeomHandler.
      * @returns whatever geom_handler.result() returns if that function exists,
      *          void otherwise
@@ -427,9 +396,9 @@ namespace vtzero {
      * @pre Geometry must be a polygon geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POLYGON);
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
     }
 
@@ -438,7 +407,6 @@ namespace vtzero {
      *
      * @tparam TGeomHandler Handler class. See tutorial for details.
      * @param geometry The geometry as returned by feature.geometry().
-     * @param strict Use strict interpretation of geometry encoding.
      * @param geom_handler An object of TGeomHandler.
      * @returns whatever geom_handler.result() returns if that function exists,
      *          void otherwise
@@ -446,8 +414,8 @@ namespace vtzero {
      *                        a problem with the geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_geometry(const geometry geometry, bool strict, TGeomHandler&& geom_handler) {
-        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), strict, geometry.data().size() / 2};
+    typename detail::get_result<TGeomHandler>::type decode_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
+        detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         switch (geometry.type()) {
             case GeomType::POINT:
                 return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));

@@ -22,7 +22,6 @@ static void print_help() {
               << "Options:\n"
               << "  -h, --help         This help message\n"
               << "  -l, --layers       Show layer overview with feature count\n"
-              << "  -s, --strict       Use strict geometry parser\n"
               << "  -t, --tables       Also print key/value tables\n"
               << "  -T, --value-types  Also show value types\n";
 }
@@ -125,7 +124,7 @@ struct print_value {
 
 }; // struct print_value
 
-static void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
+static void print_layer(vtzero::layer& layer, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
     std::cout << "=============================================================\n"
               << "layer: " << layer_num << '\n'
               << "  name: " << std::string(layer.name()) << '\n'
@@ -162,7 +161,7 @@ static void print_layer(vtzero::layer& layer, bool strict, bool print_tables, bo
         }
         std::cout << "    geomtype: " << vtzero::geom_type_name(feature.geometry_type()) << '\n'
                   << "    geometry:\n";
-        vtzero::decode_geometry(feature.geometry(), strict, geom_handler{});
+        vtzero::decode_geometry(feature.geometry(), geom_handler{});
         std::cout << "    properties:\n";
         while (auto property = feature.next_property()) {
             std::cout << "      " << property.key() << '=';
@@ -183,21 +182,19 @@ static void print_layer_overview(const vtzero::layer& layer) {
 
 int main(int argc, char* argv[]) {
     bool layer_overview = false;
-    bool strict = false;
     bool print_tables = false;
     bool print_value_types = false;
 
     static struct option long_options[] = {
         {"help",        no_argument, nullptr, 'h'},
         {"layers",      no_argument, nullptr, 'l'},
-        {"strict",      no_argument, nullptr, 's'},
         {"tables",      no_argument, nullptr, 't'},
         {"value-types", no_argument, nullptr, 'T'},
         {nullptr, 0, nullptr, 0}
     };
 
     while (true) {
-        const int c = getopt_long(argc, argv, "hlstT", long_options, nullptr);
+        const int c = getopt_long(argc, argv, "hltT", long_options, nullptr);
         if (c == -1) {
             break;
         }
@@ -208,9 +205,6 @@ int main(int argc, char* argv[]) {
                 return 0;
             case 'l':
                 layer_overview = true;
-                break;
-            case 's':
-                strict = true;
                 break;
             case 't':
                 print_tables = true;
@@ -241,7 +235,7 @@ int main(int argc, char* argv[]) {
                 if (layer_overview) {
                     print_layer_overview(layer);
                 } else {
-                    print_layer(layer, strict, print_tables, print_value_types, layer_num, feature_num);
+                    print_layer(layer, print_tables, print_value_types, layer_num, feature_num);
                 }
                 ++layer_num;
             }
@@ -250,7 +244,7 @@ int main(int argc, char* argv[]) {
             if (layer_overview) {
                 print_layer_overview(layer);
             } else {
-                print_layer(layer, strict, print_tables, print_value_types, layer_num, feature_num);
+                print_layer(layer, print_tables, print_value_types, layer_num, feature_num);
             }
         }
     } catch (const std::exception& e) {
