@@ -154,10 +154,11 @@ namespace vtzero {
          * @returns The index value of they value.
          */
         index_value operator()(const bool value) {
-            if (!m_index[value].valid()) {
-                m_index[value] = m_builder.add_value_without_dup_check(encoded_property_value{value});
+            auto& idx = m_index[static_cast<std::size_t>(value)]; // NOLINT clang-tidy: cppcoreguidelines-pro-bounds-constant-array-index
+            if (!idx.valid()) {
+                idx = m_builder.add_value_without_dup_check(encoded_property_value{value});
             }
-            return m_index[value];
+            return idx;
         }
 
     }; // class value_index_bool
