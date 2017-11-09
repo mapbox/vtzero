@@ -122,7 +122,7 @@ TEST_CASE("iterate over some features in a layer") {
     auto layer = tile.get_layer_by_name("building");
     REQUIRE(layer);
 
-    std::size_t id_sum = 0;
+    uint64_t id_sum = 0;
 
     SECTION("external iterator") {
         while (auto feature = layer.next_feature()) {
@@ -144,7 +144,7 @@ TEST_CASE("iterate over some features in a layer") {
         REQUIRE_FALSE(done);
     }
 
-    const std::size_t expected = (10 - 1) * 10 / 2;
+    const uint64_t expected = (10 - 1) * 10 / 2;
     REQUIRE(id_sum == expected);
 
     layer.reset_feature();
