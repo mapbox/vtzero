@@ -41,6 +41,8 @@ To access the contents of vector tiles with vtzero create a `vector_tile`
 object first with the data of the tile as first argument:
 
 ```cpp
+#include <vtzero/vector_tile.hpp> // always needed when reading vector tiles
+
 std::string vt_data = ...;
 vtzero::vector_tile tile{vt_data};
 ```
@@ -495,6 +497,8 @@ you call `serialize()` to actually build the vector tile from the data you
 provided to the builders:
 
 ```cpp
+#include <vtzero/builder.hpp> // always needed when writing vector tiles
+
 vtzero::tile_builder tbuilder;
 // add lots of data to builder...
 std::string buffer = tbuilder.serialize();
