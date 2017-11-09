@@ -360,7 +360,7 @@ are inefficient, that's why there are specialized indexes for special cases:
   numbers are small and densly packed, this is very efficient. This is
   especially useful for enum types.
 
-## Deriving from `vtzero::layer_builder` and `vtzero::feature_builder`
+## Deriving from `layer_builder` and `feature_builder`
 
 The `vtzero::layer_builder` and `vtzero::feature_builder` classes have been
 designed in a way that they can be derived from easily. This allows you to
