@@ -65,7 +65,7 @@ namespace vtzero {
      * function for your type and it will be used by vtzero.
      */
     template <typename TPoint>
-    point create_vtzero_point(TPoint p) noexcept {
+    point create_vtzero_point(const TPoint& p) noexcept {
         return {p.x, p.y};
     }
 
