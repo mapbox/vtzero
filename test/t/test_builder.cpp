@@ -3,6 +3,7 @@
 
 #include <vtzero/builder.hpp>
 #include <vtzero/index.hpp>
+#include <vtzero/output.hpp>
 
 #include <cstdint>
 #include <string>
@@ -247,5 +248,73 @@ TEST_CASE("Rolling back an already committed feature fails with asserts") {
     fbuilder.add_point(10, 10);
     fbuilder.commit();
     REQUIRE_THROWS_AS(fbuilder.rollback(), assert_error);
+}
+
+static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
+    vtzero::vector_tile vt1{t1};
+    vtzero::vector_tile vt2{t2};
+
+    for (auto l1 = vt1.next_layer(), l2 = vt2.next_layer();
+         l1 && l2;
+         l1 = vt1.next_layer(), l2 = vt2.next_layer()) {
+        if (l1.empty()) {
+            l1 = vt1.next_layer();
+            if (!l1) {
+                return true;
+            }
+        }
+        if (l2.empty()) {
+            l2 = vt2.next_layer();
+            if (!l2) {
+                return true;
+            }
+        }
+
+        if (!l1 ||
+            !l2 ||
+            l1.version() != l2.version() ||
+            l1.extent() != l2.extent() ||
+            l1.num_features() != l2.num_features() ||
+            l1.name() != l2.name()) {
+            return false;
+        }
+
+        for (auto f1 = l1.next_feature(), f2 = l2.next_feature();
+             f1 && f2;
+             f1 = l1.next_feature(), f2 = l2.next_feature()) {
+            if (f1.id() != f2.id() ||
+                f1.geometry_type() != f2.geometry_type() ||
+                f1.num_properties() != f2.num_properties() ||
+                f1.geometry().data() != f2.geometry().data()) {
+                return false;
+            }
+            for (auto p1 = f1.next_property(), p2 = f2.next_property();
+                p1 && p2;
+                p1 = f1.next_property(), p2 = f2.next_property()) {
+                if (p1.key() != p2.key() || p1.value() != p2.value()) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+TEST_CASE("Copy tile") {
+    const auto buffer = load_test_tile();
+    vtzero::vector_tile tile{buffer};
+
+    vtzero::tile_builder tbuilder;
+
+    while (auto layer = tile.next_layer()) {
+        vtzero::layer_builder lbuilder{tbuilder, layer};
+        while (auto feature = layer.next_feature()) {
+            lbuilder.add_feature(feature);
+        }
+    }
+
+    const std::string data = tbuilder.serialize();
+    REQUIRE(vector_tile_equal(buffer, data));
 }
 
