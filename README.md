@@ -51,6 +51,9 @@ make
 
 Call `ctest` to run the tests.
 
+We use the [Catch2](https://github.com/catchorg/Catch2) unit test framework
+which is included in the repository.
+
 
 ## Examples
 

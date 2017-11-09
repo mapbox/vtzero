@@ -246,6 +246,6 @@ TEST_CASE("Rolling back an already committed feature fails with asserts") {
     fbuilder.set_id(1);
     fbuilder.add_point(10, 10);
     fbuilder.commit();
-    REQUIRE_THROWS_AS(fbuilder.rollback(), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.rollback(), assert_error);
 }
 

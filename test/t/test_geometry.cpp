@@ -18,7 +18,7 @@ TEST_CASE("geometry_decoder") {
     REQUIRE(decoder.count() == 0);
     REQUIRE(decoder.done());
     REQUIRE_FALSE(decoder.next_command(vtzero::detail::command_move_to()));
-    REQUIRE_THROWS_AS(decoder.next_point(), const assert_error&);
+    REQUIRE_THROWS_AS(decoder.next_point(), assert_error);
 }
 
 TEST_CASE("geometry_decoder with point") {
@@ -28,10 +28,10 @@ TEST_CASE("geometry_decoder with point") {
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
 
-    REQUIRE_THROWS_AS(decoder.next_point(), const assert_error&);
+    REQUIRE_THROWS_AS(decoder.next_point(), assert_error);
 
     SECTION("trying to get LineTo command") {
-        REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_line_to()), const vtzero::geometry_exception&);
+        REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_line_to()), vtzero::geometry_exception);
     }
 
     SECTION("trying to get ClosePath command") {
@@ -40,7 +40,7 @@ TEST_CASE("geometry_decoder with point") {
 
     SECTION("trying to get MoveTo command") {
         REQUIRE(decoder.next_command(vtzero::detail::command_move_to()));
-        REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_move_to()), const assert_error&);
+        REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_move_to()), assert_error);
         REQUIRE(decoder.count() == 1);
         REQUIRE(decoder.next_point() == vtzero::point(25, 17));
 
@@ -67,7 +67,7 @@ TEST_CASE("geometry_decoder with incomplete point") {
 
     REQUIRE(decoder.next_command(vtzero::detail::command_move_to()));
     REQUIRE(decoder.count() == 1);
-    REQUIRE_THROWS_AS(decoder.next_point(), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(decoder.next_point(), vtzero::geometry_exception);
 }
 
 TEST_CASE("geometry_decoder with multipoint") {
@@ -195,7 +195,7 @@ TEST_CASE("geometry_decoder with polygon with wrong ClosePath count") {
     REQUIRE(decoder.next_command(vtzero::detail::command_line_to()));
     REQUIRE(decoder.next_point() == vtzero::point(8, 12));
     REQUIRE(decoder.next_point() == vtzero::point(20, 34));
-    REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_close_path()), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_close_path()), vtzero::geometry_exception);
 }
 
 TEST_CASE("geometry_decoder with multipolygon") {
@@ -302,7 +302,7 @@ TEST_CASE("geometry_decoder with multipoint with a huge count") {
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
 
-    REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_move_to()), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_move_to()), vtzero::geometry_exception);
 }
 
 TEST_CASE("geometry_decoder with multipoint with not enough points") {
@@ -312,6 +312,6 @@ TEST_CASE("geometry_decoder with multipoint with not enough points") {
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
 
-    REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_move_to()), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::command_move_to()), vtzero::geometry_exception);
 }
 
