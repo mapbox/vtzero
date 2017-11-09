@@ -844,6 +844,90 @@ are inefficient, that's why there are specialized indexes for special cases:
   numbers are small and densly packed, this is very efficient. This is
   especially useful for enum types.
 
+### Deriving from `vtzero::layer_builder` and `vtzero::feature_builder`
+
+The `vtzero::layer_builder` and `vtzero::feature_builder` classes have been
+designed in a way that they can be derived from easily. This allows you to
+encapsulate part of your vector tile writing code if some aspects of your
+layers/features are always the same, such as the layer name and the names
+and types of properties.
+
+Say you want to write a layer named "restaurants" with point geometries.
+Each feature should have a name and a 5-star-rating. First you create a
+class derived from the `layer_builder` with all the indexes you want to use.
+For the keys you don't need indexes in this case, because there are only
+two keys for which we can easily store the index values in the layer.
+
+```cpp
+class restaurant_layer_builder : public vtzero::layer_builder {
+
+public:
+
+    // The index we'll use for the "name" property values
+    vtzero::value_index<vtzero::string_value_type, std::string, std::unordered_map> string_index;
+
+    // The index we'll use for the "stars" property values
+    vtzero::value_index_small_uint stars_index;
+
+    // The index value of the "name" key
+    vtzero::index_value key_name;
+
+    // The index value of the "stars" key
+    vtzero::index_value key_stars;
+
+    restaurant_layer_builder(vtzero::tile_builder& tile) :
+        layer_builder(tile, "restaurants"), // the name of the layer
+        string_index(*this),
+        stars_index(*this),
+        key_name(add_key_without_dup_check("name")),
+        key_stars(add_key_without_dup_check("stars")) {
+    }
+
+};
+```
+
+The we'll add a class derived from `feature_builder` to help with adding
+features:
+
+```cpp
+class restaurant_feature_builder : public vtzero::feature_builder {
+
+    restaurant_layer_builder& m_layer;
+
+public:
+
+    restaurant_feature_builder(restaurant_layer_builder& layer, uint64_t id) :
+        vtzero::point_feature_builder(layer), // always a point geometry
+        m_layer(layer) {
+        set_id(id); // we always have an ID in this case
+    }
+
+    void add_location(mylocation& loc) { // restaurant location is stored in your own type
+        add_point(loc.lon(), loc.lat());
+    }
+
+    void set_name(const std::string& name) {
+        add_property(m_layer.key_name,
+                     m_layer.string_index(vtzero::encoded_property_value{name}));
+    }
+
+    void set_stars(stars s) { // your own "stars" type
+        vtzero::encoded_property_value svalue{ s.num_stars() }; // convert stars type to small integer
+
+        add_property(m_layer.key_stars,
+                     m_layer.stars_index(svalue));
+    }
+
+};
+```
+
+This example only shows a general pattern you can follow to derive from the
+`layer_builder` and `feature_builder` classes. In some cases this makes more
+sense then in others. The derived classes make it easy for you to mix your
+own functions (for instance when you need to convert from your own types to
+vtzero types like with the `mylocation` and `stars` types above) or just use
+the functions in the base classes.
+
 
 ## Error handling
 
