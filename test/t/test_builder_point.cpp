@@ -102,12 +102,17 @@ TEST_CASE("Point builder with id/with properties") {
     test_point_builder(true, true);
 }
 
-TEST_CASE("Calling add_points(0) throws assert") {
+TEST_CASE("Calling add_points() with bad values throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
-    REQUIRE_THROWS_AS(fbuilder.add_points(0), assert_error);
+    SECTION("0") {
+        REQUIRE_THROWS_AS(fbuilder.add_points(0), assert_error);
+    }
+    SECTION("2^29") {
+        REQUIRE_THROWS_AS(fbuilder.add_points(1ul << 29), assert_error);
+    }
 }
 
 void test_multipoint_builder(bool with_id, bool with_prop) {

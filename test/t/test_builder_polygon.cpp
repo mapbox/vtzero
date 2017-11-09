@@ -92,12 +92,26 @@ TEST_CASE("polygon builder with id/with properties") {
     test_polygon_builder(true, true);
 }
 
-TEST_CASE("Calling add_ring(3) throws assert") {
+TEST_CASE("Calling add_ring() with bad values throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
-    REQUIRE_THROWS_AS(fbuilder.add_ring(3), assert_error);
+    SECTION("0") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(0), assert_error);
+    }
+    SECTION("1") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(1), assert_error);
+    }
+    SECTION("2") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(2), assert_error);
+    }
+    SECTION("3") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(3), assert_error);
+    }
+    SECTION("2^29") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(1ul << 29), assert_error);
+    }
 }
 
 void test_multipolygon_builder(bool with_id, bool with_prop) {
