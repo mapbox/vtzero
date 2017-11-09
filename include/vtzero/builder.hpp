@@ -371,7 +371,8 @@ namespace vtzero {
         }
 
         /// Helper function to check size isn't too large
-        uint32_t check_size(const std::size_t size) {
+        template <typename T>
+        uint32_t check_size(T size) {
             if (size > std::numeric_limits<uint32_t>::max()) {
                 throw geometry_exception{"Too many points (max 2^32-1 points allowed in geometry)"};
             }
