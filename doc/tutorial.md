@@ -32,8 +32,8 @@ hold basic values in a type-safe way. Most of them are defined in `types.hpp`
 
 Sometimes it is useful to be able to print the values of those types, for
 instance when debugging. For this overloads of `operator<<` on `basic_ostream`
-are available in `output.hpp`. Include this file and you can use the usual
-`std::cout << some_value;` to print those values.
+are available in `vtzero/output.hpp`. Include this file and you can use the
+usual `std::cout << some_value;` to print those values.
 
 ## Use of asserts and exceptions
 
@@ -76,6 +76,16 @@ All the exceptions thrown directly by the vtzero library are derived from
 * An `out_of_range_exception` is thrown when an index into the key or value
   table in a layer is out of range. This can only happen if the tile data is
   invalid.
+
+## Include files
+
+Usually you only directly include the following files:
+
+* When reading: `<vtzero/vector_tile.hpp>`
+* When writing: `<vtzero/builder.hpp>`
+* If you need any of the special indexes: `<vtzero/index.hpp>`
+* If you want overloads of `operator<<` for basic types: `<vtzero/output.hpp>`
+* If you need the version: `<vtzero/version.hpp>`
 
 ## Reading and writing vector tiles
 
