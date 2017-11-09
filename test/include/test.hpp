@@ -24,4 +24,14 @@ extern bool got_an_assert;
 
 std::string load_test_tile();
 
+struct mypoint {
+    int64_t p1;
+    int64_t p2;
+};
+
+inline vtzero::point create_vtzero_point(mypoint p) noexcept {
+    return {static_cast<int32_t>(p.p1),
+            static_cast<int32_t>(p.p2)};
+}
+
 #endif // TEST_HPP

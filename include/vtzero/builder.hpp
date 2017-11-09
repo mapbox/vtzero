@@ -372,9 +372,9 @@ namespace vtzero {
 
         /// Helper function to check size isn't too large
         template <typename T>
-        uint32_t check_size(T size) {
-            if (size > std::numeric_limits<uint32_t>::max()) {
-                throw geometry_exception{"Too many points (max 2^32-1 points allowed in geometry)"};
+        uint32_t check_num_points(T size) {
+            if (size >= (1l << 29)) {
+                throw geometry_exception{"Maximum of 2^29 - 1 points allowed in geometry"};
             }
             return static_cast<uint32_t>(size);
         }
@@ -555,7 +555,7 @@ namespace vtzero {
          *
          * @param count The number of points in the multipoint geometry.
          *
-         * @pre @code count > 0 @endcode
+         * @pre @code count > 0 && count < 2^29 @endcode
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
@@ -565,7 +565,7 @@ namespace vtzero {
                           "can not call add_points() twice or mix with add_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_points() has to be called before properties are added");
-            vtzero_assert(count > 0 && "add_points() must be called with count > 0");
+            vtzero_assert(count > 0 && count < (1ul << 29) && "add_points() must be called with 0 < count < 2^29");
             m_num_points.set(count);
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
             m_pbf_geometry.add_element(detail::command_move_to(count));
@@ -644,7 +644,7 @@ namespace vtzero {
          */
         template <typename TIter>
         void add_points(TIter begin, TIter end) {
-            add_points(check_size(std::distance(begin, end)));
+            add_points(check_num_points(std::distance(begin, end)));
             for (; begin != end; ++begin) {
                 set_point(*begin);
             }
@@ -655,7 +655,7 @@ namespace vtzero {
          * to this feature. Use this function if you know the number of
          * points in the range.
          *
-         * @tparam TIter Foward iterator type. Dereferencing must yield
+         * @tparam TIter Forward iterator type. Dereferencing must yield
          *         a vtzero::point or something convertible to it.
          * @param begin Iterator to the beginning of the range.
          * @param end Iterator one past the end of the range.
@@ -691,7 +691,7 @@ namespace vtzero {
          */
         template <typename TContainer>
         void add_points_from_container(const TContainer& container) {
-            add_points(check_size(container.size()));
+            add_points(check_num_points(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
@@ -742,7 +742,7 @@ namespace vtzero {
          *
          * @param count The number of points in the linestring.
          *
-         * @pre @code count > 1 @endcode
+         * @pre @code count > 1 && count < 2^29 @endcode
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
@@ -750,7 +750,7 @@ namespace vtzero {
         void add_linestring(const uint32_t count) {
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_linestring() has to be called before properties are added");
-            vtzero_assert(count > 1 && "add_linestring() must be called with count > 1");
+            vtzero_assert(count > 1 && count < (1ul << 29) && "add_linestring() must be called with 1 < count < 2^29");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -844,11 +844,7 @@ namespace vtzero {
          */
         template <typename TIter>
         void add_linestring(TIter begin, TIter end) {
-            const auto size = std::distance(begin, end);
-            if (size > (1 << 29)) {
-                throw format_exception{"a linestring can not contain more then 2^29 points"};
-            }
-            add_linestring(uint32_t(size));
+            add_linestring(check_num_points(std::distance(begin, end)));
             for (; begin != end; ++begin) {
                 set_point(*begin);
             }
@@ -859,7 +855,7 @@ namespace vtzero {
          * to this feature. Use this function if you know the number of
          * points in the range.
          *
-         * @tparam TIter Foward iterator type. Dereferencing must yield
+         * @tparam TIter Forward iterator type. Dereferencing must yield
          *         a vtzero::point or something convertible to it.
          * @param begin Iterator to the beginning of the range.
          * @param end Iterator one past the end of the range.
@@ -873,11 +869,8 @@ namespace vtzero {
             add_linestring(count);
             for (; begin != end; ++begin) {
                 set_point(*begin);
-#ifndef NDEBUG
-                --count;
-#endif
             }
-            vtzero_assert(count == 0 && "Iterators must yield exactly <<count> points");
+            vtzero_assert(m_num_points.value() == 0 && "Iterator must yield exactly count points");
         }
 
         /**
@@ -898,7 +891,7 @@ namespace vtzero {
          */
         template <typename TContainer>
         void add_linestring_from_container(const TContainer& container) {
-            add_linestring(check_size(container.size()));
+            add_linestring(check_num_points(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
@@ -950,7 +943,7 @@ namespace vtzero {
          *
          * @param count The number of points in the ring.
          *
-         * @pre @code count > 3 @endcode
+         * @pre @code count > 3 && count < 2^29 @endcode
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
@@ -958,7 +951,7 @@ namespace vtzero {
         void add_ring(const uint32_t count) {
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_ring() has to be called before properties are added");
-            vtzero_assert(count > 3 && "add_ring() must be called with count > 3");
+            vtzero_assert(count > 3 && count < (1ul << 29) && "add_ring() must be called with 3 < count < 2^29");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -1077,7 +1070,7 @@ namespace vtzero {
          */
         template <typename TIter>
         void add_ring(TIter begin, TIter end) {
-            add_ring(std::distance(begin, end));
+            add_ring(check_num_points(std::distance(begin, end)));
             for (; begin != end; ++begin) {
                 set_point(create_vtzero_point(*begin));
             }
@@ -1087,7 +1080,7 @@ namespace vtzero {
          * Add the points from an iterator range as a ring to this feature. Use
          * this function if you know the number of points in the range.
          *
-         * @tparam TIter Foward iterator type. Dereferencing must yield
+         * @tparam TIter Forward iterator type. Dereferencing must yield
          *         a vtzero::point or something convertible to it.
          * @param begin Iterator to the beginning of the range.
          * @param end Iterator one past the end of the range.
@@ -1101,11 +1094,8 @@ namespace vtzero {
             add_ring(count);
             for (; begin != end; ++begin) {
                 set_point(*begin);
-#ifndef NDEBUG
-                --count;
-#endif
             }
-            vtzero_assert(count == 0 && "Iterators must yield exactly <count> points");
+            vtzero_assert(m_num_points.value() == 0 && "Iterator must yield exactly count points");
         }
 
         /**
@@ -1126,7 +1116,7 @@ namespace vtzero {
          */
         template <typename TContainer>
         void add_ring_from_container(const TContainer& container) {
-            add_ring(check_size(container.size()));
+            add_ring(check_num_points(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }

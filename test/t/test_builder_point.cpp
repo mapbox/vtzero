@@ -27,16 +27,6 @@ struct point_handler {
 
 };
 
-struct mypoint {
-    int64_t p1;
-    int64_t p2;
-};
-
-inline vtzero::point create_vtzero_point(mypoint p) noexcept {
-    return {static_cast<int32_t>(p.p1),
-            static_cast<int32_t>(p.p2)};
-}
-
 void test_point_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
@@ -112,6 +102,14 @@ TEST_CASE("Point builder with id/with properties") {
     test_point_builder(true, true);
 }
 
+TEST_CASE("Calling add_points(0) throws assert") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+
+    REQUIRE_THROWS_AS(fbuilder.add_points(0), assert_error);
+}
+
 void test_multipoint_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
@@ -185,7 +183,7 @@ TEST_CASE("Calling add_point() and then other geometry functions throws assert")
     }
 }
 
-TEST_CASE("Calling set_point() throws assert") {
+TEST_CASE("Calling point_feature_builder::set_point() throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
@@ -208,7 +206,7 @@ TEST_CASE("Calling add_points() and then other geometry functions throws assert"
     }
 }
 
-TEST_CASE("Calling set_point() too often throws assert") {
+TEST_CASE("Calling point_feature_builder::set_point() too often throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
