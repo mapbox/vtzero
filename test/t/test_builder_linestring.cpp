@@ -30,7 +30,7 @@ struct linestring_handler {
 
 };
 
-void test_linestring_builder(bool with_id, bool with_prop) {
+static void test_linestring_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -107,7 +107,7 @@ TEST_CASE("Calling add_linestring() with bad values throws assert") {
     }
 }
 
-void test_multilinestring_builder(bool with_id, bool with_prop) {
+static void test_multilinestring_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::linestring_feature_builder fbuilder{lbuilder};

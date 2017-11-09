@@ -30,7 +30,7 @@ struct polygon_handler {
 
 };
 
-void test_polygon_builder(bool with_id, bool with_prop) {
+static void test_polygon_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -114,7 +114,7 @@ TEST_CASE("Calling add_ring() with bad values throws assert") {
     }
 }
 
-void test_multipolygon_builder(bool with_id, bool with_prop) {
+static void test_multipolygon_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};

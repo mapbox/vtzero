@@ -27,7 +27,7 @@ struct point_handler {
 
 };
 
-void test_point_builder(bool with_id, bool with_prop) {
+static void test_point_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -115,7 +115,7 @@ TEST_CASE("Calling add_points() with bad values throws assert") {
     }
 }
 
-void test_multipoint_builder(bool with_id, bool with_prop) {
+static void test_multipoint_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
