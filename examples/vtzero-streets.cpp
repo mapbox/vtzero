@@ -19,7 +19,7 @@ static bool keep_feature(vtzero::feature& feature) {
     static const std::string key{"class"};
     static const std::string val{"street"};
 
-    while (const auto& prop = feature.next_property()) {
+    while (const auto prop = feature.next_property()) {
         if (key == prop.key() && val == prop.value().string_value()) {
             return true;
         }
