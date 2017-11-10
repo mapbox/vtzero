@@ -12,6 +12,8 @@ add_executable(vtzero-check vtzero-check.cpp utils.cpp)
 
 add_executable(vtzero-create vtzero-create.cpp utils.cpp)
 
+add_executable(vtzero-stats vtzero-stats.cpp utils.cpp)
+
 add_executable(vtzero-streets vtzero-streets.cpp utils.cpp)
 
 # disable building of examples that need getopt lib on MSVC
