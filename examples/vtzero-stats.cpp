@@ -26,7 +26,7 @@ int main(int argc, char* argv[]) {
     vtzero::vector_tile tile{data};
 
     while (const auto layer = tile.next_layer()) {
-        std::cout.write(layer.name().data(), layer.name().size());
+        std::cout.write(layer.name().data(), static_cast<std::streamsize>(layer.name().size()));
         std::cout << ' '
                   << layer.num_features() << ' '
                   << layer.key_table().size() << ' '
