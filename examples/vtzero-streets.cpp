@@ -10,22 +10,24 @@
 #include "utils.hpp"
 
 #include <vtzero/builder.hpp>
+#include <vtzero/property_mapper.hpp>
 #include <vtzero/vector_tile.hpp>
 
 #include <iostream>
 #include <string>
 
-static bool keep_feature(vtzero::feature& feature) {
+static bool keep_feature(const vtzero::feature& feature) {
     static const std::string key{"class"};
     static const std::string val{"street"};
 
-    while (const auto prop = feature.next_property()) {
-        if (key == prop.key() && val == prop.value().string_value()) {
-            return true;
-        }
-    }
+    bool found = false;
 
-    return false;
+    feature.for_each_property([&](const vtzero::property& prop) {
+        found = key == prop.key() && val == prop.value().string_value();
+        return !found;
+    });
+
+    return found;
 }
 
 int main(int argc, char* argv[]) {
@@ -50,9 +52,19 @@ int main(int argc, char* argv[]) {
     vtzero::tile_builder tb;
     vtzero::layer_builder layer_builder{tb, layer};
 
+    vtzero::property_mapper mapper{layer, layer_builder};
+
     while (auto feature = layer.next_feature()) {
         if (keep_feature(feature)) {
-            layer_builder.add_feature(feature);
+            vtzero::geometry_feature_builder feature_builder{layer_builder};
+            if (feature.has_id()) {
+                feature_builder.set_id(feature.id());
+            }
+            feature_builder.set_geometry(feature.geometry());
+
+            while (auto idxs = feature.next_property_indexes()) {
+                feature_builder.add_property(mapper(idxs));
+            }
         }
     }
 

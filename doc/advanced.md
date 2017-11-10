@@ -39,6 +39,49 @@ as parameter and returning a `vtzero::point`. Vtzero will find your function
 using [ADL](http://en.cppreference.com/w/cpp/language/adl) which magically
 makes the vtzero builders work with your point type.
 
+## Using the `property_mapper` class when copying layers
+
+Sometimes you want to copy some features of a layer into a new layer. Because
+you only copy some features (and/or only some properties of the features), the
+key and value tables in the layer have to be rebuilt. This is where the
+`property_mapper` class helps you. It keeps the mapping between the index
+values of the old and the new table adding property keys and values as needed
+to the new table.
+
+Here is some code that shows you how to use it:
+
+```cpp
+#include <vtzero/property_mapper.hpp> // you have to include this
+
+vtzero::layer layer = ...; // layer you got from an existing tile
+vtzero::layer_builder layer_builder{...}; // create new layer
+
+// instantiate the property mapper with the old and new layers
+vtzero::property_mapper mapper{layer, layer_builder};
+
+// you'll probably want to iterate over all features in the old layer...
+while (auto feature = layer.next_feature()) {
+    // ... and decide somehow which ones you want to keep
+    if (keep_feature(feature)) {
+        // instantiate a feature builder as usual and copy id and geometry
+        vtzero::geometry_feature_builder feature_builder{layer_builder};
+        if (feature.has_id()) {
+            feature_builder.set_id(feature.id());
+        }
+        feature_builder.set_geometry(feature.geometry());
+
+        // now iterate over all properties...
+        while (auto idxs = feature.next_property_indexes()) {
+            // ... decide which ones to keep,
+            if (keep_property(idxs)) {
+                // ... and add them to the new layer using the mapper
+                feature_builder.add_property(mapper(idxs));
+            }
+        }
+    }
+}
+```
+
 ## Protection against huge memory use
 
 When decoding a vector tile we got from an unknown source, we don't know what
