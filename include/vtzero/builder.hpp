@@ -379,6 +379,17 @@ namespace vtzero {
             return static_cast<uint32_t>(size);
         }
 
+        /// Helper function to make sure we have everything before adding a property
+        void prepare_to_add_property() {
+            if (m_pbf_geometry.valid()) {
+                m_num_points.assert_is_zero();
+                m_pbf_geometry.commit();
+            }
+            if (!m_pbf_tags.valid()) {
+                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+            }
+        }
+
     public:
 
         /**
@@ -423,17 +434,31 @@ namespace vtzero {
         /**
          * Add a property to this feature. Can only be called after all the
          * methods manipulating the geometry.
+         *
+         * @tparam TProp Can be type index_value_pair or property.
+         * @param prop The property to add.
          */
-        template <typename ...TArgs>
-        void add_property(TArgs&& ...args) {
-            if (m_pbf_geometry.valid()) {
-                m_num_points.assert_is_zero();
-                m_pbf_geometry.commit();
-            }
-            if (!m_pbf_tags.valid()) {
-                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
-            }
-            add_property_impl(std::forward<TArgs>(args)...);
+        template <typename TProp>
+        void add_property(TProp&& prop) {
+            prepare_to_add_property();
+            add_property_impl(std::forward<TProp>(prop));
+        }
+
+        /**
+         * Add a property to this feature. Can only be called after all the
+         * methods manipulating the geometry.
+         *
+         * @tparam TKey Can be type index_value or data_view or anything that
+         *         converts to it.
+         * @tparam TValue Can be type index_value or property_value or
+         *         encoded_property or anything that converts to it.
+         * @param key The key.
+         * @param value The value.
+         */
+        template <typename TKey, typename TValue>
+        void add_property(TKey&& key, TValue&& value) {
+            prepare_to_add_property();
+            add_property_impl(std::forward<TKey>(key), std::forward<TValue>(value));
         }
 
         /**
@@ -1212,10 +1237,29 @@ namespace vtzero {
         /**
          * Add a property to this feature. Can only be called after the
          * set_geometry method.
+         *
+         * @tparam TProp Can be type index_value_pair or property.
+         * @param prop The property to add.
          */
-        template <typename ...TArgs>
-        void add_property(TArgs&& ...args) {
-            add_property_impl(std::forward<TArgs>(args)...);
+        template <typename TProp>
+        void add_property(TProp&& prop) {
+            add_property_impl(std::forward<TProp>(prop));
+        }
+
+        /**
+         * Add a property to this feature. Can only be called after the
+         * set_geometry method.
+         *
+         * @tparam TKey Can be type index_value or data_view or anything that
+         *         converts to it.
+         * @tparam TValue Can be type index_value or property_value or
+         *         encoded_property or anything that converts to it.
+         * @param key The key.
+         * @param value The value.
+         */
+        template <typename TKey, typename TValue>
+        void add_property(TKey&& key, TValue&& value) {
+            add_property_impl(std::forward<TKey>(key), std::forward<TValue>(value));
         }
 
     }; // class geometry_feature_builder

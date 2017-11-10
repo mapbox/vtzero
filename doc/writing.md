@@ -360,6 +360,50 @@ are inefficient, that's why there are specialized indexes for special cases:
   numbers are small and densly packed, this is very efficient. This is
   especially useful for enum types.
 
+## The `add_property()` function.
+
+The last chapters already talked about the `add_property()` function of the
+`feature_builder` class. But because it is a bit difficult to see all the
+different ways `add_property()` can be called, here is some more information.
+
+The `add_property()` function is called with either two parameters for the
+key and value or with one parameter that combines the key and value.
+
+If it is called with an `index_value` for the key or value, that index value is
+stored directly into the feature. If it is called with an `index_value_pair`,
+the index values in the `index_value_pair` are stored directly in the feature.
+
+If it is called with something that is not an `index_value` or
+`index_value_pair`, the function will interpret the data as keys or values.
+It will add those keys and values to the layer (if they are not already there),
+find the corresponding index values and store them in the feature.
+
+You can mix index-use with non-index use. For instance
+
+```cpp
+index_value key_maxspeed = lbuilder.add_key("maxspeed");
+...
+fbuilder.add_property(key_maxspeed, 30);
+```
+
+In this case the key ("maxspeed") was added to the layer once and its index
+value (`key_maxspeed`) can later be reused. The value (30), on the other hand,
+is only added to the layer in the `add_property()` call.
+
+So for keys, you can have as argument:
+* An `index_value`.
+* A `data_view` or something that converts to it like a `const char*` or `std::string`.
+
+For values, you can have as argument:
+* An `index_value`.
+* A `property_value`.
+* An `encoded_property_value` or anything that converts to it.
+
+For combined keys and values, you can have as argument:
+* An `index_value_pair`.
+* A `property`.
+
+
 ## Deriving from `layer_builder` and `feature_builder`
 
 The `vtzero::layer_builder` and `vtzero::feature_builder` classes have been

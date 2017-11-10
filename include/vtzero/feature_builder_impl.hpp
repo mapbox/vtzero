@@ -33,6 +33,7 @@ namespace vtzero {
             layer_builder_impl* m_layer;
 
             void add_key_internal(index_value idx) {
+                vtzero_assert(idx.valid());
                 m_pbf_tags.add_element(idx.value());
             }
 
@@ -42,6 +43,7 @@ namespace vtzero {
             }
 
             void add_value_internal(index_value idx) {
+                vtzero_assert(idx.valid());
                 m_pbf_tags.add_element(idx.value());
             }
 
@@ -79,6 +81,11 @@ namespace vtzero {
             void add_property_impl(const property& property) {
                 add_key_internal(property.key());
                 add_value_internal(property.value());
+            }
+
+            void add_property_impl(const index_value_pair idxs) {
+                add_key_internal(idxs.key());
+                add_value_internal(idxs.value());
             }
 
             template <typename TKey, typename TValue>
