@@ -3,7 +3,7 @@
 
 /*****************************************************************************
 
-vtzero - Minimalistic vector tile decoder and encoder in C++.
+vtzero - Tiny and fast vector tile decoder and encoder in C++.
 
 This file is from https://github.com/mapbox/vtzero where you can find more
 documentation.

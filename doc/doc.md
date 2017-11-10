@@ -1,5 +1,5 @@
 
-Minimalistic vector tile decoder and encoder in C++.
+Tiny and fast vector tile decoder and encoder in C++.
 
 This is the API documentation that was automatically created from the
 source code. For more information about vtzero go to
