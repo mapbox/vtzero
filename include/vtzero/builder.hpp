@@ -1202,7 +1202,7 @@ namespace vtzero {
          *
          * @param geometry The geometry.
          */
-        void set_geometry(const geometry geometry) {
+        void set_geometry(const geometry& geometry) {
             vtzero_assert(!m_pbf_tags.valid());
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
             m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());

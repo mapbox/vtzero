@@ -366,7 +366,7 @@ namespace vtzero {
      * @pre Geometry must be a point geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_point_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_point_geometry(const geometry& geometry, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POINT);
         detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
@@ -384,7 +384,7 @@ namespace vtzero {
      * @pre Geometry must be a linestring geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_linestring_geometry(const geometry& geometry, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::LINESTRING);
         detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
@@ -402,7 +402,7 @@ namespace vtzero {
      * @pre Geometry must be a polygon geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_polygon_geometry(const geometry& geometry, TGeomHandler&& geom_handler) {
         vtzero_assert(geometry.type() == GeomType::POLYGON);
         detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
@@ -420,7 +420,7 @@ namespace vtzero {
      *                        a problem with the geometry.
      */
     template <typename TGeomHandler>
-    typename detail::get_result<TGeomHandler>::type decode_geometry(const geometry geometry, TGeomHandler&& geom_handler) {
+    typename detail::get_result<TGeomHandler>::type decode_geometry(const geometry& geometry, TGeomHandler&& geom_handler) {
         detail::geometry_decoder<decltype(geometry.begin())> decoder{geometry.begin(), geometry.end(), geometry.data().size() / 2};
         switch (geometry.type()) {
             case GeomType::POINT:
