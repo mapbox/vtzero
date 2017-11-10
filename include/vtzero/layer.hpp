@@ -387,9 +387,12 @@ namespace vtzero {
 
     inline property feature::next_property() {
         const auto idxs = next_property_indexes();
-        return idxs.valid() ? property{m_layer->key(idxs.key()),
-                                       m_layer->value(idxs.value())}
-                            : property{};
+        property p{};
+        if (idxs.valid()) {
+            p = {m_layer->key(idxs.key()),
+                 m_layer->value(idxs.value())};
+        }
+        return p;
     }
 
     template <typename TFunc>
