@@ -53,7 +53,7 @@ TEST_CASE("iterate over all properties of a feature") {
     }
 
     SECTION("internal iterator") {
-        feature.for_each_property([&](const vtzero::property p) {
+        feature.for_each_property([&count](const vtzero::property& p) {
             ++count;
             if (p.key() == "type") {
                 REQUIRE(p.value().type() == vtzero::property_value_type::string_value);
@@ -83,7 +83,7 @@ TEST_CASE("iterate over some properties of a feature") {
     }
 
     SECTION("internal iterator") {
-        feature.for_each_property([&](const vtzero::property p) {
+        feature.for_each_property([&count](const vtzero::property& p) {
             ++count;
             return p.key() != "oneway";
         });

@@ -78,7 +78,7 @@ TEST_CASE("iterate over layers") {
     }
 
     SECTION("internal iterator") {
-        const bool done = tile.for_each_layer([&](const vtzero::layer&& layer) {
+        const bool done = tile.for_each_layer([&names](const vtzero::layer& layer) {
             names.emplace_back(layer.name());
             return true;
         });
@@ -119,7 +119,7 @@ TEST_CASE("iterate over some of the layers") {
     }
 
     SECTION("internal iterator") {
-        const bool done = tile.for_each_layer([&](const vtzero::layer&& layer) noexcept {
+        const bool done = tile.for_each_layer([&num_layers](const vtzero::layer& layer) noexcept {
             ++num_layers;
             return layer.name() != "water";
         });

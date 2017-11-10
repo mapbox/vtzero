@@ -105,7 +105,7 @@ TEST_CASE("iterate over all features in a layer") {
     }
 
     SECTION("internal iterator") {
-        const bool done = layer.for_each_feature([&](vtzero::feature&& /*feature*/) noexcept {
+        const bool done = layer.for_each_feature([&count](const vtzero::feature& /*feature*/) noexcept {
             ++count;
             return true;
         });
@@ -134,7 +134,7 @@ TEST_CASE("iterate over some features in a layer") {
     }
 
     SECTION("internal iterator") {
-        const bool done = layer.for_each_feature([&](vtzero::feature&& feature) noexcept {
+        const bool done = layer.for_each_feature([&id_sum](const vtzero::feature& feature) noexcept {
             if (feature.id() == 10) {
                 return false;
             }

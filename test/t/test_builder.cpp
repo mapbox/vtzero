@@ -166,13 +166,13 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
     }
 
     SECTION("implicit immediate commit") {
-        const auto lambda = [&](){
+        const auto lambda = [&lbuilder](){
             vtzero::point_feature_builder fbuilder{lbuilder};
         };
         REQUIRE_ASSERT(lambda());
     }
     SECTION("implicit commit after setting id") {
-        const auto lambda = [&](){
+        const auto lambda = [&lbuilder](){
             vtzero::point_feature_builder fbuilder{lbuilder};
             fbuilder.set_id(2);
         };

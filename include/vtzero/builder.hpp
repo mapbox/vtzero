@@ -1226,7 +1226,7 @@ namespace vtzero {
             feature_builder.set_id(feature.id());
         }
         feature_builder.set_geometry(feature.geometry());
-        feature.for_each_property([&](property&& p) {
+        feature.for_each_property([&feature_builder](const property& p) {
             feature_builder.add_property(p);
             return true;
         });

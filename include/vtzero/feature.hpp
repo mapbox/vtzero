@@ -288,7 +288,7 @@ namespace vtzero {
     TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
-        feature.for_each_property([&](property&& p) {
+        feature.for_each_property([&map](const property& p) {
             map.emplace(TKey(p.key()), convert_property_value<TValue>(p.value()));
             return true;
         });
