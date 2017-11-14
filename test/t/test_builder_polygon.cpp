@@ -98,19 +98,19 @@ TEST_CASE("Calling add_ring() with bad values throws assert") {
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     SECTION("0") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(0), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_ring(0), const assert_error&);
     }
     SECTION("1") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(1), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_ring(1), const assert_error&);
     }
     SECTION("2") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(2), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_ring(2), const assert_error&);
     }
     SECTION("3") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(3), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_ring(3), const assert_error&);
     }
     SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(1ul << 29), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_ring(1ul << 29), const assert_error&);
     }
 }
 
@@ -200,10 +200,10 @@ TEST_CASE("Calling polygon_feature_builder::set_point()/close_ring() throws asse
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     SECTION("set_point") {
-        REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const assert_error&);
     }
     SECTION("close_ring") {
-        REQUIRE_THROWS_AS(fbuilder.close_ring(), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.close_ring(), const assert_error&);
     }
 }
 
@@ -219,10 +219,10 @@ TEST_CASE("Calling polygon_feature_builder::set_point()/close_ring() too often t
     fbuilder.set_point(10, 20);
 
     SECTION("set_point") {
-        REQUIRE_THROWS_AS(fbuilder.set_point(50, 20), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.set_point(50, 20), const assert_error&);
     }
     SECTION("close_ring") {
-        REQUIRE_THROWS_AS(fbuilder.close_ring(), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.close_ring(), const assert_error&);
     }
 }
 
@@ -276,6 +276,6 @@ TEST_CASE("Add polygon from iterator with wrong count throws assert") {
 
     REQUIRE_THROWS_AS(fbuilder.add_ring(points.cbegin(),
                                         points.cend(),
-                                        static_cast<uint32_t>(points.size() + 1)), assert_error);
+                                        static_cast<uint32_t>(points.size() + 1)), const assert_error&);
 }
 
