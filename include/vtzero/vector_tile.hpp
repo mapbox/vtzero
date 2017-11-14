@@ -80,6 +80,16 @@ namespace vtzero {
         }
 
         /**
+         * Construct the vector_tile from a ptr and size. The vector_tile
+         * object will keep a reference to the data. No copy of the data is
+         * created.
+         */
+        vector_tile(const char* data, std::size_t size) noexcept :
+            m_data(data, size),
+            m_tile_reader(m_data) {
+        }
+
+        /**
          * Is this vector tile empty?
          *
          * @returns true if there are no layers in this vector tile, false

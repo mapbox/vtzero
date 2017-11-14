@@ -24,6 +24,14 @@ TEST_CASE("open a vector tile with data_view") {
     REQUIRE(tile.count_layers() == 12);
 }
 
+TEST_CASE("open a vector tile with pointer and size") {
+    const auto data = load_test_tile();
+    vtzero::vector_tile tile{data.data(), data.size()};
+
+    REQUIRE_FALSE(tile.empty());
+    REQUIRE(tile.count_layers() == 12);
+}
+
 TEST_CASE("get layer by index") {
     const auto data = load_test_tile();
     vtzero::vector_tile tile{data};
