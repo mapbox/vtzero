@@ -32,15 +32,8 @@ namespace vtzero {
             return 1u << zoom;
         }
 
-        constexpr int64_t max_coordinate_epsg3857_cm = 2003750834;
-
-        /**
-         * Returns the width or height of a tile in web mercator coordinates
-         * for the given zoom level.
-         */
-        inline constexpr int64_t tile_extent_in_zoom(const uint32_t zoom) noexcept {
-            return detail::max_coordinate_epsg3857_cm * 2 / num_tiles_in_zoom(zoom);
-        }
+        /// Maximum coordinate value in web mercator in millimeters.
+        constexpr const int64_t max_coordinate_epsg3857_mm = 20037508342LL;
 
     } // namespace detail
 
@@ -58,8 +51,9 @@ namespace vtzero {
             m_y(y),
             m_zoom(zoom),
             m_extent(extent) {
-            vtzero_assert_in_noexcept_function(x < detail::num_tiles_in_zoom(zoom));
-            vtzero_assert_in_noexcept_function(y < detail::num_tiles_in_zoom(zoom));
+            vtzero_assert_in_noexcept_function(zoom < 16 && "zoom out of range");
+            vtzero_assert_in_noexcept_function(x < detail::num_tiles_in_zoom(zoom) && "x coordinate out of range");
+            vtzero_assert_in_noexcept_function(y < detail::num_tiles_in_zoom(zoom) && "y coordinate out of range");
         }
 
         uint32_t x() const noexcept {
@@ -78,12 +72,17 @@ namespace vtzero {
             return m_extent;
         }
 
-        template <typename TPoint>
-        TPoint transform(const point p) const noexcept {
-            const int64_t e = detail::tile_extent_in_zoom(m_zoom);
-            const int64_t x = m_x * e + (p.x * e / m_extent) - detail::max_coordinate_epsg3857_cm;
-            const int64_t y = m_y * e + (p.y * e / m_extent) - detail::max_coordinate_epsg3857_cm;
+        std::pair<int64_t, int64_t> transform_int(const point p) const noexcept {
+            const int64_t d = static_cast<int64_t>(detail::num_tiles_in_zoom(m_zoom)) * m_extent;
+            const int64_t x = 2 * detail::max_coordinate_epsg3857_mm * (m_extent * m_x  + p.x) / d - detail::max_coordinate_epsg3857_mm;
+            const int64_t y = 2 * detail::max_coordinate_epsg3857_mm * (m_extent * m_y  + p.y) / d - detail::max_coordinate_epsg3857_mm;
             return {x, y};
+        }
+
+        std::pair<double, double> transform_double(const point p) const noexcept {
+            const auto r = transform_int(p);
+            return {static_cast<double>(r.first) / 1000,
+                    static_cast<double>(r.second) / 1000};
         }
 
     }; // class tile
