@@ -77,7 +77,9 @@ namespace vtzero {
             uint32_t m_num_values = 0;
 
             // Below this value, no index will be used to find entries in the
-            // key/value tables. XXX This probably needs some tuning.
+            // key/value tables. This number is based on some initial
+            // benchmarking but probably needs some tuning.
+            // See also https://github.com/mapbox/vtzero/issues/30
             static constexpr const uint32_t max_entries_flat = 20;
 
             using map_type = std::unordered_map<std::string, index_value>;
