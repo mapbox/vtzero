@@ -79,22 +79,30 @@ namespace vtzero {
         return !(a==b);
     }
 
+    /// The command id type as specified in the vector tile spec
+    enum CommandId : uint32_t {
+        MOVE_TO = 1,
+        LINE_TO = 2,
+        CLOSE_PATH = 7
+    };
+
     namespace detail {
 
+        
         inline constexpr uint32_t command_integer(const uint32_t id, const uint32_t count) noexcept {
             return (id & 0x7) | (count << 3);
         }
 
-        inline constexpr uint32_t command_move_to(const uint32_t count = 0) noexcept {
-            return command_integer(1, count);
+        inline constexpr uint32_t command_move_to(const uint32_t count) noexcept {
+            return command_integer(CommandId::MOVE_TO, count);
         }
 
-        inline constexpr uint32_t command_line_to(const uint32_t count = 0) noexcept {
-            return command_integer(2, count);
+        inline constexpr uint32_t command_line_to(const uint32_t count) noexcept {
+            return command_integer(CommandId::LINE_TO, count);
         }
 
-        inline constexpr uint32_t command_close_path(const uint32_t count = 0) noexcept {
-            return command_integer(7, count);
+        inline constexpr uint32_t command_close_path() noexcept {
+            return command_integer(CommandId::CLOSE_PATH, 1);
         }
 
         inline constexpr uint32_t get_command_id(const uint32_t command_integer) noexcept {
@@ -188,28 +196,28 @@ namespace vtzero {
                 return m_it == m_end;
             }
 
-            bool next_command(const uint32_t expected_command) {
+            bool next_command(const uint32_t expected_command_id) {
                 vtzero_assert(m_count == 0);
 
                 if (m_it == m_end) {
                     return false;
                 }
-
-                m_command_id = detail::get_command_id(*m_it);
-                if (m_command_id != expected_command) {
+                
+                m_command_id = get_command_id(*m_it);
+                if (m_command_id != expected_command_id) {
                     throw geometry_exception{std::string{"expected command "} +
-                                             std::to_string(expected_command) +
+                                             std::to_string(expected_command_id) +
                                              " but got " +
                                              std::to_string(m_command_id)};
                 }
 
-                if (expected_command == command_close_path()) {
+                if (m_command_id == CommandId::CLOSE_PATH) {
                     // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
                     if (detail::get_command_count(*m_it) != 1) {
                         throw geometry_exception{"ClosePath command count is not 1"};
                     }
                 } else {
-                    m_count = detail::get_command_count(*m_it);
+                    m_count = get_command_count(*m_it);
                     if (m_count > m_max_count) {
                         throw geometry_exception{"Max count too large"};
                     }
@@ -249,7 +257,7 @@ namespace vtzero {
             template <typename TGeomHandler>
             typename detail::get_result<TGeomHandler>::type decode_point(TGeomHandler&& geom_handler) {
                 // spec 4.3.4.2 "MUST consist of a single MoveTo command"
-                if (!next_command(detail::command_move_to())) {
+                if (!next_command(CommandId::MOVE_TO)) {
                     throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
                 }
 
@@ -276,7 +284,7 @@ namespace vtzero {
             template <typename TGeomHandler>
             typename detail::get_result<TGeomHandler>::type decode_linestring(TGeomHandler&& geom_handler) {
                 // spec 4.3.4.3 "1. A MoveTo command"
-                while (next_command(detail::command_move_to())) {
+                while (next_command(CommandId::MOVE_TO)) {
                     // spec 4.3.4.3 "with a command count of 1"
                     if (count() != 1) {
                         throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.3)"};
@@ -285,7 +293,7 @@ namespace vtzero {
                     const auto first_point = next_point();
 
                     // spec 4.3.4.3 "2. A LineTo command"
-                    if (!next_command(detail::command_line_to())) {
+                    if (!next_command(CommandId::LINE_TO)) {
                         throw geometry_exception{"expected LineTo command (spec 4.3.4.3)"};
                     }
 
@@ -310,7 +318,7 @@ namespace vtzero {
             template <typename TGeomHandler>
             typename detail::get_result<TGeomHandler>::type decode_polygon(TGeomHandler&& geom_handler) {
                 // spec 4.3.4.4 "1. A MoveTo command"
-                while (next_command(detail::command_move_to())) {
+                while (next_command(CommandId::MOVE_TO)) {
                     // spec 4.3.4.4 "with a command count of 1"
                     if (count() != 1) {
                         throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.4)"};
@@ -321,7 +329,7 @@ namespace vtzero {
                     point last_point = start_point;
 
                     // spec 4.3.4.4 "2. A LineTo command"
-                    if (!next_command(detail::command_line_to())) {
+                    if (!next_command(CommandId::LINE_TO)) {
                         throw geometry_exception{"expected LineTo command (spec 4.3.4.4)"};
                     }
 
@@ -337,7 +345,7 @@ namespace vtzero {
                     }
 
                     // spec 4.3.4.4 "3. A ClosePath command"
-                    if (!next_command(detail::command_close_path())) {
+                    if (!next_command(CommandId::CLOSE_PATH)) {
                         throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
                     }
 

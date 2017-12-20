@@ -1017,7 +1017,7 @@ namespace vtzero {
             } else if (m_num_points.value() == 0) {
                 vtzero_assert(m_first_point == p); // XXX
                 // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
-                m_pbf_geometry.add_element(detail::command_close_path(1));
+                m_pbf_geometry.add_element(detail::command_close_path());
             } else {
                 vtzero_assert(m_cursor != p); // XXX
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
@@ -1078,7 +1078,7 @@ namespace vtzero {
                           "close_ring() has to be called before properties are added");
             vtzero_assert(m_num_points.value() == 1 &&
                           "wrong number of points in ring");
-            m_pbf_geometry.add_element(detail::command_close_path(1));
+            m_pbf_geometry.add_element(detail::command_close_path());
             m_num_points.decrement();
         }
 

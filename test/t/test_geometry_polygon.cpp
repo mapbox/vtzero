@@ -156,7 +156,7 @@ TEST_CASE("Calling decode_polygon_geometry() with 2nd command not a LineTo") {
 TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
     const container g = {vtzero::detail::command_move_to(1), 3, 4,
                          vtzero::detail::command_line_to(0),
-                         vtzero::detail::command_close_path(1)};
+                         vtzero::detail::command_close_path()};
     vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), g.size() / 2};
 
     dummy_geom_handler handler;
@@ -167,7 +167,7 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
 TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
     const container g = {vtzero::detail::command_move_to(1), 3, 4,
                          vtzero::detail::command_line_to(1), 5, 6,
-                         vtzero::detail::command_close_path(1)};
+                         vtzero::detail::command_close_path()};
 
     vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), g.size() / 2};
     dummy_geom_handler handler;
@@ -194,7 +194,7 @@ TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") 
 TEST_CASE("Calling decode_polygon_geometry() on polygon with zero area") {
     const container g = {vtzero::detail::command_move_to(1), 0, 0,
                          vtzero::detail::command_line_to(3), 2, 0, 0, 4, 2, 0,
-                         vtzero::detail::command_close_path(1)};
+                         vtzero::detail::command_close_path()};
 
     vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), g.size() / 2};
     dummy_geom_handler handler;
