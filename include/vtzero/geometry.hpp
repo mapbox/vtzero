@@ -88,7 +88,6 @@ namespace vtzero {
 
     namespace detail {
 
-        
         inline constexpr uint32_t command_integer(const uint32_t id, const uint32_t count) noexcept {
             return (id & 0x7) | (count << 3);
         }
@@ -202,7 +201,7 @@ namespace vtzero {
                 if (m_it == m_end) {
                     return false;
                 }
-                
+
                 m_command_id = get_command_id(*m_it);
                 if (m_command_id != expected_command_id) {
                     throw geometry_exception{std::string{"expected command "} +
