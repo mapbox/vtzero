@@ -79,14 +79,14 @@ namespace vtzero {
         return !(a==b);
     }
 
-    /// The command id type as specified in the vector tile spec
-    enum CommandId : uint32_t {
-        MOVE_TO = 1,
-        LINE_TO = 2,
-        CLOSE_PATH = 7
-    };
-
     namespace detail {
+
+        /// The command id type as specified in the vector tile spec
+        enum CommandId : uint32_t {
+            MOVE_TO = 1,
+            LINE_TO = 2,
+            CLOSE_PATH = 7
+        };
 
         inline constexpr uint32_t command_integer(const uint32_t id, const uint32_t count) noexcept {
             return (id & 0x7) | (count << 3);
