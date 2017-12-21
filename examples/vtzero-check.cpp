@@ -50,7 +50,7 @@ class CheckGeomHandler {
     vtzero::point m_prev_point{};
     int m_layer_num;
     int m_feature_num;
-    int32_t m_extent;
+    int64_t m_extent;
     bool m_is_first_point = false;
     int m_count = 0;
 
@@ -86,7 +86,7 @@ class CheckGeomHandler {
 
 public:
 
-    CheckGeomHandler(uint32_t extent, int layer_num, int feature_num) :
+    CheckGeomHandler(uint64_t extent, int layer_num, int feature_num) :
         m_layer_num(layer_num),
         m_feature_num(feature_num),
         m_extent(static_cast<int32_t>(extent)) {
