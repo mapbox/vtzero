@@ -86,10 +86,10 @@ class CheckGeomHandler {
 
 public:
 
-    CheckGeomHandler(uint64_t extent, int layer_num, int feature_num) :
+    CheckGeomHandler(uint32_t extent, int layer_num, int feature_num) :
         m_layer_num(layer_num),
         m_feature_num(feature_num),
-        m_extent(static_cast<int32_t>(extent)) {
+        m_extent(static_cast<int64_t>(extent)) {
     }
 
     // ----------------------------------------------------------------------
