@@ -221,7 +221,7 @@ fb.add_property("foo", "bar"); // add properties
 A feature can have any number of properties. They are added with the
 `add_property()` method called on the feature builder. There are two different
 ways of doing this. The *simple approach* which does all the work for you and
-the *advanced approach* which can be more performant, but you have to to some
+the *advanced approach* which can be more efficient, but you have to to some
 more work. It is recommended that you start out with the simple approach and
 only switch to the advanced approach once you have a working program and want
 to get the last bit of performance out of it.
@@ -303,7 +303,7 @@ In some cases you only have a few property keys and know them beforehand,
 then storing the key indexes in individual variables might work. But for
 values this usually doesn't make much sense, and if all your keys and values
 are only known at runtime, it doesn't work either. For this you need some kind
-of index datastructure mapping from keys/values to index values. You can
+of index data structure mapping from keys/values to index values. You can
 implement this yourself, but it is easier to use some classes provided by
 vtzero. Then the code looks like this:
 
@@ -335,7 +335,7 @@ For values this is more difficult. Basically there are two choices:
 1. Encode the value according to the vector tile encoding rules which results
    in a string and store this in the index. This is what the
    `value_index_internal` class does.
-2. Store the unencoded value in the index. The index lookup will be faster,
+2. Store the un-encoded value in the index. The index lookup will be faster,
    but you need a different index type for each value type. This is what the
    `value_index` classes do.
 
@@ -354,11 +354,11 @@ vtzero::value_index<vtzero::sint_value:type, int, std::map> index;
 Sometimes these generic indexes based on `std::map` or `std::unordered_map`
 are inefficient, that's why there are specialized indexes for special cases:
 
-* The `value_index_bool` class can only index bool values.
+* The `value_index_bool` class can only index boolean values.
 * The `value_index_small_uint` class can only index small unsigned integer
   values (up to `uint16_t`). It uses a vector internally, so if all your
-  numbers are small and densly packed, this is very efficient. This is
-  especially useful for enum types.
+  numbers are small and densely packed, this is very efficient. This is
+  especially useful for `enum` types.
 
 ## The `add_property()` function.
 

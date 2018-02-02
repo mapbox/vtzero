@@ -59,7 +59,7 @@ over the layers again:
 tile.reset_layer();
 ```
 
-Instead of using this external interator, you can use a different function with
+Instead of using this external iterator, you can use a different function with
 an internal iterator that calls a function defined by you for each layer. Your
 function must take a `layer&&` as parameter and return `true` if the iteration
 should continue and `false` otherwise:
@@ -125,7 +125,7 @@ while (auto feature = layer.next_feature()) {
 
 Use `reset_feature()` to restart the feature iterator from the beginning.
 
-Instead of using this external interator, you can use a different function with
+Instead of using this external iterator, you can use a different function with
 an internal iterator that calls a function defined by you for each feature.
 Your function must take a `feature&&` as parameter and return `true` if the
 iteration should continue and `false` otherwise:
@@ -160,7 +160,7 @@ if (feature.has_id()) {
 ```
 
 The `geometry()` method returns an object of the `geometry` class. It contains
-the geometry type and a reference to the (undecoded) geometry data. See a
+the geometry type and a reference to the (un-decoded) geometry data. See a
 later chapter on the details of decoding this geometry. You can also directly
 add this geometry to a new feature you are writing.
 
@@ -181,7 +181,7 @@ while (auto property = feature.next_property()) {
 
 Use `reset_property()` to restart the property iterator from the beginning.
 
-Instead of using this external interator, you can use a different function with
+Instead of using this external iterator, you can use a different function with
 an internal iterator that calls a function defined by you for each property.
 Your function must take a `property&&` as parameter and return `true` if the
 iteration should continue and `false` otherwise:
@@ -228,7 +228,7 @@ if (pvalue.type() == property_value_type::int_value)
 Instead of accessing the values this way, you'll often use the visitor
 interface. Here is an example where the `print_visitor` struct is used to print
 out the values. In this case one overload is used for all primitive types
-(double, float, int, uint, bool), one overload is used for the `string_value`
+(`double`, `float`, `int`, `uint`, `bool`), one overload is used for the `string_value`
 type which is encoded in a `data_view`. You must make sure your visitor handles
 all those types.
 
