@@ -1001,13 +1001,13 @@ namespace vtzero {
                           "call add_ring() before set_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "set_point() has to be called before properties are added");
-            m_num_points.decrement();
             if (m_start_ring) {
+                m_num_points.decrement();
                 m_first_point = p;
                 m_pbf_geometry.add_element(detail::command_move_to(1));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
-                m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value() - 1));
+                m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value()));
                 m_start_ring = false;
                 m_cursor = m_first_point;
             } else if (m_num_points.value() == 0) {
@@ -1015,6 +1015,7 @@ namespace vtzero {
                 // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
                 m_pbf_geometry.add_element(detail::command_close_path(1));
             } else {
+                m_num_points.decrement();
                 vtzero_assert(m_cursor != p); // XXX
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
@@ -1072,7 +1073,7 @@ namespace vtzero {
                           "Call add_ring() before you can call close_ring()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "close_ring() has to be called before properties are added");
-            vtzero_assert(m_num_points.value() == 1 &&
+            vtzero_assert(m_num_points.value() == 0 &&
                           "wrong number of points in ring");
             m_pbf_geometry.add_element(detail::command_close_path(1));
             m_num_points.decrement();
