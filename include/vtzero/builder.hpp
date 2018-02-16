@@ -976,7 +976,7 @@ namespace vtzero {
         void add_ring(const uint32_t count) {
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_ring() has to be called before properties are added");
-            vtzero_assert(count > 3 && count < (1ul << 29) && "add_ring() must be called with 3 < count < 2^29");
+            vtzero_assert(count > 2 && count < (1ul << 29) && "add_ring() must be called with 2 < count < 2^29");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -1096,7 +1096,7 @@ namespace vtzero {
          */
         template <typename TIter>
         void add_ring(TIter begin, TIter end) {
-            add_ring(check_num_points(std::distance(begin, end)));
+            add_ring(check_num_points(std::distance(begin, end)) - 1);
             for (; begin != end; ++begin) {
                 set_point(create_vtzero_point(*begin));
             }
@@ -1117,7 +1117,7 @@ namespace vtzero {
          */
         template <typename TIter>
         void add_ring(TIter begin, TIter end, uint32_t count) {
-            add_ring(count);
+            add_ring(count - 1);
             for (; begin != end; ++begin) {
                 set_point(*begin);
             }
@@ -1142,7 +1142,7 @@ namespace vtzero {
          */
         template <typename TContainer>
         void add_ring_from_container(const TContainer& container) {
-            add_ring(check_num_points(container.size()));
+            add_ring(check_num_points(container.size() - 1));
             for (const auto& element : container) {
                 set_point(element);
             }
