@@ -373,3 +373,17 @@ TEST_CASE("create encoded property values from different bool types") {
     REQUIRE(b1.hash() == b2.hash());
 }
 
+TEST_CASE("property equality comparison operator") {
+    vtzero::data_view k{"key"};
+    vtzero::encoded_property_value epv1{"value"};
+    vtzero::encoded_property_value epv2{"another value"};
+
+    vtzero::property_value pv1{epv1.data()};
+    vtzero::property_value pv2{epv2.data()};
+
+    vtzero::property p1{k, pv1};
+    vtzero::property p2{k, pv1};
+    vtzero::property p3{k, pv2};
+    REQUIRE(p1 == p2);
+    REQUIRE_FALSE(p1 == p3);
+}
