@@ -374,10 +374,10 @@ TEST_CASE("create encoded property values from different bool types") {
 }
 
 TEST_CASE("property equality comparison operator") {
-    vtzero::data_view k{"key"};
+    std::string k = "key";
+
     vtzero::encoded_property_value epv1{"value"};
     vtzero::encoded_property_value epv2{"another value"};
-
     vtzero::property_value pv1{epv1.data()};
     vtzero::property_value pv2{epv2.data()};
 
@@ -389,11 +389,11 @@ TEST_CASE("property equality comparison operator") {
 }
 
 TEST_CASE("property inequality comparison operator") {
-    vtzero::data_view k1{"key"};
-    vtzero::data_view k2{"another_key"};
+    std::string k1 = "key";
+    std::string k2 = "another_key";
+
     vtzero::encoded_property_value epv1{"value"};
     vtzero::encoded_property_value epv2{"another value"};
-
     vtzero::property_value pv1{epv1.data()};
     vtzero::property_value pv2{epv2.data()};
 
