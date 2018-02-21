@@ -81,7 +81,7 @@ namespace vtzero {
 
     /// properties are unequal if they do not contain them same key and value data.
     inline constexpr bool operator!=(const property& lhs, const property& rhs) noexcept {
-        return lhs.key() != rhs.key() || lhs.value() != rhs.value();
+        return !(lhs == rhs);
     }
 
 } // namespace vtzero
