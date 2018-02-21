@@ -82,14 +82,14 @@ namespace vtzero {
     namespace detail {
 
         /// The command id type as specified in the vector tile spec
-        enum CommandId : uint32_t {
+        enum class CommandId : uint32_t {
             MOVE_TO = 1,
             LINE_TO = 2,
             CLOSE_PATH = 7
         };
 
-        inline constexpr uint32_t command_integer(const uint32_t id, const uint32_t count) noexcept {
-            return (id & 0x7) | (count << 3);
+        inline constexpr uint32_t command_integer(CommandId id, const uint32_t count) noexcept {
+            return (static_cast<uint32_t>(id) & 0x7) | (count << 3);
         }
 
         inline constexpr uint32_t command_move_to(const uint32_t count) noexcept {
@@ -167,9 +167,6 @@ namespace vtzero {
             // maximum value for m_count before we throw an exception
             uint32_t m_max_count;
 
-            // the last command read
-            uint32_t m_command_id = 0;
-
             /**
              * The current count value is set from the CommandInteger and
              * then counted down with each next_point() call. So it must be
@@ -195,24 +192,24 @@ namespace vtzero {
                 return m_it == m_end;
             }
 
-            bool next_command(const uint32_t expected_command_id) {
+            bool next_command(const CommandId expected_command_id) {
                 vtzero_assert(m_count == 0);
 
                 if (m_it == m_end) {
                     return false;
                 }
 
-                m_command_id = get_command_id(*m_it);
-                if (m_command_id != expected_command_id) {
+                const auto command_id = get_command_id(*m_it);
+                if (command_id != static_cast<uint32_t>(expected_command_id)) {
                     throw geometry_exception{std::string{"expected command "} +
-                                             std::to_string(expected_command_id) +
+                                             std::to_string(static_cast<uint32_t>(expected_command_id)) +
                                              " but got " +
-                                             std::to_string(m_command_id)};
+                                             std::to_string(command_id)};
                 }
 
-                if (m_command_id == CommandId::CLOSE_PATH) {
+                if (expected_command_id == CommandId::CLOSE_PATH) {
                     // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
-                    if (detail::get_command_count(*m_it) != 1) {
+                    if (get_command_count(*m_it) != 1) {
                         throw geometry_exception{"ClosePath command count is not 1"};
                     }
                 } else {
