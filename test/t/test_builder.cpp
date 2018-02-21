@@ -318,3 +318,25 @@ TEST_CASE("Copy tile") {
     REQUIRE(vector_tile_equal(buffer, data));
 }
 
+TEST_CASE("Copy tile using geometry_feature_builder") {
+    const auto buffer = load_test_tile();
+    vtzero::vector_tile tile{buffer};
+
+    vtzero::tile_builder tbuilder;
+
+    while (auto layer = tile.next_layer()) {
+        vtzero::layer_builder lbuilder{tbuilder, layer};
+        while (auto feature = layer.next_feature()) {
+            vtzero::geometry_feature_builder fbuilder{lbuilder};
+            fbuilder.set_id(feature.id());
+            fbuilder.set_geometry(feature.geometry());
+            while (auto property = feature.next_property()) {
+                fbuilder.add_property(property.key(), property.value());
+            }
+        }
+    }
+
+    const std::string data = tbuilder.serialize();
+    REQUIRE(vector_tile_equal(buffer, data));
+}
+
