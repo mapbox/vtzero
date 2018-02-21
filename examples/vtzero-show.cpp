@@ -6,10 +6,11 @@
 
 *****************************************************************************/
 
-#include "clara.hpp"
 #include "utils.hpp"
 
 #include <vtzero/vector_tile.hpp>
+
+#include <clara.hpp>
 
 #include <cstdint>
 #include <exception>
