@@ -6,7 +6,8 @@
 
 language: generic
 
-sudo: false
+# LSAN doesn't work on container-based system
+sudo: required
 
 dist: trusty
 
