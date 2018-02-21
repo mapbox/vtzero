@@ -6,6 +6,7 @@
 
 *****************************************************************************/
 
+#include "clara.hpp"
 #include "utils.hpp"
 
 #include <vtzero/builder.hpp>
@@ -14,69 +15,63 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <getopt.h>
 #include <iostream>
 #include <limits>
 #include <string>
 
-static void print_help() {
-    std::cout << "vtzero-filter [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n\n"
-              << "Filter contents of vector tile.\n"
-              << "Options:\n"
-              << "  -h, --help         This help message\n"
-              << "  -o, --output=FILE  Write output to file FILE\n";
-}
-
-static void print_usage(const char* command) {
-    std::cerr << "Usage: " << command << " [OPTIONS] VECTOR-TILE LAYER-NUM|LAYER-NAME [ID]\n";
-}
-
 int main(int argc, char* argv[]) {
+    std::string filename;
+    std::string layer_num_or_name;
+    std::string idstr;
     std::string output_file{"filtered.mvt"};
 
-    static struct option long_options[] = {
-        {"help",         no_argument, nullptr, 'h'},
-        {"output", required_argument, nullptr, 'o'},
-        {nullptr, 0, nullptr, 0}
-    };
+    bool help = false;
 
-    while (true) {
-        const int c = getopt_long(argc, argv, "ho:", long_options, nullptr);
-        if (c == -1) {
-            break;
-        }
+    const auto cli
+        = clara::Opt(output_file, "FILE")
+            ["-o"]["--output"]
+            ("write output to FILE")
+        | clara::Help(help)
+        | clara::Arg(filename, "FILENAME").required()
+            ("vector tile")
+        | clara::Arg(layer_num_or_name, "LAYER-NUM|LAYER-NAME").required()
+            ("layer")
+        | clara::Arg(idstr, "ID")
+            ("feature_id");
 
-        switch (c) {
-            case 'h':
-                print_help();
-                return 0;
-            case 'o':
-                output_file = optarg;
-                break;
-            default:
-                return 1;
-        }
-    }
-
-    const int remaining_args = argc - optind;
-    if (remaining_args < 2 || remaining_args > 3) {
-        print_usage(argv[0]);
+    const auto result = cli.parse(clara::Args(argc, argv));
+    if (!result) {
+        std::cerr << "Error in command line: " << result.errorMessage() << '\n';
         return 1;
     }
 
-    const auto data = read_file(argv[optind]);
+    if (help) {
+        std::cout << cli
+                  << "\nFilter contents of vector tile.\n";
+        return 0;
+    }
 
+    if (filename.empty()) {
+        std::cerr << "Error in command line: Missing file name of vector tile to read\n";
+        return 1;
+    }
+
+    if (layer_num_or_name.empty()) {
+        std::cerr << "Error in command line: Missing layer number or name\n";
+        return 1;
+    }
+
+    const auto data = read_file(filename);
     vtzero::vector_tile tile{data};
 
-    auto layer = get_layer(tile, argv[optind + 1]);
+    auto layer = get_layer(tile, layer_num_or_name);
     std::cerr << "Found layer: " << std::string(layer.name()) << "\n";
 
     vtzero::tile_builder tb;
 
-    if (remaining_args == 2) {
+    if (idstr.empty()) {
         tb.add_existing_layer(layer);
     } else {
-        std::string idstr{argv[optind + 2]};
         char* str_end = nullptr;
         const int64_t id = std::strtoll(idstr.c_str(), &str_end, 10);
         if (str_end != idstr.c_str() + idstr.size()) {

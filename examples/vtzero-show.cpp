@@ -6,29 +6,15 @@
 
 *****************************************************************************/
 
+#include "clara.hpp"
 #include "utils.hpp"
 
 #include <vtzero/vector_tile.hpp>
 
 #include <cstdint>
 #include <exception>
-#include <getopt.h>
 #include <iostream>
 #include <string>
-
-static void print_help() {
-    std::cout << "vtzero-show [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n\n"
-              << "Show contents of vector tile.\n\n"
-              << "Options:\n"
-              << "  -h, --help         This help message\n"
-              << "  -l, --layers       Show layer overview with feature count\n"
-              << "  -t, --tables       Also print key/value tables\n"
-              << "  -T, --value-types  Also show value types\n";
-}
-
-static void print_usage(const char* command) {
-    std::cerr << "Usage: " << command << " [OPTIONS] VECTOR-TILE [LAYER-NUM|LAYER-NAME]\n";
-}
 
 class geom_handler {
 
@@ -181,56 +167,54 @@ static void print_layer_overview(const vtzero::layer& layer) {
 }
 
 int main(int argc, char* argv[]) {
+    std::string filename;
+    std::string layer_num_or_name;
     bool layer_overview = false;
     bool print_tables = false;
     bool print_value_types = false;
+    bool help = false;
 
-    static struct option long_options[] = {
-        {"help",        no_argument, nullptr, 'h'},
-        {"layers",      no_argument, nullptr, 'l'},
-        {"tables",      no_argument, nullptr, 't'},
-        {"value-types", no_argument, nullptr, 'T'},
-        {nullptr, 0, nullptr, 0}
-    };
+    const auto cli
+        = clara::Opt(layer_overview)
+            ["-l"]["--layers"]
+            ("show layer overview with feature count")
+        | clara::Opt(print_tables)
+            ["-t"]["--tables"]
+            ("also print key/value tables")
+        | clara::Opt(print_value_types)
+            ["-T"]["--value-types"]
+            ("also show value types")
+        | clara::Help(help)
+        | clara::Arg(filename, "FILENAME").required()
+            ("vector tile")
+        | clara::Arg(layer_num_or_name, "LAYER-NUM|LAYER-NAME")
+            ("layer");
 
-    while (true) {
-        const int c = getopt_long(argc, argv, "hltT", long_options, nullptr);
-        if (c == -1) {
-            break;
-        }
-
-        switch (c) {
-            case 'h':
-                print_help();
-                return 0;
-            case 'l':
-                layer_overview = true;
-                break;
-            case 't':
-                print_tables = true;
-                break;
-            case 'T':
-                print_value_types = true;
-                break;
-            default:
-                return 1;
-        }
+    const auto result = cli.parse(clara::Args(argc, argv));
+    if (!result) {
+        std::cerr << "Error in command line: " << result.errorMessage() << '\n';
+        return 1;
     }
 
-    const int remaining_args = argc - optind;
-    if (remaining_args < 1 || remaining_args > 2) {
-        print_usage(argv[0]);
+    if (help) {
+        std::cout << cli
+                  << "\nShow contents of vector tile FILENAME.\n";
+        return 0;
+    }
+
+    if (filename.empty()) {
+        std::cerr << "Error in command line: Missing file name of vector tile to read\n";
         return 1;
     }
 
     int layer_num = 0;
     int feature_num = 0;
     try {
-        const auto data = read_file(argv[optind]);
+        const auto data = read_file(filename);
 
         vtzero::vector_tile tile{data};
 
-        if (remaining_args == 1) {
+        if (layer_num_or_name.empty()) {
             while (auto layer = tile.next_layer()) {
                 if (layer_overview) {
                     print_layer_overview(layer);
@@ -240,7 +224,7 @@ int main(int argc, char* argv[]) {
                 ++layer_num;
             }
         } else {
-            auto layer = get_layer(tile, argv[optind + 1]);
+            auto layer = get_layer(tile, layer_num_or_name);
             if (layer_overview) {
                 print_layer_overview(layer);
             } else {
