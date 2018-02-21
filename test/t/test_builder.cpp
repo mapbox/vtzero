@@ -340,3 +340,32 @@ TEST_CASE("Copy tile using geometry_feature_builder") {
     REQUIRE(vector_tile_equal(buffer, data));
 }
 
+TEST_CASE("Build point feature from container with too many points") {
+
+    // fake container pretending to contain too many points
+    struct test_container {
+
+        std::size_t size() const noexcept {
+            return 1l << 29;
+        }
+
+        vtzero::point* begin() const noexcept {
+            return nullptr;
+        }
+
+        vtzero::point* end() const noexcept {
+            return nullptr;
+        }
+
+    };
+
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+
+    fbuilder.set_id(1);
+
+    test_container tc;
+    REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), const vtzero::geometry_exception&);
+}
+
