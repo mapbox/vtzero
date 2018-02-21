@@ -28,7 +28,7 @@ set_tests_properties(vtzero-filter-empty PROPERTIES
 add_test(NAME vtzero-filter-help
             COMMAND vtzero-filter -h)
 set_tests_properties(vtzero-filter-help PROPERTIES
-                        PASS_REGULAR_EXPRESSION "^usage:\n  vtzero-filter ")
+                        PASS_REGULAR_EXPRESSION "^usage:\n  vtzero-filter")
 
 add_test(NAME vtzero-filter-layer
             COMMAND vtzero-filter -o ${CMAKE_CURRENT_BINARY_DIR}/bridges.mvt ${TEST_FILE} bridge)
@@ -53,7 +53,7 @@ set_tests_properties(vtzero-show-empty PROPERTIES
 add_test(NAME vtzero-show-help
             COMMAND vtzero-show -h)
 set_tests_properties(vtzero-show-help PROPERTIES
-                        PASS_REGULAR_EXPRESSION "^usage:\n  vtzero-show ")
+                        PASS_REGULAR_EXPRESSION "^usage:\n  vtzero-show")
 
 add_test(NAME vtzero-show-layers
             COMMAND vtzero-show -l ${TEST_FILE})
