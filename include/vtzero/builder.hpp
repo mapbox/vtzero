@@ -1013,7 +1013,7 @@ namespace vtzero {
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
                 m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value() - 1));
                 m_start_ring = false;
-                m_cursor = m_first_point;
+                m_cursor = p;
             } else if (m_num_points.value() == 0) {
                 vtzero_assert(m_first_point == p); // XXX
                 // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
