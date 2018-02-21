@@ -369,3 +369,12 @@ TEST_CASE("Build point feature from container with too many points") {
     REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), const vtzero::geometry_exception&);
 }
 
+TEST_CASE("Moving a feature builder is allowed") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+
+    auto fbuilder2 = std::move(fbuilder);
+    vtzero::point_feature_builder fbuilder3{std::move(fbuilder2)};
+}
+
