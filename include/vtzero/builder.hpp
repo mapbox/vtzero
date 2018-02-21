@@ -500,9 +500,9 @@ namespace vtzero {
      * creating an object of this class you can add data to the feature in a
      * specific order:
      *
-     * * Optionally add the ID using setid().
-     * * Add the (multi)point geometry using add_point(), add_points(), and
-     *   set_point().
+     * * Optionally add the ID using set_id().
+     * * Add the (multi)point geometry using add_point(), add_points() and
+     *   set_point(), or add_points_from_container().
      * * Optionally add any number of properties using add_property().
      *
      * @code
@@ -733,7 +733,7 @@ namespace vtzero {
      * After creating an object of this class you can add data to the
      * feature in a specific order:
      *
-     * * Optionally add the ID using setid().
+     * * Optionally add the ID using set_id().
      * * Add the (multi)linestring geometry using add_linestring() or
      *   add_linestring_from_container().
      * * Optionally add any number of properties using add_property().
@@ -933,7 +933,7 @@ namespace vtzero {
      * After creating an object of this class you can add data to the
      * feature in a specific order:
      *
-     * * Optionally add the ID using setid().
+     * * Optionally add the ID using set_id().
      * * Add the (multi)polygon geometry using add_ring() or
      *   add_ring_from_container().
      * * Optionally add any number of properties using add_property().
@@ -1158,7 +1158,7 @@ namespace vtzero {
      * creating an object of this class you can add data to the feature in a
      * specific order:
      *
-     * * Optionally add the ID using setid().
+     * * Optionally add the ID using set_id().
      * * Add the geometry using set_geometry().
      * * Optionally add any number of properties using add_property().
      *
@@ -1169,7 +1169,7 @@ namespace vtzero {
      * vtzero::layer_builder lb{tb};
      * vtzero::geometry_feature_builder fb{lb};
      * fb.set_id(123); // optionally set ID
-     * fb.add_geometry(geom) // add geometry
+     * fb.set_geometry(geom) // add geometry
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
