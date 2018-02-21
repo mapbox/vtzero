@@ -652,6 +652,9 @@ namespace vtzero {
             set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
+// These functions have been disabled, see https://github.com/mapbox/vtzero/issues/22
+// for details. Please report there if you are using them.
+#if 0
         /**
          * Add the points from an iterator range as multipoint geometry
          * to this feature. This method will determine the number of points in
@@ -697,6 +700,7 @@ namespace vtzero {
             }
             vtzero_assert(m_num_points.value() == 0 && "Iterator must yield exactly count points");
         }
+#endif
 
         /**
          * Add the points from the specified container as multipoint geometry

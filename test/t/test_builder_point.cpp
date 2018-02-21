@@ -231,13 +231,13 @@ TEST_CASE("Add points from container") {
     {
         vtzero::point_feature_builder fbuilder{lbuilder};
 
-        SECTION("using iterators") {
+/*        SECTION("using iterators") {
             fbuilder.add_points(points.cbegin(), points.cend());
         }
 
         SECTION("using iterators and size") {
             fbuilder.add_points(points.cbegin(), points.cend(), static_cast<uint32_t>(points.size()));
-        }
+        }*/
 
         SECTION("using container directly") {
             fbuilder.add_points_from_container(points);
@@ -262,7 +262,7 @@ TEST_CASE("Add points from container") {
 
     REQUIRE(handler.data == points);
 }
-
+/*
 TEST_CASE("Add points from iterator with wrong count throws assert") {
     const std::vector<vtzero::point> points = {{10, 20}, {20, 30}, {30, 40}};
 
@@ -273,5 +273,5 @@ TEST_CASE("Add points from iterator with wrong count throws assert") {
     REQUIRE_THROWS_AS(fbuilder.add_points(points.cbegin(),
                                           points.cend(),
                                           static_cast<uint32_t>(points.size() + 1)), const assert_error&);
-}
+}*/
 
