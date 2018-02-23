@@ -393,12 +393,12 @@ namespace vtzero {
     public:
 
         /**
-         * The destructor will commit all the details added to the feature
-         * to the layer builder.
+         * If the feature was not committed, the destructor will roll back all
+         * the changes.
          */
         ~feature_builder() {
             try {
-                commit();
+                rollback();
             } catch (...) {
                 // ignore exceptions
             }
@@ -425,6 +425,8 @@ namespace vtzero {
          * @param id The ID.
          */
         void set_id(uint64_t id) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call set_id() after commit() or rollback()");
             vtzero_assert(!m_pbf_geometry.valid() &&
                           !m_pbf_tags.valid() &&
                           "Call set_id() before setting the geometry or adding properties");
@@ -440,6 +442,8 @@ namespace vtzero {
          */
         template <typename TProp>
         void add_property(TProp&& prop) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call add_property() after commit() or rollback()");
             prepare_to_add_property();
             add_property_impl(std::forward<TProp>(prop));
         }
@@ -457,20 +461,25 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_property(TKey&& key, TValue&& value) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call add_property() after commit() or rollback()");
             prepare_to_add_property();
             add_property_impl(std::forward<TKey>(key), std::forward<TValue>(value));
         }
 
         /**
-         * Commit this feature. Optionally call this after all the details of
-         * this feature have been added. If this is not called, the feature
-         * will be committed when the destructor of the feature_builder is
+         * Commit this feature. Call this after all the details of this
+         * feature have been added. If this is not called, the feature
+         * will be rolled back when the destructor of the feature_builder is
          * called.
+         *
+         * Once a feature has been committed or rolled back, further calls
+         * to commit() or rollback() don't do anything.
          */
         void commit() {
             if (m_feature_writer.valid()) {
-                vtzero_assert_in_noexcept_function((m_pbf_geometry.valid() || m_pbf_tags.valid()) &&
-                                                   "Can not call commit before geometry was added");
+                vtzero_assert((m_pbf_geometry.valid() || m_pbf_tags.valid()) &&
+                              "Can not call commit before geometry was added");
                 if (m_pbf_geometry.valid()) {
                     m_pbf_geometry.commit();
                 }
@@ -481,16 +490,20 @@ namespace vtzero {
         /**
          * Rollback this feature. Removed all traces of this feature from
          * the layer_builder. Useful when you started creating a feature
-         * but then found out that its geometry is invalid or something like
-         * it.
+         * but then find out that its geometry is invalid or something like
+         * it. This will also happen automatically when the feature_builder
+         * is destructed and commit() hasn't been called on it.
+         *
+         * Once a feature has been committed or rolled back, further calls
+         * to commit() or rollback() don't do anything.
          */
         void rollback() {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call rollback() after commit()");
-            if (m_pbf_geometry.valid()) {
-                m_pbf_geometry.commit();
+            if (m_feature_writer.valid()) {
+                if (m_pbf_geometry.valid()) {
+                    m_pbf_geometry.rollback();
+                }
+                do_rollback();
             }
-            do_rollback();
         }
 
     }; // class feature_builder
@@ -537,6 +550,8 @@ namespace vtzero {
          *      this method.
          */
         void add_point(const point p) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_geometry.valid() &&
                           !m_pbf_tags.valid() &&
                           "add_point() can only be called once");
@@ -586,6 +601,8 @@ namespace vtzero {
          *      this method.
          */
         void add_points(uint32_t count) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_geometry.valid() &&
                           "can not call add_points() twice or mix with add_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
@@ -608,6 +625,8 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(m_pbf_geometry.valid() &&
                           "call add_points() before set_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
@@ -777,6 +796,8 @@ namespace vtzero {
          *      this method.
          */
         void add_linestring(const uint32_t count) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_linestring() has to be called before properties are added");
             vtzero_assert(count > 1 && count < (1ul << 29) && "add_linestring() must be called with 1 < count < 2^29");
@@ -801,6 +822,8 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(m_pbf_geometry.valid() &&
                           "call add_linestring() before set_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
@@ -978,6 +1001,8 @@ namespace vtzero {
          *      this method.
          */
         void add_ring(const uint32_t count) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_ring() has to be called before properties are added");
             vtzero_assert(count > 3 && count < (1ul << 29) && "add_ring() must be called with 3 < count < 2^29");
@@ -1001,6 +1026,8 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(m_pbf_geometry.valid() &&
                           "call add_ring() before set_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
@@ -1072,6 +1099,8 @@ namespace vtzero {
          *      this method.
          */
         void close_ring() {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(m_pbf_geometry.valid() &&
                           "Call add_ring() before you can call close_ring()");
             vtzero_assert(!m_pbf_tags.valid() &&
@@ -1187,12 +1216,12 @@ namespace vtzero {
         }
 
         /**
-         * The destructor will commit all the details added to the feature
-         * to the layer builder.
+         * If the feature was not committed, the destructor will roll back all
+         * the changes.
          */
         ~geometry_feature_builder() noexcept {
             try {
-                do_commit();
+                rollback();
             } catch (...) {
                 // ignore exceptions
             }
@@ -1219,6 +1248,8 @@ namespace vtzero {
          * @param id The ID.
          */
         void set_id(uint64_t id) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call set_id() after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid());
             m_feature_writer.add_uint64(detail::pbf_feature::id, id);
         }
@@ -1232,6 +1263,8 @@ namespace vtzero {
          * @param geometry The geometry.
          */
         void set_geometry(const geometry& geometry) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid());
             m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
             m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
@@ -1247,6 +1280,8 @@ namespace vtzero {
          */
         template <typename TProp>
         void add_property(TProp&& prop) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call add_property() after commit() or rollback()");
             add_property_impl(std::forward<TProp>(prop));
         }
 
@@ -1263,7 +1298,42 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_property(TKey&& key, TValue&& value) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call add_property() after commit() or rollback()");
             add_property_impl(std::forward<TKey>(key), std::forward<TValue>(value));
+        }
+
+        /**
+         * Commit this feature. Call this after all the details of this
+         * feature have been added. If this is not called, the feature
+         * will be rolled back when the destructor of the feature_builder is
+         * called.
+         *
+         * Once a feature has been committed or rolled back, further calls
+         * to commit() or rollback() don't do anything.
+         */
+        void commit() {
+            if (m_feature_writer.valid()) {
+                vtzero_assert(m_pbf_tags.valid() &&
+                              "Can not call commit before geometry was added");
+                do_commit();
+            }
+        }
+
+        /**
+         * Rollback this feature. Removed all traces of this feature from
+         * the layer_builder. Useful when you started creating a feature
+         * but then find out that its geometry is invalid or something like
+         * it. This will also happen automatically when the feature_builder
+         * is destructed and commit() hasn't been called on it.
+         *
+         * Once a feature has been committed or rolled back, further calls
+         * to commit() or rollback() don't do anything.
+         */
+        void rollback() {
+            if (m_feature_writer.valid()) {
+                do_rollback();
+            }
         }
 
     }; // class geometry_feature_builder

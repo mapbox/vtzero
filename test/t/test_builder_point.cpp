@@ -61,9 +61,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
             }
         }
 
-        if (with_id) {
-            fbuilder.commit();
-        }
+        fbuilder.commit();
     }
 
     const std::string data = tbuilder.serialize();
@@ -128,9 +126,11 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     fbuilder.set_point(10, 20);
     fbuilder.set_point(vtzero::point{20, 30});
     fbuilder.set_point(mypoint{30, 40});
+
     if (with_prop) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
+
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
@@ -242,6 +242,8 @@ TEST_CASE("Add points from container") {
         SECTION("using container directly") {
             fbuilder.add_points_from_container(points);
         }
+
+        fbuilder.commit();
     }
 
     const std::string data = tbuilder.serialize();

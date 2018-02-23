@@ -117,26 +117,23 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
         fbuilder.commit();
     }
 
-    { // implicit commit after geometry
+    { // extra commits or rollbacks are okay but no other calls
         vtzero::point_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(3);
         fbuilder.add_point(10, 10);
-    }
-
-    { // implicit commit after properties
-        vtzero::point_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(4);
-        fbuilder.add_point(10, 10);
-        fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
-    }
-
-    { // multiple commits is okay
-        vtzero::point_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(5);
-        fbuilder.add_point(10, 10);
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
         fbuilder.commit();
-        fbuilder.commit();
+
+        SECTION("superfluous commit()") {
+            fbuilder.commit();
+        }
+        SECTION("superfluous rollback()") {
+            fbuilder.rollback();
+        }
+
+        REQUIRE_THROWS_AS(fbuilder.set_id(10), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_point(20, 20), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), const assert_error&);
     }
 
     const std::string data = tbuilder.serialize();
@@ -148,6 +145,8 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
     while (auto feature = layer.next_feature()) {
         REQUIRE(feature.id() == n++);
     }
+
+    REQUIRE(n == 4);
 }
 
 TEST_CASE("Committing a feature fails with assert if no geometry was added") {
@@ -156,27 +155,13 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
 
     SECTION("explicit immediate commit") {
         vtzero::point_feature_builder fbuilder{lbuilder};
-        REQUIRE_ASSERT(fbuilder.commit());
+        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
     }
 
     SECTION("explicit commit after setting id") {
         vtzero::point_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(2);
-        REQUIRE_ASSERT(fbuilder.commit());
-    }
-
-    SECTION("implicit immediate commit") {
-        const auto lambda = [&lbuilder](){
-            vtzero::point_feature_builder fbuilder{lbuilder};
-        };
-        REQUIRE_ASSERT(lambda());
-    }
-    SECTION("implicit commit after setting id") {
-        const auto lambda = [&lbuilder](){
-            vtzero::point_feature_builder fbuilder{lbuilder};
-            fbuilder.set_id(2);
-        };
-        REQUIRE_ASSERT(lambda());
+        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
     }
 }
 
@@ -199,29 +184,43 @@ TEST_CASE("Rollback feature") {
 
     { // rollback after setting id
         vtzero::point_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(2);
+        fbuilder.set_id(3);
         fbuilder.rollback();
     }
 
     { // rollback after geometry
         vtzero::point_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(2);
+        fbuilder.set_id(4);
         fbuilder.add_point(20, 20);
         fbuilder.rollback();
     }
 
     { // rollback after properties
         vtzero::point_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(2);
+        fbuilder.set_id(5);
         fbuilder.add_point(20, 20);
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
         fbuilder.rollback();
     }
 
+    { // implicit rollback after geometry
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(6);
+        fbuilder.add_point(10, 10);
+    }
+
+    { // implicit rollback after properties
+        vtzero::point_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(7);
+        fbuilder.add_point(10, 10);
+        fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
+    }
+
     {
         vtzero::point_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(3);
+        fbuilder.set_id(8);
         fbuilder.add_point(30, 30);
+        fbuilder.commit();
     }
 
     const std::string data = tbuilder.serialize();
@@ -233,21 +232,10 @@ TEST_CASE("Rollback feature") {
     REQUIRE(feature.id() == 1);
 
     feature = layer.next_feature();
-    REQUIRE(feature.id() == 3);
+    REQUIRE(feature.id() == 8);
 
     feature = layer.next_feature();
     REQUIRE_FALSE(feature);
-}
-
-TEST_CASE("Rolling back an already committed feature fails with asserts") {
-    vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
-
-    vtzero::point_feature_builder fbuilder{lbuilder};
-    fbuilder.set_id(1);
-    fbuilder.add_point(10, 10);
-    fbuilder.commit();
-    REQUIRE_THROWS_AS(fbuilder.rollback(), const assert_error&);
 }
 
 static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
@@ -333,11 +321,51 @@ TEST_CASE("Copy tile using geometry_feature_builder") {
             while (auto property = feature.next_property()) {
                 fbuilder.add_property(property.key(), property.value());
             }
+            fbuilder.commit();
         }
     }
 
     const std::string data = tbuilder.serialize();
     REQUIRE(vector_tile_equal(buffer, data));
+}
+
+TEST_CASE("Copy only point geometries using geometry_feature_builder") {
+    const auto buffer = load_test_tile();
+    vtzero::vector_tile tile{buffer};
+
+    vtzero::tile_builder tbuilder;
+
+    int n = 0;
+    while (auto layer = tile.next_layer()) {
+        vtzero::layer_builder lbuilder{tbuilder, layer};
+        while (auto feature = layer.next_feature()) {
+            vtzero::geometry_feature_builder fbuilder{lbuilder};
+            fbuilder.set_id(feature.id());
+            if (feature.geometry().type() == vtzero::GeomType::POINT) {
+                fbuilder.set_geometry(feature.geometry());
+                while (auto property = feature.next_property()) {
+                    fbuilder.add_property(property.key(), property.value());
+                }
+                fbuilder.commit();
+                ++n;
+            } else {
+                fbuilder.rollback();
+            }
+        }
+    }
+    REQUIRE(n == 17);
+
+    const std::string data = tbuilder.serialize();
+
+    n = 0;
+    vtzero::vector_tile result_tile{data};
+    while (auto layer = result_tile.next_layer()) {
+        while (auto feature = layer.next_feature()) {
+            ++n;
+        }
+    }
+
+    REQUIRE(n == 17);
 }
 
 TEST_CASE("Build point feature from container with too many points") {

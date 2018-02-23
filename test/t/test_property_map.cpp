@@ -16,13 +16,14 @@ TEST_CASE("property map") {
     vtzero::tile_builder tile;
     vtzero::layer_builder layer_points{tile, "points"};
     {
-        vtzero::point_feature_builder feature{layer_points};
-        feature.set_id(1);
-        feature.add_points(1);
-        feature.set_point(10, 10);
-        feature.add_property("foo", "bar");
-        feature.add_property("x", "y");
-        feature.add_property("abc", "def");
+        vtzero::point_feature_builder fbuilder{layer_points};
+        fbuilder.set_id(1);
+        fbuilder.add_points(1);
+        fbuilder.set_point(10, 10);
+        fbuilder.add_property("foo", "bar");
+        fbuilder.add_property("x", "y");
+        fbuilder.add_property("abc", "def");
+        fbuilder.commit();
     }
 
     std::string data = tile.serialize();

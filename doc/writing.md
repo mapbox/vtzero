@@ -109,18 +109,20 @@ vtzero::layer_builder lbuilder{...};
     // add the properties
     fbuilder.add_property("highway", "primary");
     fbuilder.add_property("maxspeed", 80);
+    // call commit() when you are done
+    fbuilder.commit()
 }
 ```
 
-Once the feature builder is destructed, the feature is "committed" to the
-layer. Instead you can also call `commit()` on the feature builder to do this.
-(After calling `commit()` you can't change the feature builder object any
-more.)
+You have to call `commit()` on the feature builder object after you set all the
+data to actually add it to the layer. If you don't do this, the feature will
+not be added to the layer! This can be useful, for instance, if you detect that
+you have an invalid geometry while you are adding the geometry to the feature
+builder. In that case you can call `rollback()` explicitly or just let the
+feature builder go out of scope and it will do the rollback automatically.
 
-If you decide that you do not want to add this feature to the layer after all,
-you can call `rollback()` on the feature builder. This can happen for instance
-if you detect that you have an invalid geometry while you are adding the
-geometry to the feature builder.
+Only the first call to `commit()` or `rollback()` will take effect, any further
+calls to these functions on the same feature builder object are ignored.
 
 ## Adding a geometry to the feature
 
@@ -213,6 +215,7 @@ vtzero::geometry_feature_builder fb{lb};
 fb.set_id(123); // optionally set ID
 fb.add_geometry(geom) // add geometry
 fb.add_property("foo", "bar"); // add properties
+fb.commit();
 ...
 ```
 

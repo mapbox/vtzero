@@ -51,9 +51,7 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
             fbuilder.add_property("foo", "bar");
         }
 
-        if (with_id) {
-            fbuilder.commit();
-        }
+        fbuilder.commit();
     }
 
     const std::string data = tbuilder.serialize();
@@ -246,6 +244,8 @@ TEST_CASE("Add polygon from container") {
         SECTION("using container directly") {
             fbuilder.add_ring_from_container(points[0]);
         }
+
+        fbuilder.commit();
     }
 
     const std::string data = tbuilder.serialize();

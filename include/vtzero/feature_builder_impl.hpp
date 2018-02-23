@@ -98,15 +98,13 @@ namespace vtzero {
                 if (m_pbf_tags.valid()) {
                     m_pbf_tags.commit();
                 }
-                if (m_feature_writer.valid()) {
-                    m_feature_writer.commit();
-                    m_layer->increment_feature_count();
-                }
+                m_feature_writer.commit();
+                m_layer->increment_feature_count();
             }
 
             void do_rollback() {
                 if (m_pbf_tags.valid()) {
-                    m_pbf_tags.commit();
+                    m_pbf_tags.rollback();
                 }
                 m_feature_writer.rollback();
             }
