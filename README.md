@@ -40,7 +40,7 @@ Then, inside the `vtzero` directory do:
 git submodule update --init
 ```
 
-Finally, to build the examples do:
+Finally, to build the examples and tests do:
 
 ```
 mkdir build
