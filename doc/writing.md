@@ -144,15 +144,7 @@ Call `add_points()` with the number of points in the geometry as only argument.
 After that call `set_point()` for each of those points. `set_point()` has
 multiple overloads just like the `add_point()` method described above.
 
-There are two other versions of the `add_points()` function. They take two
-iterators defining a range to get the points from. Dereferencing those
-iterators must yield a `vtzero::point` or something convertible to it. One
-of these functions takes a third argument, the number of points the iterator
-will yield. If this is not available `std::distance(begin, end)` is called
-which internally by the `add_points()` function which might be slow depending
-on your iterator type.
-
-There is also a `add_points_from_container()` function which copies the
+There is also the `add_points_from_container()` function which copies the
 point from any container type supporting the `size()` function and which
 iterator yields a `vtzero::point` or something convertible to it.
 
