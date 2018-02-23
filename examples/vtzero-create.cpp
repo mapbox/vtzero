@@ -72,7 +72,7 @@ int main() {
         feature.set_point(10, 20);
         feature.set_point(vtzero::point{20, 20});
         std::vector<vtzero::point> points = {{11, 11}, {12, 13}};
-        feature.add_linestring(points.begin(), points.end());
+        feature.add_linestring_from_container(points);
         feature.add_property("highway", "primary");
         feature.add_property(std::string{"maxspeed"}, maxspeed_index(50));
     }

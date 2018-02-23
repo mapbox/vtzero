@@ -255,6 +255,7 @@ TEST_CASE("Add polygon from container") {
     {
         vtzero::polygon_feature_builder fbuilder{lbuilder};
 
+#if 0
         SECTION("using iterators") {
             fbuilder.add_ring(points[0].cbegin(), points[0].cend());
         }
@@ -262,6 +263,7 @@ TEST_CASE("Add polygon from container") {
         SECTION("using iterators and size") {
             fbuilder.add_ring(points[0].cbegin(), points[0].cend(), static_cast<uint32_t>(points[0].size()));
         }
+#endif
 
         SECTION("using container directly") {
             fbuilder.add_ring_from_container(points[0]);
@@ -289,6 +291,7 @@ TEST_CASE("Add polygon from container") {
     REQUIRE(handler.data == points);
 }
 
+#if 0
 TEST_CASE("Add polygon from iterator with wrong count throws assert") {
     const std::vector<vtzero::point> points = {{10, 20}, {20, 30}, {30, 40}, {10, 20}};
 
@@ -300,4 +303,5 @@ TEST_CASE("Add polygon from iterator with wrong count throws assert") {
                                         points.cend(),
                                         static_cast<uint32_t>(points.size() + 1)), const assert_error&);
 }
+#endif
 
