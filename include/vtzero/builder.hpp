@@ -815,6 +815,10 @@ namespace vtzero {
          *
          * @param p The point.
          *
+         * @throws geometry_exception if the point set is the same as the
+         *         previous point. This would create zero-length segments
+         *         which are not allowed according to the vector tile spec.
+         *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_linestring(count).
          *
@@ -836,7 +840,9 @@ namespace vtzero {
                 m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value()));
                 m_start_line = false;
             } else {
-                vtzero_assert(p != m_cursor); // no zero-length segments
+                if (p == m_cursor) {
+                    throw geometry_exception{"Zero-length segments in linestrings are not allowed."};
+                }
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
             }
@@ -849,6 +855,10 @@ namespace vtzero {
          *
          * @param x X coordinate of the point to set.
          * @param y Y coordinate of the point to set.
+         *
+         * @throws geometry_exception if the point set is the same as the
+         *         previous point. This would create zero-length segments
+         *         which are not allowed according to the vector tile spec.
          *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_linestring(count).
@@ -867,6 +877,10 @@ namespace vtzero {
          * @tparam TPoint A type that can be converted to vtzero::point using
          *         the create_vtzero_point function.
          * @param p The point to add.
+         *
+         * @throws geometry_exception if the point set is the same as the
+         *         previous point. This would create zero-length segments
+         *         which are not allowed according to the vector tile spec.
          *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_linestring(count).
@@ -891,6 +905,10 @@ namespace vtzero {
          * @param begin Iterator to the beginning of the range.
          * @param end Iterator one past the end of the range.
          *
+         * @throws geometry_exception If there are more than 2^32-1 members
+         *         in the range or if two consecutive points in the range
+         *         are identical.
+         *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
@@ -912,6 +930,9 @@ namespace vtzero {
          * @param begin Iterator to the beginning of the range.
          * @param end Iterator one past the end of the range.
          * @param count The number of points in the range.
+         *
+         * @throws geometry_exception If two consecutive points in the
+         *         range are identical.
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
@@ -936,7 +957,8 @@ namespace vtzero {
          * @param container The container to read the points from.
          *
          * @throws geometry_exception If there are more than 2^32-1 members in
-         *         the container.
+         *         the container or if two consecutive points in the container
+         *         are identical.
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
@@ -1019,6 +1041,13 @@ namespace vtzero {
          *
          * @param p The point.
          *
+         * @throws geometry_exception if the point set is the same as the
+         *         previous point. This would create zero-length segments
+         *         which are not allowed according to the vector tile spec.
+         *         This exception is also thrown when the last point in the
+         *         ring is not equal to the first point, because this would
+         *         not create a closed ring.
+         *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_ring(count).
          *
@@ -1042,11 +1071,15 @@ namespace vtzero {
                 m_start_ring = false;
                 m_cursor = p;
             } else if (m_num_points.value() == 0) {
-                vtzero_assert(m_first_point == p); // XXX
+                if (p != m_first_point) {
+                    throw geometry_exception{"Last point in a ring must be the same as the first point."};
+                }
                 // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
                 m_pbf_geometry.add_element(detail::command_close_path());
             } else {
-                vtzero_assert(m_cursor != p); // XXX
+                if (p == m_cursor) {
+                    throw geometry_exception{"Zero-length segments in linestrings are not allowed."};
+                }
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
                 m_cursor = p;
@@ -1058,6 +1091,13 @@ namespace vtzero {
          *
          * @param x X coordinate of the point to set.
          * @param y Y coordinate of the point to set.
+         *
+         * @throws geometry_exception if the point set is the same as the
+         *         previous point. This would create zero-length segments
+         *         which are not allowed according to the vector tile spec.
+         *         This exception is also thrown when the last point in the
+         *         ring is not equal to the first point, because this would
+         *         not create a closed ring.
          *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_ring(count).
@@ -1075,6 +1115,13 @@ namespace vtzero {
          * @tparam TPoint A type that can be converted to vtzero::point using
          *         the create_vtzero_point function.
          * @param p The point to add.
+         *
+         * @throws geometry_exception if the point set is the same as the
+         *         previous point. This would create zero-length segments
+         *         which are not allowed according to the vector tile spec.
+         *         This exception is also thrown when the last point in the
+         *         ring is not equal to the first point, because this would
+         *         not create a closed ring.
          *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_ring(count).
@@ -1123,6 +1170,11 @@ namespace vtzero {
          * @param begin Iterator to the beginning of the range.
          * @param end Iterator one past the end of the range.
          *
+         * @throws geometry_exception If there are more than 2^32-1 members in
+         *         the range or if two consecutive points in the range are
+         *         identical or if the last point is not the same as the
+         *         first point.
+         *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
          */
@@ -1143,6 +1195,10 @@ namespace vtzero {
          * @param begin Iterator to the beginning of the range.
          * @param end Iterator one past the end of the range.
          * @param count The number of points in the range.
+         *
+         * @throws geometry_exception If two consecutive points in the range
+         *         are identical or if the last point is not the same as the
+         *         first point.
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.
@@ -1167,7 +1223,9 @@ namespace vtzero {
          * @param container The container to read the points from.
          *
          * @throws geometry_exception If there are more than 2^32-1 members in
-         *         the container.
+         *         the container or if two consecutive points in the container
+         *         are identical or if the last point is not the same as the
+         *         first point.
          *
          * @pre You must not have any calls to add_property() before calling
          *      this method.

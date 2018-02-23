@@ -224,6 +224,28 @@ TEST_CASE("Calling polygon_feature_builder::set_point()/close_ring() too often t
     }
 }
 
+TEST_CASE("Calling polygon_feature_builder::set_point() with same point throws") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::polygon_feature_builder fbuilder{lbuilder};
+
+    fbuilder.add_ring(4);
+    fbuilder.set_point(10, 10);
+    REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const vtzero::geometry_exception&);
+}
+
+TEST_CASE("Calling polygon_feature_builder::set_point() creating unclosed ring throws") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::polygon_feature_builder fbuilder{lbuilder};
+
+    fbuilder.add_ring(4);
+    fbuilder.set_point(10, 10);
+    fbuilder.set_point(10, 20);
+    fbuilder.set_point(20, 20);
+    REQUIRE_THROWS_AS(fbuilder.set_point(20, 30), const vtzero::geometry_exception&);
+}
+
 TEST_CASE("Add polygon from container") {
     const polygon_type points = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
 

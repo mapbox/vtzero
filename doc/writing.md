@@ -107,8 +107,7 @@ vtzero::layer_builder lbuilder{...};
     // add the geometry (exact calls are different for different feature builders)
     fbuilder.add_point(99, 33);
     // add the properties
-    fbuilder.add_property("highway", "primary");
-    fbuilder.add_property("maxspeed", 80);
+    fbuilder.add_property("amenity", "restaurant");
     // call commit() when you are done
     fbuilder.commit()
 }
@@ -163,6 +162,31 @@ Call `add_linestring()` with the number of points in the linestring as only
 argument. After that call `set_point()` for each of those points. `set_point()`
 has multiple overloads just like the `add_point()` method described above.
 
+```cpp
+...
+vtzero::layer_builder lbuilder{...};
+try {
+    vtzero::linestring_feature_builder fbuilder{lbuilder};
+    // optionally set the ID
+    fbuilder.set_id(23);
+    // add the geometry
+    fbuilder.add_linestring(2);
+    fbuilder.set_point(1, 2);
+    fbuilder.set_point(3, 4);
+    // add the properties
+    fbuilder.add_property("highway", "primary");
+    fbuilder.add_property("maxspeed", 80);
+    // call commit() when you are done
+    fbuilder.commit()
+} catch (const vtzero::geometry_exception& e) {
+    // if we are here, something was wrong with the geometry.
+}
+```
+
+Note that we have wrapped the feature builder in a try-catch-block here. This
+will ignore all geometry errors (which can happen if two consective points
+are the same creating a zero-length segment).
+
 There are two other versions of the `add_linestring()` function. They take two
 iterators defining a range to get the points from. Dereferencing those
 iterators must yield a `vtzero::point` or something convertible to it. One of
@@ -183,7 +207,37 @@ to first add the outer ring and then the inner rings, if any.
 
 Call `add_ring()` with the number of points in the ring as only argument. After
 that call `set_point()` for each of those points. `set_point()` has multiple
-overloads just like the `add_point()` method described above.
+overloads just like the `add_point()` method described above. The minimum
+number of points is 4 and the last point must be the same as the first point
+(or call `close_ring()` instead of the last `set_point()`).
+
+```cpp
+...
+vtzero::layer_builder lbuilder{...};
+try {
+    vtzero::polygon_feature_builder fbuilder{lbuilder};
+    // optionally set the ID
+    fbuilder.set_id(23);
+    // add the geometry
+    fbuilder.add_ring(5);
+    fbuilder.set_point(1, 1);
+    fbuilder.set_point(1, 2);
+    fbuilder.set_point(2, 2);
+    fbuilder.set_point(2, 1);
+    fbuilder.set_point(1, 1); // or call fbuilder.close_ring() instead
+    // add the properties
+    fbuilder.add_property("landuse", "forest");
+    // call commit() when you are done
+    fbuilder.commit()
+} catch (const vtzero::geometry_exception& e) {
+    // if we are here, something was wrong with the geometry.
+}
+```
+
+Note that we have wrapped the feature builder in a try-catch-block here. This
+will ignore all geometry errors (which can happen if two consective points
+are the same creating a zero-length segment or if the last point is not the
+same as the first point).
 
 There are two other versions of the `add_ring()` function. They take two
 iterators defining a range to get the points from. Dereferencing those
