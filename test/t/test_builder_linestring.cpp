@@ -279,7 +279,7 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
         fbuilder.set_point(10, 10);
         fbuilder.set_point(10, 10);
         fbuilder.commit();
-    } catch (vtzero::geometry_exception& e) {
+    } catch (vtzero::geometry_exception&) {
     }
 
     {
