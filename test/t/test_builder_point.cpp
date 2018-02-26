@@ -109,7 +109,7 @@ TEST_CASE("Calling add_points() with bad values throws assert") {
         REQUIRE_THROWS_AS(fbuilder.add_points(0), const assert_error&);
     }
     SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_points(1ul << 29), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_points(1ul << 29u), const assert_error&);
     }
 }
 
