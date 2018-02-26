@@ -77,10 +77,10 @@ void write_data_to_file(const std::string& buffer, const std::string& filename) 
 vtzero::layer get_layer(const vtzero::vector_tile& tile, const std::string& layer_name_or_num) {
     vtzero::layer layer;
     char* str_end = nullptr;
-    const long num = std::strtol(layer_name_or_num.c_str(), &str_end, 10); // NOLINT clang-tidy: google-runtime-int
+    const long num = std::strtol(layer_name_or_num.c_str(), &str_end, 10); // NOLINT(google-runtime-int)
 
     if (str_end == layer_name_or_num.data() + layer_name_or_num.size()) {
-        if (num >= 0 && num < std::numeric_limits<long>::max()) { // NOLINT clang-tidy: google-runtime-int
+        if (num >= 0 && num < std::numeric_limits<long>::max()) { // NOLINT(google-runtime-int)
             layer = tile.get_layer(static_cast<std::size_t>(num));
             if (!layer) {
                 std::cerr << "No such layer: " << num << '\n';

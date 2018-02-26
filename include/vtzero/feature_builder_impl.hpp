@@ -69,9 +69,9 @@ namespace vtzero {
 
             ~feature_builder_base() noexcept = default;
 
-            feature_builder_base(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
+            feature_builder_base(const feature_builder_base&) = delete; // NOLINT(hicpp-use-equals-delete, modernize-use-equals-delete)
 
-            feature_builder_base& operator=(const feature_builder_base&) = delete; // NOLINT clang-tidy: hicpp-use-equals-delete
+            feature_builder_base& operator=(const feature_builder_base&) = delete; // NOLINT(hicpp-use-equals-delete, modernize-use-equals-delete)
                                                                                    // The check wants these functions to be public...
 
             feature_builder_base(feature_builder_base&&) noexcept = default;

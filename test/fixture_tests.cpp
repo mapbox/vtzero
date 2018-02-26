@@ -153,7 +153,7 @@ TEST_CASE("MVT test 001: Empty tile") {
     vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.empty());
-    REQUIRE(tile.count_layers() == 0); // NOLINT clang-tidy: readability-container-size-empty
+    REQUIRE(tile.count_layers() == 0); // NOLINT(readability-container-size-empty)
 }
 
 TEST_CASE("MVT test 002: Tile with single point feature without id") {
@@ -464,7 +464,7 @@ TEST_CASE("MVT test 025: Layer without features") {
     REQUIRE(tile.count_layers() == 1);
     const auto layer = tile.next_layer();
     REQUIRE(layer.empty());
-    REQUIRE(layer.num_features() == 0); // NOLINT clang-tidy: readability-container-size-empty
+    REQUIRE(layer.num_features() == 0); // NOLINT(readability-container-size-empty)
 }
 
 TEST_CASE("MVT test 026: Extra value type") {
@@ -495,7 +495,7 @@ TEST_CASE("MVT test 027: Layer with unused bool property value") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 0); // NOLINT clang-tidy: readability-container-size-empty
+    REQUIRE(feature.num_properties() == 0); // NOLINT(readability-container-size-empty)
 
     const auto& vtab = layer.value_table();
     REQUIRE(vtab.size() == 1);

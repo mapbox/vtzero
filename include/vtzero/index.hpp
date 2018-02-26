@@ -154,7 +154,7 @@ namespace vtzero {
          * @returns The index value of they value.
          */
         index_value operator()(const bool value) {
-            auto& idx = m_index[static_cast<std::size_t>(value)]; // NOLINT clang-tidy: cppcoreguidelines-pro-bounds-constant-array-index
+            auto& idx = m_index[static_cast<std::size_t>(value)]; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
             if (!idx.valid()) {
                 idx = m_builder.add_value_without_dup_check(encoded_property_value{value});
             }
