@@ -1,5 +1,5 @@
 ---
-Checks:          '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-google-runtime-references,-readability-avoid-const-params-in-decls'
+Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-readability-avoid-const-params-in-decls'
 #
 #  Disabled checks:
 #
@@ -9,15 +9,24 @@ Checks:          '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-pro-bound
 #  cert-err60-cpp
 #    Reports std::runtime_error as broken which we can't do anything about.
 #
+#  cppcoreguidelines-owning-memory
+#    Don't want to add dependency on gsl library.
+#
 #  cppcoreguidelines-pro-bounds-array-to-pointer-decay
-#    Limited use and many false positives including for all asserts
+#    Limited use and many false positives including for all asserts.
 #
 #  cppcoreguidelines-pro-bounds-pointer-arithmetic
 #    This is a low-level library, it needs to do pointer arithmetic.
 #
+#  fuchsia-*
+#    Much too strict.
+#
 #  google-runtime-references
 #    This is just a matter of preference, and we can't change the interfaces
 #    now anyways.
+#
+#  hicpp-no-array-decay
+#    Limited use and many false positives including for all asserts.
 #
 #  readability-avoid-const-params-in-decls
 #    Inconsistently complaines about some cases but not others. It is nice
@@ -27,26 +36,4 @@ Checks:          '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-pro-bound
 WarningsAsErrors: '*'
 HeaderFilterRegex: '\/include\/'
 AnalyzeTemporaryDtors: false
-CheckOptions:    
-  - key:             google-readability-braces-around-statements.ShortStatementLines
-    value:           '1'
-  - key:             google-readability-function-size.StatementThreshold
-    value:           '800'
-  - key:             google-readability-namespace-comments.ShortNamespaceLines
-    value:           '10'
-  - key:             google-readability-namespace-comments.SpacesBeforeComments
-    value:           '2'
-  - key:             modernize-loop-convert.MaxCopySize
-    value:           '16'
-  - key:             modernize-loop-convert.MinConfidence
-    value:           reasonable
-  - key:             modernize-loop-convert.NamingStyle
-    value:           CamelCase
-  - key:             modernize-pass-by-value.IncludeStyle
-    value:           llvm
-  - key:             modernize-replace-auto-ptr.IncludeStyle
-    value:           llvm
-  - key:             modernize-use-nullptr.NullMacros
-    value:           'NULL'
 ...
-
