@@ -212,7 +212,7 @@ namespace vtzero {
          * @param extent The extent of the new layer.
          */
         template <typename TString, typename std::enable_if<!is_layer<TString>::value, int>::type = 0>
-        layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096):
+        layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096) :
             m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
         }
 

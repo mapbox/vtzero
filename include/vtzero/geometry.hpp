@@ -76,7 +76,7 @@ namespace vtzero {
 
     /// Points are not equal if their coordinates aren't
     inline constexpr bool operator!=(const point a, const point b) noexcept {
-        return !(a==b);
+        return !(a == b);
     }
 
     namespace detail {

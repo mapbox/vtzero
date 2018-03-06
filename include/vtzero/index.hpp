@@ -31,7 +31,7 @@ namespace vtzero {
      * @tparam TMap The map class to use (std::map, std::unordered_map or
      *         something compatible).
      */
-    template <template<typename...> class TMap>
+    template <template <typename...> class TMap>
     class key_index {
 
         layer_builder& m_builder;
@@ -83,7 +83,7 @@ namespace vtzero {
      * @tparam TMap The map class to use (std::map, std::unordered_map or
      *         something compatible).
      */
-    template <typename TInternal, typename TExternal, template<typename...> class TMap>
+    template <typename TInternal, typename TExternal, template <typename...> class TMap>
     class value_index {
 
         layer_builder& m_builder;
@@ -220,7 +220,7 @@ namespace vtzero {
      * @tparam TMap The map class to use (std::map, std::unordered_map or
      *         something compatible).
      */
-    template <template<typename...> class TMap>
+    template <template <typename...> class TMap>
     class value_index_internal {
 
         layer_builder& m_builder;
