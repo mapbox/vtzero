@@ -46,7 +46,7 @@ add_test(NAME unit-tests
          COMMAND unit-tests
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(_fixtures ${CMAKE_CURRENT_SOURCE_DIR}/mvt-fixtures/fixtures)
+set(_fixtures ${MVT_FIXTURES}/fixtures)
 if(EXISTS ${_fixtures})
     message(STATUS "Found test fixtures. Enabled mvt fixture tests.")
     add_test(NAME fixture-tests
@@ -56,7 +56,7 @@ if(EXISTS ${_fixtures})
                          ENVIRONMENT "FIXTURES_DIR=${_fixtures}")
 
     if(NOT WIN32)
-        set(_real_world_dir ${CMAKE_CURRENT_SOURCE_DIR}/mvt-fixtures/real-world)
+        set(_real_world_dir ${MVT_FIXTURES}/real-world)
         file(GLOB real_world ${_real_world_dir}/bangkok/*
                              ${_real_world_dir}/chicago/*
                              ${_real_world_dir}/nepal/*

@@ -25,6 +25,16 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #-----------------------------------------------------------------------------
 
+# This variable must be set to the directory where the mvt-fixtures from the
+# https://github.com/mapbox/mvt-fixtures repository are to be found. Usually
+# this is the directory where the submodule is checked out as described in
+# the README, but you can also set this to a different path, for instance
+# to change the setting while doing development.
+
+set(MVT_FIXTURES "${CMAKE_SOURCE_DIR}/test/mvt-fixtures" CACHE PATH "mvt-fixtures directory for tests")
+
+#-----------------------------------------------------------------------------
+
 option(WERROR "Add -Werror flag to build (turns warnings into errors)" ON)
 
 if(MSVC)
