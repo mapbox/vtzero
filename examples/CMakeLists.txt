@@ -14,6 +14,8 @@ add_executable(vtzero-check vtzero-check.cpp utils.cpp)
 
 add_executable(vtzero-create vtzero-create.cpp utils.cpp)
 
+add_executable(vtzero-encode-geom vtzero-encode-geom.cpp utils.cpp)
+
 add_executable(vtzero-stats vtzero-stats.cpp utils.cpp)
 
 add_executable(vtzero-streets vtzero-streets.cpp utils.cpp)
