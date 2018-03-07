@@ -1,5 +1,5 @@
 ---
-Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-readability-avoid-const-params-in-decls'
+Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-readability-avoid-const-params-in-decls,-readability-implicit-bool-cast,-readability-implicit-bool-conversion'
 #
 #  Disabled checks:
 #
@@ -32,6 +32,12 @@ Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-owning-memory,-cpp
 #    Inconsistently complaines about some cases but not others. It is nice
 #    to have const in parameters if we don't change them just like with any
 #    other variables.
+#
+#  readability-implicit-bool-cast
+#    Old name for readability-implicit-bool-conversion.
+#
+#  readability-implicit-bool-conversion
+#    I don't think this makes the code more readable.
 #
 WarningsAsErrors: '*'
 HeaderFilterRegex: '\/include\/'
