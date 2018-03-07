@@ -215,7 +215,7 @@ namespace vtzero {
                 } else {
                     m_count = get_command_count(*m_it);
                     if (m_count > m_max_count) {
-                        throw geometry_exception{"Max count too large"};
+                        throw geometry_exception{"count too large"};
                     }
                 }
 
