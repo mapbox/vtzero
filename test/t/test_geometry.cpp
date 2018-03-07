@@ -287,7 +287,7 @@ TEST_CASE("geometry_decoder decoding linestring with int32 overflow in x coordin
     REQUIRE(decoder.next_point() == vtzero::point(std::numeric_limits<int32_t>::max(), 0));
     REQUIRE(decoder.next_command(vtzero::detail::CommandId::LINE_TO));
     REQUIRE(decoder.count() == 1);
-    decoder.next_point();
+    REQUIRE(decoder.next_point() == vtzero::point(std::numeric_limits<int32_t>::min(), 1));
 }
 
 TEST_CASE("geometry_decoder decoding linestring with int32 overflow in y coordinate") {
@@ -308,7 +308,7 @@ TEST_CASE("geometry_decoder decoding linestring with int32 overflow in y coordin
     REQUIRE(decoder.next_point() == vtzero::point(0, std::numeric_limits<int32_t>::min()));
     REQUIRE(decoder.next_command(vtzero::detail::CommandId::LINE_TO));
     REQUIRE(decoder.count() == 1);
-    decoder.next_point();
+    REQUIRE(decoder.next_point() == vtzero::point(-1, std::numeric_limits<int32_t>::max()));
 }
 
 TEST_CASE("geometry_decoder with multipoint with a huge count") {
