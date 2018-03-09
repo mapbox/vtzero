@@ -734,7 +734,146 @@ TEST_CASE("MVT test 044: Geometry field begins with a ClosePath command, which i
     auto feature = layer.next_feature();
     REQUIRE(feature);
 
-    auto geometry = feature.geometry();
+    const auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
+}
+
+TEST_CASE("MVT test 045: Invalid point geometry that includes a MoveTo command and only half of the xy coordinates") {
+    std::string buffer{open_tile("045/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_WITH(vtzero::decode_geometry(geometry, geom_handler{}), "too few points in geometry");
+}
+
+TEST_CASE("MVT test 046: Invalid linestring geometry that includes two points in the same position, which is not OGC valid") {
+    std::string buffer{open_tile("046/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+
+    geom_handler handler;
+    vtzero::decode_geometry(geometry, handler);
+
+    const std::vector<std::vector<vtzero::point>> expected = {{{2, 2}, {2, 10}, {2, 10}}};
+    REQUIRE(handler.line_data == expected);
+}
+
+TEST_CASE("MVT test 047: Invalid polygon with wrong ClosePath count 2 (must be count 1)") {
+    std::string buffer{open_tile("047/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_WITH(vtzero::decode_geometry(geometry, geom_handler{}), "ClosePath command count is not 1");
+}
+
+TEST_CASE("MVT test 048: Invalid polygon with wrong ClosePath count 0 (must be count 1)") {
+    std::string buffer{open_tile("048/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_WITH(vtzero::decode_geometry(geometry, geom_handler{}), "ClosePath command count is not 1");
+}
+
+TEST_CASE("MVT test 049: decoding linestring with int32 overflow in x coordinate") {
+    std::string buffer{open_tile("049/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+
+    geom_handler handler;
+    vtzero::decode_geometry(geometry, handler);
+
+    const std::vector<std::vector<vtzero::point>> expected = {{{std::numeric_limits<int32_t>::max(), 0}, {std::numeric_limits<int32_t>::min(), 1}}};
+    REQUIRE(handler.line_data == expected);
+}
+
+TEST_CASE("MVT test 050: decoding linestring with int32 overflow in y coordinate") {
+    std::string buffer{open_tile("050/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+
+    geom_handler handler;
+    vtzero::decode_geometry(geometry, handler);
+
+    const std::vector<std::vector<vtzero::point>> expected = {{{0, std::numeric_limits<int32_t>::min()}, {-1, std::numeric_limits<int32_t>::max()}}};
+    REQUIRE(handler.line_data == expected);
+}
+
+TEST_CASE("MVT test 051: multipoint with a huge count value, useful for ensuring no over-allocation errors. Example error message \"count too large\"") {
+    std::string buffer{open_tile("051/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_WITH(vtzero::decode_geometry(geometry, geom_handler{}), "count too large");
+}
+
+TEST_CASE("MVT test 052: multipoint with not enough points") {
+    std::string buffer{open_tile("052/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
     REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
 }
 
