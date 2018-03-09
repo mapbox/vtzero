@@ -14,3 +14,10 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 
+## [1.0.0] - 2018-03-09
+
+First release 
+
+
+[unreleased]: https://github.com/osmcode/libosmium/compare/v1.1.0...HEAD
+
