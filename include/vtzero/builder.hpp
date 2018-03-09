@@ -671,56 +671,6 @@ namespace vtzero {
             set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
-// These functions have been disabled, see https://github.com/mapbox/vtzero/issues/22
-// for details. Please report there if you are using them.
-#if 0
-        /**
-         * Add the points from an iterator range as multipoint geometry
-         * to this feature. This method will determine the number of points in
-         * the range using std::distance(), so it will not work on an input
-         * iterator and might be more expensive than calling the overload of
-         * this function taking a third parameter with the count.
-         *
-         * @tparam TIter Forward iterator type. Dereferencing must yield
-         *         a vtzero::point or something convertible to it.
-         * @param begin Iterator to the beginning of the range.
-         * @param end Iterator one past the end of the range.
-         *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
-         */
-        template <typename TIter>
-        void add_points(TIter begin, TIter end) {
-            add_points(check_num_points(std::distance(begin, end)));
-            for (; begin != end; ++begin) {
-                set_point(*begin);
-            }
-        }
-
-        /**
-         * Add the points from an iterator range as multipoint geometry
-         * to this feature. Use this function if you know the number of
-         * points in the range.
-         *
-         * @tparam TIter Forward iterator type. Dereferencing must yield
-         *         a vtzero::point or something convertible to it.
-         * @param begin Iterator to the beginning of the range.
-         * @param end Iterator one past the end of the range.
-         * @param count The number of points in the range.
-         *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
-         */
-        template <typename TIter>
-        void add_points(TIter begin, TIter end, uint32_t count) {
-            add_points(count);
-            for (; begin != end; ++begin) {
-                set_point(*begin);
-            }
-            vtzero_assert(m_num_points.value() == 0 && "Iterator must yield exactly count points");
-        }
-#endif
-
         /**
          * Add the points from the specified container as multipoint geometry
          * to this feature.
@@ -892,63 +842,6 @@ namespace vtzero {
         void set_point(TPoint&& p) {
             set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
-
-// These functions have been disabled, see https://github.com/mapbox/vtzero/issues/22
-// for details. Please report there if you are using them.
-#if 0
-        /**
-         * Add the points from an iterator range as a linestring geometry
-         * to this feature. This method will determine the number of points in
-         * the range using std::distance(), so it will not work on an input
-         * iterator and might be more expensive than calling the overload of
-         * this function taking a third parameter with the count.
-         *
-         * @tparam TIter Forward iterator type. Dereferencing must yield
-         *         a vtzero::point or something convertible to it.
-         * @param begin Iterator to the beginning of the range.
-         * @param end Iterator one past the end of the range.
-         *
-         * @throws geometry_exception If there are more than 2^32-1 members
-         *         in the range or if two consecutive points in the range
-         *         are identical.
-         *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
-         */
-        template <typename TIter>
-        void add_linestring(TIter begin, TIter end) {
-            add_linestring(check_num_points(std::distance(begin, end)));
-            for (; begin != end; ++begin) {
-                set_point(*begin);
-            }
-        }
-
-        /**
-         * Add the points from an iterator range as a linestring geometry
-         * to this feature. Use this function if you know the number of
-         * points in the range.
-         *
-         * @tparam TIter Forward iterator type. Dereferencing must yield
-         *         a vtzero::point or something convertible to it.
-         * @param begin Iterator to the beginning of the range.
-         * @param end Iterator one past the end of the range.
-         * @param count The number of points in the range.
-         *
-         * @throws geometry_exception If two consecutive points in the
-         *         range are identical.
-         *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
-         */
-        template <typename TIter>
-        void add_linestring(TIter begin, TIter end, uint32_t count) {
-            add_linestring(count);
-            for (; begin != end; ++begin) {
-                set_point(*begin);
-            }
-            vtzero_assert(m_num_points.value() == 0 && "Iterator must yield exactly count points");
-        }
-#endif
 
         /**
          * Add the points from the specified container as a linestring geometry
@@ -1161,64 +1054,6 @@ namespace vtzero {
             m_pbf_geometry.add_element(detail::command_close_path());
             m_num_points.decrement();
         }
-
-// These functions have been disabled, see https://github.com/mapbox/vtzero/issues/22
-// for details. Please report there if you are using them.
-#if 0
-        /**
-         * Add the points from an iterator range as a ring to this feature.
-         * This method will determine the number of points in the range using
-         * std::distance(), so it will not work on an input iterator and might
-         * be more expensive than calling the overload of this function taking
-         * a third parameter with the count.
-         *
-         * @tparam TIter Forward iterator type. Dereferencing must yield
-         *         a vtzero::point or something convertible to it.
-         * @param begin Iterator to the beginning of the range.
-         * @param end Iterator one past the end of the range.
-         *
-         * @throws geometry_exception If there are more than 2^32-1 members in
-         *         the range or if two consecutive points in the range are
-         *         identical or if the last point is not the same as the
-         *         first point.
-         *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
-         */
-        template <typename TIter>
-        void add_ring(TIter begin, TIter end) {
-            add_ring(check_num_points(std::distance(begin, end)));
-            for (; begin != end; ++begin) {
-                set_point(create_vtzero_point(*begin));
-            }
-        }
-
-        /**
-         * Add the points from an iterator range as a ring to this feature. Use
-         * this function if you know the number of points in the range.
-         *
-         * @tparam TIter Forward iterator type. Dereferencing must yield
-         *         a vtzero::point or something convertible to it.
-         * @param begin Iterator to the beginning of the range.
-         * @param end Iterator one past the end of the range.
-         * @param count The number of points in the range.
-         *
-         * @throws geometry_exception If two consecutive points in the range
-         *         are identical or if the last point is not the same as the
-         *         first point.
-         *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
-         */
-        template <typename TIter>
-        void add_ring(TIter begin, TIter end, uint32_t count) {
-            add_ring(count);
-            for (; begin != end; ++begin) {
-                set_point(*begin);
-            }
-            vtzero_assert(m_num_points.value() == 0 && "Iterator must yield exactly count points");
-        }
-#endif
 
         /**
          * Add the points from the specified container as a ring to this
