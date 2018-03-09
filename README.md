@@ -9,11 +9,6 @@ Implements the [Mapbox Vector Tile Specification 2.x](https://www.mapbox.com/vec
 [![Coverage Status](https://codecov.io/gh/mapbox/vtzero/branch/master/graph/badge.svg)](https://codecov.io/gh/mapbox/vtzero)
 
 
-## Status
-
-**This is experimental code and subject to change.**
-
-
 ## Depends
 
 * C++11 compiler (GCC 4.8 or higher, clang 3.5 or higher, ...)
@@ -76,6 +71,15 @@ to check vector tile for validity.
 
 
 ## Docs
+
+Extensive documentation is available:
+* [Tutorial](doc/tutorial.md) (start here)
+* [Reading vector tiles](doc/reading.md)
+* [Writing vector tiles](doc/writing.md)
+* [Advanced vtzero topics](doc/advanced.md)
+
+Make sure to read all of it before using vtzero. Vtzero isn't the simplest
+library to use, because it always chooses performance over ease of use.
 
 If [Doxygen](http://www.stack.nl/~dimitri/doxygen/) is installed on your
 system, the build process will automatically create the API docs for you.
