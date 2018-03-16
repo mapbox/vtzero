@@ -877,3 +877,115 @@ TEST_CASE("MVT test 052: multipoint with not enough points") {
     REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
 }
 
+TEST_CASE("MVT test 053: clipped square (exact extent): a polygon that covers the entire tile to the exact boundary") {
+    std::string buffer{open_tile("053/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+
+    geom_handler handler;
+    vtzero::decode_geometry(geometry, handler);
+
+    const std::vector<std::vector<vtzero::point>> expected = {{{0, 0}, {4096, 0}, {4096, 4096}, {0, 4096}, {0, 0}}};
+    REQUIRE(handler.line_data == expected);
+}
+
+TEST_CASE("MVT test 054: clipped square (one unit buffer): a polygon that covers the entire tile plus a one unit buffer") {
+    std::string buffer{open_tile("054/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+
+    geom_handler handler;
+    vtzero::decode_geometry(geometry, handler);
+
+    const std::vector<std::vector<vtzero::point>> expected = {{{-1, -1}, {4097, -1}, {4097, 4097}, {-1, 4097}, {-1, -1}}};
+    REQUIRE(handler.line_data == expected);
+}
+
+TEST_CASE("MVT test 055: clipped square (minus one unit buffer): a polygon that almost covers the entire tile minus one unit buffer") {
+    std::string buffer{open_tile("055/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+
+    geom_handler handler;
+    vtzero::decode_geometry(geometry, handler);
+
+    const std::vector<std::vector<vtzero::point>> expected = {{{1, 1}, {4095, 1}, {4095, 4095}, {1, 4095}, {1, 1}}};
+    REQUIRE(handler.line_data == expected);
+}
+
+TEST_CASE("MVT test 056: clipped square (large buffer): a polygon that covers the entire tile plus a 200 unit buffer") {
+    std::string buffer{open_tile("056/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+
+    geom_handler handler;
+    vtzero::decode_geometry(geometry, handler);
+
+    const std::vector<std::vector<vtzero::point>> expected = {{{-200, -200}, {4296, -200}, {4296, 4296}, {-200, 4296}, {-200, -200}}};
+    REQUIRE(handler.line_data == expected);
+}
+
+TEST_CASE("MVT test 057: A point fixture with a gigantic MoveTo command. Can be used to test decoders for memory overallocation situations") {
+    std::string buffer{open_tile("057/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_WITH(vtzero::decode_geometry(geometry, geom_handler{}), "count too large");
+}
+
+TEST_CASE("MVT test 058: A linestring fixture with a gigantic LineTo command") {
+    std::string buffer{open_tile("058/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+
+    auto feature = layer.next_feature();
+    REQUIRE(feature);
+
+    const auto geometry = feature.geometry();
+    REQUIRE_THROWS_AS(vtzero::decode_geometry(geometry, geom_handler{}), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_WITH(vtzero::decode_geometry(geometry, geom_handler{}), "count too large");
+}
+
