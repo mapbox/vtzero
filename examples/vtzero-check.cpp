@@ -15,7 +15,7 @@
 #include <stdexcept>
 #include <string>
 
-class result {
+class results {
 
     int m_return_code = 0;
 
@@ -43,7 +43,7 @@ public:
         return m_return_code;
     }
 
-} result;
+} results;
 
 class CheckGeomHandler {
 
@@ -62,14 +62,14 @@ class CheckGeomHandler {
     }
 
     void print_error(const char* message) const {
-        result.has_error();
+        results.has_error();
         std::cerr << "Error";
         print_context();
         std::cerr << message << '\n';
     }
 
     void print_warning(const char* message) const {
-        result.has_warning();
+        results.has_warning();
         std::cerr << "Warning";
         print_context();
         std::cerr << message << '\n';
@@ -183,13 +183,13 @@ int main(int argc, char* argv[]) {
         while (auto layer = tile.next_layer()) {
             if (layer.name().empty()) {
                 std::cerr << "Error in layer " << layer_num << ": name is empty (spec 4.1)\n";
-                result.has_error();
+                results.has_error();
             }
 
             std::string name(layer.name());
             if (layer_names.count(name) > 0) {
                 std::cerr << "Error in layer " << layer_num << ": name is duplicate of previous layer ('" << name << "') (spec 4.1)\n";
-                result.has_error();
+                results.has_error();
             }
 
             layer_names.insert(name);
@@ -202,14 +202,14 @@ int main(int argc, char* argv[]) {
             }
             if (feature_num == 0) {
                 std::cerr << "Warning: No features in layer " << layer_num << " (spec 4.1)\n";
-                result.has_warning();
+                results.has_warning();
             }
             feature_num = -1;
             ++layer_num;
         }
         if (layer_num == 0) {
             std::cerr << "Warning: No layers in vector tile (spec 4.1)\n";
-            result.has_warning();
+            results.has_warning();
         }
     } catch (const std::exception& e) {
         std::cerr << "Fatal error in layer " << layer_num;
@@ -217,9 +217,9 @@ int main(int argc, char* argv[]) {
             std::cerr << " in feature " << feature_num;
         }
         std::cerr << ": " << e.what() << '\n';
-        result.has_fatal_error();
+        results.has_fatal_error();
     }
 
-    return result.return_code();
+    return results.return_code();
 }
 

@@ -41,9 +41,9 @@ namespace vtzero {
         /**
          * Create a (valid) property from a key and value.
          */
-        constexpr property(const data_view key, const property_value value) noexcept :
-            m_key(key),
-            m_value(value) {
+        constexpr property(const data_view key_, const property_value value_) noexcept :
+            m_key(key_),
+            m_value(value_) {
         }
 
         /**
