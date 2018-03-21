@@ -278,18 +278,22 @@ namespace vtzero {
      * @tparam TValue Value type, usally the value of the map type. The
      *                property_value is converted to this type before
      *                adding it to the map.
+     * @tparam TMapping A struct derived from property_value_mapping with the
+     *         mapping for vtzero property value types to TValue-constructing
+     *         types. (See convert_property_value() for details.)
      * @param feature The feature to get the properties from.
      * @returns An object of type TMap with all the properties.
      * @pre @code feature.valid() @endcode
      */
     template <typename TMap,
               typename TKey = typename TMap::key_type,
-              typename TValue = typename TMap::mapped_type>
+              typename TValue = typename TMap::mapped_type,
+              typename TMapping = property_value_mapping>
     TMap create_properties_map(const vtzero::feature& feature) {
         TMap map;
 
         feature.for_each_property([&map](const property& p) {
-            map.emplace(TKey(p.key()), convert_property_value<TValue>(p.value()));
+            map.emplace(TKey(p.key()), convert_property_value<TValue, TMapping>(p.value()));
             return true;
         });
 
