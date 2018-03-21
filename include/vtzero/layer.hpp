@@ -100,9 +100,9 @@ namespace vtzero {
          *                           number (only version 1 and 2 are supported)
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        explicit layer(const data_view data) :
-            m_data(data) {
-            protozero::pbf_message<detail::pbf_layer> reader{data};
+        explicit layer(const data_view data_) :
+            m_data(data_) {
+            protozero::pbf_message<detail::pbf_layer> reader{data_};
             while (reader.next()) {
                 switch (reader.tag_and_type()) {
                     case protozero::tag_and_type(detail::pbf_layer::version, protozero::pbf_wire_type::varint):

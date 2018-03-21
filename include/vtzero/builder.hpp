@@ -338,8 +338,8 @@ namespace vtzero {
                 return m_value;
             }
 
-            void set(const uint32_t value) noexcept {
-                m_value = value;
+            void set(const uint32_t value_) noexcept {
+                m_value = value_;
             }
 
             void decrement() {

@@ -293,8 +293,8 @@ namespace vtzero {
         constexpr index_value() noexcept = default;
 
         /// Construct with the given value.
-        constexpr index_value(uint32_t value) noexcept : // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-            m_value(value) {
+        constexpr index_value(uint32_t value_) noexcept : // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
+            m_value(value_) {
         }
 
         /**
@@ -341,9 +341,9 @@ namespace vtzero {
         constexpr index_value_pair() noexcept = default;
 
         /// Construct with the given values.
-        constexpr index_value_pair(index_value key, index_value value) noexcept :
-            m_key(key),
-            m_value(value) {
+        constexpr index_value_pair(index_value key_, index_value value_) noexcept :
+            m_key(key_),
+            m_value(value_) {
         }
 
         /**
@@ -397,9 +397,9 @@ namespace vtzero {
         constexpr geometry() noexcept = default;
 
         /// Construct with the given values.
-        constexpr geometry(data_view data, GeomType type) noexcept :
-            m_data(data),
-            m_type(type) {
+        constexpr geometry(data_view data_, GeomType type_) noexcept :
+            m_data(data_),
+            m_type(type_) {
         }
 
         /// The data of this geometry
