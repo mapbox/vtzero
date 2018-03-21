@@ -34,6 +34,9 @@ namespace vtzero {
 
     /**
      * A feature according to spec 4.2.
+     *
+     * Note that a feature will internally contain a pointer to the layer it
+     * came from. The layer has to stay valid as long as the feature is used.
      */
     class feature {
 

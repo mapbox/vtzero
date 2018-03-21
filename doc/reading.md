@@ -145,6 +145,10 @@ If you know the ID of a feature you can get the feature using
 all the features in the layer, decoding each one until it finds the right ID.
 This is almost always **not** what you want.
 
+Note that the feature returned by `next_feature()` or `get_feature_by_id()`
+will internally contain a pointer to the layer it came from. The layer has to
+stay valid as long as the feature is used.
+
 ## The feature
 
 You get features from the layer as described in the previous chapter. The

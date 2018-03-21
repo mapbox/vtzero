@@ -297,6 +297,10 @@ namespace vtzero {
         /**
          * Get the next feature in this layer.
          *
+         * Note that the feature returned will internally contain a pointer to
+         * the layer it came from. The layer has to stay valid as long as the
+         * feature is used.
+         *
          * Complexity: Constant.
          *
          * @returns The next feature or the invalid feature if there are no
@@ -356,6 +360,10 @@ namespace vtzero {
         /**
          * Get the feature with the specified ID. If there are several features
          * with the same ID, it is undefined which one you'll get.
+         *
+         * Note that the feature returned will internally contain a pointer to
+         * the layer it came from. The layer has to stay valid as long as the
+         * feature is used.
          *
          * Complexity: Linear in the number of features.
          *
