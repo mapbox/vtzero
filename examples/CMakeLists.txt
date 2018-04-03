@@ -76,12 +76,12 @@ set_tests_properties(vtzero-show-layer-name PROPERTIES
 
 #-------------------------------------------------------------
 
-file(GLOB ext_tests RELATIVE ${CMAKE_SOURCE_DIR}/test/data/ ${CMAKE_SOURCE_DIR}/test/data/ext*)
+file(GLOB ext_tests RELATIVE ${CMAKE_SOURCE_DIR}/test/data/ ${CMAKE_SOURCE_DIR}/test/data/*.mvt)
 
 foreach(_test IN LISTS ext_tests)
     message(STATUS "Adding ext test: ${_test}")
     add_test(NAME ext-tests-${_test}
-                COMMAND vtzero-show ${CMAKE_SOURCE_DIR}/test/data/${_test})
+             COMMAND vtzero-show ${CMAKE_SOURCE_DIR}/test/data/${_test})
 endforeach()
 
 
