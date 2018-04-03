@@ -255,6 +255,30 @@ namespace vtzero {
         }
 
         /**
+         * Return the size of the key table. This returns the correct value
+         * whether the key table was already built or not.
+         *
+         * Complexity: Constant.
+         *
+         * @returns Size of the key table.
+         */
+        std::size_t key_table_size() const noexcept {
+            return m_key_table_size > 0 ? m_key_table_size : m_key_table.size();
+        }
+
+        /**
+         * Return the size of the value table. This returns the correct value
+         * whether the value table was already built or not.
+         *
+         * Complexity: Constant.
+         *
+         * @returns Size of the value table.
+         */
+        std::size_t value_table_size() const noexcept {
+            return m_value_table_size > 0 ? m_value_table_size : m_value_table.size();
+        }
+
+        /**
          * Get the property key with the given index.
          *
          * Complexity: Amortized constant. First time the table is needed
@@ -401,6 +425,31 @@ namespace vtzero {
                  m_layer->value(idxs.value())};
         }
         return p;
+    }
+
+    inline index_value_pair feature::next_property_indexes() {
+        vtzero_assert(valid());
+        if (m_property_iterator == m_properties.end()) {
+            return {};
+        }
+
+        const auto ki = *m_property_iterator++;
+
+        assert(m_property_iterator != m_properties.end());
+        const auto vi = *m_property_iterator++;
+
+        assert(index_value{ki}.valid());
+        assert(index_value{vi}.valid());
+
+        if (ki >= m_layer->key_table_size()) {
+            throw out_of_range_exception{ki};
+        }
+
+        if (vi >= m_layer->value_table_size()) {
+            throw out_of_range_exception{vi};
+        }
+
+        return {ki, vi};
     }
 
     template <typename TFunc>

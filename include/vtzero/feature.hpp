@@ -225,18 +225,12 @@ namespace vtzero {
          * @returns The next index_value_pair or an invalid index_value_pair
          *          if there are no more properties.
          * @throws format_exception if the feature data is ill-formed.
+         * @throws out_of_range_exception if the key or value index is not
+         *         within the range of indexes in the layer key/value table.
          * @throws any protozero exception if the protobuf encoding is invalid.
          * @pre @code valid() @endcode
          */
-        index_value_pair next_property_indexes() {
-            vtzero_assert(valid());
-            if (m_property_iterator == m_properties.end()) {
-                return {};
-            }
-            const auto ki = *m_property_iterator++;
-            const auto vi = *m_property_iterator++;
-            return {ki, vi};
-        }
+        index_value_pair next_property_indexes();
 
         /**
          * Reset the property iterator. The next time next_property() or

@@ -674,6 +674,18 @@ TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the 
     REQUIRE_THROWS_AS(feature.next_property(), const vtzero::out_of_range_exception&);
 }
 
+TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the layer decoded using next_property_indexes().") {
+    std::string buffer{open_tile("040/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+
+    REQUIRE(tile.count_layers() == 1);
+    auto layer = tile.next_layer();
+    REQUIRE(layer.num_features() == 1);
+    auto feature = layer.next_feature();
+    REQUIRE(feature.num_properties() == 1);
+    REQUIRE_THROWS_AS(feature.next_property_indexes(), const vtzero::out_of_range_exception&);
+}
+
 TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
     std::string buffer{open_tile("041/tile.mvt")};
     vtzero::vector_tile tile{buffer};
