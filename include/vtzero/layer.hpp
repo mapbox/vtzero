@@ -434,12 +434,15 @@ namespace vtzero {
         }
 
         const auto ki = *m_property_iterator++;
+        if (!index_value{ki}.valid()) {
+            throw out_of_range_exception{ki};
+        }
 
         assert(m_property_iterator != m_properties.end());
         const auto vi = *m_property_iterator++;
-
-        assert(index_value{ki}.valid());
-        assert(index_value{vi}.valid());
+        if (!index_value{vi}.valid()) {
+            throw out_of_range_exception{vi};
+        }
 
         if (ki >= m_layer->key_table_size()) {
             throw out_of_range_exception{ki};
