@@ -17,6 +17,7 @@ documentation.
  */
 
 #include "builder.hpp"
+#include "types.hpp"
 
 #include <array>
 #include <cstdint>
