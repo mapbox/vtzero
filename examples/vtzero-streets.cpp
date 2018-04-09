@@ -41,35 +41,39 @@ int main(int argc, char* argv[]) {
 
     const auto data = read_file(input_file);
 
-    vtzero::vector_tile tile{data};
+    try {
+        vtzero::vector_tile tile{data};
 
-    auto layer = get_layer(tile, "road_label");
-    if (!layer) {
-        std::cerr << "No 'road_label' layer found\n";
-        return 1;
-    }
+        auto layer = get_layer(tile, "road_label");
+        if (!layer) {
+            std::cerr << "No 'road_label' layer found\n";
+            return 1;
+        }
 
-    vtzero::tile_builder tb;
-    vtzero::layer_builder layer_builder{tb, layer};
+        vtzero::tile_builder tb;
+        vtzero::layer_builder layer_builder{tb, layer};
 
-    vtzero::property_mapper mapper{layer, layer_builder};
+        vtzero::property_mapper mapper{layer, layer_builder};
 
-    while (auto feature = layer.next_feature()) {
-        if (keep_feature(feature)) {
-            vtzero::geometry_feature_builder feature_builder{layer_builder};
-            if (feature.has_id()) {
-                feature_builder.set_id(feature.id());
-            }
-            feature_builder.set_geometry(feature.geometry());
+        while (auto feature = layer.next_feature()) {
+            if (keep_feature(feature)) {
+                vtzero::geometry_feature_builder feature_builder{layer_builder};
+                if (feature.has_id()) {
+                    feature_builder.set_id(feature.id());
+                }
+                feature_builder.set_geometry(feature.geometry());
 
-            while (auto idxs = feature.next_property_indexes()) {
-                feature_builder.add_property(mapper(idxs));
+                while (auto idxs = feature.next_property_indexes()) {
+                    feature_builder.add_property(mapper(idxs));
+                }
             }
         }
+
+        std::string output = tb.serialize();
+        write_data_to_file(output, output_file);
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << '\n';
+        return 1;
     }
-
-    std::string output = tb.serialize();
-
-    write_data_to_file(output, output_file);
 }
 
