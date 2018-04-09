@@ -70,7 +70,10 @@ TEST_CASE("iterate over some properties of a feature") {
     const auto data = load_test_tile();
     vtzero::vector_tile tile{data};
     auto layer = tile.get_layer_by_name("bridge");
+    REQUIRE(layer.valid());
+
     auto feature = layer.next_feature();
+    REQUIRE(feature.valid());
 
     int count = 0;
     SECTION("external iterator") {

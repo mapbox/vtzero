@@ -31,9 +31,11 @@ TEST_CASE("property map") {
     vtzero::vector_tile vt{data};
     REQUIRE(vt.count_layers() == 1);
     auto layer = vt.next_layer();
+    REQUIRE(layer.valid());
     REQUIRE(layer.num_features() == 1);
-    const auto feature = layer.next_feature();
 
+    const auto feature = layer.next_feature();
+    REQUIRE(feature.valid());
     REQUIRE(feature.num_properties() == 3);
 
 #ifdef VTZERO_TEST_WITH_VARIANT
