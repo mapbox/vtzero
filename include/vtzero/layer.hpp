@@ -461,7 +461,16 @@ namespace vtzero {
 
         for (auto it = m_properties.begin(); it != m_properties.end();) {
             const uint32_t ki = *it++;
+            if (!index_value{ki}.valid()) {
+                throw out_of_range_exception{ki};
+            }
+
+            assert(m_property_iterator != m_properties.end());
             const uint32_t vi = *it++;
+            if (!index_value{vi}.valid()) {
+                throw out_of_range_exception{vi};
+            }
+
             if (!std::forward<TFunc>(func)(property{m_layer->key(ki), m_layer->value(vi)})) {
                 return false;
             }
