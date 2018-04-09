@@ -73,7 +73,7 @@ if(EXISTS ${_fixtures})
         endif()
     endif()
 else()
-    message(WARNING "Disabled mvt fixture tests, because fixtures not found.\n  Install them by calling 'git submodule update --init'.")
+    message(WARNING "Disabled mvt fixture tests, because fixtures not found.\n  Install them by calling 'git submodule update --init' in ${CMAKE_SOURCE_DIR}.")
 endif()
 
 
