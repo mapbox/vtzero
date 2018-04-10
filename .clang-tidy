@@ -1,5 +1,5 @@
 ---
-Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-readability-avoid-const-params-in-decls,-readability-implicit-bool-cast,-readability-implicit-bool-conversion'
+Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-clang-analyzer-core.CallAndMessage,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-google-runtime-references,-hicpp-no-array-decay,-readability-avoid-const-params-in-decls,-readability-implicit-bool-cast,-readability-implicit-bool-conversion'
 #
 #  Disabled checks:
 #
@@ -8,6 +8,9 @@ Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-cppcoreguidelines-owning-memory,-cpp
 #
 #  cert-err60-cpp
 #    Reports std::runtime_error as broken which we can't do anything about.
+#
+#  clang-analyzer-core.CallAndMessage
+#    Produces false positives
 #
 #  cppcoreguidelines-owning-memory
 #    Don't want to add dependency on gsl library.
