@@ -34,6 +34,10 @@ addons_shortcuts:
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-5.0' ]
       packages: [ 'libboost1.55-dev', 'clang-5.0', 'clang-tidy-5.0' ]
+  addons_clang60: &clang60
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-6.0' ]
+      packages: [ 'libboost1.55-dev', 'clang-6.0', 'clang-tidy-6.0' ]
   addons_gcc48: &gcc48
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
@@ -88,6 +92,10 @@ matrix:
       # LSAN doesn't work on container-based system
       sudo: required
       addons: *clang50
+    - os: linux
+      compiler: "clang-6.0"
+      env: BUILD='Debug' CC=clang-6.0 CXX=clang++-6.0
+      addons: *clang60
     - os: linux
       compiler: "gcc-4.8"
       env: BUILD='Debug' CC=gcc-4.8 CXX=g++-4.8
