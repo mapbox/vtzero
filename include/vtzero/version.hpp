@@ -23,7 +23,7 @@ documentation.
 #define VTZERO_VERSION_MINOR 0
 
 /// The patch number
-#define VTZERO_VERSION_PATCH 0
+#define VTZERO_VERSION_PATCH 1
 
 /// The complete version number
 #define VTZERO_VERSION_CODE                                      \
@@ -31,6 +31,6 @@ documentation.
      VTZERO_VERSION_PATCH)
 
 /// Version number as string
-#define VTZERO_VERSION_STRING "1.0.0"
+#define VTZERO_VERSION_STRING "1.0.1"
 
 #endif // VTZERO_VERSION_HPP
