@@ -37,8 +37,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] - 2018-03-09
 
-First release 
+First release
 
 
-[unreleased]: https://github.com/osmcode/libosmium/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/osmcode/libosmium/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/osmcode/libosmium/compare/v1.0.0...v1.0.1
 
