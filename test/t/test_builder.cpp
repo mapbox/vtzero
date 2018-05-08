@@ -238,25 +238,22 @@ TEST_CASE("Rollback feature") {
     REQUIRE_FALSE(feature);
 }
 
+static vtzero::layer next_nonempty_layer(vtzero::vector_tile& tile) {
+    while (auto layer = tile.next_layer()) {
+        if (layer && !layer.empty()) {
+            return layer;
+        }
+    }
+    return vtzero::layer{};
+}
+
 static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
     vtzero::vector_tile vt1{t1};
     vtzero::vector_tile vt2{t2};
 
-    for (auto l1 = vt1.next_layer(), l2 = vt2.next_layer();
-         l1 && l2;
-         l1 = vt1.next_layer(), l2 = vt2.next_layer()) {
-        if (l1.empty()) {
-            l1 = vt1.next_layer();
-            if (!l1) {
-                return true;
-            }
-        }
-        if (l2.empty()) {
-            l2 = vt2.next_layer();
-            if (!l2) {
-                return true;
-            }
-        }
+    for (auto l1 = next_nonempty_layer(vt1), l2 = next_nonempty_layer(vt2);
+         l1 || l2;
+         l1 = next_nonempty_layer(vt1), l2 = next_nonempty_layer(vt2)) {
 
         if (!l1 ||
             !l2 ||
@@ -268,18 +265,23 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
         }
 
         for (auto f1 = l1.next_feature(), f2 = l2.next_feature();
-             f1 && f2;
+             f1 || f2;
              f1 = l1.next_feature(), f2 = l2.next_feature()) {
-            if (f1.id() != f2.id() ||
+            if (!f1 ||
+                !f2 ||
+                f1.id() != f2.id() ||
                 f1.geometry_type() != f2.geometry_type() ||
                 f1.num_properties() != f2.num_properties() ||
                 f1.geometry().data() != f2.geometry().data()) {
                 return false;
             }
             for (auto p1 = f1.next_property(), p2 = f2.next_property();
-                p1 && p2;
+                p1 || p2;
                 p1 = f1.next_property(), p2 = f2.next_property()) {
-                if (p1.key() != p2.key() || p1.value() != p2.value()) {
+                if (!p1 ||
+                    !p2 ||
+                    p1.key() != p2.key() ||
+                    p1.value() != p2.value()) {
                     return false;
                 }
             }
@@ -287,6 +289,16 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
     }
 
     return true;
+}
+
+TEST_CASE("vector_tile_equal") {
+    REQUIRE(vector_tile_equal("", ""));
+
+    const auto buffer = load_test_tile();
+    REQUIRE(buffer.size() == 269388);
+    REQUIRE(vector_tile_equal(buffer, buffer));
+
+    REQUIRE_FALSE(vector_tile_equal(buffer, ""));
 }
 
 TEST_CASE("Copy tile") {

@@ -13,6 +13,9 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+* `layer_builder::add_feature()` did not work, because it didn't commit
+  the features it added.
+
 
 ## [1.0.1] - 2018-04-12
 

@@ -1249,6 +1249,7 @@ namespace vtzero {
             feature_builder.add_property(p);
             return true;
         });
+        feature_builder.commit();
     }
 
 } // namespace vtzero
