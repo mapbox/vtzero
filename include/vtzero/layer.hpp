@@ -48,6 +48,10 @@ namespace vtzero {
      * @code
      *   layer.get_feature_by_id(7);
      * @endcode
+     *
+     * Note that the layer class uses mutable members inside to cache the
+     * key and value tables. It can not be used safely in several threads
+     * at once!
      */
     class layer {
 
