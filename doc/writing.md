@@ -140,7 +140,7 @@ you can create your own overload of this function. See the
 
 ### Adding a multipoint geometry
 
-Call `add_points()` with the number of points in the geometry as only argument.
+Call `add_points()` with the number of points in the geometry as the only argument.
 After that call `set_point()` for each of those points. `set_point()` has
 multiple overloads just like the `add_point()` method described above.
 
