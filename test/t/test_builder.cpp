@@ -378,6 +378,65 @@ TEST_CASE("Copy only point geometries using geometry_feature_builder") {
     REQUIRE(n == 17);
 }
 
+struct points_to_vector {
+
+    std::vector<vtzero::point> m_points;
+
+    void points_begin(const uint32_t count) {
+        m_points.reserve(count);
+    }
+
+    void points_point(const vtzero::point point) {
+        m_points.push_back(point);
+    }
+
+    void points_end() const {
+    }
+
+    std::vector<vtzero::point> result() {
+        return m_points;
+    }
+
+}; // struct points_to_vector
+
+TEST_CASE("Copy only point geometries using point_feature_builder") {
+    const auto buffer = load_test_tile();
+    vtzero::vector_tile tile{buffer};
+
+    vtzero::tile_builder tbuilder;
+
+    int n = 0;
+    while (auto layer = tile.next_layer()) {
+        vtzero::layer_builder lbuilder{tbuilder, layer};
+        while (auto feature = layer.next_feature()) {
+            vtzero::point_feature_builder fbuilder{lbuilder};
+            fbuilder.copy_id(feature);
+            if (feature.geometry().type() == vtzero::GeomType::POINT) {
+                const auto points = decode_point_geometry(feature.geometry(), points_to_vector{});
+                fbuilder.add_points_from_container(points);
+                fbuilder.copy_properties(feature);
+                fbuilder.commit();
+                ++n;
+            } else {
+                fbuilder.rollback();
+            }
+        }
+    }
+    REQUIRE(n == 17);
+
+    const std::string data = tbuilder.serialize();
+
+    n = 0;
+    vtzero::vector_tile result_tile{data};
+    while (auto layer = result_tile.next_layer()) {
+        while (auto feature = layer.next_feature()) {
+            ++n;
+        }
+    }
+
+    REQUIRE(n == 17);
+}
+
 TEST_CASE("Build point feature from container with too many points") {
 
     // fake container pretending to contain too many points
