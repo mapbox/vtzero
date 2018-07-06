@@ -78,6 +78,10 @@ namespace vtzero {
 
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
 
+            void set_id_impl(uint64_t id) {
+                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+            }
+
             void add_property_impl(const property& property) {
                 add_key_internal(property.key());
                 add_value_internal(property.value());

@@ -420,7 +420,7 @@ namespace vtzero {
          * Set the ID of this feature.
          *
          * You can only call this method once and it must be before calling
-         * any other method manipulating the geometry.
+         * any method manipulating the geometry.
          *
          * @param id The ID.
          */
@@ -430,7 +430,27 @@ namespace vtzero {
             vtzero_assert(!m_pbf_geometry.valid() &&
                           !m_pbf_tags.valid() &&
                           "Call set_id() before setting the geometry or adding properties");
-            m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+            set_id_impl(id);
+        }
+
+        /**
+         * Copy the ID of an existing feature to this feature. If the
+         * feature doesn't have an ID, no ID is set.
+         *
+         * You can only call this method once and it must be before calling
+         * any method manipulating the geometry.
+         *
+         * @param feature The feature to copy the ID from.
+         */
+        void copy_id(const feature& feature) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_id() after commit() or rollback()");
+            vtzero_assert(!m_pbf_geometry.valid() &&
+                          !m_pbf_tags.valid() &&
+                          "Call copy_id() before setting the geometry or adding properties");
+            if (feature.has_id()) {
+                set_id_impl(feature.id());
+            }
         }
 
         /**
@@ -1152,7 +1172,25 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call set_id() after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid());
-            m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+            set_id_impl(id);
+        }
+
+        /**
+         * Copy the ID of an existing feature to this feature. If the
+         * feature doesn't have an ID, no ID is set.
+         *
+         * You can only call this function once and it must be before calling
+         * set_geometry().
+         *
+         * @param feature The feature to copy the ID from.
+         */
+        void copy_id(const feature& feature) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_id() after commit() or rollback()");
+            vtzero_assert(!m_pbf_tags.valid());
+            if (feature.has_id()) {
+                set_id_impl(feature.id());
+            }
         }
 
         /**
