@@ -330,9 +330,7 @@ TEST_CASE("Copy tile using geometry_feature_builder") {
             vtzero::geometry_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
             fbuilder.set_geometry(feature.geometry());
-            while (auto property = feature.next_property()) {
-                fbuilder.add_property(property.key(), property.value());
-            }
+            fbuilder.copy_properties(feature);
             fbuilder.commit();
         }
     }

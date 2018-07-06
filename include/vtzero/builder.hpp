@@ -469,6 +469,21 @@ namespace vtzero {
         }
 
         /**
+         * Copy all properties of an existing feature to the one being built.
+         *
+         * @param feature The feature to copy the properties from.
+         */
+        void copy_properties(const feature& feature) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_properties() after commit() or rollback()");
+            prepare_to_add_property();
+            feature.for_each_property([this](const property& prop) {
+                add_property_impl(prop);
+                return true;
+            });
+        }
+
+        /**
          * Add a property to this feature. Can only be called after all the
          * methods manipulating the geometry.
          *
@@ -1240,6 +1255,20 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call add_property() after commit() or rollback()");
             add_property_impl(std::forward<TKey>(key), std::forward<TValue>(value));
+        }
+
+        /**
+         * Copy all properties of an existing feature to the one being built.
+         *
+         * @param feature The feature to copy the properties from.
+         */
+        void copy_properties(const feature& feature) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_properties() after commit() or rollback()");
+            feature.for_each_property([this](const property& prop) {
+                add_property_impl(prop);
+                return true;
+            });
         }
 
         /**
