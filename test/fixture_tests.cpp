@@ -535,6 +535,18 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     REQUIRE(ii.key().value() == 0);
     REQUIRE(ii.value().value() == 0);
     REQUIRE_FALSE(feature.next_property_indexes());
+
+    int32_t sum = 0;
+    int32_t count = 0;
+    feature.for_each_property_indexes([&](vtzero::index_value_pair&& ivp) {
+        sum += ivp.key().value();
+        sum += ivp.value().value();
+        ++count;
+        return true;
+    });
+
+    REQUIRE(sum == 0);
+    REQUIRE(count == 1);
 }
 
 TEST_CASE("MVT test 033: Layer with single feature with float property value") {

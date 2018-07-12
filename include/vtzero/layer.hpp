@@ -483,6 +483,30 @@ namespace vtzero {
         return true;
     }
 
+    template <typename TFunc>
+    bool feature::for_each_property_indexes(TFunc&& func) const {
+        vtzero_assert(valid());
+
+        for (auto it = m_properties.begin(); it != m_properties.end();) {
+            const uint32_t ki = *it++;
+            if (!index_value{ki}.valid()) {
+                throw out_of_range_exception{ki};
+            }
+
+            assert(it != m_properties.end());
+            const uint32_t vi = *it++;
+            if (!index_value{vi}.valid()) {
+                throw out_of_range_exception{vi};
+            }
+
+            if (!std::forward<TFunc>(func)(index_value_pair{ki, vi})) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 } // namespace vtzero
 
 #endif // VTZERO_LAYER_HPP
