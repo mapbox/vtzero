@@ -469,7 +469,7 @@ namespace vtzero {
                 throw out_of_range_exception{ki};
             }
 
-            assert(m_property_iterator != m_properties.end());
+            assert(it != m_properties.end());
             const uint32_t vi = *it++;
             if (!index_value{vi}.valid()) {
                 throw out_of_range_exception{vi};
