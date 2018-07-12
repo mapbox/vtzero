@@ -484,6 +484,26 @@ namespace vtzero {
         }
 
         /**
+         * Copy all properties of an existing feature to the one being built
+         * using a property_mapper.
+         *
+         * @tparam TMapper Must be the property_mapper class or something
+         *                 equivalent.
+         * @param feature The feature to copy the properties from.
+         * @param mapper Instance of the property_mapper class.
+         */
+        template <typename TMapper>
+        void copy_properties(const feature& feature, TMapper& mapper) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_properties() after commit() or rollback()");
+            prepare_to_add_property();
+            feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
+                add_property_impl(mapper(idxs));
+                return true;
+            });
+        }
+
+        /**
          * Add a property to this feature. Can only be called after all the
          * methods manipulating the geometry.
          *
@@ -1267,6 +1287,25 @@ namespace vtzero {
                           "Can not call copy_properties() after commit() or rollback()");
             feature.for_each_property([this](const property& prop) {
                 add_property_impl(prop);
+                return true;
+            });
+        }
+
+        /**
+         * Copy all properties of an existing feature to the one being built
+         * using a property_mapper.
+         *
+         * @tparam TMapper Must be the property_mapper class or something
+         *                 equivalent.
+         * @param feature The feature to copy the properties from.
+         * @param mapper Instance of the property_mapper class.
+         */
+        template <typename TMapper>
+        void copy_properties(const feature& feature, TMapper& mapper) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_properties() after commit() or rollback()");
+            feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
+                add_property_impl(mapper(idxs));
                 return true;
             });
         }
