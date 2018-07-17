@@ -14,6 +14,23 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 
 
+## [1.0.3] - 2018-07-17
+
+### Added
+
+* New `copy_id()` helper function on feature builder copies ID (if it exists)
+  from an existing feature.
+* New `copy_properties()` helper funtion on feature builder copies all
+  properties from an existing feature, optionally using a `property_mapper`.
+* New `feature::for_each_property_indexes()` member function.
+
+### Fixed
+
+* The example program `vtzero-stats` now catches exceptions and exists with
+  an error message.
+* Fix an assert where a wrong iterator was checked.
+
+
 ## [1.0.2] - 2018-06-26
 
 ### Fixed
@@ -48,7 +65,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 First release
 
 
-[unreleased]: https://github.com/osmcode/libosmium/compare/v1.0.2...HEAD
+[unreleased]: https://github.com/osmcode/libosmium/compare/v1.0.3...HEAD
+[1.0.3]: https://github.com/osmcode/libosmium/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/osmcode/libosmium/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/osmcode/libosmium/compare/v1.0.0...v1.0.1
 
