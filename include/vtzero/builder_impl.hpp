@@ -70,6 +70,9 @@ namespace vtzero {
             // The number of features in the layer
             std::size_t m_num_features = 0;
 
+            // Vector tile spec version
+            uint32_t m_version = 0;
+
             // The number of keys in the keys table
             uint32_t m_num_keys = 0;
 
@@ -164,7 +167,8 @@ namespace vtzero {
             layer_builder_impl(TString&& name, uint32_t version, uint32_t extent) :
                 m_pbf_message_layer(m_data),
                 m_pbf_message_keys(m_keys_data),
-                m_pbf_message_values(m_values_data) {
+                m_pbf_message_values(m_values_data),
+                m_version(version) {
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::version, version);
                 m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<TString>(name));
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
@@ -177,6 +181,10 @@ namespace vtzero {
 
             layer_builder_impl(layer_builder_impl&&) = default;
             layer_builder_impl& operator=(layer_builder_impl&&) = default;
+
+            uint32_t version() const noexcept {
+                return m_version;
+            }
 
             index_value add_key_without_dup_check(const data_view text) {
                 m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
