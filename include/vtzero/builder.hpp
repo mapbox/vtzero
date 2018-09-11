@@ -430,7 +430,25 @@ namespace vtzero {
             vtzero_assert(!m_pbf_geometry.valid() &&
                           !m_pbf_tags.valid() &&
                           "Call set_id() before setting the geometry or adding properties");
-            set_id_impl(id);
+            set_integer_id_impl(id);
+        }
+
+        /**
+         * Set the ID of this feature.
+         *
+         * You can only call this method once and it must be before calling
+         * any method manipulating the geometry.
+         *
+         * @param id The ID.
+         */
+        void set_string_id(data_view id) {
+            vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call set_id() after commit() or rollback()");
+            vtzero_assert(!m_pbf_geometry.valid() &&
+                          !m_pbf_tags.valid() &&
+                          "Call set_id() before setting the geometry or adding properties");
+            set_string_id_impl(id);
         }
 
         /**
@@ -448,9 +466,7 @@ namespace vtzero {
             vtzero_assert(!m_pbf_geometry.valid() &&
                           !m_pbf_tags.valid() &&
                           "Call copy_id() before setting the geometry or adding properties");
-            if (feature.has_id()) {
-                set_id_impl(feature.id());
-            }
+            copy_id_impl(feature);
         }
 
         /**
@@ -1207,7 +1223,23 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call set_id() after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid());
-            set_id_impl(id);
+            set_integer_id_impl(id);
+        }
+
+        /**
+         * Set the ID of this feature.
+         *
+         * You can only call this method once and it must be before calling
+         * set_geometry().
+         *
+         * @param id The ID.
+         */
+        void set_string_id(data_view id) {
+            vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call set_id() after commit() or rollback()");
+            vtzero_assert(!m_pbf_tags.valid());
+            set_string_id_impl(id);
         }
 
         /**
@@ -1223,9 +1255,7 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_id() after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid());
-            if (feature.has_id()) {
-                set_id_impl(feature.id());
-            }
+            copy_id_impl(feature);
         }
 
         /**
@@ -1347,9 +1377,7 @@ namespace vtzero {
 
     inline void layer_builder::add_feature(const feature& feature) {
         geometry_feature_builder feature_builder{*this};
-        if (feature.has_id()) {
-            feature_builder.set_id(feature.id());
-        }
+        feature_builder.copy_id(feature);
         feature_builder.set_geometry(feature.geometry());
         feature.for_each_property([&feature_builder](const property& p) {
             feature_builder.add_property(p);

@@ -102,7 +102,8 @@ namespace vtzero {
             id       = 1,
             tags     = 2,
             type     = 3,
-            geometry = 4
+            geometry = 4,
+            string_id = 10
         };
 
         using pbf_value = property_value_type;

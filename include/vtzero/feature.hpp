@@ -40,16 +40,23 @@ namespace vtzero {
      */
     class feature {
 
+        enum class id_type {
+            no_id = 0,
+            integer_id = 1,
+            string_id = 2
+        };
+
         using uint32_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint32_iterator>;
 
         const layer* m_layer = nullptr;
-        uint64_t m_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
+        uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
+        data_view m_string_id{};
         uint32_it_range m_properties{};
         protozero::pbf_reader::const_uint32_iterator m_property_iterator{};
         std::size_t m_num_properties = 0;
         data_view m_geometry{};
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
-        bool m_has_id = false;
+        id_type m_id_type = id_type::no_id;
 
     public:
 
@@ -73,8 +80,11 @@ namespace vtzero {
             while (reader.next()) {
                 switch (reader.tag_and_type()) {
                     case protozero::tag_and_type(detail::pbf_feature::id, protozero::pbf_wire_type::varint):
-                        m_id = reader.get_uint64();
-                        m_has_id = true;
+                        if (m_id_type != id_type::no_id) {
+                            throw format_exception{"Feature has more than one id/string_id field"};
+                        }
+                        m_integer_id = reader.get_uint64();
+                        m_id_type = id_type::integer_id;
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
                         if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
@@ -97,6 +107,13 @@ namespace vtzero {
                             throw format_exception{"Feature has more than one geometry field"};
                         }
                         m_geometry = reader.get_view();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_feature::string_id, protozero::pbf_wire_type::length_delimited):
+                        if (m_id_type != id_type::no_id) {
+                            throw format_exception{"Feature has more than one id/string_id field"};
+                        }
+                        m_string_id = reader.get_view();
+                        m_id_type = id_type::string_id;
                         break;
                     default:
                         reader.skip(); // ignore unknown fields
@@ -136,7 +153,11 @@ namespace vtzero {
         }
 
         /**
-         * The ID of this feature. According to the spec IDs should be unique
+         * The integer ID of this feature.
+         *
+         * Returns 0 if it isn't set.
+         *
+         * According to the spec IDs should be unique
          * in a layer if they are set (spec 4.2).
          *
          * Complexity: Constant.
@@ -144,7 +165,23 @@ namespace vtzero {
          * Always returns 0 for invalid features.
          */
         uint64_t id() const noexcept {
-            return m_id;
+            return m_integer_id;
+        }
+
+        /**
+         * The string ID of this feature.
+         *
+         * Returns an empty data_view if this feature doesn't have a string_id.
+         *
+         * According to the spec IDs should be unique
+         * in a layer if they are set (spec 4.2).
+         *
+         * Complexity: Constant.
+         *
+         * Always returns an empty data_view for invalid features.
+         */
+        data_view string_id() const noexcept {
+            return m_string_id;
         }
 
         /**
@@ -155,7 +192,29 @@ namespace vtzero {
          * Always returns false for invalid features.
          */
         bool has_id() const noexcept {
-            return m_has_id;
+            return m_id_type != id_type::no_id;
+        }
+
+        /**
+         * Does this feature have an integer ID?
+         *
+         * Complexity: Constant.
+         *
+         * Always returns false for invalid features.
+         */
+        bool has_integer_id() const noexcept {
+            return m_id_type == id_type::integer_id;
+        }
+
+        /**
+         * Does this feature have a string ID?
+         *
+         * Complexity: Constant.
+         *
+         * Always returns false for invalid features.
+         */
+        bool has_string_id() const noexcept {
+            return m_id_type == id_type::string_id;
         }
 
         /**

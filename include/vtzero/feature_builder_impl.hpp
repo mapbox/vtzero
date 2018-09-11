@@ -18,6 +18,7 @@ documentation.
 
 #include "builder_impl.hpp"
 #include "encoded_property_value.hpp"
+#include "feature.hpp"
 #include "geometry.hpp"
 #include "property.hpp"
 #include "property_value.hpp"
@@ -82,8 +83,20 @@ namespace vtzero {
                 return m_layer->version();
             }
 
-            void set_id_impl(uint64_t id) {
+            void set_integer_id_impl(uint64_t id) {
                 m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+            }
+
+            void set_string_id_impl(data_view id) {
+                m_feature_writer.add_string(detail::pbf_feature::string_id, id);
+            }
+
+            void copy_id_impl(const feature& feature) {
+                if (feature.has_integer_id()) {
+                    set_integer_id_impl(feature.id());
+                } else if (feature.has_string_id()) {
+                    set_string_id_impl(feature.string_id());
+                }
             }
 
             void add_property_impl(const property& property) {

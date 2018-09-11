@@ -12,6 +12,8 @@ TEST_CASE("default constructed feature") {
     REQUIRE_FALSE(feature);
     REQUIRE(feature.id() == 0);
     REQUIRE_FALSE(feature.has_id());
+    REQUIRE_FALSE(feature.has_integer_id());
+    REQUIRE_FALSE(feature.has_string_id());
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE_ASSERT(feature.geometry());
     REQUIRE(feature.empty());
@@ -30,6 +32,8 @@ TEST_CASE("read a feature") {
     REQUIRE(feature);
     REQUIRE(feature.id() == 0);
     REQUIRE(feature.has_id());
+    REQUIRE(feature.has_integer_id());
+    REQUIRE_FALSE(feature.has_string_id());
     REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
     REQUIRE_FALSE(feature.empty());
     REQUIRE(feature.num_properties() == 4);

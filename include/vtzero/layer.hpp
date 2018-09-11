@@ -139,8 +139,8 @@ namespace vtzero {
                 }
             }
 
-            // This library can only handle version 1 and 2.
-            if (m_version < 1 || m_version > 2) {
+            // This library can only handle version 1 to 3.
+            if (m_version < 1 || m_version > 3) {
                 throw version_exception{m_version};
             }
 

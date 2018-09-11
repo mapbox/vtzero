@@ -166,6 +166,32 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
     }
 }
 
+TEST_CASE("String ids are not allowed in version 2 tiles") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+    REQUIRE_THROWS_AS(fbuilder.set_string_id("foo"), const assert_error&);
+}
+
+TEST_CASE("String ids are okay in version 3 tiles") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+    fbuilder.set_string_id("foo");
+    fbuilder.add_point(10, 10);
+    fbuilder.commit();
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+    auto layer = tile.next_layer();
+
+    auto feature = layer.next_feature();
+    REQUIRE_FALSE(feature.has_integer_id());
+    REQUIRE(feature.has_string_id());
+    REQUIRE(feature.string_id() == "foo");
+}
+
 TEST_CASE("Rollback feature") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
@@ -230,9 +256,13 @@ TEST_CASE("Rollback feature") {
     auto layer = tile.next_layer();
 
     auto feature = layer.next_feature();
+    REQUIRE(feature.has_integer_id());
+    REQUIRE_FALSE(feature.has_string_id());
     REQUIRE(feature.id() == 1);
 
     feature = layer.next_feature();
+    REQUIRE(feature.has_integer_id());
+    REQUIRE_FALSE(feature.has_string_id());
     REQUIRE(feature.id() == 8);
 
     feature = layer.next_feature();
