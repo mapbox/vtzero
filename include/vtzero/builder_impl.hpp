@@ -146,6 +146,47 @@ namespace vtzero {
 
         }; // class string_table
 
+        template <typename T>
+        class fixed_value_size_table {
+
+            // TODO: Like the string_table, this should also use an
+            // unordered_map when the table becomes large.
+
+            std::vector<T> m_values;
+
+        public:
+
+            bool empty() const noexcept {
+                return m_values.empty();
+            }
+
+            std::size_t size() const noexcept {
+                return m_values.size() * sizeof(T);
+            }
+
+            index_value add_without_dup_check(T value) {
+                m_values.push_back(value);
+                return index_value{static_cast<uint32_t>(m_values.size() - 1)};
+            }
+
+            index_value add(T value) {
+                const auto it = std::find(m_values.cbegin(), m_values.cend(), value);
+                if (it != m_values.cend()) {
+                    return index_value{static_cast<uint32_t>(std::distance(m_values.cbegin(), it))};
+                }
+                return add_without_dup_check(value);
+            }
+
+            void encode(detail::pbf_layer pbf_type, std::string& data) const {
+                if (m_values.empty()) {
+                    return;
+                }
+                protozero::pbf_builder<detail::pbf_layer> pbf_table{data};
+                pbf_table.add_packed_fixed<T>(static_cast<protozero::pbf_tag_type>(pbf_type), m_values.cbegin(), m_values.cend());
+            }
+
+        }; // class fixed_value_size_table
+
         class layer_builder_impl : public layer_builder_base {
 
             // Buffer containing the encoded layer metadata and features
@@ -156,13 +197,13 @@ namespace vtzero {
             string_table m_string_values_table{detail::pbf_layer::string_values};
 
             // The double_values index table
-            std::vector<double> m_double_values;
+            fixed_value_size_table<double> m_double_values_table;
 
             // The float_values index table
-            std::vector<float> m_float_values;
+            fixed_value_size_table<float> m_float_values_table;
 
             // The int_values index table
-            std::vector<uint64_t> m_int_values;
+            fixed_value_size_table<uint64_t> m_int_values_table;
 
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
 
@@ -235,47 +276,32 @@ namespace vtzero {
 
             index_value add_double_value_without_dup_check(double value) {
                 vtzero_assert(m_version == 3);
-                m_double_values.push_back(value);
-                return index_value{static_cast<uint32_t>(m_double_values.size() - 1)};
+                return m_double_values_table.add_without_dup_check(value);
             }
 
             index_value add_double_value(double value) {
                 vtzero_assert(m_version == 3);
-                const auto it = std::find(m_double_values.cbegin(), m_double_values.cend(), value);
-                if (it != m_double_values.cend()) {
-                    return index_value{static_cast<uint32_t>(std::distance(m_double_values.cbegin(), it))};
-                }
-                return add_double_value_without_dup_check(value);
+                return m_double_values_table.add(value);
             }
 
             index_value add_float_value_without_dup_check(float value) {
                 vtzero_assert(m_version == 3);
-                m_float_values.push_back(value);
-                return index_value{static_cast<uint32_t>(m_float_values.size() - 1)};
+                return m_float_values_table.add_without_dup_check(value);
             }
 
             index_value add_float_value(float value) {
                 vtzero_assert(m_version == 3);
-                const auto it = std::find(m_float_values.cbegin(), m_float_values.cend(), value);
-                if (it != m_float_values.cend()) {
-                    return index_value{static_cast<uint32_t>(std::distance(m_float_values.cbegin(), it))};
-                }
-                return add_float_value_without_dup_check(value);
+                return m_float_values_table.add(value);
             }
 
             index_value add_int_value_without_dup_check(uint64_t value) {
                 vtzero_assert(m_version == 3);
-                m_int_values.push_back(value);
-                return index_value{static_cast<uint32_t>(m_int_values.size() - 1)};
+                return m_int_values_table.add_without_dup_check(value);
             }
 
             index_value add_int_value(uint64_t value) {
                 vtzero_assert(m_version == 3);
-                const auto it = std::find(m_int_values.cbegin(), m_int_values.cend(), value);
-                if (it != m_int_values.cend()) {
-                    return index_value{static_cast<uint32_t>(std::distance(m_int_values.cbegin(), it))};
-                }
-                return add_int_value_without_dup_check(value);
+                return m_int_values_table.add(value);
             }
 
             protozero::pbf_builder<detail::pbf_layer>& message() noexcept {
@@ -291,9 +317,9 @@ namespace vtzero {
                 return m_data.size() +
                        m_keys_table.data().size() +
                        m_values_table.data().size() +
-                       m_double_values.size() +
-                       m_float_values.size() +
-                       m_int_values.size() +
+                       m_double_values_table.size() +
+                       m_float_values_table.size() +
+                       m_int_values_table.size() +
                        estimated_overhead_for_pbf_encoding;
             }
 
@@ -307,19 +333,11 @@ namespace vtzero {
                     } else {
                         constexpr const std::size_t estimated_overhead_for_pbf_encoding = 2 * (1 + 2);
                         std::string values_tables_data;
-                        values_tables_data.reserve(m_double_values.size() + m_float_values.size() + m_int_values.size() + estimated_overhead_for_pbf_encoding);
-                        if (!m_double_values.empty()) {
-                            protozero::pbf_builder<detail::pbf_layer> pbf_table{values_tables_data};
-                            pbf_table.add_packed_double(detail::pbf_layer::double_values, m_double_values.begin(), m_double_values.end());
-                        }
-                        if (!m_float_values.empty()) {
-                            protozero::pbf_builder<detail::pbf_layer> pbf_table{values_tables_data};
-                            pbf_table.add_packed_float(detail::pbf_layer::float_values, m_float_values.begin(), m_float_values.end());
-                        }
-                        if (!m_int_values.empty()) {
-                            protozero::pbf_builder<detail::pbf_layer> pbf_table{values_tables_data};
-                            pbf_table.add_packed_uint64(detail::pbf_layer::int_values, m_int_values.begin(), m_int_values.end());
-                        }
+                        values_tables_data.reserve(m_double_values_table.size() + m_float_values_table.size() + m_int_values_table.size() + estimated_overhead_for_pbf_encoding);
+
+                        m_double_values_table.encode(detail::pbf_layer::double_values, values_tables_data);
+                        m_float_values_table.encode(detail::pbf_layer::float_values, values_tables_data);
+                        m_int_values_table.encode(detail::pbf_layer::int_values, values_tables_data);
 
                         pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
                                                             m_data,
