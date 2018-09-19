@@ -53,48 +53,7 @@ namespace vtzero {
 
         }; // class layer_builder_base
 
-        class layer_builder_impl : public layer_builder_base {
-
-            // Buffer containing the encoded layer metadata and features
-            std::string m_data;
-
-            // Buffer containing the encoded keys table
-            std::string m_keys_data;
-
-            // Buffer containing the encoded values table
-            std::string m_values_data;
-
-            // The double_values index table
-            std::vector<double> m_double_values;
-
-            // The float_values index table
-            std::vector<float> m_float_values;
-
-            // The int_values index table
-            std::vector<uint64_t> m_int_values;
-
-            // The string_values index table
-            std::string m_string_values_data;
-
-            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
-            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys;
-            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_values;
-            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_string_values;
-
-            // The number of features in the layer
-            std::size_t m_num_features = 0;
-
-            // Vector tile spec version
-            uint32_t m_version = 0;
-
-            // The number of keys in the keys table
-            uint32_t m_num_keys = 0;
-
-            // The number of values in the values table
-            uint32_t m_num_values = 0;
-
-            // The number of values in the string_values table
-            uint32_t m_num_string_values = 0;
+        class string_table {
 
             // Below this value, no index will be used to find entries in the
             // key/value tables. This number is based on some initial
@@ -102,10 +61,21 @@ namespace vtzero {
             // See also https://github.com/mapbox/vtzero/issues/30
             static constexpr const uint32_t max_entries_flat = 20;
 
+            // Buffer containing the encoded table
+            std::string m_data{};
+
+            // The index into the table
             using map_type = std::unordered_map<std::string, index_value>;
-            map_type m_keys_index;
-            map_type m_values_index;
-            map_type m_string_values_index;
+            map_type m_index{};
+
+            // The pbf message builder for our table
+            protozero::pbf_builder<detail::pbf_layer> m_pbf_message;
+
+            // The number of entries in the table
+            uint32_t m_num = 0;
+
+            // PBF message type
+            detail::pbf_layer m_pbf_type;
 
             static index_value find_in_table(const data_view text, const std::string& data) {
                 uint32_t index = 0;
@@ -134,75 +104,79 @@ namespace vtzero {
                 }
             }
 
-            index_value add_value_without_dup_check(const data_view text) {
-                m_pbf_message_values.add_string(detail::pbf_layer::values, text);
-                return m_num_values++;
+        public:
+
+            explicit string_table(detail::pbf_layer pbf_type) :
+                m_pbf_message(m_data),
+                m_pbf_type(pbf_type) {
             }
 
-            index_value add_value(const data_view text) {
-                const auto index = find_in_values_table(text);
+            const std::string& data() const noexcept {
+                return m_data;
+            }
+
+            index_value add_without_dup_check(const data_view text) {
+                m_pbf_message.add_string(m_pbf_type, text);
+                return m_num++;
+            }
+
+            index_value find(const data_view text) {
+                if (m_num < max_entries_flat) {
+                    return find_in_table(text, m_data);
+                }
+
+                if (m_index.empty()) {
+                    populate_index(m_data, m_index);
+                }
+
+                auto& v = m_index[std::string(text)];
+                if (!v.valid()) {
+                    v = add_without_dup_check(text);
+                }
+                return v;
+            }
+
+            index_value add(const data_view text) {
+                const auto index = find(text);
                 if (index.valid()) {
                     return index;
                 }
-                return add_value_without_dup_check(text);
+                return add_without_dup_check(text);
             }
 
-            index_value find_in_keys_table(const data_view text) {
-                if (m_num_keys < max_entries_flat) {
-                    return find_in_table(text, m_keys_data);
-                }
+        }; // class string_table
 
-                if (m_keys_index.empty()) {
-                    populate_index(m_keys_data, m_keys_index);
-                }
+        class layer_builder_impl : public layer_builder_base {
 
-                auto& v = m_keys_index[std::string(text)];
-                if (!v.valid()) {
-                    v = add_key_without_dup_check(text);
-                }
-                return v;
-            }
+            // Buffer containing the encoded layer metadata and features
+            std::string m_data;
 
-            index_value find_in_values_table(const data_view text) {
-                if (m_num_values < max_entries_flat) {
-                    return find_in_table(text, m_values_data);
-                }
+            string_table m_keys_table{detail::pbf_layer::keys};
+            string_table m_values_table{detail::pbf_layer::values};
+            string_table m_string_values_table{detail::pbf_layer::string_values};
 
-                if (m_values_index.empty()) {
-                    populate_index(m_values_data, m_values_index);
-                }
+            // The double_values index table
+            std::vector<double> m_double_values;
 
-                auto& v = m_values_index[std::string(text)];
-                if (!v.valid()) {
-                    v = add_value_without_dup_check(text);
-                }
-                return v;
-            }
+            // The float_values index table
+            std::vector<float> m_float_values;
 
-            index_value find_in_string_values_table(const data_view text) {
-                if (m_num_string_values < max_entries_flat) {
-                    return find_in_table(text, m_string_values_data);
-                }
+            // The int_values index table
+            std::vector<uint64_t> m_int_values;
 
-                if (m_string_values_index.empty()) {
-                    populate_index(m_string_values_data, m_string_values_index);
-                }
+            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
 
-                auto& v = m_string_values_index[std::string(text)];
-                if (!v.valid()) {
-                    v = add_string_value_without_dup_check(text);
-                }
-                return v;
-            }
+            // The number of features in the layer
+            std::size_t m_num_features = 0;
+
+            // Vector tile spec version
+            uint32_t m_version = 0;
 
         public:
 
             template <typename TString>
             layer_builder_impl(TString&& name, uint32_t version, uint32_t extent) :
                 m_pbf_message_layer(m_data),
-                m_pbf_message_keys(m_keys_data),
-                m_pbf_message_values(m_values_data),
-                m_pbf_message_string_values(m_string_values_data),
                 m_version(version) {
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::version, version);
                 m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<TString>(name));
@@ -222,51 +196,41 @@ namespace vtzero {
             }
 
             index_value add_key_without_dup_check(const data_view text) {
-                m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
-                return m_num_keys++;
+                return m_keys_table.add_without_dup_check(text);
             }
 
             index_value add_key(const data_view text) {
-                const auto index = find_in_keys_table(text);
-                if (index.valid()) {
-                    return index;
-                }
-                return add_key_without_dup_check(text);
+                return m_keys_table.add(text);
             }
 
             index_value add_value_without_dup_check(const property_value value) {
                 vtzero_assert(m_version < 3);
-                return add_value_without_dup_check(value.data());
+                return m_values_table.add_without_dup_check(value.data());
             }
 
             index_value add_value_without_dup_check(const encoded_property_value& value) {
                 vtzero_assert(m_version < 3);
-                return add_value_without_dup_check(value.data());
+                return m_values_table.add_without_dup_check(value.data());
             }
 
             index_value add_value(const property_value value) {
                 vtzero_assert(m_version < 3);
-                return add_value(value.data());
+                return m_values_table.add(value.data());
             }
 
             index_value add_value(const encoded_property_value& value) {
                 vtzero_assert(m_version < 3);
-                return add_value(value.data());
+                return m_values_table.add(value.data());
             }
 
             index_value add_string_value_without_dup_check(data_view value) {
                 vtzero_assert(m_version == 3);
-                m_pbf_message_string_values.add_string(detail::pbf_layer::string_values, value);
-                return m_num_string_values++;
+                return m_string_values_table.add_without_dup_check(value);
             }
 
             index_value add_string_value(data_view value) {
                 vtzero_assert(m_version == 3);
-                const auto index = find_in_string_values_table(value);
-                if (index.valid()) {
-                    return index;
-                }
-                return add_string_value_without_dup_check(value);
+                return m_string_values_table.add(value);
             }
 
             index_value add_double_value_without_dup_check(double value) {
@@ -314,22 +278,6 @@ namespace vtzero {
                 return add_int_value_without_dup_check(value);
             }
 
-            const std::string& data() const noexcept {
-                return m_data;
-            }
-
-            const std::string& keys_data() const noexcept {
-                return m_keys_data;
-            }
-
-            const std::string& values_data() const noexcept {
-                return m_values_data;
-            }
-
-            const std::string& string_values_data() const noexcept {
-                return m_string_values_data;
-            }
-
             protozero::pbf_builder<detail::pbf_layer>& message() noexcept {
                 return m_pbf_message_layer;
             }
@@ -340,9 +288,9 @@ namespace vtzero {
 
             std::size_t estimated_size() const override {
                 constexpr const std::size_t estimated_overhead_for_pbf_encoding = 14;
-                return data().size() +
-                       keys_data().size() +
-                       values_data().size() +
+                return m_data.size() +
+                       m_keys_table.data().size() +
+                       m_values_table.data().size() +
                        m_double_values.size() +
                        m_float_values.size() +
                        m_int_values.size() +
@@ -353,9 +301,9 @@ namespace vtzero {
                 if (m_num_features > 0) {
                     if (m_version < 3) {
                         pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
-                                                            data(),
-                                                            keys_data(),
-                                                            values_data());
+                                                            m_data,
+                                                            m_keys_table.data(),
+                                                            m_values_table.data());
                     } else {
                         constexpr const std::size_t estimated_overhead_for_pbf_encoding = 2 * (1 + 2);
                         std::string values_tables_data;
@@ -374,9 +322,9 @@ namespace vtzero {
                         }
 
                         pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
-                                                            data(),
-                                                            keys_data(),
-                                                            string_values_data(),
+                                                            m_data,
+                                                            m_keys_table.data(),
+                                                            m_string_values_table.data(),
                                                             values_tables_data);
                     }
                 }
