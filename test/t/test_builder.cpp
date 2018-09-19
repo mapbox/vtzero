@@ -467,7 +467,7 @@ TEST_CASE("Copy only point geometries using point_feature_builder") {
             if (feature.geometry().type() == vtzero::GeomType::POINT) {
                 const auto points = decode_point_geometry(feature.geometry(), points_to_vector{});
                 fbuilder.add_points_from_container(points);
-                fbuilder.copy_properties(feature);
+                fbuilder.copy_attributes(feature);
                 fbuilder.commit();
                 ++n;
             } else {

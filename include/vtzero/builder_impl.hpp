@@ -27,6 +27,7 @@ documentation.
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace vtzero {
 
@@ -63,9 +64,22 @@ namespace vtzero {
             // Buffer containing the encoded values table
             std::string m_values_data;
 
+            // The double_values index table
+            std::vector<double> m_double_values;
+
+            // The float_values index table
+            std::vector<float> m_float_values;
+
+            // The int_values index table
+            std::vector<uint64_t> m_int_values;
+
+            // The string_values index table
+            std::string m_string_values_data;
+
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys;
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_values;
+            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_string_values;
 
             // The number of features in the layer
             std::size_t m_num_features = 0;
@@ -79,6 +93,9 @@ namespace vtzero {
             // The number of values in the values table
             uint32_t m_num_values = 0;
 
+            // The number of values in the string_values table
+            uint32_t m_num_string_values = 0;
+
             // Below this value, no index will be used to find entries in the
             // key/value tables. This number is based on some initial
             // benchmarking but probably needs some tuning.
@@ -88,6 +105,7 @@ namespace vtzero {
             using map_type = std::unordered_map<std::string, index_value>;
             map_type m_keys_index;
             map_type m_values_index;
+            map_type m_string_values_index;
 
             static index_value find_in_table(const data_view text, const std::string& data) {
                 uint32_t index = 0;
@@ -161,6 +179,22 @@ namespace vtzero {
                 return v;
             }
 
+            index_value find_in_string_values_table(const data_view text) {
+                if (m_num_string_values < max_entries_flat) {
+                    return find_in_table(text, m_string_values_data);
+                }
+
+                if (m_string_values_index.empty()) {
+                    populate_index(m_string_values_data, m_string_values_index);
+                }
+
+                auto& v = m_string_values_index[std::string(text)];
+                if (!v.valid()) {
+                    v = add_string_value_without_dup_check(text);
+                }
+                return v;
+            }
+
         public:
 
             template <typename TString>
@@ -168,6 +202,7 @@ namespace vtzero {
                 m_pbf_message_layer(m_data),
                 m_pbf_message_keys(m_keys_data),
                 m_pbf_message_values(m_values_data),
+                m_pbf_message_string_values(m_string_values_data),
                 m_version(version) {
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::version, version);
                 m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<TString>(name));
@@ -200,19 +235,83 @@ namespace vtzero {
             }
 
             index_value add_value_without_dup_check(const property_value value) {
+                vtzero_assert(m_version < 3);
                 return add_value_without_dup_check(value.data());
             }
 
             index_value add_value_without_dup_check(const encoded_property_value& value) {
+                vtzero_assert(m_version < 3);
                 return add_value_without_dup_check(value.data());
             }
 
             index_value add_value(const property_value value) {
+                vtzero_assert(m_version < 3);
                 return add_value(value.data());
             }
 
             index_value add_value(const encoded_property_value& value) {
+                vtzero_assert(m_version < 3);
                 return add_value(value.data());
+            }
+
+            index_value add_string_value_without_dup_check(data_view value) {
+                vtzero_assert(m_version == 3);
+                m_pbf_message_string_values.add_string(detail::pbf_layer::string_values, value);
+                return m_num_string_values++;
+            }
+
+            index_value add_string_value(data_view value) {
+                vtzero_assert(m_version == 3);
+                const auto index = find_in_string_values_table(value);
+                if (index.valid()) {
+                    return index;
+                }
+                return add_string_value_without_dup_check(value);
+            }
+
+            index_value add_double_value_without_dup_check(double value) {
+                vtzero_assert(m_version == 3);
+                m_double_values.push_back(value);
+                return index_value{static_cast<uint32_t>(m_double_values.size() - 1)};
+            }
+
+            index_value add_double_value(double value) {
+                vtzero_assert(m_version == 3);
+                const auto it = std::find(m_double_values.cbegin(), m_double_values.cend(), value);
+                if (it != m_double_values.cend()) {
+                    return index_value{static_cast<uint32_t>(std::distance(m_double_values.cbegin(), it))};
+                }
+                return add_double_value_without_dup_check(value);
+            }
+
+            index_value add_float_value_without_dup_check(float value) {
+                vtzero_assert(m_version == 3);
+                m_float_values.push_back(value);
+                return index_value{static_cast<uint32_t>(m_float_values.size() - 1)};
+            }
+
+            index_value add_float_value(float value) {
+                vtzero_assert(m_version == 3);
+                const auto it = std::find(m_float_values.cbegin(), m_float_values.cend(), value);
+                if (it != m_float_values.cend()) {
+                    return index_value{static_cast<uint32_t>(std::distance(m_float_values.cbegin(), it))};
+                }
+                return add_float_value_without_dup_check(value);
+            }
+
+            index_value add_int_value_without_dup_check(uint64_t value) {
+                vtzero_assert(m_version == 3);
+                m_int_values.push_back(value);
+                return index_value{static_cast<uint32_t>(m_int_values.size() - 1)};
+            }
+
+            index_value add_int_value(uint64_t value) {
+                vtzero_assert(m_version == 3);
+                const auto it = std::find(m_int_values.cbegin(), m_int_values.cend(), value);
+                if (it != m_int_values.cend()) {
+                    return index_value{static_cast<uint32_t>(std::distance(m_int_values.cbegin(), it))};
+                }
+                return add_int_value_without_dup_check(value);
             }
 
             const std::string& data() const noexcept {
@@ -227,6 +326,10 @@ namespace vtzero {
                 return m_values_data;
             }
 
+            const std::string& string_values_data() const noexcept {
+                return m_string_values_data;
+            }
+
             protozero::pbf_builder<detail::pbf_layer>& message() noexcept {
                 return m_pbf_message_layer;
             }
@@ -236,19 +339,46 @@ namespace vtzero {
             }
 
             std::size_t estimated_size() const override {
-                constexpr const std::size_t estimated_overhead_for_pbf_encoding = 8;
+                constexpr const std::size_t estimated_overhead_for_pbf_encoding = 14;
                 return data().size() +
                        keys_data().size() +
                        values_data().size() +
+                       m_double_values.size() +
+                       m_float_values.size() +
+                       m_int_values.size() +
                        estimated_overhead_for_pbf_encoding;
             }
 
             void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const override {
                 if (m_num_features > 0) {
-                    pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
-                                                        data(),
-                                                        keys_data(),
-                                                        values_data());
+                    if (m_version < 3) {
+                        pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
+                                                            data(),
+                                                            keys_data(),
+                                                            values_data());
+                    } else {
+                        constexpr const std::size_t estimated_overhead_for_pbf_encoding = 2 * (1 + 2);
+                        std::string values_tables_data;
+                        values_tables_data.reserve(m_double_values.size() + m_float_values.size() + m_int_values.size() + estimated_overhead_for_pbf_encoding);
+                        if (!m_double_values.empty()) {
+                            protozero::pbf_builder<detail::pbf_layer> pbf_table{values_tables_data};
+                            pbf_table.add_packed_double(detail::pbf_layer::double_values, m_double_values.begin(), m_double_values.end());
+                        }
+                        if (!m_float_values.empty()) {
+                            protozero::pbf_builder<detail::pbf_layer> pbf_table{values_tables_data};
+                            pbf_table.add_packed_float(detail::pbf_layer::float_values, m_float_values.begin(), m_float_values.end());
+                        }
+                        if (!m_int_values.empty()) {
+                            protozero::pbf_builder<detail::pbf_layer> pbf_table{values_tables_data};
+                            pbf_table.add_packed_uint64(detail::pbf_layer::int_values, m_int_values.begin(), m_int_values.end());
+                        }
+
+                        pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
+                                                            data(),
+                                                            keys_data(),
+                                                            string_values_data(),
+                                                            values_tables_data);
+                    }
                 }
             }
 

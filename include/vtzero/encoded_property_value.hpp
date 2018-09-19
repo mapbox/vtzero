@@ -170,6 +170,16 @@ namespace vtzero {
 
         // ------------------
 
+        /// Construct from null.
+        /* This is not possible in vt2, but we need the function for forwards
+         * compatibility, so we encode as "false" here.*/
+        explicit encoded_property_value(null_type /*value*/) {
+            protozero::pbf_builder<detail::pbf_value> pbf_message_value{m_data};
+            pbf_message_value.add_bool(detail::pbf_value::bool_value, false);
+        }
+
+        // ------------------
+
         /**
          * Get view of the raw data stored inside.
          */

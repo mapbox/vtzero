@@ -17,7 +17,9 @@ endif()
 include_directories(SYSTEM "${CMAKE_CURRENT_SOURCE_DIR}/catch")
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-set(TEST_SOURCES builder
+set(TEST_SOURCES attributes
+                 attributes_variant
+                 builder
                  builder_linestring
                  builder_point
                  builder_polygon

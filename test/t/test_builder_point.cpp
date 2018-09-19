@@ -100,6 +100,77 @@ TEST_CASE("Point builder with id/with properties") {
     test_point_builder(true, true);
 }
 
+static void test_point_builder_vt3(bool with_id, bool with_prop) {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+
+    {
+        vtzero::point_feature_builder fbuilder{lbuilder};
+
+        if (with_id) {
+            fbuilder.set_id(17);
+        }
+
+        SECTION("add point using coordinates / property using key/string value") {
+            fbuilder.add_point(10, 20);
+            if (with_prop) {
+                fbuilder.add_scalar_attribute("foo", vtzero::data_view{"bar"});
+            }
+        }
+
+        SECTION("add point using vtzero::point / property using key/int value") {
+            fbuilder.add_point(vtzero::point{10, 20});
+            if (with_prop) {
+                fbuilder.add_scalar_attribute("foo", 22);
+            }
+        }
+
+        SECTION("add point using mypoint / property using key/double value") {
+            fbuilder.add_point(mypoint{10, 20});
+            if (with_prop) {
+                fbuilder.add_scalar_attribute("foo", 3.5);
+            }
+        }
+
+        fbuilder.commit();
+    }
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.name() == "test");
+    REQUIRE(layer.version() == 3);
+    REQUIRE(layer.extent() == 4096);
+    REQUIRE(layer.num_features() == 1);
+
+    const auto feature = layer.next_feature();
+    REQUIRE(feature.id() == (with_id ? 17 : 0));
+
+    point_handler handler;
+    vtzero::decode_point_geometry(feature.geometry(), handler);
+
+    const std::vector<vtzero::point> result = {{10, 20}};
+    REQUIRE(handler.data == result);
+}
+
+TEST_CASE("Point builder without id/without properties (vt3)") {
+    test_point_builder_vt3(false, false);
+}
+
+TEST_CASE("Point builder without id/with properties (vt3)") {
+    test_point_builder_vt3(false, true);
+}
+
+TEST_CASE("Point builder with id/without properties (vt3)") {
+    test_point_builder_vt3(true, false);
+}
+
+TEST_CASE("Point builder with id/with properties (vt3)") {
+    test_point_builder_vt3(true, true);
+}
+
 TEST_CASE("Calling add_points() with bad values throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};

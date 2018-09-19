@@ -20,6 +20,7 @@ documentation.
 #include "property.hpp"
 #include "property_value.hpp"
 #include "types.hpp"
+#include "util.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -47,11 +48,13 @@ namespace vtzero {
         };
 
         using uint32_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint32_iterator>;
+        using uint64_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint64_iterator>;
 
         const layer* m_layer = nullptr;
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
         uint32_it_range m_properties{};
+        uint64_it_range m_attributes{};
         protozero::pbf_reader::const_uint32_iterator m_property_iterator{};
         std::size_t m_num_properties = 0;
         data_view m_geometry{};
@@ -90,8 +93,20 @@ namespace vtzero {
                         if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
                             throw format_exception{"Feature has more than one tags field"};
                         }
+                        if (m_attributes.begin() != protozero::pbf_reader::const_uint64_iterator{}) {
+                            throw format_exception{"Feature has both tags and attributes field"};
+                        }
                         m_properties = reader.get_packed_uint32();
                         m_property_iterator = m_properties.begin();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
+                        if (m_attributes.begin() != protozero::pbf_reader::const_uint64_iterator{}) {
+                            throw format_exception{"Feature has more than one attributes field"};
+                        }
+                        if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
+                            throw format_exception{"Feature has both tags and attributes field"};
+                        }
+                        m_attributes = reader.get_packed_uint64();
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
                             const auto type = reader.get_enum();
@@ -330,6 +345,19 @@ namespace vtzero {
          */
         template <typename TFunc>
         bool for_each_property_indexes(TFunc&& func) const;
+
+        /**
+         * Decode all properties in this feature.
+         *
+         * @tparam THandler Handler class.
+         * @param handler Handler to call callback functions on.
+         * @returns whatever handler.result() returns if that function exists,
+         *          void otherwise.
+         * @throws out_of_range_exception if there is an error decoding the
+         *         data.
+         */
+        template <typename THandler>
+        detail::get_result_t<THandler> decode_attributes(THandler&& handler) const;
 
     }; // class feature
 

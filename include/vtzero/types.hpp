@@ -90,25 +90,38 @@ namespace vtzero {
         };
 
         enum class pbf_layer : protozero::pbf_tag_type {
-            name     =  1,
-            features =  2,
-            keys     =  3,
-            values   =  4,
-            extent   =  5,
-            version  = 15
+            name          =  1,
+            features      =  2,
+            keys          =  3,
+            values        =  4,
+            extent        =  5,
+            string_values =  7,
+            double_values =  8,
+            float_values  =  9,
+            int_values    = 10,
+            version       = 15
         };
 
         enum class pbf_feature : protozero::pbf_tag_type {
-            id       = 1,
-            tags     = 2,
-            type     = 3,
-            geometry = 4,
-            string_id = 10
+            id         = 1,
+            tags       = 2,
+            type       = 3,
+            geometry   = 4,
+            attributes = 5,
+            string_id  = 10
         };
 
         using pbf_value = property_value_type;
 
     } // namespace detail
+
+    /// The "null" value type.
+    struct null_type {
+        /// @cond internal
+        // in the vector tile the null value is encoded with this value
+        static const uint64_t encoded_value = 2;
+        /// @endcond
+    };
 
     /// property value type holding a reference to a string
     struct string_value_type {

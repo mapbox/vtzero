@@ -59,6 +59,12 @@ namespace vtzero {
         return out << '(' << p.x << ',' << p.y << ')';
     }
 
+    /// Overload of the << operator for null_type
+    template <typename TChar, typename TTraits>
+    std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, null_type /*dummy*/) {
+        return out << "null";
+    }
+
 } // namespace vtzero
 
 #endif // VTZERO_OUTPUT_HPP
