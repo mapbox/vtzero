@@ -120,7 +120,7 @@ struct PropertyHandler {
         ++count_vi;
     }
 
-    void attribute_key(vtzero::data_view key, std::size_t /*depth*/) {
+    void attribute_key(vtzero::data_view key, std::size_t /*depth*/) noexcept {
         ++count_k;
         if (key == "type") {
             key_is_type = true;
@@ -159,7 +159,7 @@ class MapHandler {
 
 public:
 
-    bool attribute_key(vtzero::data_view key, std::size_t /*depth*/) {
+    bool attribute_key(vtzero::data_view key, std::size_t /*depth*/) noexcept {
         m_key = key;
         return true;
     }
@@ -169,7 +169,7 @@ public:
         return true;
     }
 
-    std::map<std::string, std::string> result() noexcept {
+    std::map<std::string, std::string> result() {
         std::map<std::string, std::string> result;
         using std::swap;
         swap(m_map, result);
