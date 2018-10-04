@@ -542,7 +542,7 @@ namespace vtzero {
          * @returns Scaled elevation.
          */
         double scale_elevation(int64_t elevation) const noexcept {
-            vtzero_assert(!m_scalings.empty());
+            vtzero_assert_in_noexcept_function(!m_scalings.empty());
             return m_scalings[0].decode(elevation);
         }
 

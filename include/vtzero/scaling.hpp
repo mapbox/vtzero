@@ -76,7 +76,7 @@ namespace vtzero {
 
         /// Decode a value according to the scaling.
         constexpr double decode(int64_t value) const noexcept {
-            return m_base + m_multiplier * (static_cast<double>(value) + m_offset);
+            return m_base + m_multiplier * (static_cast<double>(value + m_offset));
         }
 
     }; // class scaling

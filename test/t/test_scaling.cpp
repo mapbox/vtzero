@@ -4,7 +4,7 @@
 #include <vtzero/scaling.hpp>
 
 TEST_CASE("Default scaling") {
-    const vtzero::scaling s;
+    const vtzero::scaling s{};
 
     REQUIRE(s.encode(5.3) == 5);
     REQUIRE(s.decode(5) == Approx(5.0));
