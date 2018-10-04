@@ -17,6 +17,7 @@ documentation.
  */
 
 #include "exception.hpp"
+#include "geometry.hpp"
 #include "property.hpp"
 #include "property_value.hpp"
 #include "types.hpp"
@@ -53,13 +54,50 @@ namespace vtzero {
         const layer* m_layer = nullptr;
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
-        uint32_it_range m_properties{};
-        uint64_it_range m_attributes{};
+        uint32_it_range m_properties{}; // version 2 "tags"
+        uint64_it_range m_attributes{}; // version 3 attributes
         protozero::pbf_reader::const_uint32_iterator m_property_iterator{};
         std::size_t m_num_properties = 0;
+
         data_view m_geometry{};
+        data_view m_elevations{};
+        data_view m_geometric_attributes{};
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
+
         id_type m_id_type = id_type::no_id;
+
+        using geom_iterator = protozero::pbf_reader::const_uint32_iterator;
+        using elev_iterator = protozero::pbf_reader::const_sint64_iterator;
+        using attr_iterator = protozero::pbf_reader::const_uint64_iterator;
+
+        geom_iterator geometry_begin() const noexcept {
+            return {m_geometry.data(), m_geometry.data() + m_geometry.size()};
+        }
+
+        geom_iterator geometry_end() const noexcept {
+            return {m_geometry.data() + m_geometry.size(), m_geometry.data() + m_geometry.size()};
+        }
+
+        elev_iterator elevations_begin() const noexcept {
+            return {m_elevations.data(), m_elevations.data() + m_elevations.size()};
+        }
+
+        elev_iterator elevations_end() const noexcept {
+            return {m_elevations.data() + m_elevations.size(), m_elevations.data() + m_elevations.size()};
+        }
+
+        attr_iterator geometric_attributes_begin() const noexcept {
+            return {m_geometric_attributes.data(), m_geometric_attributes.data() + m_geometric_attributes.size()};
+        }
+
+        attr_iterator geometric_attributes_end() const noexcept {
+            return {m_geometric_attributes.data() + m_geometric_attributes.size(), m_geometric_attributes.data() + m_geometric_attributes.size()};
+        }
+
+        using geom_decoder_type = detail::extended_geometry_decoder<3,
+              geom_iterator,
+              protozero::pbf_reader::const_sint64_iterator,
+              protozero::pbf_reader::const_uint64_iterator>;
 
     public:
 
@@ -122,6 +160,18 @@ namespace vtzero {
                             throw format_exception{"Feature has more than one geometry field"};
                         }
                         m_geometry = reader.get_view();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_feature::elevations, protozero::pbf_wire_type::length_delimited):
+                        if (!m_elevations.empty()) {
+                            throw format_exception{"Feature has more than one elevations field"};
+                        }
+                        m_elevations = reader.get_view();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_feature::geometric_attributes, protozero::pbf_wire_type::length_delimited):
+                        if (!m_geometric_attributes.empty()) {
+                            throw format_exception{"Feature has more than one geometric_attributes field"};
+                        }
+                        m_geometric_attributes = reader.get_view();
                         break;
                     case protozero::tag_and_type(detail::pbf_feature::string_id, protozero::pbf_wire_type::length_delimited):
                         if (m_id_type != id_type::no_id) {
@@ -244,6 +294,15 @@ namespace vtzero {
         }
 
         /**
+         * Does this feature have a 3d geometry?
+         *
+         * Complexity: Constant.
+         */
+        bool is_3d() const noexcept {
+            return !m_elevations.empty();
+        }
+
+        /**
          * Get the geometry of this feature.
          *
          * Complexity: Constant.
@@ -358,6 +417,103 @@ namespace vtzero {
          */
         template <typename THandler>
         detail::get_result_t<THandler> decode_attributes(THandler&& handler) const;
+
+        /**
+         * Decode a point geometry.
+         *
+         * @tparam TGeomHandler Handler class. See tutorial for details.
+         * @param geom_handler An object of TGeomHandler.
+         * @returns whatever geom_handler.result() returns if that function
+         *          exists, void otherwise
+         * @throws geometry_error If there is a problem with the geometry.
+         * @pre Geometry must be a point geometry.
+         */
+        template <typename TGeomHandler>
+        detail::get_result_t<TGeomHandler> decode_point_geometry(TGeomHandler&& geom_handler) const {
+            vtzero_assert(geometry_type() == GeomType::POINT);
+
+            geom_decoder_type decoder{geometry_begin(), geometry_end(),
+                elevations_begin(), elevations_end(),
+                geometric_attributes_begin(), geometric_attributes_end(),
+                m_geometry.size() / 2};
+
+            return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
+        }
+
+        /**
+         * Decode a linestring geometry.
+         *
+         * @tparam TGeomHandler Handler class. See tutorial for details.
+         * @param geom_handler An object of TGeomHandler.
+         * @returns whatever geom_handler.result() returns if that function
+         *          exists, void otherwise
+         * @throws geometry_error If there is a problem with the geometry.
+         * @pre Geometry must be a point geometry.
+         */
+        template <typename TGeomHandler>
+        detail::get_result_t<TGeomHandler> decode_linestring_geometry(TGeomHandler&& geom_handler) const {
+            vtzero_assert(geometry_type() == GeomType::LINESTRING);
+
+            geom_decoder_type decoder{geometry_begin(), geometry_end(),
+                elevations_begin(), elevations_end(),
+                geometric_attributes_begin(), geometric_attributes_end(),
+                m_geometry.size() / 2};
+
+            return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
+        }
+
+        /**
+         * Decode a polygon geometry.
+         *
+         * @tparam TGeomHandler Handler class. See tutorial for details.
+         * @param geom_handler An object of TGeomHandler.
+         * @returns whatever geom_handler.result() returns if that function
+         *          exists, void otherwise
+         * @throws geometry_error If there is a problem with the geometry.
+         * @pre Geometry must be a point geometry.
+         */
+        template <typename TGeomHandler>
+        detail::get_result_t<TGeomHandler> decode_polygon_geometry(TGeomHandler&& geom_handler) const {
+            vtzero_assert(geometry_type() == GeomType::POLYGON);
+
+            geom_decoder_type decoder{geometry_begin(), geometry_end(),
+                elevations_begin(), elevations_end(),
+                geometric_attributes_begin(), geometric_attributes_end(),
+                m_geometry.size() / 2};
+
+            return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
+        }
+
+        /**
+         * Decode a geometry.
+         *
+         * @tparam TGeomHandler Handler class. See tutorial for details.
+         * @param geom_handler An object of TGeomHandler.
+         * @returns whatever geom_handler.result() returns if that function
+         *          exists, void otherwise
+         * @throws geometry_error If the geometry has type UNKNOWN of if there
+         *                        is a problem with the geometry.
+         */
+        template <typename TGeomHandler>
+        detail::get_result_t<TGeomHandler> decode_geometry(TGeomHandler&& geom_handler) const {
+            geom_decoder_type decoder{geometry_begin(), geometry_end(),
+                elevations_begin(), elevations_end(),
+                geometric_attributes_begin(), geometric_attributes_end(),
+                m_geometry.size() / 2};
+
+            switch (geometry_type()) {
+                case GeomType::POINT:
+                    return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
+                case GeomType::LINESTRING:
+                    return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
+                case GeomType::POLYGON:
+                    return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
+                default:
+                    break;
+            }
+
+            throw geometry_exception{"unknown geometry type"};
+        }
 
     }; // class feature
 

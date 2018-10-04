@@ -89,26 +89,36 @@ namespace vtzero {
             layers = 3
         };
 
+        enum class pbf_scaling : protozero::pbf_tag_type {
+            offset     = 1,
+            multiplier = 2,
+            base       = 3
+        };
+
         enum class pbf_layer : protozero::pbf_tag_type {
-            name          =  1,
-            features      =  2,
-            keys          =  3,
-            values        =  4,
-            extent        =  5,
-            string_values =  7,
-            double_values =  8,
-            float_values  =  9,
-            int_values    = 10,
-            version       = 15
+            name               =  1,
+            features           =  2,
+            keys               =  3,
+            values             =  4,
+            extent             =  5,
+            string_values      =  6,
+            double_values      =  7,
+            float_values       =  8,
+            int_values         =  9,
+            elevation_scaling  = 10,
+            attribute_scalings = 11,
+            version            = 15
         };
 
         enum class pbf_feature : protozero::pbf_tag_type {
-            id         = 1,
-            tags       = 2,
-            type       = 3,
-            geometry   = 4,
-            attributes = 5,
-            string_id  = 10
+            id                   =  1,
+            tags                 =  2,
+            type                 =  3,
+            geometry             =  4,
+            attributes           =  5,
+            geometric_attributes =  6,
+            elevations           =  7,
+            string_id            = 10
         };
 
         using pbf_value = property_value_type;

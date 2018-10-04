@@ -38,6 +38,10 @@ struct point_handler {
 
     std::vector<vtzero::point> data{};
 
+    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
+        return {p.x, p.y};
+    }
+
     void points_begin(uint32_t count) {
         data.reserve(count);
     }
@@ -54,6 +58,10 @@ struct point_handler {
 struct linestring_handler {
 
     std::vector<std::vector<vtzero::point>> data{};
+
+    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
+        return {p.x, p.y};
+    }
 
     void linestring_begin(uint32_t count) {
         data.emplace_back();
@@ -72,6 +80,10 @@ struct linestring_handler {
 struct polygon_handler {
 
     std::vector<std::vector<vtzero::point>> data{};
+
+    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
+        return {p.x, p.y};
+    }
 
     void ring_begin(uint32_t count) {
         data.emplace_back();
@@ -93,6 +105,10 @@ struct geom_handler {
 
     std::vector<vtzero::point> point_data{};
     std::vector<std::vector<vtzero::point>> line_data{};
+
+    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
+        return {p.x, p.y};
+    }
 
     void points_begin(uint32_t count) {
         point_data.reserve(count);

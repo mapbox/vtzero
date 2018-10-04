@@ -57,7 +57,7 @@ int main(int argc, char* argv[]) {
 
         while (auto feature = layer.next_feature()) {
             if (keep_feature(feature)) {
-                vtzero::geometry_feature_builder feature_builder{layer_builder};
+                vtzero::geometry_2d_feature_builder feature_builder{layer_builder};
                 if (feature.has_id()) {
                     feature_builder.set_id(feature.id());
                 }

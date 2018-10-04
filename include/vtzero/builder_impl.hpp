@@ -149,7 +149,7 @@ namespace vtzero {
         template <typename T>
         class fixed_value_size_table {
 
-            // TODO: Like the string_table, this should also use an
+            // TODO(joto): Like the string_table, this should also use an
             // unordered_map when the table becomes large.
 
             std::vector<T> m_values;

@@ -24,6 +24,8 @@ set(TEST_SOURCES attributes
                  builder_point
                  builder_polygon
                  exceptions
+                 extended_geometry
+                 extended_geometry_point
                  feature
                  geometry
                  geometry_linestring
@@ -35,6 +37,7 @@ set(TEST_SOURCES attributes
                  point
                  property_map
                  property_value
+                 scaling
                  types
                  vector_tile)
 

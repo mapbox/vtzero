@@ -34,4 +34,29 @@ inline vtzero::point create_vtzero_point(mypoint p) noexcept {
             static_cast<int32_t>(p.p2)};
 }
 
+struct mypoint_3d {
+    int64_t x = 0.0;
+    int64_t y = 0.0;
+    int64_t elev = 0.0;
+
+    mypoint_3d(int64_t x_, int64_t y_, int64_t elev_) :
+        x(x_),
+        y(y_),
+        elev(elev_) {
+    }
+};
+
+inline constexpr bool operator==(const mypoint_3d& a, const mypoint_3d& b) noexcept {
+    return a.x == b.x && a.y == b.y && a.elev == b.elev;
+}
+
+inline constexpr bool operator!=(const mypoint_3d& a, const mypoint_3d& b) noexcept {
+    return !(a == b);
+}
+
+template <typename TChar, typename TTraits>
+std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, const mypoint_3d& p) {
+    return out << '(' << p.x << ',' << p.y << ',' << p.elev << ')';
+}
+
 #endif // TEST_HPP

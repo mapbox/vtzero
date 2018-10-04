@@ -21,6 +21,7 @@ documentation.
 #include "feature.hpp"
 #include "geometry.hpp"
 #include "property_value.hpp"
+#include "scaling.hpp"
 #include "types.hpp"
 #include "unaligned_table.hpp"
 
@@ -63,6 +64,8 @@ namespace vtzero {
         std::size_t m_num_features = 0;
         data_view m_name{};
         protozero::pbf_message<detail::pbf_layer> m_layer_reader{m_data};
+
+        std::vector<scaling> m_scalings = {scaling{}};
 
         mutable std::vector<data_view> m_key_table;
         mutable std::vector<property_value> m_value_table;
@@ -167,6 +170,12 @@ namespace vtzero {
                             throw format_exception{"more than one int_table in the layer"};
                         }
                         m_int_table = detail::unaligned_table<uint64_t>{reader.get_view()};
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::elevation_scaling, protozero::pbf_wire_type::length_delimited):
+                        m_scalings[0] = scaling{reader.get_view()};
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::attribute_scalings, protozero::pbf_wire_type::length_delimited):
+                        m_scalings.emplace_back(reader.get_view());
                         break;
                     default:
                         throw format_exception{"unknown field in layer (tag=" +
@@ -523,6 +532,33 @@ namespace vtzero {
             }
 
             return feature{};
+        }
+
+        /**
+         * Scale the given elevation from a vector tile according to the
+         * scaling stored in the layer.
+         *
+         * @param elevation The elevation of a point.
+         * @returns Scaled elevation.
+         */
+        double scale_elevation(int64_t elevation) const noexcept {
+            vtzero_assert(!m_scalings.empty());
+            return m_scalings[0].decode(elevation);
+        }
+
+        /**
+         * Scale the given geometric attribute value according to the
+         * scaling stored in the layer.
+         *
+         * @param index The scaling configuration to be used.
+         * @param value The value of a geometric attribute at some point.
+         * @returns Scaled value.
+         */
+        double scale_attribute_value(std::size_t index, int64_t value) const {
+            if (index + 1 >= m_scalings.size()) {
+                throw format_exception{"non-existent scaling index: " + std::to_string(index)};
+            }
+            return m_scalings[index + 1].decode(value);
         }
 
     }; // class layer

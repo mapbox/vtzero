@@ -15,6 +15,10 @@ class dummy_geom_handler {
 
 public:
 
+    static vtzero::point convert(const vtzero::unscaled_point& /*p*/) noexcept {
+        return {};
+    }
+
     void linestring_begin(const uint32_t /*count*/) noexcept {
         ++value;
     }

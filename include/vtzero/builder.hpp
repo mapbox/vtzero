@@ -25,7 +25,6 @@ documentation.
 #include <protozero/pbf_builder.hpp>
 
 #include <cstdlib>
-#include <iostream>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -176,10 +175,17 @@ namespace vtzero {
 
         vtzero::detail::layer_builder_impl* m_layer;
 
-        friend class geometry_feature_builder;
+        template <int Dimensions, bool WithGeometricAttributes>
         friend class point_feature_builder;
+
+        template <int Dimensions, bool WithGeometricAttributes>
         friend class linestring_feature_builder;
+
+        template <int Dimensions, bool WithGeometricAttributes>
         friend class polygon_feature_builder;
+
+        template <int Dimensions, bool WithGeometricAttributes>
+        friend class geometry_feature_builder;
 
         vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {
             return *m_layer;
@@ -375,12 +381,63 @@ namespace vtzero {
 
     }; // class layer_builder
 
+    namespace detail {
+
+        template <int Dimensions>
+        class elevations_policy {
+
+        public:
+
+            void add(int64_t /*value*/) const noexcept {
+            }
+
+            void serialize(protozero::pbf_builder<detail::pbf_feature>& /*builder*/) const noexcept {
+            }
+
+        }; // class elevations_policy
+
+        template <>
+        class elevations_policy<3> {
+
+            std::vector<int64_t> m_values;
+
+        public:
+
+            void add(int64_t value) {
+                m_values.push_back(value);
+            }
+
+            void serialize(protozero::pbf_builder<detail::pbf_feature>& builder) const {
+                builder.add_packed_sint64(detail::pbf_feature::elevations, m_values.cbegin(), m_values.cend());
+            }
+
+        }; // class elevations_policy<3>
+
+        template <bool WithGeometricAttributes>
+        class geometric_attributes_policy {
+
+        public:
+
+        }; // class geometric_attributes_policy
+
+        template <>
+        class geometric_attributes_policy<true> {
+
+        public:
+
+        }; // class geometric_attributes_policy<true>
+
+    } // namespace detail
+
     /**
      * Parent class for the point_feature_builder, linestring_feature_builder
      * and polygon_feature_builder classes. You can not instantiate this class
      * directly, use it through its derived classes.
      */
+    template <int Dimensions, bool WithGeometricAttributes>
     class feature_builder : public detail::feature_builder_base {
+
+        static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
 
         class countdown_value {
 
@@ -430,6 +487,12 @@ namespace vtzero {
         }; // countdown_value
 
     protected:
+
+        /// The elevations store (if using 3D geometries).
+        detail::elevations_policy<Dimensions> m_elevations;
+
+        /// The geometric attributes store (optional).
+        detail::geometric_attributes_policy<WithGeometricAttributes> m_geometric_attributes;
 
         /// Encoded geometry.
         protozero::packed_field_uint32 m_pbf_geometry{};
@@ -888,6 +951,7 @@ namespace vtzero {
                               "Can not call commit before geometry was added");
                 if (m_pbf_geometry.valid()) {
                     m_pbf_geometry.commit();
+                    m_elevations.serialize(m_feature_writer);
                 }
                 do_commit();
             }
@@ -933,7 +997,8 @@ namespace vtzero {
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
-    class point_feature_builder : public feature_builder {
+    template <int Dimensions, bool WithGeometricAttributes>
+    class point_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
 
     public:
 
@@ -943,8 +1008,29 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit point_feature_builder(layer_builder layer) :
-            feature_builder(&layer.get_layer_impl()) {
-            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
+            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
+        }
+
+        /**
+         * Add a single unscaled_point as the geometry to this feature.
+         *
+         * @param p The point to add.
+         *
+         * @pre You must not have any calls to add_property() before calling
+         *      this method.
+         */
+        void add_point(const unscaled_point p) {
+            vtzero_assert(this->m_feature_writer.valid() &&
+                          "Can not add geometry after commit() or rollback()");
+            vtzero_assert(!this->m_pbf_geometry.valid() &&
+                          !this->valid_properties() &&
+                          "add_point() can only be called once");
+            this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
+            this->m_pbf_geometry.add_element(detail::command_move_to(1));
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
+            this->m_elevations.add(p.z);
         }
 
         /**
@@ -956,15 +1042,15 @@ namespace vtzero {
          *      this method.
          */
         void add_point(const point p) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!m_pbf_geometry.valid() &&
-                          !valid_properties() &&
+            vtzero_assert(!this->m_pbf_geometry.valid() &&
+                          !this->valid_properties() &&
                           "add_point() can only be called once");
-            m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
-            m_pbf_geometry.add_element(detail::command_move_to(1));
-            m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
-            m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
+            this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
+            this->m_pbf_geometry.add_element(detail::command_move_to(1));
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
         }
 
         /**
@@ -1007,16 +1093,16 @@ namespace vtzero {
          *      this method.
          */
         void add_points(uint32_t count) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!m_pbf_geometry.valid() &&
+            vtzero_assert(!this->m_pbf_geometry.valid() &&
                           "can not call add_points() twice or mix with add_point()");
-            vtzero_assert(!valid_properties() &&
+            vtzero_assert(!this->valid_properties() &&
                           "add_points() has to be called before properties are added");
             vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
-            m_num_points.set(count);
-            m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
-            m_pbf_geometry.add_element(detail::command_move_to(count));
+            this->m_num_points.set(count);
+            this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
+            this->m_pbf_geometry.add_element(detail::command_move_to(count));
         }
 
         /**
@@ -1031,16 +1117,16 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(m_pbf_geometry.valid() &&
+            vtzero_assert(this->m_pbf_geometry.valid() &&
                           "call add_points() before set_point()");
-            vtzero_assert(!valid_properties() &&
+            vtzero_assert(!this->valid_properties() &&
                           "set_point() has to be called before properties are added");
-            m_num_points.decrement();
-            m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
-            m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
-            m_cursor = p;
+            this->m_num_points.decrement();
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+            this->m_cursor = p;
         }
 
         /**
@@ -1095,7 +1181,7 @@ namespace vtzero {
          */
         template <typename TContainer>
         void add_points_from_container(const TContainer& container) {
-            add_points(check_num_points(container.size()));
+            add_points(this->check_num_points(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
@@ -1124,7 +1210,8 @@ namespace vtzero {
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
-    class linestring_feature_builder : public feature_builder {
+    template <int Dimensions, bool WithGeometricAttributes>
+    class linestring_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
 
         bool m_start_line = false;
 
@@ -1136,8 +1223,8 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit linestring_feature_builder(layer_builder layer) :
-            feature_builder(&layer.get_layer_impl()) {
-            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
+            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
         }
 
         /**
@@ -1152,16 +1239,16 @@ namespace vtzero {
          *      this method.
          */
         void add_linestring(const uint32_t count) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!valid_properties() &&
+            vtzero_assert(!this->valid_properties() &&
                           "add_linestring() has to be called before properties are added");
             vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
-            m_num_points.assert_is_zero();
-            if (!m_pbf_geometry.valid()) {
-                m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
+            this->m_num_points.assert_is_zero();
+            if (!this->m_pbf_geometry.valid()) {
+                this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
             }
-            m_num_points.set(count);
+            this->m_num_points.set(count);
             m_start_line = true;
         }
 
@@ -1182,27 +1269,27 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(m_pbf_geometry.valid() &&
+            vtzero_assert(this->m_pbf_geometry.valid() &&
                           "call add_linestring() before set_point()");
-            vtzero_assert(!valid_properties() &&
+            vtzero_assert(!this->valid_properties() &&
                           "set_point() has to be called before properties are added");
-            m_num_points.decrement();
+            this->m_num_points.decrement();
             if (m_start_line) {
-                m_pbf_geometry.add_element(detail::command_move_to(1));
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
-                m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value()));
+                this->m_pbf_geometry.add_element(detail::command_move_to(1));
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+                this->m_pbf_geometry.add_element(detail::command_line_to(this->m_num_points.value()));
                 m_start_line = false;
             } else {
-                if (p == m_cursor) {
+                if (p == this->m_cursor) {
                     throw geometry_exception{"Zero-length segments in linestrings are not allowed."};
                 }
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
             }
-            m_cursor = p;
+            this->m_cursor = p;
         }
 
         /**
@@ -1268,7 +1355,7 @@ namespace vtzero {
          */
         template <typename TContainer>
         void add_linestring_from_container(const TContainer& container) {
-            add_linestring(check_num_points(container.size()));
+            add_linestring(this->check_num_points(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
@@ -1297,7 +1384,8 @@ namespace vtzero {
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
-    class polygon_feature_builder : public feature_builder {
+    template <int Dimensions, bool WithGeometricAttributes>
+    class polygon_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
 
         point m_first_point{0, 0};
         bool m_start_ring = false;
@@ -1310,8 +1398,8 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit polygon_feature_builder(layer_builder layer) :
-            feature_builder(&layer.get_layer_impl()) {
-            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
+            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
         }
 
         /**
@@ -1326,16 +1414,16 @@ namespace vtzero {
          *      this method.
          */
         void add_ring(const uint32_t count) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!valid_properties() &&
+            vtzero_assert(!this->valid_properties() &&
                           "add_ring() has to be called before properties are added");
             vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
-            m_num_points.assert_is_zero();
-            if (!m_pbf_geometry.valid()) {
-                m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
+            this->m_num_points.assert_is_zero();
+            if (!this->m_pbf_geometry.valid()) {
+                this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
             }
-            m_num_points.set(count);
+            this->m_num_points.set(count);
             m_start_ring = true;
         }
 
@@ -1358,34 +1446,34 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(m_pbf_geometry.valid() &&
+            vtzero_assert(this->m_pbf_geometry.valid() &&
                           "call add_ring() before set_point()");
-            vtzero_assert(!valid_properties() &&
+            vtzero_assert(!this->valid_properties() &&
                           "set_point() has to be called before properties are added");
-            m_num_points.decrement();
+            this->m_num_points.decrement();
             if (m_start_ring) {
                 m_first_point = p;
-                m_pbf_geometry.add_element(detail::command_move_to(1));
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
-                m_pbf_geometry.add_element(detail::command_line_to(m_num_points.value() - 1));
+                this->m_pbf_geometry.add_element(detail::command_move_to(1));
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+                this->m_pbf_geometry.add_element(detail::command_line_to(this->m_num_points.value() - 1));
                 m_start_ring = false;
-                m_cursor = p;
-            } else if (m_num_points.value() == 0) {
+                this->m_cursor = p;
+            } else if (this->m_num_points.value() == 0) {
                 if (p != m_first_point) {
                     throw geometry_exception{"Last point in a ring must be the same as the first point."};
                 }
                 // spec 4.3.3.3 "A ClosePath command MUST have a command count of 1"
-                m_pbf_geometry.add_element(detail::command_close_path());
+                this->m_pbf_geometry.add_element(detail::command_close_path());
             } else {
-                if (p == m_cursor) {
+                if (p == this->m_cursor) {
                     throw geometry_exception{"Zero-length segments in linestrings are not allowed."};
                 }
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
-                m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
-                m_cursor = p;
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
+                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+                this->m_cursor = p;
             }
         }
 
@@ -1449,16 +1537,16 @@ namespace vtzero {
          *      this method.
          */
         void close_ring() {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(m_pbf_geometry.valid() &&
+            vtzero_assert(this->m_pbf_geometry.valid() &&
                           "Call add_ring() before you can call close_ring()");
-            vtzero_assert(!valid_properties() &&
+            vtzero_assert(!this->valid_properties() &&
                           "close_ring() has to be called before properties are added");
-            vtzero_assert(m_num_points.value() == 1 &&
+            vtzero_assert(this->m_num_points.value() == 1 &&
                           "wrong number of points in ring");
-            m_pbf_geometry.add_element(detail::command_close_path());
-            m_num_points.decrement();
+            this->m_pbf_geometry.add_element(detail::command_close_path());
+            this->m_num_points.decrement();
         }
 
         /**
@@ -1481,7 +1569,7 @@ namespace vtzero {
          */
         template <typename TContainer>
         void add_ring_from_container(const TContainer& container) {
-            add_ring(check_num_points(container.size()));
+            add_ring(this->check_num_points(container.size()));
             for (const auto& element : container) {
                 set_point(element);
             }
@@ -1509,6 +1597,7 @@ namespace vtzero {
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
+    template <int Dimensions, bool WithGeometricAttributes>
     class geometry_feature_builder : public detail::feature_builder_base {
 
     public:
@@ -1555,9 +1644,9 @@ namespace vtzero {
          * @param id The ID.
          */
         void set_id(uint64_t id) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!valid_properties());
+            vtzero_assert(!this->valid_properties());
             set_integer_id_impl(id);
         }
 
@@ -1571,9 +1660,9 @@ namespace vtzero {
          */
         void set_string_id(data_view id) {
             vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!valid_properties());
+            vtzero_assert(!this->valid_properties());
             set_string_id_impl(id);
         }
 
@@ -1587,9 +1676,9 @@ namespace vtzero {
          * @param feature The feature to copy the ID from.
          */
         void copy_id(const feature& feature) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call copy_id() after commit() or rollback()");
-            vtzero_assert(!valid_properties());
+            vtzero_assert(!this->valid_properties());
             copy_id_impl(feature);
         }
 
@@ -1602,12 +1691,12 @@ namespace vtzero {
          * @param geometry The geometry.
          */
         void set_geometry(const geometry& geometry) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!valid_properties());
-            m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
-            m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
-            m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+            vtzero_assert(!this->valid_properties());
+            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
+            this->m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
+            m_pbf_tags = {this->m_feature_writer, detail::pbf_feature::tags};
         }
 
         /**
@@ -1621,7 +1710,7 @@ namespace vtzero {
          */
         template <typename TProp>
         void add_property(TProp&& prop) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call add_property() after commit() or rollback()");
             vtzero_assert(version() < 3);
             add_property_impl_vt2(std::forward<TProp>(prop));
@@ -1642,7 +1731,7 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_property(TKey&& key, TValue&& value) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call add_property() after commit() or rollback()");
             vtzero_assert(version() < 3);
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
@@ -1656,7 +1745,7 @@ namespace vtzero {
          * @pre layer version < 3
          */
         void copy_properties(const feature& feature) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
             vtzero_assert(version() < 3);
             feature.for_each_property([this](const property& prop) {
@@ -1678,7 +1767,7 @@ namespace vtzero {
          */
         template <typename TMapper>
         void copy_properties(const feature& feature, TMapper& mapper) {
-            vtzero_assert(m_feature_writer.valid() &&
+            vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
             vtzero_assert(version() < 3);
             feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
@@ -1697,8 +1786,8 @@ namespace vtzero {
          * to commit() or rollback() don't do anything.
          */
         void commit() {
-            if (m_feature_writer.valid()) {
-                vtzero_assert(valid_properties() &&
+            if (this->m_feature_writer.valid()) {
+                vtzero_assert(this->valid_properties() &&
                               "Can not call commit() before geometry was added");
                 do_commit();
             }
@@ -1715,16 +1804,28 @@ namespace vtzero {
          * to commit() or rollback() don't do anything.
          */
         void rollback() {
-            if (m_feature_writer.valid()) {
+            if (this->m_feature_writer.valid()) {
                 do_rollback();
             }
         }
 
     }; // class geometry_feature_builder
 
+    /// alias for 2D point feature builder
+    using point_2d_feature_builder = point_feature_builder<2, false>;
+
+    /// alias for 2D linestring feature builder
+    using linestring_2d_feature_builder = linestring_feature_builder<2, false>;
+
+    /// alias for 2D polygon feature builder
+    using polygon_2d_feature_builder = polygon_feature_builder<2, false>;
+
+    /// alias for 2D geometry feature builder
+    using geometry_2d_feature_builder = geometry_feature_builder<2, false>;
+
     inline void layer_builder::add_feature(const feature& feature) {
         vtzero_assert(m_layer->version() < 3);
-        geometry_feature_builder feature_builder{*this};
+        geometry_2d_feature_builder feature_builder{*this};
         feature_builder.copy_id(feature);
         feature_builder.set_geometry(feature.geometry());
         feature.for_each_property([&feature_builder](const property& p) {

@@ -147,7 +147,7 @@ TEST_CASE("build feature with scalar properties and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
-        vtzero::point_feature_builder fbuilder{lbuilder};
+        vtzero::point_2d_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_scalar_attribute("data_view", vtzero::data_view{"foo"}); // 1
@@ -257,7 +257,7 @@ TEST_CASE("build feature with list and map properties and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
-        vtzero::point_feature_builder fbuilder{lbuilder};
+        vtzero::point_2d_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_scalar_attribute("some_int", 111u);
@@ -313,7 +313,7 @@ TEST_CASE("build feature with list property from array and read it again") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
 
     SECTION("without size") {
-        vtzero::point_feature_builder fbuilder{lbuilder};
+        vtzero::point_2d_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_list_attribute("pi", pi.begin(), pi.end());
@@ -321,7 +321,7 @@ TEST_CASE("build feature with list property from array and read it again") {
     }
 
     SECTION("with size") {
-        vtzero::point_feature_builder fbuilder{lbuilder};
+        vtzero::point_2d_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_list_attribute("pi", pi.begin(), pi.end(), pi.size());
