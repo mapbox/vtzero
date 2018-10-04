@@ -35,9 +35,9 @@ inline vtzero::point create_vtzero_point(mypoint p) noexcept {
 }
 
 struct mypoint_3d {
-    int64_t x = 0.0;
-    int64_t y = 0.0;
-    int64_t elev = 0.0;
+    int64_t x = 0;
+    int64_t y = 0;
+    int64_t elev = 0;
 
     mypoint_3d(int64_t x_, int64_t y_, int64_t elev_) :
         x(x_),
