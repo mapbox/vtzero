@@ -602,7 +602,7 @@ namespace vtzero {
         feature_builder(feature_builder&& other) noexcept = default;
 
         /// Builder classes can be moved
-        feature_builder& operator=(feature_builder&& other) noexcept = default;
+        feature_builder& operator=(feature_builder&& other) = default;
 
         /**
          * Set the ID of this feature.
