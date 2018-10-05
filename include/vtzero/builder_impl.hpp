@@ -226,7 +226,7 @@ namespace vtzero {
             layer_builder_impl(TString&& name, uint32_t version, uint32_t extent) :
                 m_pbf_message_layer(m_data),
                 m_version(version) {
-                vtzero_assert(version >= 1 || version <= 3);
+                vtzero_assert(version >= 1 && version <= 3);
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::version, version);
                 m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<TString>(name));
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
