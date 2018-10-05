@@ -36,10 +36,6 @@ addons_shortcuts:
     apt:
       sources: [ 'ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-6.0' ]
       packages: [ 'libboost1.55-dev', 'clang-6.0', 'clang-tidy-6.0' ]
-  addons_gcc48: &gcc48
-    apt:
-      sources: [ 'ubuntu-toolchain-r-test' ]
-      packages: [ 'libboost1.55-dev', 'g++-4.8', 'gcc-4.8' ]
   addons_gcc49: &gcc49
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
@@ -92,10 +88,6 @@ matrix:
       compiler: "clang-6.0"
       env: BUILD='Debug' CC=clang-6.0 CXX=clang++-6.0
       addons: *clang60
-    - os: linux
-      compiler: "gcc-4.8"
-      env: BUILD='Debug' CC=gcc-4.8 CXX=g++-4.8
-      addons: *gcc48
     - os: linux
       compiler: "gcc-4.9"
       env: BUILD='Debug' CC=gcc-4.9 CXX=g++-4.9

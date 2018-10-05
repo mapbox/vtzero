@@ -11,7 +11,7 @@ Implements the [Mapbox Vector Tile Specification 2.x](https://www.mapbox.com/vec
 
 ## Depends
 
-* C++11 compiler (GCC 4.8 or higher, clang 3.5 or higher, ...)
+* C++11 compiler (GCC 4.9 or higher, clang 3.5 or higher, ...)
 * CMake
 * [Protozero](https://github.com/mapbox/protozero) version >= 1.6.0
 
