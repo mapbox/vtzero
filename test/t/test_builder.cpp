@@ -7,6 +7,7 @@
 #include <vtzero/property_mapper.hpp>
 
 #include <cstdint>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 
@@ -97,6 +98,51 @@ TEST_CASE("Create layer and add keys/values") {
     REQUIRE(vi4 != vi5);
     REQUIRE(vi4 != vi6);
     REQUIRE(vi4 == vi7);
+}
+
+TEST_CASE("Create layer and add scalings") {
+    vtzero::scaling scaling_elev{11, 2.2, 3.3};
+
+    vtzero::scaling scaling0{0, 1.0, 0.0};
+    vtzero::scaling scaling1{1, 2.0, 1.0};
+    vtzero::scaling scaling2{2, 3.0, 2.0};
+
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "name", 3};
+
+    { // we need to add a feature, otherwise the layer will not be serialized
+        vtzero::point_feature_builder<3, true> fbuilder{lbuilder};
+        fbuilder.add_point(vtzero::unscaled_point{});
+        fbuilder.commit();
+    }
+
+    REQUIRE(lbuilder.elevation_scaling() == vtzero::scaling{});
+    lbuilder.set_elevation_scaling(scaling_elev);
+    REQUIRE(lbuilder.elevation_scaling() == scaling_elev);
+
+    const auto index0 = lbuilder.add_attribute_scaling(scaling0);
+    REQUIRE(index0.value() == 0);
+    const auto index1 = lbuilder.add_attribute_scaling(scaling1);
+    REQUIRE(index1.value() == 1);
+    const auto index2 = lbuilder.add_attribute_scaling(scaling2);
+    REQUIRE(index2.value() == 2);
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer);
+    REQUIRE(layer.name() == "name");
+    REQUIRE(layer.version() == 3);
+    REQUIRE(layer.num_features() == 1);
+
+    REQUIRE(layer.elevation_scaling() == scaling_elev);
+    REQUIRE(layer.num_attribute_scalings() == 3);
+    REQUIRE(layer.attribute_scaling(vtzero::index_value{0}) == scaling0);
+    REQUIRE(layer.attribute_scaling(vtzero::index_value{1}) == scaling1);
+    REQUIRE(layer.attribute_scaling(vtzero::index_value{2}) == scaling2);
+    REQUIRE_THROWS_AS(layer.attribute_scaling(vtzero::index_value{3}), const std::out_of_range&);
 }
 
 TEST_CASE("Committing a feature succeeds after a geometry was added") {

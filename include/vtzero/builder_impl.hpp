@@ -18,6 +18,7 @@ documentation.
 
 #include "encoded_property_value.hpp"
 #include "property_value.hpp"
+#include "scaling.hpp"
 #include "types.hpp"
 
 #include <protozero/pbf_builder.hpp>
@@ -177,7 +178,7 @@ namespace vtzero {
                 return add_without_dup_check(value);
             }
 
-            void encode(detail::pbf_layer pbf_type, std::string& data) const {
+            void serialize(detail::pbf_layer pbf_type, std::string& data) const {
                 if (m_values.empty()) {
                     return;
                 }
@@ -205,6 +206,12 @@ namespace vtzero {
             // The int_values index table
             fixed_value_size_table<uint64_t> m_int_values_table;
 
+            // Elevation scaling
+            scaling m_elevation_scaling{};
+
+            // Geometric attribute scalings
+            std::vector<scaling> m_attribute_scalings{};
+
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
 
             // The number of features in the layer
@@ -219,6 +226,7 @@ namespace vtzero {
             layer_builder_impl(TString&& name, uint32_t version, uint32_t extent) :
                 m_pbf_message_layer(m_data),
                 m_version(version) {
+                vtzero_assert(version >= 1 || version <= 3);
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::version, version);
                 m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<TString>(name));
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
@@ -304,6 +312,25 @@ namespace vtzero {
                 return m_int_values_table.add(value);
             }
 
+            const scaling& elevation_scaling() const noexcept {
+                return m_elevation_scaling;
+            }
+
+            const scaling& attribute_scaling(index_value index) const {
+                return m_attribute_scalings.at(index.value());
+            }
+
+            void set_elevation_scaling(const scaling& s) {
+                vtzero_assert(m_version == 3);
+                m_elevation_scaling = s;
+            }
+
+            index_value add_attribute_scaling(const scaling& s) {
+                vtzero_assert(m_version == 3);
+                m_attribute_scalings.push_back(s);
+                return index_value{static_cast<uint32_t>(m_attribute_scalings.size() - 1)};
+            }
+
             protozero::pbf_builder<detail::pbf_layer>& message() noexcept {
                 return m_pbf_message_layer;
             }
@@ -333,11 +360,32 @@ namespace vtzero {
                     } else {
                         constexpr const std::size_t estimated_overhead_for_pbf_encoding = 2 * (1 + 2);
                         std::string values_tables_data;
-                        values_tables_data.reserve(m_double_values_table.size() + m_float_values_table.size() + m_int_values_table.size() + estimated_overhead_for_pbf_encoding);
 
-                        m_double_values_table.encode(detail::pbf_layer::double_values, values_tables_data);
-                        m_float_values_table.encode(detail::pbf_layer::float_values, values_tables_data);
-                        m_int_values_table.encode(detail::pbf_layer::int_values, values_tables_data);
+                        auto estimated_size = m_double_values_table.size() + m_float_values_table.size() + m_int_values_table.size() + estimated_overhead_for_pbf_encoding;
+                        if (!m_elevation_scaling.is_default()) {
+                            estimated_size += 16;
+                        }
+                        estimated_size += m_attribute_scalings.size() * 16;
+                        values_tables_data.reserve(estimated_size);
+
+                        m_double_values_table.serialize(detail::pbf_layer::double_values, values_tables_data);
+                        m_float_values_table.serialize(detail::pbf_layer::float_values, values_tables_data);
+                        m_int_values_table.serialize(detail::pbf_layer::int_values, values_tables_data);
+
+                        if (m_version == 3) {
+                            // The elevation scaling is only written out if it
+                            // doesn't have the default values (which will also
+                            // be the case if no elevations are set at all).
+                            if (!m_elevation_scaling.is_default()) {
+                                m_elevation_scaling.serialize(detail::pbf_layer::elevation_scaling, values_tables_data);
+                            }
+                            // The attribute scalings have to be written all out
+                            // even if they have the default values, because
+                            // otherwise the indexes pointing to them are wrong.
+                            for (const auto& scaling : m_attribute_scalings) {
+                                scaling.serialize(detail::pbf_layer::attribute_scalings, values_tables_data);
+                            }
+                        }
 
                         pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
                                                             m_data,

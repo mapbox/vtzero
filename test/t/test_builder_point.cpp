@@ -198,12 +198,17 @@ TEST_CASE("Point builder with id/with properties (vt3)") {
 }
 
 TEST_CASE("Point builder with 3d point") {
+    vtzero::scaling scaling{10, 1.0, 3.0};
+    const auto elev = scaling.encode(30.0);
+
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+    lbuilder.set_elevation_scaling(scaling);
+    REQUIRE(lbuilder.elevation_scaling() == scaling);
     {
         vtzero::point_feature_builder<3, true> fbuilder{lbuilder};
         fbuilder.set_id(17);
-        fbuilder.add_point(vtzero::unscaled_point{10, 20, 30});
+        fbuilder.add_point(vtzero::unscaled_point{10, 20, elev});
         fbuilder.commit();
     }
     const std::string data = tbuilder.serialize();
@@ -223,7 +228,12 @@ TEST_CASE("Point builder with 3d point") {
     point_handler_3d handler;
     feature.decode_point_geometry(handler);
     REQUIRE(handler.data.size() == 1);
-    REQUIRE(handler.data[0] == mypoint_3d(10, 20, 30));
+
+    const auto p = handler.data[0];
+    REQUIRE(p.x == 10);
+    REQUIRE(p.y == 20);
+    REQUIRE(layer.elevation_scaling() == scaling);
+    REQUIRE(layer.elevation_scaling().decode(p.elev) == Approx(30.0));
 }
 
 TEST_CASE("Calling add_points() with bad values throws assert") {

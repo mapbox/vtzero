@@ -19,6 +19,7 @@ documentation.
 #include "builder_impl.hpp"
 #include "feature_builder_impl.hpp"
 #include "geometry.hpp"
+#include "scaling.hpp"
 #include "types.hpp"
 #include "vector_tile.hpp"
 
@@ -220,6 +221,44 @@ namespace vtzero {
         template <typename TString, typename std::enable_if<!is_layer<TString>::value, int>::type = 0>
         layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096) :
             m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
+        }
+
+        /// Get the elevation scaling currently set.
+        const scaling& elevation_scaling() const noexcept {
+            return m_layer->elevation_scaling();
+        }
+
+        /**
+         * Get the attribute scaling with the specified index.
+         *
+         * @param index The index of the scaling requested.
+         * @returns scaling
+         * @throws std::out_of_range if the index is out of range.
+         */
+        const scaling& attribute_scaling(index_value index) const {
+            return m_layer->attribute_scaling(index);
+        }
+
+        /**
+         * Set the scaling for elevations. If this is not set, the default
+         * scaling is assumed.
+         *
+         * @param s The scaling.
+         * @pre Layer being built must be a version 3 layer.
+         */
+        void set_elevation_scaling(const scaling& s) {
+            m_layer->set_elevation_scaling(s);
+        }
+
+        /**
+         * Add a scaling for geometric attributes.
+         *
+         * @param s The scaling.
+         * @returns Index of this scaling.
+         * @pre Layer being built must be a version 3 layer.
+         */
+        index_value add_attribute_scaling(const scaling& s) {
+            return m_layer->add_attribute_scaling(s);
         }
 
         /**

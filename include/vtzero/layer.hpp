@@ -65,7 +65,11 @@ namespace vtzero {
         data_view m_name{};
         protozero::pbf_message<detail::pbf_layer> m_layer_reader{m_data};
 
-        std::vector<scaling> m_scalings = {scaling{}};
+        // Elevation scaling
+        scaling m_elevation_scaling{};
+
+        // Geometric attribute scalings
+        std::vector<scaling> m_attribute_scalings{};
 
         mutable std::vector<data_view> m_key_table;
         mutable std::vector<property_value> m_value_table;
@@ -172,10 +176,10 @@ namespace vtzero {
                         m_int_table = detail::unaligned_table<uint64_t>{reader.get_view()};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::elevation_scaling, protozero::pbf_wire_type::length_delimited):
-                        m_scalings[0] = scaling{reader.get_view()};
+                        m_elevation_scaling = scaling{reader.get_view()};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::attribute_scalings, protozero::pbf_wire_type::length_delimited):
-                        m_scalings.emplace_back(reader.get_view());
+                        m_attribute_scalings.emplace_back(reader.get_view());
                         break;
                     default:
                         throw format_exception{"unknown field in layer (tag=" +
@@ -535,30 +539,28 @@ namespace vtzero {
         }
 
         /**
-         * Scale the given elevation from a vector tile according to the
-         * scaling stored in the layer.
-         *
-         * @param elevation The elevation of a point.
-         * @returns Scaled elevation.
+         * Get the elevation scaling.
          */
-        double scale_elevation(int64_t elevation) const noexcept {
-            vtzero_assert_in_noexcept_function(!m_scalings.empty());
-            return m_scalings[0].decode(elevation);
+        const scaling& elevation_scaling() const noexcept {
+            return m_elevation_scaling;
         }
 
         /**
-         * Scale the given geometric attribute value according to the
-         * scaling stored in the layer.
+         * Get the attribute scaling with the specified index.
          *
-         * @param index The scaling configuration to be used.
-         * @param value The value of a geometric attribute at some point.
-         * @returns Scaled value.
+         * @param index The index of the scaling requested.
+         * @returns scaling
+         * @throws std::out_of_range if the index is out of range.
          */
-        double scale_attribute_value(std::size_t index, int64_t value) const {
-            if (index + 1 >= m_scalings.size()) {
-                throw format_exception{"non-existent scaling index: " + std::to_string(index)};
-            }
-            return m_scalings[index + 1].decode(value);
+        const scaling& attribute_scaling(index_value index) const {
+            return m_attribute_scalings.at(index.value());
+        }
+
+        /**
+         * Return the number of attribute scalings defined in this layer.
+         */
+        std::size_t num_attribute_scalings() const noexcept {
+            return m_attribute_scalings.size();
         }
 
     }; // class layer
