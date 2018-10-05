@@ -16,6 +16,7 @@ struct PropertyCountHandler {
     int count_k = 0;
     int count_v = 0;
     int count_nonscalar = 0;
+    std::size_t count_number_list = 0;
 
     bool key_index(vtzero::index_value /*ki*/, std::size_t /*depth*/) noexcept {
         ++count_ki;
@@ -52,6 +53,12 @@ struct PropertyCountHandler {
 
     bool end_map_attribute(std::size_t /*depth*/) noexcept {
         --count_nonscalar;
+        return true;
+    }
+
+    bool start_number_list(std::size_t count, vtzero::index_value index, std::size_t /*depth*/) noexcept {
+        REQUIRE(index.value() == 0);
+        count_number_list += count;
         return true;
     }
 
@@ -219,6 +226,26 @@ struct PropertyDumpHandler {
         return true;
     }
 
+    bool start_number_list(std::size_t size, vtzero::index_value index, std::size_t /*depth*/) {
+        out += "number-list(";
+        out += std::to_string(size);
+        out += ',';
+        out += std::to_string(index.value());
+        out += ")[\n";
+        return true;
+    }
+
+    bool number_list_value(uint64_t value, std::size_t /*depth*/) {
+        out += std::to_string(value);
+        out += '\n';
+        return true;
+    }
+
+    bool end_number_list(std::size_t /*depth*/) {
+        out += "]\n";
+        return true;
+    }
+
     bool end_map_attribute(std::size_t /*depth*/) {
         out += "]\n";
         return true;
@@ -300,6 +327,51 @@ TEST_CASE("build feature with list and map properties and read it again") {
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 7);
         REQUIRE(result.second == 15);
+    }
+    {
+        PropertyDumpHandler handler;
+        REQUIRE(feature.decode_attributes(handler) == expected);
+    }
+}
+
+TEST_CASE("build feature with number list properties and read it again") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+    const auto index = lbuilder.add_attribute_scaling(vtzero::scaling{0, 2.0, 0.0});
+    {
+        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        fbuilder.set_id(1);
+        fbuilder.add_point(10, 20);
+        fbuilder.start_number_list_with_key("nlist", 3, index);
+        fbuilder.number_list_value(10);
+        fbuilder.number_list_value(20);
+        fbuilder.number_list_value(30);
+        fbuilder.add_scalar_attribute("x", 3);
+        fbuilder.commit();
+    }
+
+    std::string expected{"nlist=number-list(3,0)[\n10\n20\n30\n]\nx=3\n"};
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer);
+    REQUIRE(layer.name() == "test");
+    REQUIRE(layer.version() == 3);
+    REQUIRE(layer.num_features() == 1);
+    REQUIRE(layer.num_attribute_scalings() == 1);
+
+    const auto feature = layer.next_feature();
+    REQUIRE(feature);
+    REQUIRE(feature.id() == 1);
+
+    {
+        PropertyCountHandler handler;
+        const auto result = feature.decode_attributes(handler);
+        REQUIRE(result.first == 2);
+        REQUIRE(handler.count_number_list == 3);
     }
     {
         PropertyDumpHandler handler;

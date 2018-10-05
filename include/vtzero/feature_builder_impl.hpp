@@ -86,6 +86,10 @@ namespace vtzero {
                 m_pbf_attributes.add_element(static_cast<uint64_t>(type) | (param << 4u));
             }
 
+            void add_direct_value(uint64_t value) {
+                m_pbf_attributes.add_element(value);
+            }
+
             void add_value_internal_vt2(index_value idx) {
                 vtzero_assert(idx.valid());
                 m_pbf_tags.add_element(idx.value());

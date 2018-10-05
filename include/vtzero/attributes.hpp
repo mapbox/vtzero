@@ -29,18 +29,19 @@ namespace vtzero {
 
         // attribute value types
         enum class complex_value_type {
-            cvt_inline_sint = 0,
-            cvt_inline_uint = 1,
-            cvt_bool        = 2,
-            cvt_null        = 2,
-            cvt_float       = 3,
-            cvt_double      = 4,
-            cvt_string      = 5,
-            cvt_sint        = 6,
-            cvt_uint        = 7,
-            cvt_list        = 8,
-            cvt_map         = 9,
-            max             = 9
+            cvt_inline_sint =  0,
+            cvt_inline_uint =  1,
+            cvt_bool        =  2,
+            cvt_null        =  2,
+            cvt_float       =  3,
+            cvt_double      =  4,
+            cvt_string      =  5,
+            cvt_sint        =  6,
+            cvt_uint        =  7,
+            cvt_list        =  8,
+            cvt_map         =  9,
+            cvt_number_list = 10,
+            max             = 10
         };
 
 // @cond internal
@@ -95,6 +96,9 @@ namespace vtzero {
         DEF_CALL_WRAPPER2(start_map_attribute, std::size_t)
         DEF_CALL_WRAPPER1(end_map_attribute)
 
+        DEF_CALL_WRAPPER2(number_list_value, std::uint64_t)
+        DEF_CALL_WRAPPER1(end_number_list)
+
 #undef DEF_CALL_WRAPPER1
 #undef DEF_CALL_WRAPPER2
 // @endcond
@@ -115,6 +119,25 @@ namespace vtzero {
         // This overload matches always.
         template <typename... TArgs>
         bool call_attribute_value(TArgs&&... /*unused*/) {
+            return true;
+        }
+
+        // This overload matches only when the handler has the start_number_list() member function returning bool.
+        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().start_number_list(std::declval<std::size_t>(), std::declval<index_value>(), std::declval<std::size_t>()))>::value, int>::type = 0>
+        bool call_start_number_list(THandler&& handler, std::size_t count, index_value index, std::size_t depth) {
+            return std::forward<THandler>(handler).start_number_list(count, index, depth);
+        }
+
+        // This overload matches only when the handler has the start_number_list() member function returning void.
+        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().start_number_list(std::declval<std::size_t>(), std::declval<index_value>(), std::declval<std::size_t>()))>::value, int>::type = 0>
+        bool call_start_number_list(THandler&& handler, std::size_t count, index_value index, std::size_t depth) {
+            std::forward<THandler>(handler).start_number_list(count, index, depth);
+            return true;
+        }
+
+        // This overload matches always.
+        template <typename... TArgs>
+        bool call_start_number_list(TArgs&&... /*unused*/) {
             return true;
         }
 

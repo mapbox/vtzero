@@ -836,6 +836,71 @@ namespace vtzero {
         }
 
         /**
+         * Start to add a number list attribute to this feature. Can only be
+         * called after all the methods manipulating the geometry.
+         *
+         * This function works with layers of version 3 only.
+         *
+         * Call this function, then add size attribute values using
+         * number_list_value().
+         *
+         * @param size The number of elements in the list.
+         * @param index The index of the attribute scalings used.
+         * @param depth Optional depth (will be ignored).
+         *
+         * @pre layer version is 3
+         */
+        void start_number_list(std::size_t size, index_value index, std::size_t /*depth*/ = 0) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            add_complex_value(detail::complex_value_type::cvt_number_list, size);
+            add_direct_value(index.value());
+        }
+
+        /**
+         * Start to add a number list attribute to this feature. Can only be called
+         * after all the methods manipulating the geometry.
+         *
+         * This function works with layers of version 3 only.
+         *
+         * Call this function, then add size attribute values using
+         * number_list_value().
+         *
+         * @tparam TKey Can be type index_value or data_view or anything that
+         *         converts to it.
+         * @param key The key.
+         * @param index The index of the attribute scalings used.
+         * @param size The number of elements in the list.
+         *
+         * @pre layer version is 3
+         */
+        template <typename TKey>
+        void start_number_list_with_key(TKey&& key, std::size_t size, index_value index) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            prepare_to_add_property_vt3();
+            add_key_internal(std::forward<TKey>(key));
+            add_complex_value(detail::complex_value_type::cvt_number_list, size);
+            add_direct_value(index.value());
+        }
+
+        /**
+         * Add a value to a number list.
+         *
+         * @param value The value.
+         *
+         * @pre layer version is 3
+         */
+        void number_list_value(uint64_t value) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            add_direct_value(value);
+        }
+
+        /**
          * Start to add a list attribute to this feature. Can only be called
          * after all the methods manipulating the geometry.
          *

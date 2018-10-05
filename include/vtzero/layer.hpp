@@ -839,6 +839,28 @@ namespace vtzero {
                         return false;
                     }
                     break;
+                case detail::complex_value_type::cvt_number_list: {
+                    index_value index{static_cast<uint32_t>(*it++)};
+                    if (it == end) {
+                        throw format_exception{"Properties list is missing value"};
+                    }
+                    if (!detail::call_start_number_list<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), index, depth)) {
+                        return false;
+                    }
+                    while (vp > 0) {
+                        if (it == end) {
+                            throw format_exception{"Properties list is missing value"};
+                        }
+                        --vp;
+                        if (!detail::call_number_list_value<THandler>(std::forward<THandler>(handler), static_cast<uint64_t>(*it++), depth)) {
+                            return false;
+                        }
+                    }
+                    if (!detail::call_end_number_list<THandler>(std::forward<THandler>(handler), depth)) {
+                        return false;
+                    }
+                    break;
+                }
             }
 
             return true;
