@@ -124,7 +124,7 @@ public:
 
 }; // class VariantConverter
 
-TEST_CASE("build feature with properties explicitly and read it again") {
+TEST_CASE("build feature with attributes explicitly and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
@@ -245,7 +245,7 @@ variant_type make_map(TArgs&&... args) {
     return variant_type{std::map<std::string, variant_type>{std::forward<TArgs>(args)...}};
 }
 
-TEST_CASE("build feature with properties from variant and read it again") {
+TEST_CASE("build feature with attributes from variant and read it again") {
     std::map<std::string, variant_type> test_data{
         {"some_int", static_cast<uint64_t>(111u)},
         {"list", make_list(

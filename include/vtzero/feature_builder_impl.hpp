@@ -57,7 +57,7 @@ namespace vtzero {
 
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
 
-            bool valid_properties() const noexcept {
+            bool valid_attributes() const noexcept {
                 if (version() < 3) {
                     return m_pbf_tags.valid();
                 }

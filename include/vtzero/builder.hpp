@@ -616,7 +616,7 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call set_id() after commit() or rollback()");
             vtzero_assert(!m_pbf_geometry.valid() &&
-                          !valid_properties() &&
+                          !valid_attributes() &&
                           "Call set_id() before setting the geometry or adding properties");
             set_integer_id_impl(id);
         }
@@ -652,7 +652,7 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_id() after commit() or rollback()");
             vtzero_assert(!m_pbf_geometry.valid() &&
-                          !valid_properties() &&
+                          !valid_attributes() &&
                           "Call copy_id() before setting the geometry or adding properties");
             copy_id_impl(feature);
         }
@@ -1051,7 +1051,7 @@ namespace vtzero {
          */
         void commit() {
             if (m_feature_writer.valid()) {
-                vtzero_assert((m_pbf_geometry.valid() || valid_properties()) &&
+                vtzero_assert((m_pbf_geometry.valid() || valid_attributes()) &&
                               "Can not call commit before geometry was added");
                 if (m_pbf_geometry.valid()) {
                     m_pbf_geometry.commit();
@@ -1128,7 +1128,7 @@ namespace vtzero {
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(!this->m_pbf_geometry.valid() &&
-                          !this->valid_properties() &&
+                          !this->valid_attributes() &&
                           "add_point() can only be called once");
             this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -1149,7 +1149,7 @@ namespace vtzero {
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(!this->m_pbf_geometry.valid() &&
-                          !this->valid_properties() &&
+                          !this->valid_attributes() &&
                           "add_point() can only be called once");
             this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -1201,7 +1201,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(!this->m_pbf_geometry.valid() &&
                           "can not call add_points() twice or mix with add_point()");
-            vtzero_assert(!this->valid_properties() &&
+            vtzero_assert(!this->valid_attributes() &&
                           "add_points() has to be called before properties are added");
             vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
             this->m_num_points.set(count);
@@ -1225,7 +1225,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(this->m_pbf_geometry.valid() &&
                           "call add_points() before set_point()");
-            vtzero_assert(!this->valid_properties() &&
+            vtzero_assert(!this->valid_attributes() &&
                           "set_point() has to be called before properties are added");
             this->m_num_points.decrement();
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
@@ -1345,7 +1345,7 @@ namespace vtzero {
         void add_linestring(const uint32_t count) {
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->valid_properties() &&
+            vtzero_assert(!this->valid_attributes() &&
                           "add_linestring() has to be called before properties are added");
             vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
             this->m_num_points.assert_is_zero();
@@ -1377,7 +1377,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(this->m_pbf_geometry.valid() &&
                           "call add_linestring() before set_point()");
-            vtzero_assert(!this->valid_properties() &&
+            vtzero_assert(!this->valid_attributes() &&
                           "set_point() has to be called before properties are added");
             this->m_num_points.decrement();
             if (m_start_line) {
@@ -1520,7 +1520,7 @@ namespace vtzero {
         void add_ring(const uint32_t count) {
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->valid_properties() &&
+            vtzero_assert(!this->valid_attributes() &&
                           "add_ring() has to be called before properties are added");
             vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
             this->m_num_points.assert_is_zero();
@@ -1554,7 +1554,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(this->m_pbf_geometry.valid() &&
                           "call add_ring() before set_point()");
-            vtzero_assert(!this->valid_properties() &&
+            vtzero_assert(!this->valid_attributes() &&
                           "set_point() has to be called before properties are added");
             this->m_num_points.decrement();
             if (m_start_ring) {
@@ -1645,7 +1645,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(this->m_pbf_geometry.valid() &&
                           "Call add_ring() before you can call close_ring()");
-            vtzero_assert(!this->valid_properties() &&
+            vtzero_assert(!this->valid_attributes() &&
                           "close_ring() has to be called before properties are added");
             vtzero_assert(this->m_num_points.value() == 1 &&
                           "wrong number of points in ring");
@@ -1750,7 +1750,7 @@ namespace vtzero {
         void set_id(uint64_t id) {
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!this->valid_properties());
+            vtzero_assert(!this->valid_attributes());
             set_integer_id_impl(id);
         }
 
@@ -1766,7 +1766,7 @@ namespace vtzero {
             vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!this->valid_properties());
+            vtzero_assert(!this->valid_attributes());
             set_string_id_impl(id);
         }
 
@@ -1782,7 +1782,7 @@ namespace vtzero {
         void copy_id(const feature& feature) {
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not call copy_id() after commit() or rollback()");
-            vtzero_assert(!this->valid_properties());
+            vtzero_assert(!this->valid_attributes());
             copy_id_impl(feature);
         }
 
@@ -1797,7 +1797,7 @@ namespace vtzero {
         void set_geometry(const geometry& geometry) {
             vtzero_assert(this->m_feature_writer.valid() &&
                           "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->valid_properties());
+            vtzero_assert(!this->valid_attributes());
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
             this->m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
             m_pbf_tags = {this->m_feature_writer, detail::pbf_feature::tags};
@@ -1891,7 +1891,7 @@ namespace vtzero {
          */
         void commit() {
             if (this->m_feature_writer.valid()) {
-                vtzero_assert(this->valid_properties() &&
+                vtzero_assert(this->valid_attributes() &&
                               "Can not call commit() before geometry was added");
                 do_commit();
             }

@@ -10,7 +10,7 @@
 #include <string>
 #include <utility>
 
-struct PropertyCountHandler {
+struct AttributeCountHandler {
 
     int count_ki = 0;
     int count_k = 0;
@@ -68,13 +68,13 @@ struct PropertyCountHandler {
         return std::make_pair(count_k, count_v);
     }
 
-}; // class PropertyCountHandler
+}; // class AttributeCountHandler
 
 static const std::string types[] = { // NOLINT(cert-err58-cpp)
     "data_view", "uint", "sint", "double", "float", "true", "false", "null", "cstring", "string"
 };
 
-struct PropertyCheckHandler {
+struct AttributeCheckHandler {
 
     std::size_t count = 0;
 
@@ -148,9 +148,9 @@ struct PropertyCheckHandler {
         return count;
     }
 
-}; // class PropertyCheckHandler
+}; // class AttributeCheckHandler
 
-TEST_CASE("build feature with scalar properties and read it again") {
+TEST_CASE("build feature with scalar attributes and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
@@ -186,18 +186,18 @@ TEST_CASE("build feature with scalar properties and read it again") {
     REQUIRE(feature.id() == 1);
 
     {
-        PropertyCountHandler handler;
+        AttributeCountHandler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 10);
         REQUIRE(result.second == 10);
     }
     {
-        PropertyCheckHandler handler;
+        AttributeCheckHandler handler;
         REQUIRE(feature.decode_attributes(handler) == 10);
     }
 }
 
-struct PropertyDumpHandler {
+struct AttributeDumpHandler {
 
     std::string out{};
 
@@ -278,9 +278,9 @@ struct PropertyDumpHandler {
         return out;
     }
 
-}; // class PropertyDumpHandler
+}; // class AttributeDumpHandler
 
-TEST_CASE("build feature with list and map properties and read it again") {
+TEST_CASE("build feature with list and map attributes and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
@@ -323,18 +323,18 @@ TEST_CASE("build feature with list and map properties and read it again") {
     REQUIRE(feature.id() == 1);
 
     {
-        PropertyCountHandler handler;
+        AttributeCountHandler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 7);
         REQUIRE(result.second == 15);
     }
     {
-        PropertyDumpHandler handler;
+        AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
 }
 
-TEST_CASE("build feature with number list properties and read it again") {
+TEST_CASE("build feature with number list attributes and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     const auto index = lbuilder.add_attribute_scaling(vtzero::scaling{0, 2.0, 0.0});
@@ -368,13 +368,13 @@ TEST_CASE("build feature with number list properties and read it again") {
     REQUIRE(feature.id() == 1);
 
     {
-        PropertyCountHandler handler;
+        AttributeCountHandler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 2);
         REQUIRE(handler.count_number_list == 3);
     }
     {
-        PropertyDumpHandler handler;
+        AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
 }
@@ -416,7 +416,7 @@ TEST_CASE("build feature with list property from array and read it again") {
     REQUIRE(feature.id() == 1);
 
     {
-        PropertyDumpHandler handler;
+        AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == "pi=list(8)[\n3\n1\n4\n1\n5\n9\n2\n6\n]\n");
     }
 }
