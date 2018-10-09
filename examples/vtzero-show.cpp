@@ -9,6 +9,7 @@
 #include "utils.hpp"
 
 #include <vtzero/vector_tile.hpp>
+#include <vtzero/output.hpp>
 
 #include <clara.hpp>
 
@@ -115,6 +116,23 @@ struct print_value {
 
 }; // struct print_value
 
+struct print_handler {
+
+    void attribute_key(const vtzero::data_view& key, std::size_t /*depth*/) const {
+        std::cout << "      " << key << '=';
+    }
+
+    template <typename T>
+    void attribute_value(T value, std::size_t /*depth*/) const {
+        std::cout << value << '\n';
+    }
+
+    void attribute_value(const vtzero::data_view& value, std::size_t /*depth*/) const {
+        std::cout << '"' << value << '"' << '\n';
+    }
+
+}; // struct print_handler
+
 static void print_layer(vtzero::layer& layer, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
     std::cout << "=============================================================\n"
               << "layer: " << layer_num << '\n'
@@ -128,15 +146,24 @@ static void print_layer(vtzero::layer& layer, bool print_tables, bool print_valu
         for (const auto& key : layer.key_table()) {
             std::cout << "    " << n++ << ": " << key << '\n';
         }
-        std::cout << "  values:\n";
-        n = 0;
-        for (const vtzero::property_value& value : layer.value_table()) {
-            std::cout << "    " << n++ << ": ";
-            vtzero::apply_visitor(print_value{}, value);
-            if (print_value_types) {
-                std::cout << " [" << vtzero::property_value_type_name(value.type()) << "]\n";
-            } else {
-                std::cout << '\n';
+        if (layer.version() <= 2) {
+            std::cout << "  values:\n";
+            n = 0;
+            for (const vtzero::property_value& value : layer.value_table()) {
+                std::cout << "    " << n++ << ": ";
+                vtzero::apply_visitor(print_value{}, value);
+                if (print_value_types) {
+                    std::cout << " [" << vtzero::property_value_type_name(value.type()) << "]\n";
+                } else {
+                    std::cout << '\n';
+                }
+            }
+        }
+        if (layer.version() == 3) {
+            std::cout << "  string values:\n";
+            n = 0;
+            for (const vtzero::data_view& value : layer.string_table()) {
+                std::cout << "    " << n++ << ": " << value << '\n';
             }
         }
     }
@@ -147,22 +174,17 @@ static void print_layer(vtzero::layer& layer, bool print_tables, bool print_valu
                   << "    id: ";
         if (feature.has_id()) {
             std::cout << feature.id() << '\n';
+        } else if (feature.has_string_id()) {
+            std::cout << feature.string_id() << '\n';
         } else {
             std::cout << "(none)\n";
         }
         std::cout << "    geomtype: " << vtzero::geom_type_name(feature.geometry_type()) << '\n'
                   << "    geometry:\n";
         vtzero::decode_geometry(feature.geometry(), geom_handler{});
-        std::cout << "    properties:\n";
-        while (auto property = feature.next_property()) {
-            std::cout << "      " << property.key() << '=';
-            vtzero::apply_visitor(print_value{}, property.value());
-            if (print_value_types) {
-                std::cout << " [" << vtzero::property_value_type_name(property.value().type()) << "]\n";
-            } else {
-                std::cout << '\n';
-            }
-        }
+        std::cout << "    attributes:\n";
+        print_handler handler;
+        feature.decode_attributes(handler);
         ++feature_num;
     }
 }

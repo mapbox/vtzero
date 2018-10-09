@@ -1881,6 +1881,24 @@ namespace vtzero {
         }
 
         /**
+         * Copy all attributes of an existing feature to the one being built.
+         *
+         * @param feature The feature to copy the attributes from.
+         */
+        void copy_attributes(const feature& feature) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_attributes() after commit() or rollback()");
+            if (version() < 3) {
+                feature.for_each_property([this](const property& prop) {
+                    add_property_impl_vt2(prop);
+                    return true;
+                });
+            } else {
+                feature.decode_attributes(*this);
+            }
+        }
+
+        /**
          * Commit this feature. Call this after all the details of this
          * feature have been added. If this is not called, the feature
          * will be rolled back when the destructor of the feature_builder is

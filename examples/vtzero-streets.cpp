@@ -2,7 +2,7 @@
 
   Example program for vtzero library.
 
-  vtzero-streets - Copy features from road_label layer if they have property
+  vtzero-streets - Copy features from road_label layer if they have an attribute
                    class="street". Output is always in file "streets.mvt".
 
 *****************************************************************************/
@@ -10,24 +10,47 @@
 #include "utils.hpp"
 
 #include <vtzero/builder.hpp>
+#include <vtzero/output.hpp>
 #include <vtzero/property_mapper.hpp>
 #include <vtzero/vector_tile.hpp>
 
 #include <iostream>
 #include <string>
 
+class filter_handler {
+
+    bool m_found = false;
+
+public:
+
+    void attribute_key(const vtzero::data_view& key, std::size_t /*depth*/) {
+        static const std::string mkey{"class"};
+        m_found = (mkey == key);
+    }
+
+    template <typename T>
+    void attribute_value(T /*value*/, std::size_t /*depth*/) {
+        m_found = false;
+    }
+
+    bool attribute_value(const vtzero::data_view& value, std::size_t /*depth*/) {
+        static const std::string mvalue{"street"};
+        if (m_found && mvalue == value) {
+            return false;
+        }
+        m_found = false;
+        return true;
+    }
+
+    bool result() const noexcept {
+        return m_found;
+    }
+
+}; // class filter_handler
+
 static bool keep_feature(const vtzero::feature& feature) {
-    static const std::string key{"class"};
-    static const std::string val{"street"};
-
-    bool found = false;
-
-    feature.for_each_property([&](const vtzero::property& prop) {
-        found = key == prop.key() && val == prop.value().string_value();
-        return !found;
-    });
-
-    return found;
+    filter_handler handler;
+    return feature.decode_attributes(handler);
 }
 
 int main(int argc, char* argv[]) {
@@ -53,19 +76,13 @@ int main(int argc, char* argv[]) {
         vtzero::tile_builder tb;
         vtzero::layer_builder layer_builder{tb, layer};
 
-        vtzero::property_mapper mapper{layer, layer_builder};
-
         while (auto feature = layer.next_feature()) {
             if (keep_feature(feature)) {
                 vtzero::geometry_2d_feature_builder feature_builder{layer_builder};
-                if (feature.has_id()) {
-                    feature_builder.set_id(feature.id());
-                }
+                feature_builder.copy_id(feature);
                 feature_builder.set_geometry(feature.geometry());
-
-                while (auto idxs = feature.next_property_indexes()) {
-                    feature_builder.add_property(mapper(idxs));
-                }
+                feature_builder.copy_attributes(feature);
+                feature_builder.commit();
             }
         }
 

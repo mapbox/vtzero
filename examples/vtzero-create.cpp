@@ -11,16 +11,41 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/index.hpp>
 
+#include <clara.hpp>
+
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-int main() {
+int main(int argc, char* argv[]) {
+    bool help;
+    bool version_2;
+
+    const auto cli
+        = clara::Opt(version_2)
+            ["-2"]
+            ("write version 2 tile")
+        | clara::Help(help);
+
+    const auto result = cli.parse(clara::Args(argc, argv));
+    if (!result) {
+        std::cerr << "Error in command line: " << result.errorMessage() << '\n';
+        return 1;
+    }
+
+    if (help) {
+        std::cout << cli
+                  << "\nCreate vector tile called 'test.mvt'.\n";
+        return 0;
+    }
+
+    uint32_t version = version_2 ? 2 : 3;
+
     vtzero::tile_builder tile;
-    vtzero::layer_builder layer_points{tile, "points"};
-    vtzero::layer_builder layer_lines{tile, "lines"};
-    vtzero::layer_builder layer_polygons{tile, "polygons"};
+    vtzero::layer_builder layer_points{tile, "points", version};
+    vtzero::layer_builder layer_lines{tile, "lines", version};
+    vtzero::layer_builder layer_polygons{tile, "polygons", version};
 
     vtzero::key_index<std::unordered_map> idx{layer_points};
 
@@ -29,8 +54,8 @@ int main() {
         feature.set_id(1);
         feature.add_points(1);
         feature.set_point(10, 10);
-        feature.add_property("foo", "bar");
-        feature.add_property("x", "y");
+        feature.add_scalar_attribute("foo", "bar");
+        feature.add_scalar_attribute("x", "y");
         feature.rollback();
     }
 
@@ -40,30 +65,32 @@ int main() {
         vtzero::point_2d_feature_builder feature{layer_points};
         feature.set_id(2);
         feature.add_point(20, 20);
-        feature.add_property(some, "attr");
+        feature.add_scalar_attribute(some, "attr");
+        feature.commit();
     }
     {
         vtzero::point_2d_feature_builder feature{layer_points};
         feature.set_id(3);
         feature.add_point(20, 20);
-        feature.add_property(idx("some"), "attr");
+        feature.add_scalar_attribute(idx("some"), "attr");
+        feature.commit();
     }
 
     {
         vtzero::point_2d_feature_builder feature{layer_points};
         feature.set_id(4);
         feature.add_point(20, 20);
-        feature.add_property(idx("some"), "otherattr");
+        feature.add_scalar_attribute(idx("some"), "otherattr");
+        feature.commit();
     }
 
 
     vtzero::point_2d_feature_builder feature1{layer_points};
     feature1.set_id(5);
     feature1.add_point(vtzero::point{20, 20});
-    feature1.add_property("otherkey", "attr");
+    feature1.add_scalar_attribute("otherkey", "attr");
     feature1.commit();
 
-    vtzero::value_index<vtzero::sint_value_type, int32_t, std::unordered_map> maxspeed_index{layer_lines};
     {
         vtzero::linestring_2d_feature_builder feature{layer_lines};
         feature.set_id(6);
@@ -73,8 +100,9 @@ int main() {
         feature.set_point(vtzero::point{20, 20});
         std::vector<vtzero::point> points = {{11, 11}, {12, 13}};
         feature.add_linestring_from_container(points);
-        feature.add_property("highway", "primary");
-        feature.add_property(std::string{"maxspeed"}, maxspeed_index(50));
+        feature.add_scalar_attribute("highway", "primary");
+        feature.add_scalar_attribute(std::string{"maxspeed"}, 50);
+        feature.commit();
     }
 
     {
@@ -91,8 +119,9 @@ int main() {
         feature.set_point(3, 5);
         feature.set_point(5, 5);
         feature.close_ring();
-        feature.add_property("natural", "wood");
-        feature.add_property("number_of_trees", vtzero::sint_value_type{23402752});
+        feature.add_scalar_attribute("natural", "wood");
+        feature.add_scalar_attribute("number_of_trees", 23402752);
+        feature.commit();
     }
 
     const auto data = tile.serialize();
