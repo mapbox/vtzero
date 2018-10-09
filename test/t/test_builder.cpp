@@ -387,7 +387,7 @@ TEST_CASE("Copy tile") {
     while (auto layer = tile.next_layer()) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
-            lbuilder.add_feature(feature);
+            vtzero::copy_feature(feature, lbuilder);
         }
     }
 

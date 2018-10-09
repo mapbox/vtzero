@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
         }
 
         vtzero::layer_builder layer_builder{tb, layer};
-        layer_builder.add_feature(feature);
+        vtzero::copy_feature(feature, layer_builder);
     }
 
     std::string output = tb.serialize();

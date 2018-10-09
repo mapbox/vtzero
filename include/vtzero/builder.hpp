@@ -411,13 +411,6 @@ namespace vtzero {
             return m_layer->add_float_value(value);
         }
 
-        /**
-         * Add a feature from an existing layer to the new layer. The feature
-         * will be copied completely over to the new layer including its
-         * geometry and all its properties.
-         */
-        void add_feature(const feature& feature);
-
     }; // class layer_builder
 
     namespace detail {
@@ -1949,15 +1942,18 @@ namespace vtzero {
     /// alias for 2D geometry feature builder
     using geometry_2d_feature_builder = geometry_feature_builder<2, false>;
 
-    inline void layer_builder::add_feature(const feature& feature) {
-        vtzero_assert(m_layer->version() < 3);
-        geometry_2d_feature_builder feature_builder{*this};
+
+    /**
+     * Copy a feature from an existing layer to a new layer. The feature
+     * will be copied completely over to the new layer including its id,
+     * geometry and all its attributes.
+     */
+    template <typename TLayerBuilder>
+    void copy_feature(const feature& feature, TLayerBuilder& layer_builder) {
+        geometry_feature_builder<3, true> feature_builder{layer_builder};
         feature_builder.copy_id(feature);
         feature_builder.copy_geometry(feature);
-        feature.for_each_property([&feature_builder](const property& p) {
-            feature_builder.add_property(p);
-            return true;
-        });
+        feature_builder.copy_attributes(feature);
         feature_builder.commit();
     }
 
