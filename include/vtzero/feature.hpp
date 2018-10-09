@@ -294,6 +294,28 @@ namespace vtzero {
         }
 
         /**
+         * The (2D) geometry data of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * Always returns an empty data_view for invalid features.
+         */
+        data_view geometry_data() const noexcept {
+            return m_geometry;
+        }
+
+        /**
+         * The elevations data of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * Always returns an empty data_view for invalid features.
+         */
+        data_view elevations_data() const noexcept {
+            return m_elevations;
+        }
+
+        /**
          * Does this feature have a 3d geometry?
          *
          * Complexity: Constant.

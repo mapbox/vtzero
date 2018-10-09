@@ -1687,7 +1687,7 @@ namespace vtzero {
      * specific order:
      *
      * * Optionally add the ID using set_id().
-     * * Add the geometry using set_geometry().
+     * * Add the geometry using copy_geometry().
      * * Optionally add any number of properties using add_property().
      *
      * @code
@@ -1697,7 +1697,7 @@ namespace vtzero {
      * vtzero::layer_builder lb{tb};
      * vtzero::geometry_feature_builder fb{lb};
      * fb.set_id(123); // optionally set ID
-     * fb.set_geometry(geom) // add geometry
+     * fb.copy_geometry(geom) // add geometry
      * fb.add_property("foo", "bar"); // add property
      * @endcode
      */
@@ -1743,7 +1743,7 @@ namespace vtzero {
          * Set the ID of this feature.
          *
          * You can only call this function once and it must be before calling
-         * set_geometry().
+         * copy_geometry().
          *
          * @param id The ID.
          */
@@ -1758,7 +1758,7 @@ namespace vtzero {
          * Set the ID of this feature.
          *
          * You can only call this method once and it must be before calling
-         * set_geometry().
+         * copy_geometry().
          *
          * @param id The ID.
          */
@@ -1775,7 +1775,7 @@ namespace vtzero {
          * feature doesn't have an ID, no ID is set.
          *
          * You can only call this function once and it must be before calling
-         * set_geometry().
+         * copy_geometry().
          *
          * @param feature The feature to copy the ID from.
          */
@@ -1787,25 +1787,8 @@ namespace vtzero {
         }
 
         /**
-         * Set the geometry of this feature.
-         *
-         * You can only call this method once and it must be before calling the
-         * add_property() method.
-         *
-         * @param geometry The geometry.
-         */
-        void set_geometry(const geometry& geometry) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->valid_attributes());
-            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(geometry.type()));
-            this->m_feature_writer.add_string(detail::pbf_feature::geometry, geometry.data());
-            m_pbf_tags = {this->m_feature_writer, detail::pbf_feature::tags};
-        }
-
-        /**
          * Add a property to this feature. Can only be called after the
-         * set_geometry method.
+         * copy_geometry method.
          *
          * @tparam TProp Can be type index_value_pair or property.
          * @param prop The property to add.
@@ -1822,7 +1805,7 @@ namespace vtzero {
 
         /**
          * Add a property to this feature. Can only be called after the
-         * set_geometry method.
+         * copy_geometry method.
          *
          * @tparam TKey Can be type index_value or data_view or anything that
          *         converts to it.
@@ -1878,6 +1861,27 @@ namespace vtzero {
                 add_property_impl_vt2(mapper(idxs));
                 return true;
             });
+        }
+
+        /**
+         * Copy the geometry from the geometry of an existing feature.
+         *
+         * You can only call this method once and it must be before calling the
+         * add_property() method.
+         *
+         * @param feature The feature to copy the geometry from.
+         */
+        void copy_geometry(const feature& feature) {
+            vtzero_assert(m_feature_writer.valid() &&
+                          "Can not call copy_geometry() after commit() or rollback()");
+            vtzero_assert(!valid_attributes() &&
+                          "Call copy_geometry) before adding properties");
+            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(feature.geometry_type()));
+            this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
+            if (!feature.is_3d()) {
+                this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
+            }
+            m_pbf_tags = {this->m_feature_writer, detail::pbf_feature::tags};
         }
 
         /**
@@ -1949,7 +1953,7 @@ namespace vtzero {
         vtzero_assert(m_layer->version() < 3);
         geometry_2d_feature_builder feature_builder{*this};
         feature_builder.copy_id(feature);
-        feature_builder.set_geometry(feature.geometry());
+        feature_builder.copy_geometry(feature);
         feature.for_each_property([&feature_builder](const property& p) {
             feature_builder.add_property(p);
             return true;

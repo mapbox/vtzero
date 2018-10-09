@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
             if (keep_feature(feature)) {
                 vtzero::geometry_2d_feature_builder feature_builder{layer_builder};
                 feature_builder.copy_id(feature);
-                feature_builder.set_geometry(feature.geometry());
+                feature_builder.copy_geometry(feature);
                 feature_builder.copy_attributes(feature);
                 feature_builder.commit();
             }

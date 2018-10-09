@@ -406,7 +406,7 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder") {
         while (auto feature = layer.next_feature()) {
             vtzero::geometry_2d_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
-            fbuilder.set_geometry(feature.geometry());
+            fbuilder.copy_geometry(feature);
             fbuilder.copy_properties(feature);
             fbuilder.commit();
         }
@@ -428,7 +428,7 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder and property_mapper") {
         while (auto feature = layer.next_feature()) {
             vtzero::geometry_2d_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
-            fbuilder.set_geometry(feature.geometry());
+            fbuilder.copy_geometry(feature);
             fbuilder.copy_properties(feature, mapper);
             fbuilder.commit();
         }
@@ -451,7 +451,7 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
             vtzero::geometry_2d_feature_builder fbuilder{lbuilder};
             fbuilder.set_id(feature.id());
             if (feature.geometry().type() == vtzero::GeomType::POINT) {
-                fbuilder.set_geometry(feature.geometry());
+                fbuilder.copy_geometry(feature);
                 while (auto property = feature.next_property()) {
                     fbuilder.add_property(property.key(), property.value());
                 }
