@@ -41,12 +41,14 @@ int main() {
         feature.set_id(2);
         feature.add_point(20, 20);
         feature.add_property(some, "attr");
+        feature.commit();
     }
     {
         vtzero::point_feature_builder feature{layer_points};
         feature.set_id(3);
         feature.add_point(20, 20);
         feature.add_property(idx("some"), "attr");
+        feature.commit();
     }
 
     {
@@ -54,6 +56,7 @@ int main() {
         feature.set_id(4);
         feature.add_point(20, 20);
         feature.add_property(idx("some"), "otherattr");
+        feature.commit();
     }
 
 
@@ -75,6 +78,7 @@ int main() {
         feature.add_linestring_from_container(points);
         feature.add_property("highway", "primary");
         feature.add_property(std::string{"maxspeed"}, maxspeed_index(50));
+        feature.commit();
     }
 
     {
@@ -93,6 +97,7 @@ int main() {
         feature.close_ring();
         feature.add_property("natural", "wood");
         feature.add_property("number_of_trees", vtzero::sint_value_type{23402752});
+        feature.commit();
     }
 
     const auto data = tile.serialize();
