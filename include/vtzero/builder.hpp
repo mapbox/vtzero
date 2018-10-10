@@ -110,7 +110,7 @@ namespace vtzero {
 
         static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
 
-        int64_t m_value;
+        int64_t m_value = 0;
 
     protected:
 
