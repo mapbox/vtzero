@@ -502,6 +502,10 @@ namespace vtzero {
                 return m_value;
             }
 
+            bool is_zero() const noexcept {
+                return m_value == 0;
+            }
+
             void set(const uint32_t value) noexcept {
                 m_value = value;
             }
@@ -549,26 +553,30 @@ namespace vtzero {
             return static_cast<uint32_t>(size);
         }
 
-        /// Helper function to make sure we have everything before adding a property
-        void prepare_to_add_property_vt2() {
-            if (m_pbf_geometry.valid()) {
-                m_num_points.assert_is_zero();
-                m_pbf_geometry.commit();
+        /**
+         * Enter the "geometry" stage. Do nothing if we are already in the
+         * "geometry" stage.
+         */
+        void enter_stage_geometry() {
+            if (m_stage == detail::stage::id || m_stage == detail::stage::has_id) {
+                m_stage = detail::stage::geometry;
+                this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
+                return;
             }
-            if (!m_pbf_tags.valid()) {
-                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
-            }
+            vtzero_assert(m_stage == detail::stage::geometry);
         }
 
-        /// Helper function to make sure we have everything before adding a property
-        void prepare_to_add_property_vt3() {
-            if (m_pbf_geometry.valid()) {
-                m_num_points.assert_is_zero();
+        /**
+         * Enter the "attributes" stage. Do nothing if we are already in the
+         * "attributes" stage.
+         */
+        void enter_stage_attributes() {
+            if (m_stage == detail::stage::geometry) {
                 m_pbf_geometry.commit();
+                m_stage = detail::stage::attributes;
+                return;
             }
-            if (!m_pbf_attributes.valid()) {
-                m_pbf_attributes = {m_feature_writer, detail::pbf_feature::attributes};
-            }
+            vtzero_assert(m_stage == detail::stage::attributes);
         }
 
     public:
@@ -606,12 +614,9 @@ namespace vtzero {
          * @param id The ID.
          */
         void set_id(uint64_t id) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!m_pbf_geometry.valid() &&
-                          !valid_attributes() &&
-                          "Call set_id() before setting the geometry or adding properties");
+            vtzero_assert(m_stage == detail::stage::id);
             set_integer_id_impl(id);
+            m_stage = detail::stage::has_id;
         }
 
         /**
@@ -624,12 +629,9 @@ namespace vtzero {
          */
         void set_string_id(data_view id) {
             vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!m_pbf_geometry.valid() &&
-                          !m_pbf_tags.valid() &&
-                          "Call set_id() before setting the geometry or adding properties");
+            vtzero_assert(m_stage == detail::stage::id);
             set_string_id_impl(id);
+            m_stage = detail::stage::has_id;
         }
 
         /**
@@ -642,12 +644,9 @@ namespace vtzero {
          * @param feature The feature to copy the ID from.
          */
         void copy_id(const feature& feature) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call copy_id() after commit() or rollback()");
-            vtzero_assert(!m_pbf_geometry.valid() &&
-                          !valid_attributes() &&
-                          "Call copy_id() before setting the geometry or adding properties");
+            vtzero_assert(m_stage == detail::stage::id);
             copy_id_impl(feature);
+            m_stage = detail::stage::has_id;
         }
 
         /**
@@ -661,8 +660,7 @@ namespace vtzero {
          */
         template <typename TProp>
         void add_property(TProp&& prop) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call add_property() after commit() or rollback()");
+            this->enter_stage_attributes();
             vtzero_assert(version() < 3);
             prepare_to_add_property_vt2();
             add_property_impl_vt2(std::forward<TProp>(prop));
@@ -676,8 +674,7 @@ namespace vtzero {
          * @pre layer version < 3
          */
         void copy_properties(const feature& feature) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call copy_properties() after commit() or rollback()");
+            this->enter_stage_attributes();
             vtzero_assert(version() < 3);
             prepare_to_add_property_vt2();
             feature.for_each_property([this](const property& prop) {
@@ -699,8 +696,7 @@ namespace vtzero {
          */
         template <typename TMapper>
         void copy_properties(const feature& feature, TMapper& mapper) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call copy_properties() after commit() or rollback()");
+            this->enter_stage_attributes();
             vtzero_assert(version() < 3);
             prepare_to_add_property_vt2();
             feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
@@ -724,8 +720,7 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_property(TKey&& key, TValue&& value) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call add_property() after commit() or rollback()");
+            this->enter_stage_attributes();
             vtzero_assert(version() < 3);
             prepare_to_add_property_vt2();
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
@@ -746,8 +741,7 @@ namespace vtzero {
          */
         template <typename TKey>
         void attribute_key(TKey&& key, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            this->enter_stage_attributes();
             if (version() < 3) {
                 prepare_to_add_property_vt2();
             } else {
@@ -770,8 +764,7 @@ namespace vtzero {
          */
         template <typename TValue>
         void attribute_value(TValue&& value, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(m_stage == detail::stage::attributes);
             if (version() < 3) {
                 add_value_internal_vt2(std::forward<TValue>(value));
             } else {
@@ -794,8 +787,7 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_scalar_attribute(TKey&& key, TValue&& value) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            this->enter_stage_attributes();
             if (version() < 3) {
                 prepare_to_add_property_vt2();
                 add_key_internal(std::forward<TKey>(key));
@@ -822,8 +814,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_list_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(m_stage == detail::stage::attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_list, size);
         }
@@ -844,8 +835,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_number_list(std::size_t size, index_value index, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(m_stage == detail::stage::attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
             add_direct_value(index.value());
@@ -870,8 +860,7 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_number_list_with_key(TKey&& key, std::size_t size, index_value index) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             prepare_to_add_property_vt3();
             add_key_internal(std::forward<TKey>(key));
@@ -887,8 +876,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void number_list_value(uint64_t value) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(m_stage == detail::stage::attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_direct_value(value);
         }
@@ -911,8 +899,7 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_list_attribute_with_key(TKey&& key, std::size_t size) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             prepare_to_add_property_vt3();
             add_key_internal(std::forward<TKey>(key));
@@ -934,8 +921,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_map_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            vtzero_assert(m_stage == detail::stage::attributes);
             vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_map, size);
         }
@@ -958,8 +944,7 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_map_attribute_with_key(TKey&& key, std::size_t size) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call attribute functions after commit() or rollback()");
+            this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
             prepare_to_add_property_vt3();
             add_key_internal(std::forward<TKey>(key));
@@ -1020,8 +1005,7 @@ namespace vtzero {
          * @param feature The feature to copy the attributes from.
          */
         void copy_attributes(const feature& feature) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call copy_attributes() after commit() or rollback()");
+            this->enter_stage_attributes();
             if (version() < 3) {
                 prepare_to_add_property_vt2();
                 feature.for_each_property([this](const property& prop) {
@@ -1044,8 +1028,6 @@ namespace vtzero {
          */
         void commit() {
             if (m_feature_writer.valid()) {
-                vtzero_assert((m_pbf_geometry.valid() || valid_attributes()) &&
-                              "Can not call commit before geometry was added");
                 if (m_pbf_geometry.valid()) {
                     m_pbf_geometry.commit();
                     m_elevations.serialize(m_feature_writer);
@@ -1118,12 +1100,8 @@ namespace vtzero {
          *      this method.
          */
         void add_point(const unscaled_point p) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->m_pbf_geometry.valid() &&
-                          !this->valid_attributes() &&
-                          "add_point() can only be called once");
-            this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
+            vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
+            this->enter_stage_geometry();
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
@@ -1139,12 +1117,8 @@ namespace vtzero {
          *      this method.
          */
         void add_point(const point p) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->m_pbf_geometry.valid() &&
-                          !this->valid_attributes() &&
-                          "add_point() can only be called once");
-            this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
+            vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
+            this->enter_stage_geometry();
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
@@ -1190,15 +1164,10 @@ namespace vtzero {
          *      this method.
          */
         void add_points(uint32_t count) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->m_pbf_geometry.valid() &&
-                          "can not call add_points() twice or mix with add_point()");
-            vtzero_assert(!this->valid_attributes() &&
-                          "add_points() has to be called before properties are added");
+            vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
+            this->enter_stage_geometry();
             vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
             this->m_num_points.set(count);
-            this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
             this->m_pbf_geometry.add_element(detail::command_move_to(count));
         }
 
@@ -1214,12 +1183,8 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(this->m_pbf_geometry.valid() &&
-                          "call add_points() before set_point()");
-            vtzero_assert(!this->valid_attributes() &&
-                          "set_point() has to be called before properties are added");
+            vtzero_assert(this->m_stage == detail::stage::geometry);
+            vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
@@ -1336,15 +1301,9 @@ namespace vtzero {
          *      this method.
          */
         void add_linestring(const uint32_t count) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->valid_attributes() &&
-                          "add_linestring() has to be called before properties are added");
             vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
             this->m_num_points.assert_is_zero();
-            if (!this->m_pbf_geometry.valid()) {
-                this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
-            }
+            this->enter_stage_geometry();
             this->m_num_points.set(count);
             m_start_line = true;
         }
@@ -1366,12 +1325,7 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(this->m_pbf_geometry.valid() &&
-                          "call add_linestring() before set_point()");
-            vtzero_assert(!this->valid_attributes() &&
-                          "set_point() has to be called before properties are added");
+            vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
             if (m_start_line) {
                 this->m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -1511,15 +1465,9 @@ namespace vtzero {
          *      this method.
          */
         void add_ring(const uint32_t count) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(!this->valid_attributes() &&
-                          "add_ring() has to be called before properties are added");
             vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
+            this->enter_stage_geometry();
             this->m_num_points.assert_is_zero();
-            if (!this->m_pbf_geometry.valid()) {
-                this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
-            }
             this->m_num_points.set(count);
             m_start_ring = true;
         }
@@ -1543,12 +1491,7 @@ namespace vtzero {
          *      this method.
          */
         void set_point(const point p) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(this->m_pbf_geometry.valid() &&
-                          "call add_ring() before set_point()");
-            vtzero_assert(!this->valid_attributes() &&
-                          "set_point() has to be called before properties are added");
+            vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
             if (m_start_ring) {
                 m_first_point = p;
@@ -1634,12 +1577,7 @@ namespace vtzero {
          *      this method.
          */
         void close_ring() {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not add geometry after commit() or rollback()");
-            vtzero_assert(this->m_pbf_geometry.valid() &&
-                          "Call add_ring() before you can call close_ring()");
-            vtzero_assert(!this->valid_attributes() &&
-                          "close_ring() has to be called before properties are added");
+            vtzero_assert(this->m_stage == detail::stage::geometry);
             vtzero_assert(this->m_num_points.value() == 1 &&
                           "wrong number of points in ring");
             this->m_pbf_geometry.add_element(detail::command_close_path());
@@ -1697,6 +1635,22 @@ namespace vtzero {
     template <int Dimensions, bool WithGeometricAttributes>
     class geometry_feature_builder : public detail::feature_builder_base {
 
+        void enter_stage_geometry() {
+            if (m_stage == detail::stage::id || m_stage == detail::stage::has_id) {
+                m_stage = detail::stage::geometry;
+                return;
+            }
+            vtzero_assert(m_stage == detail::stage::geometry);
+        }
+
+        void enter_stage_attributes() {
+            if (m_stage == detail::stage::geometry) {
+                m_stage = detail::stage::attributes;
+                return;
+            }
+            vtzero_assert(m_stage == detail::stage::attributes);
+        }
+
     public:
 
         /**
@@ -1741,10 +1695,9 @@ namespace vtzero {
          * @param id The ID.
          */
         void set_id(uint64_t id) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!this->valid_attributes());
+            vtzero_assert(m_stage == detail::stage::id);
             set_integer_id_impl(id);
+            m_stage = detail::stage::has_id;
         }
 
         /**
@@ -1757,10 +1710,9 @@ namespace vtzero {
          */
         void set_string_id(data_view id) {
             vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not call set_id() after commit() or rollback()");
-            vtzero_assert(!this->valid_attributes());
+            vtzero_assert(m_stage == detail::stage::id);
             set_string_id_impl(id);
+            m_stage = detail::stage::has_id;
         }
 
         /**
@@ -1773,10 +1725,9 @@ namespace vtzero {
          * @param feature The feature to copy the ID from.
          */
         void copy_id(const feature& feature) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not call copy_id() after commit() or rollback()");
-            vtzero_assert(!this->valid_attributes());
+            vtzero_assert(m_stage == detail::stage::id);
             copy_id_impl(feature);
+            m_stage = detail::stage::has_id;
         }
 
         /**
@@ -1790,8 +1741,7 @@ namespace vtzero {
          */
         template <typename TProp>
         void add_property(TProp&& prop) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not call add_property() after commit() or rollback()");
+            vtzero_assert(this->m_stage == detail::stage::attributes);
             vtzero_assert(version() < 3);
             add_property_impl_vt2(std::forward<TProp>(prop));
         }
@@ -1811,8 +1761,7 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_property(TKey&& key, TValue&& value) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not call add_property() after commit() or rollback()");
+            vtzero_assert(this->m_stage == detail::stage::attributes);
             vtzero_assert(version() < 3);
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
         }
@@ -1825,8 +1774,7 @@ namespace vtzero {
          * @pre layer version < 3
          */
         void copy_properties(const feature& feature) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not call copy_properties() after commit() or rollback()");
+            vtzero_assert(this->m_stage == detail::stage::attributes);
             vtzero_assert(version() < 3);
             feature.for_each_property([this](const property& prop) {
                 add_property_impl_vt2(prop);
@@ -1847,9 +1795,8 @@ namespace vtzero {
          */
         template <typename TMapper>
         void copy_properties(const feature& feature, TMapper& mapper) {
-            vtzero_assert(this->m_feature_writer.valid() &&
-                          "Can not call copy_properties() after commit() or rollback()");
             vtzero_assert(version() < 3);
+            enter_stage_attributes();
             feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
                 add_property_impl_vt2(mapper(idxs));
                 return true;
@@ -1865,16 +1812,13 @@ namespace vtzero {
          * @param feature The feature to copy the geometry from.
          */
         void copy_geometry(const feature& feature) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call copy_geometry() after commit() or rollback()");
-            vtzero_assert(!valid_attributes() &&
-                          "Call copy_geometry) before adding properties");
+            enter_stage_geometry();
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(feature.geometry_type()));
             this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
             if (!feature.is_3d()) {
                 this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
             }
-            m_pbf_tags = {this->m_feature_writer, detail::pbf_feature::tags};
+            m_stage = detail::stage::attributes;
         }
 
         /**
@@ -1883,8 +1827,7 @@ namespace vtzero {
          * @param feature The feature to copy the attributes from.
          */
         void copy_attributes(const feature& feature) {
-            vtzero_assert(m_feature_writer.valid() &&
-                          "Can not call copy_attributes() after commit() or rollback()");
+            enter_stage_attributes();
             if (version() < 3) {
                 feature.for_each_property([this](const property& prop) {
                     add_property_impl_vt2(prop);
@@ -1906,8 +1849,6 @@ namespace vtzero {
          */
         void commit() {
             if (this->m_feature_writer.valid()) {
-                vtzero_assert(this->valid_attributes() &&
-                              "Can not call commit() before geometry was added");
                 do_commit();
             }
         }
