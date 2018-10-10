@@ -195,6 +195,28 @@ namespace vtzero {
                 throw version_exception{m_version};
             }
 
+            // Check for vt3 components in vt2 layers.
+            if (m_version <= 2) {
+                if (m_string_table_size > 0) {
+                    throw format_exception{"found entry in string table in layer with version <= 2"};
+                }
+                if (!m_double_table.empty()) {
+                    throw format_exception{"found entry in double table in layer with version <= 2"};
+                }
+                if (!m_float_table.empty()) {
+                    throw format_exception{"found entry in float table in layer with version <= 2"};
+                }
+                if (!m_int_table.empty()) {
+                    throw format_exception{"found entry in int table in layer with version <= 2"};
+                }
+                if (m_elevation_scaling != scaling{}) {
+                    throw format_exception{"found elevation scaling message in layer with version <= 2"};
+                }
+                if (!m_attribute_scalings.empty()) {
+                    throw format_exception{"found attribute scaling message in layer with version <= 2"};
+                }
+            }
+
             // 4.1 "A layer MUST contain a name field."
             if (m_name.data() == nullptr) {
                 throw format_exception{"missing name field in layer (spec 4.1)"};
