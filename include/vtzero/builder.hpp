@@ -242,28 +242,6 @@ namespace vtzero {
         }
 
         /**
-         * Copy all properties of an existing feature to the one being built
-         * using a property_mapper.
-         *
-         * @tparam TMapper Must be the property_mapper class or something
-         *                 equivalent.
-         * @param feature The feature to copy the properties from.
-         * @param mapper Instance of the property_mapper class.
-         *
-         * @pre layer version < 3
-         */
-        template <typename TMapper>
-        void copy_properties(const feature& feature, TMapper& mapper) {
-            this->enter_stage_attributes();
-            vtzero_assert(version() < 3);
-            prepare_to_add_property_vt2();
-            feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
-                add_property_impl_vt2(mapper(idxs));
-                return true;
-            });
-        }
-
-        /**
          * Add a property to this feature. Can only be called after all the
          * methods manipulating the geometry.
          *
@@ -1278,27 +1256,6 @@ namespace vtzero {
             vtzero_assert(this->m_stage == detail::stage::attributes);
             vtzero_assert(version() < 3);
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
-        }
-
-        /**
-         * Copy all properties of an existing feature to the one being built
-         * using a property_mapper.
-         *
-         * @tparam TMapper Must be the property_mapper class or something
-         *                 equivalent.
-         * @param feature The feature to copy the properties from.
-         * @param mapper Instance of the property_mapper class.
-         *
-         * @pre layer version < 3
-         */
-        template <typename TMapper>
-        void copy_properties(const feature& feature, TMapper& mapper) {
-            vtzero_assert(version() < 3);
-            enter_stage_attributes();
-            feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
-                add_property_impl_vt2(mapper(idxs));
-                return true;
-            });
         }
 
         /**

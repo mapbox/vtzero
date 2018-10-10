@@ -4,7 +4,6 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/index.hpp>
 #include <vtzero/output.hpp>
-#include <vtzero/property_mapper.hpp>
 
 #include <cstdint>
 #include <stdexcept>
@@ -416,28 +415,6 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder") {
     REQUIRE(vector_tile_equal(buffer, data));
 }
 
-TEST_CASE("Copy tile using geometry_2d_feature_builder and property_mapper") {
-    const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
-
-    vtzero::tile_builder tbuilder;
-
-    while (auto layer = tile.next_layer()) {
-        vtzero::layer_builder lbuilder{tbuilder, layer};
-        vtzero::property_mapper mapper{layer, lbuilder};
-        while (auto feature = layer.next_feature()) {
-            vtzero::geometry_2d_feature_builder fbuilder{lbuilder};
-            fbuilder.copy_id(feature);
-            fbuilder.copy_geometry(feature);
-            fbuilder.copy_properties(feature, mapper);
-            fbuilder.commit();
-        }
-    }
-
-    const std::string data = tbuilder.serialize();
-    REQUIRE(vector_tile_equal(buffer, data));
-}
-
 TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
     const auto buffer = load_test_tile();
     vtzero::vector_tile tile{buffer};
@@ -518,45 +495,6 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
                 const auto points = decode_point_geometry(feature.geometry(), points_to_vector{});
                 fbuilder.add_points_from_container(points);
                 fbuilder.copy_attributes(feature);
-                fbuilder.commit();
-                ++n;
-            } else {
-                fbuilder.rollback();
-            }
-        }
-    }
-    REQUIRE(n == 17);
-
-    const std::string data = tbuilder.serialize();
-
-    n = 0;
-    vtzero::vector_tile result_tile{data};
-    while (auto layer = result_tile.next_layer()) {
-        while (auto feature = layer.next_feature()) {
-            ++n;
-        }
-    }
-
-    REQUIRE(n == 17);
-}
-
-TEST_CASE("Copy only point geometries using point_2d_feature_builder using property_mapper") {
-    const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
-
-    vtzero::tile_builder tbuilder;
-
-    int n = 0;
-    while (auto layer = tile.next_layer()) {
-        vtzero::layer_builder lbuilder{tbuilder, layer};
-        vtzero::property_mapper mapper{layer, lbuilder};
-        while (auto feature = layer.next_feature()) {
-            vtzero::point_2d_feature_builder fbuilder{lbuilder};
-            fbuilder.copy_id(feature);
-            if (feature.geometry().type() == vtzero::GeomType::POINT) {
-                const auto points = decode_point_geometry(feature.geometry(), points_to_vector{});
-                fbuilder.add_points_from_container(points);
-                fbuilder.copy_properties(feature, mapper);
                 fbuilder.commit();
                 ++n;
             } else {

@@ -11,7 +11,6 @@
 
 #include <vtzero/builder.hpp>
 #include <vtzero/output.hpp>
-#include <vtzero/property_mapper.hpp>
 #include <vtzero/vector_tile.hpp>
 
 #include <iostream>
