@@ -601,7 +601,7 @@ namespace vtzero {
      * * Optionally add the ID using set_id().
      * * Add the (multi)point geometry using add_point(), add_points() and
      *   set_point(), or add_points_from_container().
-     * * Optionally add any number of properties using add_property().
+     * * Optionally add any number of attributes.
      *
      * @code
      * vtzero::tile_builder tb;
@@ -609,7 +609,7 @@ namespace vtzero {
      * vtzero::point_feature_builder fb{lb};
      * fb.set_id(123); // optionally set ID
      * fb.add_point(10, 20) // add point geometry
-     * fb.add_property("foo", "bar"); // add property
+     * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
@@ -632,8 +632,8 @@ namespace vtzero {
          *
          * @param p The point to add.
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         void add_point(const unscaled_point p) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
@@ -649,8 +649,8 @@ namespace vtzero {
          *
          * @param p The point to add.
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         void add_point(const point p) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
@@ -666,8 +666,8 @@ namespace vtzero {
          * @param x X coordinate of the point to add.
          * @param y Y coordinate of the point to add.
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         void add_point(const int32_t x, const int32_t y) {
             add_point(point{x, y});
@@ -680,8 +680,8 @@ namespace vtzero {
          *         the create_vtzero_point function.
          * @param p The point to add.
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         template <typename TPoint>
         void add_point(TPoint&& p) {
@@ -696,8 +696,8 @@ namespace vtzero {
          *
          * @pre @code count > 0 && count < 2^29 @endcode
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         void add_points(uint32_t count) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
@@ -715,8 +715,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_points(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const point p) {
             vtzero_assert(this->m_stage == detail::stage::geometry);
@@ -736,8 +735,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_points(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point{x, y});
@@ -753,8 +751,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_points(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         template <typename TPoint>
         void set_point(TPoint&& p) {
@@ -774,8 +771,8 @@ namespace vtzero {
          * @throws geometry_exception If there are more than 2^32-1 members in
          *         the container.
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         template <typename TContainer>
         void add_points_from_container(const TContainer& container) {
@@ -795,7 +792,7 @@ namespace vtzero {
      * * Optionally add the ID using set_id().
      * * Add the (multi)linestring geometry using add_linestring() or
      *   add_linestring_from_container().
-     * * Optionally add any number of properties using add_property().
+     * * Optionally add any number of attributes.
      *
      * @code
      * vtzero::tile_builder tb;
@@ -805,7 +802,7 @@ namespace vtzero {
      * fb.add_linestring(2);
      * fb.set_point(10, 10);
      * fb.set_point(10, 20);
-     * fb.add_property("foo", "bar"); // add property
+     * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
@@ -833,8 +830,8 @@ namespace vtzero {
          *
          * @pre @code count > 1 && count < 2^29 @endcode
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         void add_linestring(const uint32_t count) {
             vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
@@ -857,8 +854,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_linestring(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const point p) {
             vtzero_assert(!this->m_num_points.is_zero());
@@ -893,8 +889,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_linestring(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point{x, y});
@@ -915,8 +910,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_linestring(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         template <typename TPoint>
         void set_point(TPoint&& p) {
@@ -937,8 +931,8 @@ namespace vtzero {
          *         the container or if two consecutive points in the container
          *         are identical.
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         template <typename TContainer>
         void add_linestring_from_container(const TContainer& container) {
@@ -958,7 +952,7 @@ namespace vtzero {
      * * Optionally add the ID using set_id().
      * * Add the (multi)polygon geometry using add_ring() or
      *   add_ring_from_container().
-     * * Optionally add any number of properties using add_property().
+     * * Optionally add any number of attributes.
      *
      * @code
      * vtzero::tile_builder tb;
@@ -968,7 +962,7 @@ namespace vtzero {
      * fb.add_ring(5);
      * fb.set_point(10, 10);
      * ...
-     * fb.add_property("foo", "bar"); // add property
+     * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
@@ -997,8 +991,8 @@ namespace vtzero {
          *
          * @pre @code count > 3 && count < 2^29 @endcode
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         void add_ring(const uint32_t count) {
             vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
@@ -1023,8 +1017,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_ring(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const point p) {
             vtzero_assert(!this->m_num_points.is_zero());
@@ -1069,8 +1062,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_ring(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point{x, y});
@@ -1093,8 +1085,7 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_ring(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         template <typename TPoint>
         void set_point(TPoint&& p) {
@@ -1109,8 +1100,7 @@ namespace vtzero {
          * @pre There must have been *count* - 1 calls to set_point()
          *      already after a call to add_ring(count).
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "geometry" to call this function.
          */
         void close_ring() {
             vtzero_assert(this->m_stage == detail::stage::geometry);
@@ -1135,8 +1125,8 @@ namespace vtzero {
          *         are identical or if the last point is not the same as the
          *         first point.
          *
-         * @pre You must not have any calls to add_property() before calling
-         *      this method.
+         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         *      this function.
          */
         template <typename TContainer>
         void add_ring_from_container(const TContainer& container) {
@@ -1155,7 +1145,7 @@ namespace vtzero {
      *
      * * Optionally add the ID using set_id().
      * * Add the geometry using copy_geometry().
-     * * Optionally add any number of properties using add_property().
+     * * Optionally add any number of attributes.
      *
      * @code
      * auto geom = ... // get geometry from a feature you are reading
@@ -1165,7 +1155,7 @@ namespace vtzero {
      * vtzero::geometry_feature_builder fb{lb};
      * fb.set_id(123); // optionally set ID
      * fb.copy_geometry(geom) // add geometry
-     * fb.add_property("foo", "bar"); // add property
+     * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
@@ -1260,9 +1250,6 @@ namespace vtzero {
 
         /**
          * Copy the geometry from the geometry of an existing feature.
-         *
-         * You can only call this method once and it must be before calling the
-         * add_property() method.
          *
          * @param feature The feature to copy the geometry from.
          */
