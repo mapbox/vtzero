@@ -14,6 +14,7 @@
 #include <clara.hpp>
 
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
