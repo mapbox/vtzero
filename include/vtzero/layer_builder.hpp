@@ -37,15 +37,6 @@ namespace vtzero {
         template <int Dimensions, bool WithGeometricAttributes>
         friend class feature_builder;
 
-        template <int Dimensions, bool WithGeometricAttributes>
-        friend class point_feature_builder;
-
-        template <int Dimensions, bool WithGeometricAttributes>
-        friend class linestring_feature_builder;
-
-        template <int Dimensions, bool WithGeometricAttributes>
-        friend class polygon_feature_builder;
-
         vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {
             return *m_layer;
         }

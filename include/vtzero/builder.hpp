@@ -178,11 +178,6 @@ namespace vtzero {
         /// Last point (used to calculate delta between coordinates)
         point m_cursor{0, 0};
 
-        /// Constructor.
-        explicit feature_builder(detail::layer_builder_impl* layer) :
-            feature_builder_base(layer) {
-        }
-
         /// Helper function to check size isn't too large
         template <typename T>
         uint32_t check_num_points(T size) {
@@ -226,7 +221,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+            feature_builder_base(&layer.get_layer_impl()) {
         }
 
         /**
@@ -667,7 +662,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit point_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
         }
 
@@ -862,7 +857,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit linestring_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
         }
 
@@ -1023,7 +1018,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit polygon_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
         }
 
