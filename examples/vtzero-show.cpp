@@ -8,8 +8,8 @@
 
 #include "utils.hpp"
 
-#include <vtzero/vector_tile.hpp>
 #include <vtzero/output.hpp>
+#include <vtzero/vector_tile.hpp>
 
 #include <clara.hpp>
 
