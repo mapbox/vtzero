@@ -242,23 +242,6 @@ namespace vtzero {
         }
 
         /**
-         * Copy all properties of an existing feature to the one being built.
-         *
-         * @param feature The feature to copy the properties from.
-         *
-         * @pre layer version < 3
-         */
-        void copy_properties(const feature& feature) {
-            this->enter_stage_attributes();
-            vtzero_assert(version() < 3);
-            prepare_to_add_property_vt2();
-            feature.for_each_property([this](const property& prop) {
-                add_property_impl_vt2(prop);
-                return true;
-            });
-        }
-
-        /**
          * Copy all properties of an existing feature to the one being built
          * using a property_mapper.
          *
@@ -1295,22 +1278,6 @@ namespace vtzero {
             vtzero_assert(this->m_stage == detail::stage::attributes);
             vtzero_assert(version() < 3);
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
-        }
-
-        /**
-         * Copy all properties of an existing feature to the one being built.
-         *
-         * @param feature The feature to copy the properties from.
-         *
-         * @pre layer version < 3
-         */
-        void copy_properties(const feature& feature) {
-            vtzero_assert(this->m_stage == detail::stage::attributes);
-            vtzero_assert(version() < 3);
-            feature.for_each_property([this](const property& prop) {
-                add_property_impl_vt2(prop);
-                return true;
-            });
         }
 
         /**

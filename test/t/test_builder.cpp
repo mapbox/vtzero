@@ -407,7 +407,7 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder") {
             vtzero::geometry_2d_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
             fbuilder.copy_geometry(feature);
-            fbuilder.copy_properties(feature);
+            fbuilder.copy_attributes(feature);
             fbuilder.commit();
         }
     }
