@@ -82,8 +82,28 @@ namespace vtzero {
 
     /**
      * Parent class for the point_feature_builder, linestring_feature_builder
-     * and polygon_feature_builder classes. You can not instantiate this class
-     * directly, use it through its derived classes.
+     * and polygon_feature_builder classes. Usually you do not instantiate this
+     * class directly, but use it through its derived classes.
+     *
+     * There is one case where you instantiate this class directly: When you
+     * want to copy a complete geometry from some other feature. After
+     * creating an object of this class you can add data to the feature in a
+     * specific order:
+     *
+     * * Optionally add the ID using set_integer/string_id().
+     * * Add the geometry using copy_geometry().
+     * * Optionally add any number of attributes.
+     *
+     * @code
+     * auto geom = ... // get geometry from a feature you are reading
+     * ...
+     * vtzero::tile_builder tb;
+     * vtzero::layer_builder lb{tb};
+     * vtzero::geometry_feature_builder fb{lb};
+     * fb.set_integer_id(123); // optionally set ID
+     * fb.copy_geometry(geom) // add geometry
+     * fb.add_scalar_attribute("foo", "bar"); // add attribute
+     * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
     class feature_builder : public detail::feature_builder_base {
@@ -201,6 +221,15 @@ namespace vtzero {
     public:
 
         /**
+         * Constructor
+         *
+         * @param layer The layer we want to create this feature in.
+         */
+        explicit feature_builder(layer_builder layer) :
+            feature_builder<Dimensions, WithGeometricAttributes>(&layer.get_layer_impl()) {
+        }
+
+        /**
          * If the feature was not committed, the destructor will roll back all
          * the changes.
          */
@@ -223,6 +252,21 @@ namespace vtzero {
 
         /// Builder classes can be moved
         feature_builder& operator=(feature_builder&& other) noexcept = default;
+
+        /**
+         * Copy the geometry from the geometry of an existing feature.
+         *
+         * @param feature The feature to copy the geometry from.
+         */
+        void copy_geometry(const feature& feature) {
+            vtzero_assert(m_stage == detail::stage::id || m_stage == detail::stage::has_id);
+            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(feature.geometry_type()));
+            this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
+            if (!feature.is_3d()) {
+                this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
+            }
+            m_stage = detail::stage::attributes;
+        }
 
         /**
          * Add a property to this feature. Can only be called after all the
@@ -598,7 +642,7 @@ namespace vtzero {
      * creating an object of this class you can add data to the feature in a
      * specific order:
      *
-     * * Optionally add the ID using set_id().
+     * * Optionally add the ID using set_integer/string_id().
      * * Add the (multi)point geometry using add_point(), add_points() and
      *   set_point(), or add_points_from_container().
      * * Optionally add any number of attributes.
@@ -607,7 +651,7 @@ namespace vtzero {
      * vtzero::tile_builder tb;
      * vtzero::layer_builder lb{tb};
      * vtzero::point_feature_builder fb{lb};
-     * fb.set_id(123); // optionally set ID
+     * fb.set_integer_id(123); // optionally set ID
      * fb.add_point(10, 20) // add point geometry
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
@@ -789,7 +833,7 @@ namespace vtzero {
      * After creating an object of this class you can add data to the
      * feature in a specific order:
      *
-     * * Optionally add the ID using set_id().
+     * * Optionally add the ID using set_integer/string_id().
      * * Add the (multi)linestring geometry using add_linestring() or
      *   add_linestring_from_container().
      * * Optionally add any number of attributes.
@@ -798,7 +842,7 @@ namespace vtzero {
      * vtzero::tile_builder tb;
      * vtzero::layer_builder lb{tb};
      * vtzero::linestring_feature_builder fb{lb};
-     * fb.set_id(123); // optionally set ID
+     * fb.set_integer_id(123); // optionally set ID
      * fb.add_linestring(2);
      * fb.set_point(10, 10);
      * fb.set_point(10, 20);
@@ -949,7 +993,7 @@ namespace vtzero {
      * After creating an object of this class you can add data to the
      * feature in a specific order:
      *
-     * * Optionally add the ID using set_id().
+     * * Optionally add the ID using set_integer/string_id().
      * * Add the (multi)polygon geometry using add_ring() or
      *   add_ring_from_container().
      * * Optionally add any number of attributes.
@@ -958,7 +1002,7 @@ namespace vtzero {
      * vtzero::tile_builder tb;
      * vtzero::layer_builder lb{tb};
      * vtzero::polygon_feature_builder fb{lb};
-     * fb.set_id(123); // optionally set ID
+     * fb.set_integer_id(123); // optionally set ID
      * fb.add_ring(5);
      * fb.set_point(10, 10);
      * ...
@@ -1138,181 +1182,6 @@ namespace vtzero {
 
     }; // class polygon_feature_builder
 
-    /**
-     * Used for adding a feature to a layer using an existing geometry. After
-     * creating an object of this class you can add data to the feature in a
-     * specific order:
-     *
-     * * Optionally add the ID using set_id().
-     * * Add the geometry using copy_geometry().
-     * * Optionally add any number of attributes.
-     *
-     * @code
-     * auto geom = ... // get geometry from a feature you are reading
-     * ...
-     * vtzero::tile_builder tb;
-     * vtzero::layer_builder lb{tb};
-     * vtzero::geometry_feature_builder fb{lb};
-     * fb.set_id(123); // optionally set ID
-     * fb.copy_geometry(geom) // add geometry
-     * fb.add_scalar_attribute("foo", "bar"); // add attribute
-     * @endcode
-     */
-    template <int Dimensions, bool WithGeometricAttributes>
-    class geometry_feature_builder : public detail::feature_builder_base {
-
-        void enter_stage_geometry() {
-            if (m_stage == detail::stage::id || m_stage == detail::stage::has_id) {
-                m_stage = detail::stage::geometry;
-                return;
-            }
-            vtzero_assert(m_stage == detail::stage::geometry);
-        }
-
-        void enter_stage_attributes() {
-            if (m_stage == detail::stage::geometry) {
-                m_stage = detail::stage::attributes;
-                return;
-            }
-            vtzero_assert(m_stage == detail::stage::attributes);
-        }
-
-    public:
-
-        /**
-         * Constructor
-         *
-         * @param layer The layer we want to create this feature in.
-         */
-        explicit geometry_feature_builder(layer_builder layer) :
-            feature_builder_base(&layer.get_layer_impl()) {
-        }
-
-        /**
-         * If the feature was not committed, the destructor will roll back all
-         * the changes.
-         */
-        ~geometry_feature_builder() noexcept {
-            try {
-                rollback();
-            } catch (...) {
-                // ignore exceptions
-            }
-        }
-
-        /// Feature builders can not be copied.
-        geometry_feature_builder(const geometry_feature_builder&) = delete;
-
-        /// Feature builders can not be copied.
-        geometry_feature_builder& operator=(const geometry_feature_builder&) = delete;
-
-        /// Feature builders can be moved.
-        geometry_feature_builder(geometry_feature_builder&&) noexcept = default;
-
-        /// Feature builders can be moved.
-        geometry_feature_builder& operator=(geometry_feature_builder&&) noexcept = default;
-
-        /**
-         * Add a property to this feature. Can only be called after the
-         * copy_geometry method.
-         *
-         * @tparam TProp Can be type index_value_pair or property.
-         * @param prop The property to add.
-         *
-         * @pre layer version < 3
-         */
-        template <typename TProp>
-        void add_property(TProp&& prop) {
-            vtzero_assert(this->m_stage == detail::stage::attributes);
-            vtzero_assert(version() < 3);
-            add_property_impl_vt2(std::forward<TProp>(prop));
-        }
-
-        /**
-         * Add a property to this feature. Can only be called after the
-         * copy_geometry method.
-         *
-         * @tparam TKey Can be type index_value or data_view or anything that
-         *         converts to it.
-         * @tparam TValue Can be type index_value or property_value or
-         *         encoded_property or anything that converts to it.
-         * @param key The key.
-         * @param value The value.
-         *
-         * @pre layer version < 3
-         */
-        template <typename TKey, typename TValue>
-        void add_property(TKey&& key, TValue&& value) {
-            vtzero_assert(this->m_stage == detail::stage::attributes);
-            vtzero_assert(version() < 3);
-            add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
-        }
-
-        /**
-         * Copy the geometry from the geometry of an existing feature.
-         *
-         * @param feature The feature to copy the geometry from.
-         */
-        void copy_geometry(const feature& feature) {
-            enter_stage_geometry();
-            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(feature.geometry_type()));
-            this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
-            if (!feature.is_3d()) {
-                this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
-            }
-            m_stage = detail::stage::attributes;
-        }
-
-        /**
-         * Copy all attributes of an existing feature to the one being built.
-         *
-         * @param feature The feature to copy the attributes from.
-         */
-        void copy_attributes(const feature& feature) {
-            enter_stage_attributes();
-            if (version() < 3) {
-                feature.for_each_property([this](const property& prop) {
-                    add_property_impl_vt2(prop);
-                    return true;
-                });
-            } else {
-                feature.decode_attributes(*this);
-            }
-        }
-
-        /**
-         * Commit this feature. Call this after all the details of this
-         * feature have been added. If this is not called, the feature
-         * will be rolled back when the destructor of the feature_builder is
-         * called.
-         *
-         * Once a feature has been committed or rolled back, further calls
-         * to commit() or rollback() don't do anything.
-         */
-        void commit() {
-            if (this->m_feature_writer.valid()) {
-                do_commit();
-            }
-        }
-
-        /**
-         * Rollback this feature. Removed all traces of this feature from
-         * the layer_builder. Useful when you started creating a feature
-         * but then find out that its geometry is invalid or something like
-         * it. This will also happen automatically when the feature_builder
-         * is destructed and commit() hasn't been called on it.
-         *
-         * Once a feature has been committed or rolled back, further calls
-         * to commit() or rollback() don't do anything.
-         */
-        void rollback() {
-            if (this->m_feature_writer.valid()) {
-                do_rollback();
-            }
-        }
-
-    }; // class geometry_feature_builder
-
     /// alias for 2D point feature builder
     using point_2d_feature_builder = point_feature_builder<2, false>;
 
@@ -1322,10 +1191,6 @@ namespace vtzero {
     /// alias for 2D polygon feature builder
     using polygon_2d_feature_builder = polygon_feature_builder<2, false>;
 
-    /// alias for 2D geometry feature builder
-    using geometry_2d_feature_builder = geometry_feature_builder<2, false>;
-
-
     /**
      * Copy a feature from an existing layer to a new layer. The feature
      * will be copied completely over to the new layer including its id,
@@ -1333,7 +1198,7 @@ namespace vtzero {
      */
     template <typename TLayerBuilder>
     void copy_feature(const feature& feature, TLayerBuilder& layer_builder) {
-        geometry_feature_builder<3, true> feature_builder{layer_builder};
+        feature_builder<3, true> feature_builder{layer_builder};
         feature_builder.copy_id(feature);
         feature_builder.copy_geometry(feature);
         feature_builder.copy_attributes(feature);

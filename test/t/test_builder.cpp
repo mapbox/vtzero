@@ -22,7 +22,6 @@ static_assert(movable_not_copyable<vtzero::tile_builder>::value, "tile_builder s
 static_assert(movable_not_copyable<vtzero::point_2d_feature_builder>::value, "point_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::linestring_2d_feature_builder>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::polygon_2d_feature_builder>::value, "polygon_feature_builder should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::geometry_2d_feature_builder>::value, "geometry_feature_builder should be nothrow movable, but not copyable");
 
 TEST_CASE("Create tile from existing layers") {
     const auto buffer = load_test_tile();
@@ -403,7 +402,7 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder") {
     while (auto layer = tile.next_layer()) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
-            vtzero::geometry_2d_feature_builder fbuilder{lbuilder};
+            vtzero::feature_builder<2, false> fbuilder{lbuilder};
             fbuilder.copy_id(feature);
             fbuilder.copy_geometry(feature);
             fbuilder.copy_attributes(feature);
@@ -425,7 +424,7 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
     while (auto layer = tile.next_layer()) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
-            vtzero::geometry_2d_feature_builder fbuilder{lbuilder};
+            vtzero::feature_builder<2, false> fbuilder{lbuilder};
             fbuilder.set_integer_id(feature.id());
             if (feature.geometry().type() == vtzero::GeomType::POINT) {
                 fbuilder.copy_geometry(feature);

@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 
         while (auto feature = layer.next_feature()) {
             if (keep_feature(feature)) {
-                vtzero::geometry_2d_feature_builder feature_builder{layer_builder};
+                vtzero::feature_builder<3, true> feature_builder{layer_builder};
                 feature_builder.copy_id(feature);
                 feature_builder.copy_geometry(feature);
                 feature_builder.copy_attributes(feature);
