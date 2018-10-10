@@ -606,50 +606,6 @@ namespace vtzero {
         feature_builder& operator=(feature_builder&& other) noexcept = default;
 
         /**
-         * Set the ID of this feature.
-         *
-         * You can only call this method once and it must be before calling
-         * any method manipulating the geometry.
-         *
-         * @param id The ID.
-         */
-        void set_id(uint64_t id) {
-            vtzero_assert(m_stage == detail::stage::id);
-            set_integer_id_impl(id);
-            m_stage = detail::stage::has_id;
-        }
-
-        /**
-         * Set the ID of this feature.
-         *
-         * You can only call this method once and it must be before calling
-         * any method manipulating the geometry.
-         *
-         * @param id The ID.
-         */
-        void set_string_id(data_view id) {
-            vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
-            vtzero_assert(m_stage == detail::stage::id);
-            set_string_id_impl(id);
-            m_stage = detail::stage::has_id;
-        }
-
-        /**
-         * Copy the ID of an existing feature to this feature. If the
-         * feature doesn't have an ID, no ID is set.
-         *
-         * You can only call this method once and it must be before calling
-         * any method manipulating the geometry.
-         *
-         * @param feature The feature to copy the ID from.
-         */
-        void copy_id(const feature& feature) {
-            vtzero_assert(m_stage == detail::stage::id);
-            copy_id_impl(feature);
-            m_stage = detail::stage::has_id;
-        }
-
-        /**
          * Add a property to this feature. Can only be called after all the
          * methods manipulating the geometry.
          *
@@ -1685,50 +1641,6 @@ namespace vtzero {
 
         /// Feature builders can be moved.
         geometry_feature_builder& operator=(geometry_feature_builder&&) noexcept = default;
-
-        /**
-         * Set the ID of this feature.
-         *
-         * You can only call this function once and it must be before calling
-         * copy_geometry().
-         *
-         * @param id The ID.
-         */
-        void set_id(uint64_t id) {
-            vtzero_assert(m_stage == detail::stage::id);
-            set_integer_id_impl(id);
-            m_stage = detail::stage::has_id;
-        }
-
-        /**
-         * Set the ID of this feature.
-         *
-         * You can only call this method once and it must be before calling
-         * copy_geometry().
-         *
-         * @param id The ID.
-         */
-        void set_string_id(data_view id) {
-            vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
-            vtzero_assert(m_stage == detail::stage::id);
-            set_string_id_impl(id);
-            m_stage = detail::stage::has_id;
-        }
-
-        /**
-         * Copy the ID of an existing feature to this feature. If the
-         * feature doesn't have an ID, no ID is set.
-         *
-         * You can only call this function once and it must be before calling
-         * copy_geometry().
-         *
-         * @param feature The feature to copy the ID from.
-         */
-        void copy_id(const feature& feature) {
-            vtzero_assert(m_stage == detail::stage::id);
-            copy_id_impl(feature);
-            m_stage = detail::stage::has_id;
-        }
 
         /**
          * Add a property to this feature. Can only be called after the

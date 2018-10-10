@@ -60,7 +60,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
         vtzero::point_2d_feature_builder fbuilder{lbuilder};
 
         if (with_id) {
-            fbuilder.set_id(17);
+            fbuilder.set_integer_id(17);
         }
 
         SECTION("add point using coordinates / property using key/value") {
@@ -133,7 +133,7 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
         vtzero::point_2d_feature_builder fbuilder{lbuilder};
 
         if (with_id) {
-            fbuilder.set_id(17);
+            fbuilder.set_integer_id(17);
         }
 
         SECTION("add point using coordinates / property using key/string value") {
@@ -207,7 +207,7 @@ TEST_CASE("Point builder with 3d point") {
     REQUIRE(lbuilder.elevation_scaling() == scaling);
     {
         vtzero::point_feature_builder<3, true> fbuilder{lbuilder};
-        fbuilder.set_id(17);
+        fbuilder.set_integer_id(17);
         fbuilder.add_point(vtzero::unscaled_point{10, 20, elev});
         fbuilder.commit();
     }
@@ -255,7 +255,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     vtzero::point_2d_feature_builder fbuilder{lbuilder};
 
     if (with_id) {
-        fbuilder.set_id(17);
+        fbuilder.set_integer_id(17);
     }
 
     fbuilder.add_points(3);

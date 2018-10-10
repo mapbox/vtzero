@@ -262,7 +262,7 @@ TEST_CASE("add features using a key index") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     vtzero::point_2d_feature_builder fbuilder{lbuilder};
-    fbuilder.set_id(7);
+    fbuilder.set_integer_id(7);
     fbuilder.add_point(10, 20);
 
     SECTION("no index") {
@@ -302,7 +302,7 @@ TEST_CASE("add features using a value index") {
     const auto key = lbuilder.add_key("some_key");
 
     vtzero::point_2d_feature_builder fbuilder{lbuilder};
-    fbuilder.set_id(17);
+    fbuilder.set_integer_id(17);
     fbuilder.add_point(10, 20);
 
     SECTION("no index") {

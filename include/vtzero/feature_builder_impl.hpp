@@ -73,6 +73,18 @@ namespace vtzero {
 
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
 
+            uint32_t version() const noexcept {
+                return m_layer->version();
+            }
+
+            void set_integer_id_impl(const uint64_t id) {
+                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+            }
+
+            void set_string_id_impl(const data_view& id) {
+                m_feature_writer.add_string(detail::pbf_feature::string_id, id);
+            }
+
             /// Helper function to make sure we have everything before adding a property
             void prepare_to_add_property_vt2() {
                 vtzero_assert(m_stage == stage::attributes);
@@ -179,26 +191,6 @@ namespace vtzero {
                 add_complex_value(detail::complex_value_type::cvt_string, idx.value());
             }
 
-            uint32_t version() const noexcept {
-                return m_layer->version();
-            }
-
-            void set_integer_id_impl(uint64_t id) {
-                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
-            }
-
-            void set_string_id_impl(data_view id) {
-                m_feature_writer.add_string(detail::pbf_feature::string_id, id);
-            }
-
-            void copy_id_impl(const feature& feature) {
-                if (feature.has_integer_id()) {
-                    set_integer_id_impl(feature.id());
-                } else if (feature.has_string_id()) {
-                    set_string_id_impl(feature.string_id());
-                }
-            }
-
             void add_value_internal_vt3(const std::string& text) {
                 vtzero_assert(m_stage == stage::attributes);
                 data_view value{text};
@@ -255,6 +247,59 @@ namespace vtzero {
                 }
                 m_feature_writer.rollback();
                 m_stage = stage::done;
+            }
+
+        public:
+
+            /**
+             * Set the integer ID of this feature.
+             *
+             * You can only call any of the functions setting an ID once and
+             * it has to be in the "id" stage.
+             *
+             * @param id The ID.
+             */
+            void set_integer_id(const uint64_t id) {
+                vtzero_assert(m_stage == detail::stage::id);
+                set_integer_id_impl(id);
+                m_stage = detail::stage::has_id;
+            }
+
+            /**
+             * Set the string ID of this feature.
+             *
+             * You can only call any of the functions setting an ID once and
+             * it has to be in the "id" stage.
+             *
+             * @param id The ID.
+             */
+            void set_string_id(const data_view& id) {
+                vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
+                vtzero_assert(m_stage == detail::stage::id);
+                set_string_id_impl(id);
+                m_stage = detail::stage::has_id;
+            }
+
+            /**
+             * Copy the ID of an existing feature to this feature. If the
+             * feature doesn't have an ID, no ID is set.
+             *
+             * You can only call any of the functions setting an ID once and
+             * it has to be in the "id" stage.
+             *
+             * If you are building a vt3 feature, a string_id will not be
+             * copied!
+             *
+             * @param feature The feature to copy the ID from.
+             */
+            void copy_id(const feature& feature) {
+                vtzero_assert(m_stage == detail::stage::id);
+                if (feature.has_integer_id()) {
+                    set_integer_id_impl(feature.id());
+                } else if (version() == 3 && feature.has_string_id()) {
+                    set_string_id_impl(feature.string_id());
+                }
+                m_stage = detail::stage::has_id;
             }
 
         }; // class feature_builder_base

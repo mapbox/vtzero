@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     {
         vtzero::point_2d_feature_builder feature{layer_points};
-        feature.set_id(1);
+        feature.set_integer_id(1);
         feature.add_points(1);
         feature.set_point(10, 10);
         feature.add_scalar_attribute("foo", "bar");
@@ -63,14 +63,14 @@ int main(int argc, char* argv[]) {
 
     {
         vtzero::point_2d_feature_builder feature{layer_points};
-        feature.set_id(2);
+        feature.set_integer_id(2);
         feature.add_point(20, 20);
         feature.add_scalar_attribute(some, "attr");
         feature.commit();
     }
     {
         vtzero::point_2d_feature_builder feature{layer_points};
-        feature.set_id(3);
+        feature.set_integer_id(3);
         feature.add_point(20, 20);
         feature.add_scalar_attribute(idx("some"), "attr");
         feature.commit();
@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
 
     {
         vtzero::point_2d_feature_builder feature{layer_points};
-        feature.set_id(4);
+        feature.set_integer_id(4);
         feature.add_point(20, 20);
         feature.add_scalar_attribute(idx("some"), "otherattr");
         feature.commit();
@@ -86,14 +86,14 @@ int main(int argc, char* argv[]) {
 
 
     vtzero::point_2d_feature_builder feature1{layer_points};
-    feature1.set_id(5);
+    feature1.set_integer_id(5);
     feature1.add_point(vtzero::point{20, 20});
     feature1.add_scalar_attribute("otherkey", "attr");
     feature1.commit();
 
     {
         vtzero::linestring_2d_feature_builder feature{layer_lines};
-        feature.set_id(6);
+        feature.set_integer_id(6);
         feature.add_linestring(3);
         feature.set_point(10, 10);
         feature.set_point(10, 20);
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 
     {
         vtzero::polygon_2d_feature_builder feature{layer_polygons};
-        feature.set_id(7);
+        feature.set_integer_id(7);
         feature.add_ring(5);
         feature.set_point(0, 0);
         feature.set_point(10, 0);

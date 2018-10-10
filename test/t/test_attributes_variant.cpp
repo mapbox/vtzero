@@ -129,7 +129,7 @@ TEST_CASE("build feature with attributes explicitly and read it again") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
         vtzero::point_2d_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(1);
+        fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_scalar_attribute("some_int", 111u);
         fbuilder.attribute_key("list");
@@ -282,7 +282,7 @@ TEST_CASE("build feature with attributes from variant and read it again") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
         vtzero::point_2d_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(1);
+        fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         set_attributes(fbuilder, test_data);
         fbuilder.commit();
@@ -374,7 +374,7 @@ TEST_CASE("build feature with attributes from variant and read it again") {
     vtzero::layer_builder lbuilder2{tbuilder2, "test", 3};
     {
         vtzero::point_2d_feature_builder fbuilder{lbuilder2};
-        fbuilder.set_id(1);
+        fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.copy_attributes(feature);
         fbuilder.commit();

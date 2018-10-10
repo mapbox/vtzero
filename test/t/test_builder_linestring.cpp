@@ -42,7 +42,7 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
         vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
 
         if (with_id) {
-            fbuilder.set_id(17);
+            fbuilder.set_integer_id(17);
         }
 
         fbuilder.add_linestring(3);
@@ -115,7 +115,7 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
     vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
 
     if (with_id) {
-        fbuilder.set_id(17);
+        fbuilder.set_integer_id(17);
     }
 
     fbuilder.add_linestring(3);
@@ -273,7 +273,7 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
 
     {
         vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(1);
+        fbuilder.set_integer_id(1);
         fbuilder.add_linestring(2);
         fbuilder.set_point(10, 10);
         fbuilder.set_point(20, 20);
@@ -282,7 +282,7 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
 
     try {
         vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(2);
+        fbuilder.set_integer_id(2);
         fbuilder.add_linestring(2);
         fbuilder.set_point(10, 10);
         fbuilder.set_point(10, 10);
@@ -292,7 +292,7 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
 
     {
         vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
-        fbuilder.set_id(3);
+        fbuilder.set_integer_id(3);
         fbuilder.add_linestring(2);
         fbuilder.set_point(10, 20);
         fbuilder.set_point(20, 10);

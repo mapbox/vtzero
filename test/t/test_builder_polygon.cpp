@@ -42,7 +42,7 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
         vtzero::polygon_2d_feature_builder fbuilder{lbuilder};
 
         if (with_id) {
-            fbuilder.set_id(17);
+            fbuilder.set_integer_id(17);
         }
 
         fbuilder.add_ring(4);
@@ -122,7 +122,7 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
     vtzero::polygon_2d_feature_builder fbuilder{lbuilder};
 
     if (with_id) {
-        fbuilder.set_id(17);
+        fbuilder.set_integer_id(17);
     }
 
     fbuilder.add_ring(4);
