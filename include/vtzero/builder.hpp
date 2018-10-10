@@ -125,9 +125,10 @@ namespace vtzero {
          * Enter the "geometry" stage. Do nothing if we are already in the
          * "geometry" stage.
          */
-        void enter_stage_geometry() {
+        void enter_stage_geometry(GeomType type) {
             if (m_stage == detail::stage::id || m_stage == detail::stage::has_id) {
                 m_stage = detail::stage::geometry;
+                this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(type));
                 this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
                 return;
             }
@@ -683,7 +684,6 @@ namespace vtzero {
          */
         explicit point_feature_builder(layer_builder layer) :
             feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
-            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
         }
 
         /**
@@ -696,7 +696,7 @@ namespace vtzero {
          */
         void add_point(const unscaled_point p) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
-            this->enter_stage_geometry();
+            this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
@@ -713,7 +713,7 @@ namespace vtzero {
          */
         void add_point(const point p) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
-            this->enter_stage_geometry();
+            this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
@@ -760,7 +760,7 @@ namespace vtzero {
          */
         void add_points(uint32_t count) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
-            this->enter_stage_geometry();
+            this->enter_stage_geometry(GeomType::POINT);
             vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
             this->m_num_points.set(count);
             this->m_pbf_geometry.add_element(detail::command_move_to(count));
@@ -878,7 +878,6 @@ namespace vtzero {
          */
         explicit linestring_feature_builder(layer_builder layer) :
             feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
-            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
         }
 
         /**
@@ -895,7 +894,7 @@ namespace vtzero {
         void add_linestring(const uint32_t count) {
             vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
             this->m_num_points.assert_is_zero();
-            this->enter_stage_geometry();
+            this->enter_stage_geometry(GeomType::LINESTRING);
             this->m_num_points.set(count);
             m_start_line = true;
         }
@@ -1039,7 +1038,6 @@ namespace vtzero {
          */
         explicit polygon_feature_builder(layer_builder layer) :
             feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
-            this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
         }
 
         /**
@@ -1055,7 +1053,7 @@ namespace vtzero {
          */
         void add_ring(const uint32_t count) {
             vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
-            this->enter_stage_geometry();
+            this->enter_stage_geometry(GeomType::POLYGON);
             this->m_num_points.assert_is_zero();
             this->m_num_points.set(count);
             m_start_ring = true;
