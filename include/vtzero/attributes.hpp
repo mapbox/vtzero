@@ -96,7 +96,8 @@ namespace vtzero {
         DEF_CALL_WRAPPER2(start_map_attribute, std::size_t)
         DEF_CALL_WRAPPER1(end_map_attribute)
 
-        DEF_CALL_WRAPPER2(number_list_value, std::uint64_t)
+        DEF_CALL_WRAPPER2(number_list_value, std::int64_t)
+        DEF_CALL_WRAPPER1(number_list_null_value)
         DEF_CALL_WRAPPER1(end_number_list)
 
 #undef DEF_CALL_WRAPPER1

@@ -847,13 +847,22 @@ namespace vtzero {
                     if (!detail::call_start_number_list<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), index, depth)) {
                         return false;
                     }
+                    int64_t value = 0;
                     while (vp > 0) {
                         if (it == end) {
                             throw format_exception{"Properties list is missing value"};
                         }
                         --vp;
-                        if (!detail::call_number_list_value<THandler>(std::forward<THandler>(handler), static_cast<uint64_t>(*it++), depth)) {
-                            return false;
+                        const auto encoded_value = *it++;
+                        if (encoded_value == 0) { // null
+                            if (!detail::call_number_list_null_value<THandler>(std::forward<THandler>(handler), depth)) {
+                                return false;
+                            }
+                        } else {
+                            value += protozero::decode_zigzag64(encoded_value - 1);
+                            if (!detail::call_number_list_value<THandler>(std::forward<THandler>(handler), value, depth)) {
+                                return false;
+                            }
                         }
                     }
                     if (!detail::call_end_number_list<THandler>(std::forward<THandler>(handler), depth)) {

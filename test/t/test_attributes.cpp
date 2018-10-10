@@ -235,7 +235,12 @@ struct AttributeDumpHandler {
         return true;
     }
 
-    bool number_list_value(uint64_t value, std::size_t /*depth*/) {
+    bool number_list_null_value(std::size_t /*depth*/) {
+        out += "null\n";
+        return true;
+    }
+
+    bool number_list_value(int64_t value, std::size_t /*depth*/) {
         out += std::to_string(value);
         out += '\n';
         return true;
@@ -342,15 +347,16 @@ TEST_CASE("build feature with number list attributes and read it again") {
         vtzero::point_2d_feature_builder fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
-        fbuilder.start_number_list_with_key("nlist", 3, index);
+        fbuilder.start_number_list_with_key("nlist", 4, index);
         fbuilder.number_list_value(10);
         fbuilder.number_list_value(20);
+        fbuilder.number_list_null_value();
         fbuilder.number_list_value(30);
         fbuilder.add_scalar_attribute("x", 3);
         fbuilder.commit();
     }
 
-    std::string expected{"nlist=number-list(3,0)[\n10\n20\n30\n]\nx=3\n"};
+    std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\nx=3\n"};
 
     const std::string data = tbuilder.serialize();
 
@@ -371,7 +377,7 @@ TEST_CASE("build feature with number list attributes and read it again") {
         AttributeCountHandler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 2);
-        REQUIRE(handler.count_number_list == 3);
+        REQUIRE(handler.count_number_list == 4);
     }
     {
         AttributeDumpHandler handler;

@@ -110,6 +110,8 @@ namespace vtzero {
 
         static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
 
+        int64_t m_value;
+
     protected:
 
         /// The elevations store (if using 3D geometries).
@@ -376,6 +378,7 @@ namespace vtzero {
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
             add_direct_value(index.value());
+            m_value = 0;
         }
 
         /**
@@ -385,10 +388,22 @@ namespace vtzero {
          *
          * @pre layer version is 3
          */
-        void number_list_value(uint64_t value) {
+        void number_list_value(int64_t value, std::size_t /*depth*/ = 0) {
             vtzero_assert(m_stage == detail::stage::attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
-            add_direct_value(value);
+            add_direct_value(protozero::encode_zigzag64(value - m_value) + 1);
+            m_value = value;
+        }
+
+        /**
+         * Add a null value to a number list.
+         *
+         * @pre layer version is 3
+         */
+        void number_list_null_value(std::size_t /*depth*/ = 0) {
+            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            add_direct_value(0);
         }
 
         /**
