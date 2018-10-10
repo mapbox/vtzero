@@ -110,57 +110,6 @@ namespace vtzero {
 
         static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
 
-        class countdown_value {
-
-            uint32_t m_value = 0;
-
-        public:
-
-            countdown_value() noexcept = default;
-
-            ~countdown_value() noexcept {
-                assert_is_zero();
-            }
-
-            countdown_value(const countdown_value&) = delete;
-
-            countdown_value& operator=(const countdown_value&) = delete;
-
-            countdown_value(countdown_value&& other) noexcept :
-                m_value(other.m_value) {
-                other.m_value = 0;
-            }
-
-            countdown_value& operator=(countdown_value&& other) noexcept {
-                m_value = other.m_value;
-                other.m_value = 0;
-                return *this;
-            }
-
-            uint32_t value() const noexcept {
-                return m_value;
-            }
-
-            bool is_zero() const noexcept {
-                return m_value == 0;
-            }
-
-            void set(const uint32_t value) noexcept {
-                m_value = value;
-            }
-
-            void decrement() {
-                vtzero_assert(m_value > 0 && "too many calls to set_point()");
-                --m_value;
-            }
-
-            void assert_is_zero() const noexcept {
-                vtzero_assert_in_noexcept_function(m_value == 0 &&
-                                                   "not enough calls to set_point()");
-            }
-
-        }; // countdown_value
-
     protected:
 
         /// The elevations store (if using 3D geometries).
@@ -171,21 +120,6 @@ namespace vtzero {
 
         /// Encoded geometry.
         protozero::packed_field_uint32 m_pbf_geometry{};
-
-        /// Number of points still to be set for the geometry to be complete.
-        countdown_value m_num_points;
-
-        /// Last point (used to calculate delta between coordinates)
-        point m_cursor{0, 0};
-
-        /// Helper function to check size isn't too large
-        template <typename T>
-        uint32_t check_num_points(T size) {
-            if (size >= (1ul << 29u)) {
-                throw geometry_exception{"Maximum of 2^29 - 1 points allowed in geometry"};
-            }
-            return static_cast<uint32_t>(size);
-        }
 
         /**
          * Enter the "geometry" stage. Do nothing if we are already in the
@@ -633,6 +567,92 @@ namespace vtzero {
     }; // class feature_builder
 
     /**
+     * Internal class which can not be instantiated. Instantiate one of its
+     * derived classes instead.
+     */
+    template <int Dimensions, bool WithGeometricAttributes>
+    class feature_builder_with_geometry : public feature_builder<Dimensions, WithGeometricAttributes> {
+
+        class countdown_value {
+
+            uint32_t m_value = 0;
+
+        public:
+
+            countdown_value() noexcept = default;
+
+            ~countdown_value() noexcept {
+                assert_is_zero();
+            }
+
+            countdown_value(const countdown_value&) = delete;
+
+            countdown_value& operator=(const countdown_value&) = delete;
+
+            countdown_value(countdown_value&& other) noexcept :
+                m_value(other.m_value) {
+                other.m_value = 0;
+            }
+
+            countdown_value& operator=(countdown_value&& other) noexcept {
+                m_value = other.m_value;
+                other.m_value = 0;
+                return *this;
+            }
+
+            uint32_t value() const noexcept {
+                return m_value;
+            }
+
+            bool is_zero() const noexcept {
+                return m_value == 0;
+            }
+
+            void set(const uint32_t value) noexcept {
+                m_value = value;
+            }
+
+            void decrement() {
+                vtzero_assert(m_value > 0 && "too many calls to set_point()");
+                --m_value;
+            }
+
+            void assert_is_zero() const noexcept {
+                vtzero_assert_in_noexcept_function(m_value == 0 &&
+                                                   "not enough calls to set_point()");
+            }
+
+        }; // countdown_value
+
+    protected:
+
+        /// Number of points still to be set for the geometry to be complete.
+        countdown_value m_num_points;
+
+        /// Last point (used to calculate delta between coordinates)
+        point m_cursor{0, 0};
+
+        /**
+         * Constructor
+         *
+         * @param layer The layer we want to create this feature in.
+         */
+        explicit feature_builder_with_geometry(layer_builder layer) :
+            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
+        }
+
+        /// Helper function to check size isn't too large
+        template <typename T>
+        static uint32_t check_num_points(T size) {
+            if (size >= (1ul << 29u)) {
+                throw geometry_exception{"Maximum of 2^29 - 1 points allowed in geometry"};
+            }
+            return static_cast<uint32_t>(size);
+        }
+
+    }; // class feature_builder_with_geometry
+
+    /**
      * Used for adding a feature with a point geometry to a layer. After
      * creating an object of this class you can add data to the feature in a
      * specific order:
@@ -652,7 +672,7 @@ namespace vtzero {
      * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
-    class point_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
+    class point_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
 
     public:
 
@@ -662,7 +682,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit point_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POINT));
         }
 
@@ -845,7 +865,7 @@ namespace vtzero {
      * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
-    class linestring_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
+    class linestring_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
 
         bool m_start_line = false;
 
@@ -857,7 +877,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit linestring_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::LINESTRING));
         }
 
@@ -1005,7 +1025,7 @@ namespace vtzero {
      * @endcode
      */
     template <int Dimensions, bool WithGeometricAttributes>
-    class polygon_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
+    class polygon_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
 
         point m_first_point{0, 0};
         bool m_start_ring = false;
@@ -1018,7 +1038,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit polygon_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(GeomType::POLYGON));
         }
 
