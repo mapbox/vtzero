@@ -28,8 +28,8 @@ documentation.
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
 namespace vtzero {
 
