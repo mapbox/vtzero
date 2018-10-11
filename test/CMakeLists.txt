@@ -27,6 +27,7 @@ set(TEST_SOURCES attributes
                  extended_geometry
                  extended_geometry_point
                  feature
+                 geometric_attributes
                  geometry
                  geometry_linestring
                  geometry_point

@@ -15,11 +15,14 @@ using elev_iterator = elev_container::const_iterator;
 
 using attr_iterator = vtzero::detail::dummy_attr_iterator;
 
+using geom_decoder3 = vtzero::detail::extended_geometry_decoder<3, 0, geom_iterator, elev_iterator>;
+using geom_decoder2 = vtzero::detail::extended_geometry_decoder<2, 0, geom_iterator, elev_iterator>;
+
 TEST_CASE("extended_geometry_decoder") {
     const geom_container geom = {};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -35,7 +38,7 @@ TEST_CASE("extended_geometry_decoder with point") {
     const geom_container geom = {9, 50, 34};
     const elev_container elev = {12};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -69,7 +72,7 @@ TEST_CASE("extended_geometry_decoder with point and 2d coordinates") {
     const geom_container geom = {9, 50, 34};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<2, geom_iterator, elev_iterator> decoder{
+    geom_decoder2 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -101,7 +104,7 @@ TEST_CASE("extended_geometry_decoder with incomplete point") {
 
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -119,7 +122,7 @@ TEST_CASE("extended_geometry_decoder with multipoint") {
     const geom_container geom = {17, 10, 14, 3, 9};
     const elev_container elev = {12, 4};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -143,7 +146,7 @@ TEST_CASE("extended_geometry_decoder with multipoint and missing elevation field
     const geom_container geom = {17, 10, 14, 3, 9};
     const elev_container elev = {12};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -165,7 +168,7 @@ TEST_CASE("extended_geometry_decoder with multipoint and additional elevation fi
     const geom_container geom = {17, 10, 14, 3, 9};
     const elev_container elev = {3, 4, 7};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -190,7 +193,7 @@ TEST_CASE("extended_geometry_decoder with linestring") {
     const geom_container geom = {9, 4, 4, 18, 0, 16, 16, 0};
     const elev_container elev = {1, 10, 3};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -220,7 +223,7 @@ TEST_CASE("extended_geometry_decoder with linestring with equal points") {
     const geom_container geom = {9, 4, 4, 18, 0, 16, 0, 0};
     const elev_container elev = {6, -8, 2};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -249,7 +252,7 @@ TEST_CASE("extended_geometry_decoder with multilinestring") {
     const geom_container geom = {9, 4, 4, 18, 0, 16, 16, 0, 9, 17, 17, 10, 4, 8};
     const elev_container elev = {1, 2, 1, 4, 1};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -290,7 +293,7 @@ TEST_CASE("extended_geometry_decoder with polygon") {
     const geom_container geom = {9, 6, 12, 18, 10, 12, 24, 44, 15};
     const elev_container elev = {-3, 20, 6};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -322,7 +325,7 @@ TEST_CASE("extended_geometry_decoder with polygon with wrong ClosePath count 2")
     const geom_container geom = {9, 6, 12, 18, 10, 12, 24, 44, 23};
     const elev_container elev = {1, -1, 1};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -345,7 +348,7 @@ TEST_CASE("extended_geometry_decoder with polygon with wrong ClosePath count 0")
     const geom_container geom = {9, 6, 12, 18, 10, 12, 24, 44, 7};
     const elev_container elev = {0, 0, 0};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -368,7 +371,7 @@ TEST_CASE("extended_geometry_decoder with multipolygon") {
                                  0, 0, 18, 17, 0, 15, 9, 4, 13, 26, 0, 8, 8, 0, 0, 7, 15};
     const elev_container elev = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -433,7 +436,7 @@ TEST_CASE("extended_geometry_decoder decoding linestring with int32 overflow in 
                                 };
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<2, geom_iterator, elev_iterator> decoder{
+    geom_decoder2 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -460,7 +463,7 @@ TEST_CASE("extended_geometry_decoder decoding linestring with int32 overflow in 
                                 };
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<2, geom_iterator, elev_iterator> decoder{
+    geom_decoder2 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -482,7 +485,7 @@ TEST_CASE("extended_geometry_decoder with multipoint with a huge count") {
     const geom_container geom = {vtzero::detail::command_move_to(huge_value), 10, 10};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -498,7 +501,7 @@ TEST_CASE("extended_geometry_decoder with multipoint with not enough points") {
     const geom_container geom = {vtzero::detail::command_move_to(2), 10};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder3 decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},

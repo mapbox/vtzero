@@ -16,6 +16,7 @@ documentation.
  * @brief Contains classes and functions related to geometry handling.
  */
 
+#include "attributes.hpp"
 #include "exception.hpp"
 #include "geometry_basics.hpp"
 #include "types.hpp"
@@ -23,6 +24,7 @@ documentation.
 
 #include <protozero/pbf_reader.hpp>
 
+#include <array>
 #include <cstdint>
 #include <limits>
 #include <utility>
@@ -138,12 +140,153 @@ namespace vtzero {
         using dummy_elev_iterator = null_iterator<int64_t>;
         using dummy_attr_iterator = null_iterator<uint64_t>;
 
+        template <typename TIterator>
+        class geometric_attribute {
+
+            TIterator m_it{};
+            index_value m_key_index{};
+            index_value m_scaling_index{};
+            uint64_t m_count = 0;
+            int64_t m_value = 0;
+
+        public:
+
+            geometric_attribute() noexcept = default;
+
+            geometric_attribute(TIterator it, uint64_t key_index, uint64_t scaling_index, uint64_t count) noexcept :
+                m_it(it),
+                m_key_index(static_cast<uint32_t>(key_index)),
+                m_scaling_index(static_cast<uint32_t>(scaling_index)),
+                m_count(count) {
+            }
+
+            index_value key_index() const noexcept {
+                return m_key_index;
+            }
+
+            index_value scaling_index() const noexcept {
+                return m_scaling_index;
+            }
+
+            bool get_next_value() noexcept {
+                if (m_count == 0) {
+                    return false;
+                }
+                const uint64_t raw_value = *m_it++;
+                --m_count;
+                if (raw_value == 0) {
+                    return false;
+                }
+                m_value += protozero::decode_zigzag64(raw_value - 1);
+                return true;
+            }
+
+            int64_t value() const noexcept {
+                return m_value;
+            }
+
+        }; // class geometric_attribute
+
+        template <>
+        class geometric_attribute<dummy_attr_iterator> {
+
+        public:
+
+            index_value key_index() const noexcept {
+                return {};
+            }
+
+            index_value scaling_index() const noexcept {
+                return {};
+            }
+
+            bool get_next_value() noexcept {
+                return false;
+            }
+
+            int64_t value() const noexcept {
+                return 0;
+            }
+
+        }; // class geometric_attribute
+
+        template <int MaxGeometricAttributes, typename TIterator>
+        class geometric_attribute_collection {
+
+            std::array<geometric_attribute<TIterator>, MaxGeometricAttributes> m_attrs;
+
+            std::size_t m_size = 0;
+
+        public:
+
+            geometric_attribute_collection(TIterator it, const TIterator end) :
+                m_attrs() {
+                while (it != end && m_size < MaxGeometricAttributes) {
+                    const uint64_t complex_value = *it++;
+                    if ((complex_value & 0xfu) != 10) {
+                        throw format_exception{"geometric attributes must be of type number list"};
+                    }
+                    if (it == end) {
+                        throw format_exception{"geometric attributes end too soon"};
+                    }
+
+                    auto attr_count = *it++;
+                    if (it == end) {
+                        throw format_exception{"geometric attributes end too soon"};
+                    }
+                    const uint64_t scaling = *it++;
+                    if (it == end) {
+                        throw format_exception{"geometric attributes end too soon"};
+                    }
+
+                    m_attrs[m_size] = {it, complex_value >> 4u, scaling, attr_count};
+                    ++m_size;
+
+                    while (attr_count-- > 0) {
+                        ++it;
+                        if (attr_count != 0 && it == end) {
+                            throw format_exception{"geometric attributes end too soon"};
+                        }
+                    }
+                }
+            }
+
+            typename std::array<geometric_attribute<TIterator>, MaxGeometricAttributes>::iterator begin() noexcept {
+                return m_attrs.begin();
+            }
+
+            typename std::array<geometric_attribute<TIterator>, MaxGeometricAttributes>::iterator end() noexcept {
+                return m_attrs.end();
+            }
+
+        }; // class geometric_attribute_collection
+
+        template <int MaxGeometricAttributes>
+        class geometric_attribute_collection<MaxGeometricAttributes, dummy_attr_iterator> {
+
+            geometric_attribute<dummy_attr_iterator> dummy{};
+
+        public:
+
+            geometric_attribute_collection(dummy_attr_iterator /*it*/, const dummy_attr_iterator /*end*/) noexcept {
+            }
+
+            geometric_attribute<dummy_attr_iterator>* begin() noexcept {
+                return &dummy;
+            }
+
+            geometric_attribute<dummy_attr_iterator>* end() noexcept {
+                return &dummy;
+            }
+
+        };
+
         /**
          * Decode a geometry as specified in spec 4.3. This templated class can
          * be instantiated with a different iterator type for testing than for
          * normal use.
          */
-        template <int Dimensions, typename TGeomIterator, typename TElevIterator = dummy_elev_iterator, typename TAttrIterator = dummy_attr_iterator>
+        template <int Dimensions, int MaxGeometricAttributes, typename TGeomIterator, typename TElevIterator = dummy_elev_iterator, typename TAttrIterator = dummy_attr_iterator>
         class extended_geometry_decoder {
 
             static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
@@ -189,7 +332,6 @@ namespace vtzero {
                 m_attr_end(attr_end),
                 m_max_count(static_cast<uint32_t>(max)) {
                 vtzero_assert(max <= detail::max_command_count());
-                vtzero_assert(m_attr_it == m_attr_end && "node attributes not supported yet"); // XXX
             }
 
             uint32_t count() const noexcept {
@@ -198,8 +340,7 @@ namespace vtzero {
 
             bool done() const noexcept {
                 return m_geom_it == m_geom_end &&
-                       m_elev_it == m_elev_end &&
-                       m_attr_it == m_attr_end;
+                       m_elev_it == m_elev_end;
             }
 
             bool next_command(const CommandId expected_command_id) {
@@ -266,9 +407,18 @@ namespace vtzero {
                     throw geometry_exception{"MoveTo command count is zero (spec 4.3.4.2)"};
                 }
 
+                geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
+
                 std::forward<TGeomHandler>(geom_handler).points_begin(count());
                 while (count() > 0) {
                     std::forward<TGeomHandler>(geom_handler).points_point(std::forward<TGeomHandler>(geom_handler).convert(next_point()));
+                    for (auto& geom_attr : geom_attributes) {
+                        if (geom_attr.get_next_value()) {
+                            detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                        } else {
+                            detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                        }
+                    }
                 }
 
                 // spec 4.3.4.2 "MUST consist of of a single ... command"
@@ -283,6 +433,8 @@ namespace vtzero {
 
             template <typename TGeomHandler>
             detail::get_result_t<TGeomHandler> decode_linestring(TGeomHandler&& geom_handler) {
+                geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
+
                 // spec 4.3.4.3 "1. A MoveTo command"
                 while (next_command(CommandId::MOVE_TO)) {
                     // spec 4.3.4.3 "with a command count of 1"
@@ -305,8 +457,23 @@ namespace vtzero {
                     std::forward<TGeomHandler>(geom_handler).linestring_begin(count() + 1);
 
                     std::forward<TGeomHandler>(geom_handler).linestring_point(first_point);
+                    for (auto& geom_attr : geom_attributes) {
+                        if (geom_attr.get_next_value()) {
+                            detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                        } else {
+                            detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                        }
+                    }
+
                     while (count() > 0) {
                         std::forward<TGeomHandler>(geom_handler).linestring_point(std::forward<TGeomHandler>(geom_handler).convert(next_point()));
+                        for (auto& geom_attr : geom_attributes) {
+                            if (geom_attr.get_next_value()) {
+                                detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                            } else {
+                                detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                            }
+                        }
                     }
 
                     std::forward<TGeomHandler>(geom_handler).linestring_end();
@@ -317,6 +484,8 @@ namespace vtzero {
 
             template <typename TGeomHandler>
             detail::get_result_t<TGeomHandler> decode_polygon(TGeomHandler&& geom_handler) {
+                geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
+
                 // spec 4.3.4.4 "1. A MoveTo command"
                 while (next_command(CommandId::MOVE_TO)) {
                     // spec 4.3.4.4 "with a command count of 1"
@@ -336,12 +505,26 @@ namespace vtzero {
                     std::forward<TGeomHandler>(geom_handler).ring_begin(count() + 2);
 
                     std::forward<TGeomHandler>(geom_handler).ring_point(std::forward<TGeomHandler>(geom_handler).convert(start_point));
+                    for (auto& geom_attr : geom_attributes) {
+                        if (geom_attr.get_next_value()) {
+                            detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                        } else {
+                            detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                        }
+                    }
 
                     while (count() > 0) {
                         const auto p = next_point();
                         sum += det(last_point, p);
                         last_point = p;
                         std::forward<TGeomHandler>(geom_handler).ring_point(std::forward<TGeomHandler>(geom_handler).convert(p));
+                        for (auto& geom_attr : geom_attributes) {
+                            if (geom_attr.get_next_value()) {
+                                detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                            } else {
+                                detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                            }
+                        }
                     }
 
                     // spec 4.3.4.4 "3. A ClosePath command"
@@ -368,14 +551,14 @@ namespace vtzero {
          * a different iterator type for testing than for normal use.
          */
         template <typename TIterator>
-        class geometry_decoder : public extended_geometry_decoder<2, TIterator, dummy_elev_iterator, dummy_attr_iterator> {
+        class geometry_decoder : public extended_geometry_decoder<2, 0, TIterator, dummy_elev_iterator, dummy_attr_iterator> {
 
         public:
 
             using iterator_type = TIterator;
 
             geometry_decoder(iterator_type begin, iterator_type end, std::size_t max) :
-                extended_geometry_decoder<2, iterator_type, dummy_elev_iterator, dummy_attr_iterator>(
+                extended_geometry_decoder<2, 0, iterator_type, dummy_elev_iterator, dummy_attr_iterator>(
                                           begin, end,
                                           dummy_elev_iterator{}, dummy_elev_iterator{},
                                           dummy_attr_iterator{}, dummy_attr_iterator{},

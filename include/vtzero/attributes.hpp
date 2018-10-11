@@ -82,6 +82,22 @@ namespace vtzero {
             return true; \
         } \
 
+        /// Call a function with three parameters
+#define DEF_CALL_WRAPPER3(func, ptype1, ptype2, ptype3) \
+        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func(std::declval<ptype1>(), std::declval<ptype2>(), std::declval<ptype3>()))>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler, ptype1 param1, ptype2 param2, ptype3 param3) { \
+            return std::forward<THandler>(handler).func(param1, param2, param3); \
+        } \
+        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().func(std::declval<ptype1>(), std::declval<ptype2>(), std::declval<ptype3>()))>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler, ptype1 param1, ptype2 param2, ptype3 param3) { \
+            std::forward<THandler>(handler).func(param1, param2, param3); \
+            return true; \
+        } \
+        template <typename... TArgs> \
+        bool call_##func(TArgs&&... /*unused*/) { \
+            return true; \
+        } \
+
         DEF_CALL_WRAPPER2(key_index, index_value, std::size_t)
         DEF_CALL_WRAPPER2(attribute_key, data_view, std::size_t)
         DEF_CALL_WRAPPER2(value_index, index_value, std::size_t)
@@ -99,6 +115,9 @@ namespace vtzero {
         DEF_CALL_WRAPPER2(number_list_value, std::int64_t, std::size_t)
         DEF_CALL_WRAPPER1(number_list_null_value, std::size_t)
         DEF_CALL_WRAPPER1(end_number_list, std::size_t)
+
+        DEF_CALL_WRAPPER1(points_null_attr, index_value)
+        DEF_CALL_WRAPPER3(points_attr, index_value, index_value, int64_t)
 
 #undef DEF_CALL_WRAPPER1
 #undef DEF_CALL_WRAPPER2

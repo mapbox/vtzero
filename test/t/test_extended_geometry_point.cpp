@@ -14,6 +14,8 @@ using elev_iterator = elev_container::const_iterator;
 
 using attr_iterator = vtzero::detail::dummy_attr_iterator;
 
+using geom_decoder = vtzero::detail::extended_geometry_decoder<3, 0, geom_iterator, elev_iterator>;
+
 class dummy_geom_handler {
 
     int value = 0;
@@ -46,7 +48,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with empty input") {
     const geom_container geom = {};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -66,7 +68,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid point") {
     const geom_container geom = {9, 50, 34};
     const elev_container elev = {15};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -81,7 +83,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid multipoint") {
     const geom_container geom = {17, 10, 14, 3, 9};
     const elev_container elev = {22, 3};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -94,7 +96,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a linestring geometry 
     const geom_container geom = {9, 4, 4, 18, 0, 16, 16, 0}; // this is a linestring geometry
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -114,7 +116,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a polygon geometry fai
     const geom_container geom = {9, 6, 12, 18, 10, 12, 24, 44, 15}; // this is a polygon geometry
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -134,7 +136,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with something other than M
     const geom_container geom = {vtzero::detail::command_line_to(3)};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -154,7 +156,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a count of 0") {
     const geom_container geom = {vtzero::detail::command_move_to(0)};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -174,7 +176,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with more data then expecte
     const geom_container geom = {9, 50, 34, 9};
     const elev_container elev = {};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},
@@ -220,7 +222,7 @@ TEST_CASE("Extended geometry: Calling decode_point() decoding valid multipoint")
     const geom_container geom = {17, 10, 14, 3, 9};
     const elev_container elev = {22, 3};
 
-    vtzero::detail::extended_geometry_decoder<3, geom_iterator, elev_iterator> decoder{
+    geom_decoder decoder{
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
         attr_iterator{}, attr_iterator{},

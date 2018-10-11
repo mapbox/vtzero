@@ -33,6 +33,8 @@ struct point_handler {
 
 struct point_handler_3d {
 
+    constexpr static const int max_geometric_attributes = 0;
+
     std::vector<mypoint_3d> data;
 
     static mypoint_3d convert(const vtzero::unscaled_point& p) noexcept {

@@ -16,8 +16,12 @@ documentation.
  * @brief Contains some basic classes and functions related to geometry handling.
  */
 
+#include "types.hpp"
+
 #include <cstdint>
 #include <limits>
+#include <type_traits>
+#include <utility>
 
 namespace vtzero {
 
