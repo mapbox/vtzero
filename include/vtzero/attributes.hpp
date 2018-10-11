@@ -51,14 +51,14 @@ namespace vtzero {
         // If the class defines the function, it is called.
 
         // Call a function with one parameters
-#define DEF_CALL_WRAPPER1(func) \
-        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func(std::declval<std::size_t>()))>::value, int>::type = 0> \
-        bool call_##func(THandler&& handler, std::size_t depth) { \
-            return std::forward<THandler>(handler).func(depth); \
+#define DEF_CALL_WRAPPER1(func, ptype) \
+        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func(std::declval<ptype>()))>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler, ptype param) { \
+            return std::forward<THandler>(handler).func(param); \
         } \
-        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().func(std::declval<std::size_t>()))>::value, int>::type = 0> \
-        bool call_##func(THandler&& handler, std::size_t depth) { \
-            std::forward<THandler>(handler).func(depth); \
+        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().func(std::declval<ptype>()))>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler, ptype param) { \
+            std::forward<THandler>(handler).func(param); \
             return true; \
         } \
         template <typename... TArgs> \
@@ -67,14 +67,14 @@ namespace vtzero {
         } \
 
         // Call a function with two parameters
-#define DEF_CALL_WRAPPER2(func, ptype) \
-        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func(std::declval<ptype>(), std::declval<std::size_t>()))>::value, int>::type = 0> \
-        bool call_##func(THandler&& handler, ptype param, std::size_t depth) { \
-            return std::forward<THandler>(handler).func(param, depth); \
+#define DEF_CALL_WRAPPER2(func, ptype1, ptype2) \
+        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func(std::declval<ptype1>(), std::declval<ptype2>()))>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler, ptype1 param1, ptype2 param2) { \
+            return std::forward<THandler>(handler).func(param1, param2); \
         } \
-        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().func(std::declval<ptype>(), std::declval<std::size_t>()))>::value, int>::type = 0> \
-        bool call_##func(THandler&& handler, ptype param, std::size_t depth) { \
-            std::forward<THandler>(handler).func(param, depth); \
+        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().func(std::declval<ptype1>(), std::declval<ptype2>()))>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler, ptype1 param1, ptype2 param2) { \
+            std::forward<THandler>(handler).func(param1, param2); \
             return true; \
         } \
         template <typename... TArgs> \
@@ -82,23 +82,23 @@ namespace vtzero {
             return true; \
         } \
 
-        DEF_CALL_WRAPPER2(key_index, index_value)
-        DEF_CALL_WRAPPER2(attribute_key, data_view)
-        DEF_CALL_WRAPPER2(value_index, index_value)
-        DEF_CALL_WRAPPER2(double_value_index, index_value)
-        DEF_CALL_WRAPPER2(float_value_index, index_value)
-        DEF_CALL_WRAPPER2(string_value_index, index_value)
-        DEF_CALL_WRAPPER2(int_value_index, index_value)
+        DEF_CALL_WRAPPER2(key_index, index_value, std::size_t)
+        DEF_CALL_WRAPPER2(attribute_key, data_view, std::size_t)
+        DEF_CALL_WRAPPER2(value_index, index_value, std::size_t)
+        DEF_CALL_WRAPPER2(double_value_index, index_value, std::size_t)
+        DEF_CALL_WRAPPER2(float_value_index, index_value, std::size_t)
+        DEF_CALL_WRAPPER2(string_value_index, index_value, std::size_t)
+        DEF_CALL_WRAPPER2(int_value_index, index_value, std::size_t)
 
-        DEF_CALL_WRAPPER2(start_list_attribute, std::size_t)
-        DEF_CALL_WRAPPER1(end_list_attribute)
+        DEF_CALL_WRAPPER2(start_list_attribute, std::size_t, std::size_t)
+        DEF_CALL_WRAPPER1(end_list_attribute, std::size_t)
 
-        DEF_CALL_WRAPPER2(start_map_attribute, std::size_t)
-        DEF_CALL_WRAPPER1(end_map_attribute)
+        DEF_CALL_WRAPPER2(start_map_attribute, std::size_t, std::size_t)
+        DEF_CALL_WRAPPER1(end_map_attribute, std::size_t)
 
-        DEF_CALL_WRAPPER2(number_list_value, std::int64_t)
-        DEF_CALL_WRAPPER1(number_list_null_value)
-        DEF_CALL_WRAPPER1(end_number_list)
+        DEF_CALL_WRAPPER2(number_list_value, std::int64_t, std::size_t)
+        DEF_CALL_WRAPPER1(number_list_null_value, std::size_t)
+        DEF_CALL_WRAPPER1(end_number_list, std::size_t)
 
 #undef DEF_CALL_WRAPPER1
 #undef DEF_CALL_WRAPPER2
