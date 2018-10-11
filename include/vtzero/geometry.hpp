@@ -151,9 +151,9 @@ namespace vtzero {
 
         public:
 
-            geometric_attribute() noexcept = default;
+            geometric_attribute() = default;
 
-            geometric_attribute(TIterator it, uint64_t key_index, uint64_t scaling_index, uint64_t count) noexcept :
+            geometric_attribute(TIterator it, uint64_t key_index, uint64_t scaling_index, uint64_t count) :
                 m_it(it),
                 m_key_index(static_cast<uint32_t>(key_index)),
                 m_scaling_index(static_cast<uint32_t>(scaling_index)),
