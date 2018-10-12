@@ -325,8 +325,8 @@ namespace vtzero {
 
             extended_geometry_decoder(std::size_t max,
                                       TGeomIterator geom_begin, TGeomIterator geom_end,
-                                      TElevIterator elev_begin, TElevIterator elev_end,
-                                      TAttrIterator attr_begin, TAttrIterator attr_end) :
+                                      TElevIterator elev_begin = TElevIterator{}, TElevIterator elev_end = TElevIterator{},
+                                      TAttrIterator attr_begin = TAttrIterator{}, TAttrIterator attr_end = TAttrIterator{}) :
                 m_geom_it(geom_begin),
                 m_geom_end(geom_end),
                 m_elev_it(elev_begin),
@@ -560,27 +560,8 @@ namespace vtzero {
 
         }; // class extended_geometry_decoder
 
-        /**
-         * Decode a 2d geometry as specified in spec 4.3 from a sequence of 32
-         * bit unsigned integers. This templated class can be instantiated with
-         * a different iterator type for testing than for normal use.
-         */
         template <typename TIterator>
-        class geometry_decoder : public extended_geometry_decoder<2, 0, TIterator, dummy_elev_iterator, dummy_attr_iterator> {
-
-        public:
-
-            using iterator_type = TIterator;
-
-            geometry_decoder(std::size_t max, iterator_type begin, iterator_type end) :
-                extended_geometry_decoder<2, 0, iterator_type, dummy_elev_iterator, dummy_attr_iterator>(
-                                          max,
-                                          begin, end,
-                                          dummy_elev_iterator{}, dummy_elev_iterator{},
-                                          dummy_attr_iterator{}, dummy_attr_iterator{}) {
-            }
-
-        }; // class geometry_decoder
+        using geometry_decoder = extended_geometry_decoder<2, 0, TIterator>;
 
     } // namespace detail
 
