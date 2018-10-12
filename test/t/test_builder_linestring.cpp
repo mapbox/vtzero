@@ -14,6 +14,8 @@ using ls_type = std::vector<std::vector<vtzero::point>>;
 
 struct linestring_handler {
 
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
     ls_type data;
 
     static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
@@ -71,7 +73,7 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     linestring_handler handler;
-    vtzero::decode_linestring_geometry(feature.geometry(), handler);
+    feature.decode_linestring_geometry(handler);
 
     const ls_type result = {{{10, 20}, {20, 30}, {30, 40}}};
     REQUIRE(handler.data == result);
@@ -147,7 +149,7 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     linestring_handler handler;
-    vtzero::decode_linestring_geometry(feature.geometry(), handler);
+    feature.decode_linestring_geometry(handler);
 
     const ls_type result = {{{10, 20}, {20, 30}, {30, 40}}, {{1, 2}, {2, 1}}};
     REQUIRE(handler.data == result);
@@ -248,7 +250,7 @@ TEST_CASE("Add linestring from container") {
     const auto feature = layer.next_feature();
 
     linestring_handler handler;
-    vtzero::decode_linestring_geometry(feature.geometry(), handler);
+    feature.decode_linestring_geometry(handler);
 
     REQUIRE(handler.data == points);
 }

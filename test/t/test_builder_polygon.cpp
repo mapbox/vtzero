@@ -14,6 +14,8 @@ using polygon_type = std::vector<std::vector<vtzero::point>>;
 
 struct polygon_handler {
 
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
     polygon_type data;
 
     static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
@@ -72,7 +74,7 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     polygon_handler handler;
-    vtzero::decode_polygon_geometry(feature.geometry(), handler);
+    feature.decode_polygon_geometry(handler);
 
     const polygon_type result = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
     REQUIRE(handler.data == result);
@@ -163,7 +165,7 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     polygon_handler handler;
-    vtzero::decode_polygon_geometry(feature.geometry(), handler);
+    feature.decode_polygon_geometry(handler);
 
     const polygon_type result = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}},
                                  {{1, 1}, {2, 1}, {2, 2}, {1, 2}, {1, 1}}};
@@ -290,7 +292,7 @@ TEST_CASE("Add polygon from container") {
     const auto feature = layer.next_feature();
 
     polygon_handler handler;
-    vtzero::decode_polygon_geometry(feature.geometry(), handler);
+    feature.decode_polygon_geometry(handler);
 
     REQUIRE(handler.data == points);
 }

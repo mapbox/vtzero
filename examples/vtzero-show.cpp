@@ -24,6 +24,8 @@ class geom_handler {
 
 public:
 
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
     static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
         return {p.x, p.y};
     }
@@ -181,7 +183,7 @@ static void print_layer(vtzero::layer& layer, bool print_tables, bool print_valu
         }
         std::cout << "    geomtype: " << vtzero::geom_type_name(feature.geometry_type()) << '\n'
                   << "    geometry:\n";
-        vtzero::decode_geometry(feature.geometry(), geom_handler{});
+        feature.decode_geometry(geom_handler{});
         std::cout << "    attributes:\n";
         print_handler handler;
         feature.decode_attributes(handler);

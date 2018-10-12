@@ -341,6 +341,7 @@ static vtzero::layer next_nonempty_layer(vtzero::vector_tile& tile) {
     return vtzero::layer{};
 }
 
+// TODO(joto) this function needs to be updated for vt3
 static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
     vtzero::vector_tile vt1{t1};
     vtzero::vector_tile vt2{t2};
@@ -366,7 +367,8 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
                 f1.id() != f2.id() ||
                 f1.geometry_type() != f2.geometry_type() ||
                 f1.num_properties() != f2.num_properties() ||
-                f1.geometry().data() != f2.geometry().data()) {
+                f1.geometry_data() != f2.geometry_data() ||
+                f1.elevations_data() != f2.elevations_data()) {
                 return false;
             }
             for (auto p1 = f1.next_property(), p2 = f2.next_property();
@@ -445,7 +447,7 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
         while (auto feature = layer.next_feature()) {
             vtzero::feature_builder<2, false> fbuilder{lbuilder};
             fbuilder.set_integer_id(feature.id());
-            if (feature.geometry().type() == vtzero::GeomType::POINT) {
+            if (feature.geometry_type() == vtzero::GeomType::POINT) {
                 fbuilder.copy_geometry(feature);
                 while (auto property = feature.next_property()) {
                     fbuilder.add_property(property.key(), property.value());
@@ -473,6 +475,8 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
 }
 
 struct points_to_vector {
+
+    constexpr static const unsigned int max_geometric_attributes = 0;
 
     std::vector<vtzero::point> m_points{};
 
@@ -509,8 +513,8 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
         while (auto feature = layer.next_feature()) {
             vtzero::point_2d_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
-            if (feature.geometry().type() == vtzero::GeomType::POINT) {
-                const auto points = decode_point_geometry(feature.geometry(), points_to_vector{});
+            if (feature.geometry_type() == vtzero::GeomType::POINT) {
+                const auto points = feature.decode_point_geometry(points_to_vector{});
                 fbuilder.add_points_from_container(points);
                 fbuilder.copy_attributes(feature);
                 fbuilder.commit();

@@ -84,8 +84,7 @@ TEST_CASE("access features in a layer by id") {
     REQUIRE(feature.id() == 122);
     REQUIRE(feature.num_properties() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
-    REQUIRE(feature.geometry().type() == vtzero::GeomType::POLYGON);
-    REQUIRE_FALSE(feature.geometry().data().empty());
+    REQUIRE_FALSE(feature.geometry_data().empty());
 
     REQUIRE_FALSE(layer.get_feature_by_id(844));
     REQUIRE_FALSE(layer.get_feature_by_id(999999));

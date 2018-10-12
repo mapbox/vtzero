@@ -244,18 +244,6 @@ namespace vtzero {
         }
 
         /**
-         * Get the geometry of this feature.
-         *
-         * Complexity: Constant.
-         *
-         * @pre @code valid() @endcode
-         */
-        vtzero::geometry geometry() const noexcept {
-            vtzero_assert_in_noexcept_function(valid());
-            return {m_geometry, m_geometry_type};
-        }
-
-        /**
          * Returns true if this feature doesn't have any properties.
          *
          * Complexity: Constant.
@@ -428,7 +416,7 @@ namespace vtzero {
                 geometric_attributes_begin(), geometric_attributes_end(),
                 m_geometry.size() / 2};
 
-            return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
+            return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
         }
 
         /**

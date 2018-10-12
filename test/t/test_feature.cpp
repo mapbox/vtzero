@@ -19,7 +19,6 @@ TEST_CASE("default constructed feature") {
     REQUIRE_FALSE(feature.has_integer_id());
     REQUIRE_FALSE(feature.has_string_id());
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
-    REQUIRE_ASSERT(feature.geometry());
     REQUIRE(feature.empty());
     REQUIRE(feature.num_properties() == 0);
 }

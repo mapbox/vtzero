@@ -12,6 +12,8 @@
 
 struct point_handler {
 
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
     std::vector<vtzero::point> data;
 
     static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
@@ -105,7 +107,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), handler);
+    feature.decode_point_geometry(handler);
 
     const std::vector<vtzero::point> result = {{10, 20}};
     REQUIRE(handler.data == result);
@@ -177,7 +179,7 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
     REQUIRE_FALSE(feature.has_3d_geometry());
 
     point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), handler);
+    feature.decode_point_geometry(handler);
 
     const std::vector<vtzero::point> result = {{10, 20}};
     REQUIRE(handler.data == result);
@@ -285,7 +287,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), handler);
+    feature.decode_point_geometry(handler);
 
     const std::vector<vtzero::point> result = {{10, 20}, {20, 30}, {30, 40}};
     REQUIRE(handler.data == result);
@@ -398,7 +400,7 @@ TEST_CASE("Add points from container") {
     const auto feature = layer.next_feature();
 
     point_handler handler;
-    vtzero::decode_point_geometry(feature.geometry(), handler);
+    feature.decode_point_geometry(handler);
 
     REQUIRE(handler.data == points);
 }
