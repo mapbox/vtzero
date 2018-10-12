@@ -194,7 +194,7 @@ namespace vtzero {
             vtzero_assert(m_stage == detail::stage::id || m_stage == detail::stage::has_id);
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(feature.geometry_type()));
             this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
-            if (feature.is_3d()) {
+            if (feature.has_3d_geometry()) {
                 this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
             }
             m_stage = detail::stage::attributes;

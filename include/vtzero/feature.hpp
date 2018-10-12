@@ -239,7 +239,7 @@ namespace vtzero {
          *
          * Complexity: Constant.
          */
-        bool is_3d() const noexcept {
+        bool has_3d_geometry() const noexcept {
             return !m_elevations.empty();
         }
 

@@ -174,7 +174,7 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
 
     const auto feature = layer.next_feature();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
-    REQUIRE_FALSE(feature.is_3d());
+    REQUIRE_FALSE(feature.has_3d_geometry());
 
     point_handler handler;
     vtzero::decode_point_geometry(feature.geometry(), handler);
@@ -225,7 +225,7 @@ TEST_CASE("Point builder with 3d point") {
 
     const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
-    REQUIRE(feature.is_3d());
+    REQUIRE(feature.has_3d_geometry());
 
     point_handler_3d handler;
     feature.decode_point_geometry(handler);
