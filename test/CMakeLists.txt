@@ -39,6 +39,7 @@ set(TEST_SOURCES attributes
                  property_map
                  property_value
                  scaling
+                 tile
                  types
                  vector_tile)
 

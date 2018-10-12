@@ -22,6 +22,7 @@ documentation.
 #include "geometry.hpp"
 #include "property_value.hpp"
 #include "scaling.hpp"
+#include "tile.hpp"
 #include "types.hpp"
 #include "unaligned_table.hpp"
 
@@ -59,8 +60,7 @@ namespace vtzero {
     class layer {
 
         data_view m_data{};
-        uint32_t m_version = 1; // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
-        uint32_t m_extent = 4096; // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
+        tile m_tile{};
         std::size_t m_num_features = 0;
         data_view m_name{};
         protozero::pbf_message<detail::pbf_layer> m_layer_reader{m_data};
@@ -82,6 +82,8 @@ namespace vtzero {
         detail::unaligned_table<double> m_double_table;
         detail::unaligned_table<float> m_float_table;
         detail::unaligned_table<uint64_t> m_int_table;
+
+        uint32_t m_version = 1; // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
 
         void initialize_tables() const {
             m_key_table.reserve(m_key_table_size);
@@ -130,6 +132,10 @@ namespace vtzero {
         explicit layer(const data_view data) :
             m_data(data) {
             protozero::pbf_message<detail::pbf_layer> reader{data};
+            uint32_t x = 0;
+            uint32_t y = 0;
+            uint32_t zoom = 0;
+            uint32_t extent = 4096;
             while (reader.next()) {
                 switch (reader.tag_and_type()) {
                     case protozero::tag_and_type(detail::pbf_layer::version, protozero::pbf_wire_type::varint):
@@ -151,7 +157,7 @@ namespace vtzero {
                         ++m_value_table_size;
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
-                        m_extent = reader.get_uint32();
+                        extent = reader.get_uint32();
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::string_values, protozero::pbf_wire_type::length_delimited):
                         reader.skip();
@@ -180,6 +186,18 @@ namespace vtzero {
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::attribute_scalings, protozero::pbf_wire_type::length_delimited):
                         m_attribute_scalings.emplace_back(reader.get_view());
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::tile_x, protozero::pbf_wire_type::varint):
+                        x = reader.get_uint32();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::tile_y, protozero::pbf_wire_type::varint):
+                        y = reader.get_uint32();
+                        break;
+                    case protozero::tag_and_type(detail::pbf_layer::tile_zoom, protozero::pbf_wire_type::varint):
+                        zoom = reader.get_uint32();
+                        if (zoom >= tile::max_zoom) {
+                            throw format_exception{"zoom level too large"};
+                        }
                         break;
                     default:
                         throw format_exception{"unknown field in layer (tag=" +
@@ -221,6 +239,16 @@ namespace vtzero {
             if (m_name.data() == nullptr) {
                 throw format_exception{"missing name field in layer (spec 4.1)"};
             }
+
+            if (x >= detail::num_tiles_in_zoom(zoom)) {
+                throw format_exception{"tile x value out of range"};
+            }
+
+            if (y >= detail::num_tiles_in_zoom(zoom)) {
+                throw format_exception{"tile y value out of range"};
+            }
+
+            m_tile = {x, y, zoom, extent};
         }
 
         /**
@@ -269,6 +297,17 @@ namespace vtzero {
         }
 
         /**
+         * Return the tile of this layer.
+         *
+         * @pre @code valid() @endcode
+         */
+        tile tile() const noexcept {
+            vtzero_assert_in_noexcept_function(valid());
+
+            return m_tile;
+        }
+
+        /**
          * Return the extent of this layer.
          *
          * @pre @code valid() @endcode
@@ -276,7 +315,7 @@ namespace vtzero {
         std::uint32_t extent() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
 
-            return m_extent;
+            return m_tile.extent();
         }
 
         /**

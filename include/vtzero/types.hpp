@@ -107,6 +107,9 @@ namespace vtzero {
             int_values         =  9,
             elevation_scaling  = 10,
             attribute_scalings = 11,
+            tile_x             = 12,
+            tile_y             = 13,
+            tile_zoom          = 14,
             version            = 15
         };
 

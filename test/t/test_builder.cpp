@@ -236,6 +236,25 @@ TEST_CASE("String ids are okay in version 3 tiles") {
     REQUIRE(feature.string_id() == "foo");
 }
 
+TEST_CASE("Create layer with x/y/zoom/extent") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3, vtzero::tile{5, 3, 12, 8192}};
+    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    fbuilder.set_string_id("foo");
+    fbuilder.add_point(10, 10);
+    fbuilder.commit();
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+    auto layer = tile.next_layer();
+
+    REQUIRE(layer.tile().x() == 5);
+    REQUIRE(layer.tile().y() == 3);
+    REQUIRE(layer.tile().zoom() == 12);
+    REQUIRE(layer.extent() == 8192);
+}
+
 TEST_CASE("Rollback feature") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};

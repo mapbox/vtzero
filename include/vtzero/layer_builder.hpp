@@ -62,14 +62,28 @@ namespace vtzero {
          * Construct a layer_builder to build a completely new layer.
          *
          * @tparam TString Some string type (such as std::string or const char*)
-         * @param tile The tile builder we want to create this layer in.
+         * @param tile_builder The tile builder we want to create this layer in.
+         * @param name The name of the new layer.
+         * @param version The vector tile spec version of the new layer.
+         * @param tile The tile (x, y, zoom, extent) of the new layer.
+         */
+        template <typename TString, typename std::enable_if<!is_layer<TString>::value, int>::type = 0>
+        layer_builder(vtzero::tile_builder& tile_builder, TString&& name, uint32_t version, const tile& tile) :
+            m_layer(tile_builder.add_layer(std::forward<TString>(name), version, tile)) {
+        }
+
+        /**
+         * Construct a layer_builder to build a completely new layer.
+         *
+         * @tparam TString Some string type (such as std::string or const char*)
+         * @param tile_builder The tile builder we want to create this layer in.
          * @param name The name of the new layer.
          * @param version The vector tile spec version of the new layer.
          * @param extent The extent of the new layer.
          */
         template <typename TString, typename std::enable_if<!is_layer<TString>::value, int>::type = 0>
-        layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096) :
-            m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
+        layer_builder(vtzero::tile_builder& tile_builder, TString&& name, uint32_t version = 2, uint32_t extent = 4096) :
+            m_layer(tile_builder.add_layer(std::forward<TString>(name), version, tile{0, 0, 0, extent})) {
         }
 
         /// Get the elevation scaling currently set.
