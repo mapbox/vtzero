@@ -95,7 +95,7 @@ namespace vtzero {
             return {m_geometric_attributes.data() + m_geometric_attributes.size(), m_geometric_attributes.data() + m_geometric_attributes.size()};
         }
 
-        template <int MaxGeometricAttributes>
+        template <unsigned int MaxGeometricAttributes>
         using geom_decoder_type = detail::extended_geometry_decoder<3,
               MaxGeometricAttributes,
               geom_iterator,
@@ -373,7 +373,7 @@ namespace vtzero {
         detail::get_result_t<TGeomHandler> decode_point_geometry(TGeomHandler&& geom_handler) const {
             vtzero_assert(geometry_type() == GeomType::POINT);
 
-            constexpr static const int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
+            constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
             geom_decoder_type<max> decoder{geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
@@ -397,7 +397,7 @@ namespace vtzero {
         detail::get_result_t<TGeomHandler> decode_linestring_geometry(TGeomHandler&& geom_handler) const {
             vtzero_assert(geometry_type() == GeomType::LINESTRING);
 
-            constexpr static const int max = std::decay<TGeomHandler>::type::max_geometric_attributes;
+            constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
             geom_decoder_type<max> decoder{geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
@@ -421,7 +421,7 @@ namespace vtzero {
         detail::get_result_t<TGeomHandler> decode_polygon_geometry(TGeomHandler&& geom_handler) const {
             vtzero_assert(geometry_type() == GeomType::POLYGON);
 
-            constexpr static const int max = std::decay<TGeomHandler>::type::max_geometric_attributes;
+            constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
             geom_decoder_type<max> decoder{geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
@@ -443,7 +443,7 @@ namespace vtzero {
          */
         template <typename TGeomHandler>
         detail::get_result_t<TGeomHandler> decode_geometry(TGeomHandler&& geom_handler) const {
-            constexpr static const int max = std::decay<TGeomHandler>::type::max_geometric_attributes;
+            constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
             geom_decoder_type<max> decoder{geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),

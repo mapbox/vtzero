@@ -86,6 +86,8 @@ class CheckGeomHandler {
 
 public:
 
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
     CheckGeomHandler(uint32_t extent, int layer_num, int feature_num) :
         m_layer_num(layer_num),
         m_feature_num(feature_num),

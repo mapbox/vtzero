@@ -24,7 +24,6 @@ documentation.
 
 #include <protozero/pbf_reader.hpp>
 
-#include <array>
 #include <cstdint>
 #include <limits>
 #include <utility>
@@ -210,10 +209,12 @@ namespace vtzero {
 
         }; // class geometric_attribute
 
-        template <int MaxGeometricAttributes, typename TIterator>
+        template <unsigned int MaxGeometricAttributes, typename TIterator>
         class geometric_attribute_collection {
 
-            std::array<geometric_attribute<TIterator>, MaxGeometricAttributes> m_attrs;
+            static_assert(!std::is_same<TIterator, dummy_attr_iterator>::value, "Please set MaxGeometricAttributes to 0 when dummy_attr_iterator is used");
+
+            geometric_attribute<TIterator> m_attrs[MaxGeometricAttributes];
 
             std::size_t m_size = 0;
 
@@ -255,42 +256,40 @@ namespace vtzero {
                 }
             }
 
-            typename std::array<geometric_attribute<TIterator>, MaxGeometricAttributes>::iterator begin() noexcept {
-                return m_attrs.begin();
+            geometric_attribute<TIterator>* begin() noexcept {
+                return m_attrs;
             }
 
-            typename std::array<geometric_attribute<TIterator>, MaxGeometricAttributes>::iterator end() noexcept {
-                return m_attrs.begin() + m_size;
+            geometric_attribute<TIterator>* end() noexcept {
+                return m_attrs + m_size;
             }
 
         }; // class geometric_attribute_collection
 
-        template <int MaxGeometricAttributes>
-        class geometric_attribute_collection<MaxGeometricAttributes, dummy_attr_iterator> {
-
-            geometric_attribute<dummy_attr_iterator> dummy{};
+        template <typename TIterator>
+        class geometric_attribute_collection<0, TIterator> {
 
         public:
 
-            geometric_attribute_collection(dummy_attr_iterator /*it*/, const dummy_attr_iterator /*end*/) noexcept {
+            geometric_attribute_collection(TIterator /*it*/, const TIterator /*end*/) noexcept {
             }
 
-            geometric_attribute<dummy_attr_iterator>* begin() noexcept {
-                return &dummy;
+            geometric_attribute<TIterator>* begin() const noexcept {
+                return nullptr;
             }
 
-            geometric_attribute<dummy_attr_iterator>* end() noexcept {
-                return &dummy;
+            geometric_attribute<TIterator>* end() const noexcept {
+                return nullptr;
             }
 
-        };
+        }; // class geometric_attribute_collection<0, TIterator>
 
         /**
          * Decode a geometry as specified in spec 4.3. This templated class can
          * be instantiated with a different iterator type for testing than for
          * normal use.
          */
-        template <int Dimensions, int MaxGeometricAttributes, typename TGeomIterator, typename TElevIterator = dummy_elev_iterator, typename TAttrIterator = dummy_attr_iterator>
+        template <int Dimensions, unsigned int MaxGeometricAttributes, typename TGeomIterator, typename TElevIterator = dummy_elev_iterator, typename TAttrIterator = dummy_attr_iterator>
         class extended_geometry_decoder {
 
             static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");

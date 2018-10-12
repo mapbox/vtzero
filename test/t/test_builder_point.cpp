@@ -33,7 +33,7 @@ struct point_handler {
 
 struct point_handler_3d {
 
-    constexpr static const int max_geometric_attributes = 0;
+    constexpr static const unsigned int max_geometric_attributes = 0;
 
     std::vector<mypoint_3d> data;
 
