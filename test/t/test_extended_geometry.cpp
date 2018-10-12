@@ -23,10 +23,10 @@ TEST_CASE("extended_geometry_decoder") {
     const elev_container elev = {};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE(decoder.done());
@@ -39,10 +39,10 @@ TEST_CASE("extended_geometry_decoder with point") {
     const elev_container elev = {12};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -73,10 +73,10 @@ TEST_CASE("extended_geometry_decoder with point and 2d coordinates") {
     const elev_container elev = {};
 
     geom_decoder2 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -105,10 +105,10 @@ TEST_CASE("extended_geometry_decoder with incomplete point") {
     const elev_container elev = {};
 
     geom_decoder3 decoder{
+        100,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        100};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -123,10 +123,10 @@ TEST_CASE("extended_geometry_decoder with multipoint") {
     const elev_container elev = {12, 4};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -147,10 +147,10 @@ TEST_CASE("extended_geometry_decoder with multipoint and missing elevation field
     const elev_container elev = {12};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -169,10 +169,10 @@ TEST_CASE("extended_geometry_decoder with multipoint and additional elevation fi
     const elev_container elev = {3, 4, 7};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -194,10 +194,10 @@ TEST_CASE("extended_geometry_decoder with linestring") {
     const elev_container elev = {1, 10, 3};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -224,10 +224,10 @@ TEST_CASE("extended_geometry_decoder with linestring with equal points") {
     const elev_container elev = {6, -8, 2};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -253,10 +253,10 @@ TEST_CASE("extended_geometry_decoder with multilinestring") {
     const elev_container elev = {1, 2, 1, 4, 1};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -294,10 +294,10 @@ TEST_CASE("extended_geometry_decoder with polygon") {
     const elev_container elev = {-3, 20, 6};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -326,10 +326,10 @@ TEST_CASE("extended_geometry_decoder with polygon with wrong ClosePath count 2")
     const elev_container elev = {1, -1, 1};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -349,10 +349,10 @@ TEST_CASE("extended_geometry_decoder with polygon with wrong ClosePath count 0")
     const elev_container elev = {0, 0, 0};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -372,10 +372,10 @@ TEST_CASE("extended_geometry_decoder with multipolygon") {
     const elev_container elev = {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -437,10 +437,10 @@ TEST_CASE("extended_geometry_decoder decoding linestring with int32 overflow in 
     const elev_container elev = {};
 
     geom_decoder2 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -464,10 +464,10 @@ TEST_CASE("extended_geometry_decoder decoding linestring with int32 overflow in 
     const elev_container elev = {};
 
     geom_decoder2 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -486,10 +486,10 @@ TEST_CASE("extended_geometry_decoder with multipoint with a huge count") {
     const elev_container elev = {};
 
     geom_decoder3 decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());
@@ -502,10 +502,10 @@ TEST_CASE("extended_geometry_decoder with multipoint with not enough points") {
     const elev_container elev = {};
 
     geom_decoder3 decoder{
+        1,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        1};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.count() == 0);
     REQUIRE_FALSE(decoder.done());

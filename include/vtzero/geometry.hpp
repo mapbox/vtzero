@@ -323,10 +323,10 @@ namespace vtzero {
 
         public:
 
-            extended_geometry_decoder(TGeomIterator geom_begin, TGeomIterator geom_end,
+            extended_geometry_decoder(std::size_t max,
+                                      TGeomIterator geom_begin, TGeomIterator geom_end,
                                       TElevIterator elev_begin, TElevIterator elev_end,
-                                      TAttrIterator attr_begin, TAttrIterator attr_end,
-                                      std::size_t max) :
+                                      TAttrIterator attr_begin, TAttrIterator attr_end) :
                 m_geom_it(geom_begin),
                 m_geom_end(geom_end),
                 m_elev_it(elev_begin),
@@ -574,10 +574,10 @@ namespace vtzero {
 
             geometry_decoder(iterator_type begin, iterator_type end, std::size_t max) :
                 extended_geometry_decoder<2, 0, iterator_type, dummy_elev_iterator, dummy_attr_iterator>(
+                                          max,
                                           begin, end,
                                           dummy_elev_iterator{}, dummy_elev_iterator{},
-                                          dummy_attr_iterator{}, dummy_attr_iterator{},
-                                          max) {
+                                          dummy_attr_iterator{}, dummy_attr_iterator{}) {
             }
 
         }; // class geometry_decoder

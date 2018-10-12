@@ -49,10 +49,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with empty input") {
     const elev_container elev = {};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -69,10 +69,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid point") {
     const elev_container elev = {15};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     dummy_geom_handler handler;
     decoder.decode_point(handler);
@@ -84,10 +84,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid multipoint") {
     const elev_container elev = {22, 3};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     REQUIRE(decoder.decode_point(dummy_geom_handler{}) == 10201);
 }
@@ -97,10 +97,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with a linestring geometry 
     const elev_container elev = {};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -117,10 +117,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with a polygon geometry fai
     const elev_container elev = {};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -137,10 +137,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with something other than M
     const elev_container elev = {};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -157,10 +157,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with a count of 0") {
     const elev_container elev = {};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -177,10 +177,10 @@ TEST_CASE("Extended geometry: Calling decode_point() with more data then expecte
     const elev_container elev = {};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -223,10 +223,10 @@ TEST_CASE("Extended geometry: Calling decode_point() decoding valid multipoint")
     const elev_container elev = {22, 3};
 
     geom_decoder decoder{
+        geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{},
-        geom.size() / 2};
+        attr_iterator{}, attr_iterator{}};
 
     value_geom_handler handler;
     const auto result = decoder.decode_point(handler);
