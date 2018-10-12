@@ -260,7 +260,7 @@ namespace vtzero {
             }
 
             typename std::array<geometric_attribute<TIterator>, MaxGeometricAttributes>::iterator end() noexcept {
-                return m_attrs.end();
+                return m_attrs.begin() + m_size;
             }
 
         }; // class geometric_attribute_collection
