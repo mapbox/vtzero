@@ -223,30 +223,33 @@ namespace vtzero {
                 m_attrs() {
                 while (it != end && m_size < MaxGeometricAttributes) {
                     const uint64_t complex_value = *it++;
-                    if ((complex_value & 0xfu) != 10) {
-                        throw format_exception{"geometric attributes must be of type number list"};
-                    }
-                    if (it == end) {
-                        throw format_exception{"geometric attributes end too soon"};
-                    }
-
-                    auto attr_count = *it++;
-                    if (it == end) {
-                        throw format_exception{"geometric attributes end too soon"};
-                    }
-                    const uint64_t scaling = *it++;
-                    if (it == end) {
-                        throw format_exception{"geometric attributes end too soon"};
-                    }
-
-                    m_attrs[m_size] = {it, complex_value >> 4u, scaling, attr_count};
-                    ++m_size;
-
-                    while (attr_count-- > 0) {
-                        ++it;
-                        if (attr_count != 0 && it == end) {
+                    if ((complex_value & 0xfu) == static_cast<uint64_t>(complex_value_type::cvt_number_list)) {
+                        if (it == end) {
                             throw format_exception{"geometric attributes end too soon"};
                         }
+
+                        auto attr_count = *it++;
+                        if (it == end) {
+                            throw format_exception{"geometric attributes end too soon"};
+                        }
+                        const uint64_t scaling = *it++;
+                        if (it == end) {
+                            throw format_exception{"geometric attributes end too soon"};
+                        }
+
+                        m_attrs[m_size] = {it, complex_value >> 4u, scaling, attr_count};
+                        ++m_size;
+
+                        while (attr_count-- > 0) {
+                            ++it;
+                            if (attr_count != 0 && it == end) {
+                                throw format_exception{"geometric attributes end too soon"};
+                            }
+                        }
+                    } else if ((complex_value & 0xfu) == static_cast<uint64_t>(complex_value_type::cvt_list)) {
+                        throw format_exception{"geometric attributes of type 'list' not implemented yet"}; // XXX
+                    } else {
+                        throw format_exception{"geometric attributes must be of type 'list' or 'number list'"};
                     }
                 }
             }
