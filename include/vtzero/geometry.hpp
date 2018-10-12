@@ -290,7 +290,7 @@ namespace vtzero {
          * normal use.
          */
         template <int Dimensions, unsigned int MaxGeometricAttributes, typename TGeomIterator, typename TElevIterator = dummy_elev_iterator, typename TAttrIterator = dummy_attr_iterator>
-        class extended_geometry_decoder {
+        class geometry_decoder {
 
             static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
 
@@ -323,10 +323,10 @@ namespace vtzero {
 
         public:
 
-            extended_geometry_decoder(std::size_t max,
-                                      TGeomIterator geom_begin, TGeomIterator geom_end,
-                                      TElevIterator elev_begin = TElevIterator{}, TElevIterator elev_end = TElevIterator{},
-                                      TAttrIterator attr_begin = TAttrIterator{}, TAttrIterator attr_end = TAttrIterator{}) :
+            geometry_decoder(std::size_t max,
+                             TGeomIterator geom_begin, TGeomIterator geom_end,
+                             TElevIterator elev_begin = TElevIterator{}, TElevIterator elev_end = TElevIterator{},
+                             TAttrIterator attr_begin = TAttrIterator{}, TAttrIterator attr_end = TAttrIterator{}) :
                 m_geom_it(geom_begin),
                 m_geom_end(geom_end),
                 m_elev_it(elev_begin),
@@ -558,10 +558,7 @@ namespace vtzero {
                 return detail::get_result<TGeomHandler>::of(std::forward<TGeomHandler>(geom_handler));
             }
 
-        }; // class extended_geometry_decoder
-
-        template <typename TIterator>
-        using geometry_decoder = extended_geometry_decoder<2, 0, TIterator>;
+        }; // class geometry_decoder
 
     } // namespace detail
 

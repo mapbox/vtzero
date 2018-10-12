@@ -145,7 +145,7 @@ TEST_CASE("Calling decode_point() decoding valid multipoint with geometric attri
     const attr_container attr = {10 + (0u << 4u), 2, 0, 9, 7,
                                  10 + (1u << 4u), 2, 0, 7, 4};
 
-    vtzero::detail::extended_geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
+    vtzero::detail::geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
@@ -165,7 +165,7 @@ TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric 
     const attr_container attr = {10 + (0u << 4u), 2, 0, 9, 7,
                                  10 + (1u << 4u), 2, 0, 7, 4};
 
-    vtzero::detail::extended_geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
+    vtzero::detail::geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),

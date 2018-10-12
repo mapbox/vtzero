@@ -9,7 +9,7 @@
 
 using container = std::vector<uint32_t>;
 using iterator = container::const_iterator;
-using geom_decoder = vtzero::detail::geometry_decoder<iterator>;
+using geom_decoder = vtzero::detail::geometry_decoder<2, 0, iterator>;
 
 TEST_CASE("geometry_decoder") {
     const container g = {};

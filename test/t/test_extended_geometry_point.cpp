@@ -12,9 +12,7 @@ using geom_iterator = geom_container::const_iterator;
 using elev_container = std::vector<int64_t>;
 using elev_iterator = elev_container::const_iterator;
 
-using attr_iterator = vtzero::detail::dummy_attr_iterator;
-
-using geom_decoder = vtzero::detail::extended_geometry_decoder<3, 0, geom_iterator, elev_iterator>;
+using geom_decoder = vtzero::detail::geometry_decoder<3, 0, geom_iterator, elev_iterator>;
 
 class dummy_geom_handler {
 
@@ -51,8 +49,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with empty input") {
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -71,8 +68,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid point") {
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     dummy_geom_handler handler;
     decoder.decode_point(handler);
@@ -86,8 +82,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid multipoint") {
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     REQUIRE(decoder.decode_point(dummy_geom_handler{}) == 10201);
 }
@@ -99,8 +94,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a linestring geometry 
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -119,8 +113,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a polygon geometry fai
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -139,8 +132,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with something other than M
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -159,8 +151,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a count of 0") {
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -179,8 +170,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with more data then expecte
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -225,8 +215,7 @@ TEST_CASE("Extended geometry: Calling decode_point() decoding valid multipoint")
     geom_decoder decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
-        elev.cbegin(), elev.cend(),
-        attr_iterator{}, attr_iterator{}};
+        elev.cbegin(), elev.cend()};
 
     value_geom_handler handler;
     const auto result = decoder.decode_point(handler);

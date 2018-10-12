@@ -96,7 +96,7 @@ namespace vtzero {
         }
 
         template <unsigned int MaxGeometricAttributes>
-        using geom_decoder_type = detail::extended_geometry_decoder<3,
+        using geom_decoder_type = detail::geometry_decoder<3,
               MaxGeometricAttributes,
               geom_iterator,
               protozero::pbf_reader::const_sint64_iterator,
