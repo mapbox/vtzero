@@ -16,8 +16,8 @@ using attr_container = std::vector<uint64_t>;
 using attr_iterator = attr_container::const_iterator;
 
 TEST_CASE("Geometric attributes") {
-    const attr_container attr = {10 + (0 << 4), 2, 0, 9, 7,
-                                 10 + (1 << 4), 2, 0, 7, 4};
+    const attr_container attr = {10 + (0u << 4u), 2, 0, 9, 7,
+                                 10 + (1u << 4u), 2, 0, 7, 4};
 
     vtzero::detail::geometric_attribute<attr_iterator> ga1{attr.begin() + 3, 0, 0, 2};
     vtzero::detail::geometric_attribute<attr_iterator> ga2{attr.begin() + 8, 0, 0, 2};
@@ -35,8 +35,8 @@ TEST_CASE("Geometric attributes") {
 }
 
 TEST_CASE("Geometric attributes with null values") {
-    const attr_container attr = {10 + (0 << 4), 3, 0, 9, 0, 7,
-                                 10 + (1 << 4), 4, 0, 0, 7, 0, 4};
+    const attr_container attr = {10 + (0u << 4u), 3, 0, 9, 0, 7,
+                                 10 + (1u << 4u), 4, 0, 0, 7, 0, 4};
 
     vtzero::detail::geometric_attribute<attr_iterator> ga1{attr.begin() + 0 + 3, 0, 0, 3};
     vtzero::detail::geometric_attribute<attr_iterator> ga2{attr.begin() + 6 + 3, 0, 0, 4};
@@ -142,8 +142,8 @@ public:
 TEST_CASE("Calling decode_point() decoding valid multipoint with geometric attributes") {
     const geom_container geom = {17, 10, 14, 3, 9};
     const elev_container elev = {22, 3};
-    const attr_container attr = {10 + (0 << 4), 2, 0, 9, 7,
-                                 10 + (1 << 4), 2, 0, 7, 4};
+    const attr_container attr = {10 + (0u << 4u), 2, 0, 9, 7,
+                                 10 + (1u << 4u), 2, 0, 7, 4};
 
     vtzero::detail::extended_geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
         geom.cbegin(), geom.cend(),
@@ -162,8 +162,8 @@ TEST_CASE("Calling decode_point() decoding valid multipoint with geometric attri
 TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric attributes") {
     const geom_container geom = {9, 4, 4, 18, 0, 16, 16, 0};
     const elev_container elev = {22, 3, 4};
-    const attr_container attr = {10 + (0 << 4), 2, 0, 9, 7,
-                                 10 + (1 << 4), 2, 0, 7, 4};
+    const attr_container attr = {10 + (0u << 4u), 2, 0, 9, 7,
+                                 10 + (1u << 4u), 2, 0, 7, 4};
 
     vtzero::detail::extended_geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
         geom.cbegin(), geom.cend(),
