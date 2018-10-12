@@ -572,7 +572,7 @@ namespace vtzero {
 
             using iterator_type = TIterator;
 
-            geometry_decoder(iterator_type begin, iterator_type end, std::size_t max) :
+            geometry_decoder(std::size_t max, iterator_type begin, iterator_type end) :
                 extended_geometry_decoder<2, 0, iterator_type, dummy_elev_iterator, dummy_attr_iterator>(
                                           max,
                                           begin, end,
