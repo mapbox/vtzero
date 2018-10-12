@@ -587,6 +587,92 @@ namespace vtzero {
 
     }; // class layer
 
+    inline feature::feature(const layer* layer, const data_view data) :
+        m_layer(layer) {
+        vtzero_assert(layer);
+        vtzero_assert(data.data());
+
+        protozero::pbf_message<detail::pbf_feature> reader{data};
+
+        while (reader.next()) {
+            switch (reader.tag_and_type()) {
+                case protozero::tag_and_type(detail::pbf_feature::id, protozero::pbf_wire_type::varint):
+                    if (m_id_type != id_type::no_id) {
+                        throw format_exception{"Feature has more than one id/string_id field"};
+                    }
+                    m_integer_id = reader.get_uint64();
+                    m_id_type = id_type::integer_id;
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
+                    if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
+                        throw format_exception{"Feature has more than one tags field"};
+                    }
+                    if (m_attributes.begin() != protozero::pbf_reader::const_uint64_iterator{}) {
+                        throw format_exception{"Feature has both tags and attributes field"};
+                    }
+                    m_properties = reader.get_packed_uint32();
+                    m_property_iterator = m_properties.begin();
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
+                    if (m_attributes.begin() != protozero::pbf_reader::const_uint64_iterator{}) {
+                        throw format_exception{"Feature has more than one attributes field"};
+                    }
+                    if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
+                        throw format_exception{"Feature has both tags and attributes field"};
+                    }
+                    m_attributes = reader.get_packed_uint64();
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
+                        const auto type = reader.get_enum();
+                        // spec 4.3.4 "Geometry Types"
+                        if (type < 0 || type > 3) {
+                            throw format_exception{"Unknown geometry type (spec 4.3.4)"};
+                        }
+                        m_geometry_type = static_cast<GeomType>(type);
+                    }
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
+                    if (!m_geometry.empty()) {
+                        throw format_exception{"Feature has more than one geometry field"};
+                    }
+                    m_geometry = reader.get_view();
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::elevations, protozero::pbf_wire_type::length_delimited):
+                    if (!m_elevations.empty()) {
+                        throw format_exception{"Feature has more than one elevations field"};
+                    }
+                    m_elevations = reader.get_view();
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::geometric_attributes, protozero::pbf_wire_type::length_delimited):
+                    if (!m_geometric_attributes.empty()) {
+                        throw format_exception{"Feature has more than one geometric_attributes field"};
+                    }
+                    m_geometric_attributes = reader.get_view();
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::string_id, protozero::pbf_wire_type::length_delimited):
+                    if (m_id_type != id_type::no_id) {
+                        throw format_exception{"Feature has more than one id/string_id field"};
+                    }
+                    m_string_id = reader.get_view();
+                    m_id_type = id_type::string_id;
+                    break;
+                default:
+                    reader.skip(); // ignore unknown fields
+            }
+        }
+
+        // spec 4.2 "A feature MUST contain a geometry field."
+        if (m_geometry.empty()) {
+            throw format_exception{"Missing geometry field in feature (spec 4.2)"};
+        }
+
+        const auto size = m_properties.size();
+        if (size % 2 != 0) {
+            throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
+        }
+        m_num_properties = size / 2;
+    }
+
     inline property feature::next_property() {
         vtzero_assert(m_layer->version() < 3);
         const auto idxs = next_property_indexes();
