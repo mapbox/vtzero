@@ -240,7 +240,8 @@ namespace vtzero {
                         m_attrs[m_size] = {it, complex_value >> 4u, scaling, attr_count};
                         ++m_size;
 
-                        while (attr_count-- > 0) {
+                        while (attr_count > 0) {
+                            --attr_count;
                             ++it;
                             if (attr_count != 0 && it == end) {
                                 throw format_exception{"geometric attributes end too soon"};
