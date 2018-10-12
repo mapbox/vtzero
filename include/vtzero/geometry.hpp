@@ -387,8 +387,20 @@ namespace vtzero {
                 }
 
                 // spec 4.3.2 "A ParameterInteger is zigzag encoded"
-                m_cursor.x += protozero::decode_zigzag32(*m_geom_it++);
-                m_cursor.y += protozero::decode_zigzag32(*m_geom_it++);
+                int64_t x = protozero::decode_zigzag32(*m_geom_it++);
+                int64_t y = protozero::decode_zigzag32(*m_geom_it++);
+
+                // x and y are int64_t so this addition can never overflow.
+                // If we did this calculation directly with int32_t we'd get
+                // a possible integer overflow.
+                x += m_cursor.x;
+                y += m_cursor.y;
+
+                // The cast is okay, because a valid vector tile can never
+                // contain values that would overflow here and we don't care
+                // what happens to invalid tiles here.
+                m_cursor.x = static_cast<int32_t>(x);
+                m_cursor.y = static_cast<int32_t>(y);
 
                 if (Dimensions == 3 && m_elev_it != m_elev_end) {
                     m_cursor.z += *m_elev_it++;
