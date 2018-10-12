@@ -614,6 +614,9 @@ namespace vtzero {
                     m_property_iterator = m_properties.begin();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
+                    if (layer->version() <= 2) {
+                        throw format_exception{"Found attributes field in layer with version <= 2"};
+                    }
                     if (m_attributes.begin() != protozero::pbf_reader::const_uint64_iterator{}) {
                         throw format_exception{"Feature has more than one attributes field"};
                     }
@@ -638,18 +641,27 @@ namespace vtzero {
                     m_geometry = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::elevations, protozero::pbf_wire_type::length_delimited):
+                    if (layer->version() <= 2) {
+                        throw format_exception{"Found elevation in layer with version <= 2"};
+                    }
                     if (!m_elevations.empty()) {
                         throw format_exception{"Feature has more than one elevations field"};
                     }
                     m_elevations = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::geometric_attributes, protozero::pbf_wire_type::length_delimited):
+                    if (layer->version() <= 2) {
+                        throw format_exception{"Found geometric attribute in layer with version <= 2"};
+                    }
                     if (!m_geometric_attributes.empty()) {
                         throw format_exception{"Feature has more than one geometric_attributes field"};
                     }
                     m_geometric_attributes = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::string_id, protozero::pbf_wire_type::length_delimited):
+                    if (layer->version() <= 2) {
+                        throw format_exception{"Found String ID in layer with version <= 2"};
+                    }
                     if (m_id_type != id_type::no_id) {
                         throw format_exception{"Feature has more than one id/string_id field"};
                     }
