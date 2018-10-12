@@ -249,9 +249,9 @@ TEST_CASE("Create layer with x/y/zoom/extent") {
     vtzero::vector_tile tile{data};
     auto layer = tile.next_layer();
 
-    REQUIRE(layer.tile().x() == 5);
-    REQUIRE(layer.tile().y() == 3);
-    REQUIRE(layer.tile().zoom() == 12);
+    REQUIRE(layer.get_tile().x() == 5);
+    REQUIRE(layer.get_tile().y() == 3);
+    REQUIRE(layer.get_tile().zoom() == 12);
     REQUIRE(layer.extent() == 8192);
 }
 

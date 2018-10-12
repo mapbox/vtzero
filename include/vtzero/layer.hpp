@@ -301,7 +301,7 @@ namespace vtzero {
          *
          * @pre @code valid() @endcode
          */
-        tile tile() const noexcept {
+        tile get_tile() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
 
             return m_tile;

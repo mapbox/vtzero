@@ -13,7 +13,7 @@ TEST_CASE("default constructed layer") {
 
     REQUIRE(layer.data() == vtzero::data_view{});
     REQUIRE_ASSERT(layer.version());
-    REQUIRE_ASSERT(layer.tile());
+    REQUIRE_ASSERT(layer.get_tile());
     REQUIRE_ASSERT(layer.extent());
     REQUIRE_ASSERT(layer.name());
 
@@ -40,7 +40,7 @@ TEST_CASE("read a layer") {
     REQUIRE(layer);
 
     REQUIRE(layer.version() == 1);
-    REQUIRE(layer.tile() == vtzero::tile{});
+    REQUIRE(layer.get_tile() == vtzero::tile{});
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.name() == "bridge");
 
