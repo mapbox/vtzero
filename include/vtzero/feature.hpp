@@ -25,6 +25,7 @@ documentation.
 
 #include <protozero/pbf_message.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
@@ -281,47 +282,9 @@ namespace vtzero {
                    !m_geometric_attributes.empty();
         }
 
-        /**
-         * Get the next property in this feature.
-         *
-         * Complexity: Constant.
-         *
-         * @returns The next property or the invalid property if there are no
-         *          more properties.
-         * @throws format_exception if the feature data is ill-formed.
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         * @pre @code valid() @endcode
-         */
-        property next_property();
-
-        /**
-         * Get the indexes into the key/value table for the next property in
-         * this feature.
-         *
-         * Complexity: Constant.
-         *
-         * @returns The next index_value_pair or an invalid index_value_pair
-         *          if there are no more properties.
-         * @throws format_exception if the feature data is ill-formed.
-         * @throws out_of_range_exception if the key or value index is not
-         *         within the range of indexes in the layer key/value table.
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         * @pre @code valid() @endcode
-         */
-        index_value_pair next_property_indexes();
-
-        /**
-         * Reset the property iterator. The next time next_property() or
-         * next_property_indexes() is called, it will begin from the first
-         * property again.
-         *
-         * Complexity: Constant.
-         *
-         * @pre @code valid() @endcode
-         */
-        void reset_property() noexcept {
-            vtzero_assert_in_noexcept_function(valid());
-            m_property_iterator = m_properties.begin();
+        /// XXX helper function which might be removed later
+        bool equal_properties(const feature& other) const noexcept {
+            return std::equal(m_properties.cbegin(), m_properties.cend(), other.m_properties.cbegin());
         }
 
         /**

@@ -369,18 +369,9 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
                 f1.geometry_type() != f2.geometry_type() ||
                 f1.geometry_data() != f2.geometry_data() ||
                 f1.elevations_data() != f2.elevations_data() ||
-                f1.attributes_data() != f2.attributes_data()) {
+                f1.attributes_data() != f2.attributes_data() ||
+                !f1.equal_properties(f2)) {
                 return false;
-            }
-            for (auto p1 = f1.next_property(), p2 = f2.next_property();
-                p1 || p2;
-                p1 = f1.next_property(), p2 = f2.next_property()) {
-                if (!p1 ||
-                    !p2 ||
-                    p1.key() != p2.key() ||
-                    p1.value() != p2.value()) {
-                    return false;
-                }
             }
         }
     }
@@ -450,9 +441,7 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
             fbuilder.set_integer_id(feature.id());
             if (feature.geometry_type() == vtzero::GeomType::POINT) {
                 fbuilder.copy_geometry(feature);
-                while (auto property = feature.next_property()) {
-                    fbuilder.add_property(property.key(), property.value());
-                }
+                fbuilder.copy_attributes(feature);
                 fbuilder.commit();
                 ++n;
             } else {

@@ -725,47 +725,6 @@ namespace vtzero {
         m_num_properties = size / 2;
     }
 
-    inline property feature::next_property() {
-        vtzero_assert(m_layer->version() < 3);
-        const auto idxs = next_property_indexes();
-        property p{};
-        if (idxs.valid()) {
-            p = {m_layer->key(idxs.key()),
-                 m_layer->value(idxs.value())};
-        }
-        return p;
-    }
-
-    inline index_value_pair feature::next_property_indexes() {
-        vtzero_assert(valid());
-        vtzero_assert(m_layer->version() < 3);
-
-        if (m_property_iterator == m_properties.end()) {
-            return {};
-        }
-
-        const auto ki = *m_property_iterator++;
-        if (!index_value{ki}.valid()) {
-            throw out_of_range_exception{ki};
-        }
-
-        vtzero_assert(m_property_iterator != m_properties.end());
-        const auto vi = *m_property_iterator++;
-        if (!index_value{vi}.valid()) {
-            throw out_of_range_exception{vi};
-        }
-
-        if (ki >= m_layer->key_table_size()) {
-            throw out_of_range_exception{ki};
-        }
-
-        if (vi >= m_layer->value_table_size()) {
-            throw out_of_range_exception{vi};
-        }
-
-        return {ki, vi};
-    }
-
     template <typename TFunc>
     bool feature::for_each_property(TFunc&& func) const {
         vtzero_assert(valid());
