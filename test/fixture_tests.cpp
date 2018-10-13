@@ -519,7 +519,7 @@ TEST_CASE("MVT test 027: Layer with unused bool property value") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 0); // NOLINT(readability-container-size-empty)
+    REQUIRE_FALSE(feature.has_attributes());
 
     const auto& vtab = layer.value_table();
     REQUIRE(vtab.size() == 1);
@@ -547,7 +547,7 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=i am a string value\n"};
     AttributeDumpHandler handler;
@@ -563,7 +563,7 @@ TEST_CASE("MVT test 033: Layer with single feature with float property value") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=float(3.100000)\n"};
     AttributeDumpHandler handler;
@@ -579,7 +579,7 @@ TEST_CASE("MVT test 034: Layer with single feature with double property value") 
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=double(1.230000)\n"};
     AttributeDumpHandler handler;
@@ -595,7 +595,7 @@ TEST_CASE("MVT test 035: Layer with single feature with int property value") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=sint(6)\n"};
     AttributeDumpHandler handler;
@@ -611,7 +611,7 @@ TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=uint(87948)\n"};
     AttributeDumpHandler handler;
@@ -627,7 +627,7 @@ TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=sint(87948)\n"};
     AttributeDumpHandler handler;
@@ -687,7 +687,7 @@ TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the 
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     AttributeDumpHandler handler;
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
@@ -714,7 +714,7 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
     const auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     AttributeDumpHandler handler;
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
@@ -732,7 +732,7 @@ TEST_CASE("MVT test 043: A layer with six points that all share the same key but
 
     auto feature = layer.next_feature();
     REQUIRE(feature);
-    REQUIRE(feature.num_properties() == 1);
+    REQUIRE(feature.has_attributes());
 
     const std::string expected1{"poi=swing\n"};
     REQUIRE(feature.decode_attributes(handler) == expected1);

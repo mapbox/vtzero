@@ -36,7 +36,7 @@ TEST_CASE("property map") {
 
     const auto feature = layer.next_feature();
     REQUIRE(feature.valid());
-    REQUIRE(feature.num_properties() == 3);
+    REQUIRE(feature.has_attributes());
 
 #ifdef VTZERO_TEST_WITH_VARIANT
     SECTION("std::map") {

@@ -282,17 +282,6 @@ namespace vtzero {
         }
 
         /**
-         * Returns the number of properties in this feature.
-         *
-         * Complexity: Constant.
-         *
-         * Always returns 0 for invalid features.
-         */
-        std::size_t num_properties() const noexcept {
-            return m_num_properties;
-        }
-
-        /**
          * Get the next property in this feature.
          *
          * Complexity: Constant.

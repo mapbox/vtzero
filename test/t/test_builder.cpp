@@ -365,8 +365,8 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
             if (!f1 ||
                 !f2 ||
                 f1.id() != f2.id() ||
+                f1.string_id() != f2.string_id() ||
                 f1.geometry_type() != f2.geometry_type() ||
-                f1.num_properties() != f2.num_properties() ||
                 f1.geometry_data() != f2.geometry_data() ||
                 f1.elevations_data() != f2.elevations_data() ||
                 f1.attributes_data() != f2.attributes_data()) {

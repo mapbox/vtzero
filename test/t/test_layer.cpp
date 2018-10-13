@@ -82,7 +82,7 @@ TEST_CASE("access features in a layer by id") {
 
     const auto feature = layer.get_feature_by_id(122);
     REQUIRE(feature.id() == 122);
-    REQUIRE(feature.num_properties() == 0);
+    REQUIRE_FALSE(feature.has_attributes());
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
     REQUIRE_FALSE(feature.geometry_data().empty());
 

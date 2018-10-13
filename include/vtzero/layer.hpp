@@ -717,6 +717,7 @@ namespace vtzero {
             throw format_exception{"Missing geometry field in feature (spec 4.2)"};
         }
 
+        // TODO(joto) this can only be removed if we check for this when decoding!
         const auto size = m_properties.size();
         if (size % 2 != 0) {
             throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
