@@ -1,7 +1,12 @@
 
 #include <test.hpp>
 
+#include <vtzero/builder.hpp>
+#include <vtzero/feature.hpp>
 #include <vtzero/geometry.hpp>
+#include <vtzero/layer.hpp>
+#include <vtzero/types.hpp>
+#include <vtzero/vector_tile.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -178,5 +183,143 @@ TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric 
     REQUIRE(result[0] == point_with_attr(2, 2, 22, 4, 3));
     REQUIRE(result[1] == point_with_attr(2, 10, 25, 7, 1));
     REQUIRE(result[2] == point_with_attr(10, 10, 29, 0, 0));
+}
+
+TEST_CASE("build feature with list geometric attributes and read it again") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+    {
+        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        fbuilder.set_integer_id(1);
+        fbuilder.add_point(10, 20);
+        fbuilder.add_scalar_attribute("some_int", 111u);
+        fbuilder.switch_to_geometric_attributes();
+        fbuilder.start_list_attribute_with_key("list", 8);
+        fbuilder.attribute_value(vtzero::data_view{"foo"}); // 1
+        fbuilder.attribute_value(17u); // 2
+        fbuilder.attribute_value(-22); // 3
+        fbuilder.attribute_value(true); // 4
+        fbuilder.attribute_value(false); // 5
+        fbuilder.attribute_value(vtzero::null_type{}); // 6
+        fbuilder.attribute_value("bar"); // 7
+        fbuilder.attribute_value(std::string{"baz"}); // 8
+        fbuilder.commit();
+    }
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer);
+    REQUIRE(layer.name() == "test");
+    REQUIRE(layer.version() == 3);
+    REQUIRE(layer.extent() == 4096);
+    REQUIRE(layer.num_features() == 1);
+
+    const auto feature = layer.next_feature();
+    REQUIRE(feature);
+    REQUIRE(feature.id() == 1);
+
+    {
+        AttributeCountHandler handler;
+        const auto result = feature.decode_attributes(handler);
+        REQUIRE(result.first == 1);
+        REQUIRE(result.second == 1);
+    }
+    {
+        AttributeCountHandler handler;
+        const auto result = feature.decode_geometric_attributes(handler);
+        REQUIRE(result.first == 1);
+        REQUIRE(result.second == 9);
+    }
+    {
+        AttributeCountHandler handler;
+        const auto result = feature.decode_all_attributes(handler);
+        REQUIRE(result.first == 2);
+        REQUIRE(result.second == 10);
+    }
+    {
+        std::string expected{"some_int=111\n"};
+        AttributeDumpHandler handler;
+        REQUIRE(feature.decode_attributes(handler) == expected);
+    }
+    {
+        std::string expected{"list=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
+        AttributeDumpHandler handler;
+        REQUIRE(feature.decode_geometric_attributes(handler) == expected);
+    }
+    {
+        std::string expected{"some_int=111\nlist=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
+        AttributeDumpHandler handler;
+        REQUIRE(feature.decode_all_attributes(handler) == expected);
+    }
+}
+
+TEST_CASE("build feature with number list geometric attributes and read it again") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+    const auto index = lbuilder.add_attribute_scaling(vtzero::scaling{0, 2.0, 0.0});
+    {
+        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        fbuilder.set_integer_id(1);
+        fbuilder.add_point(10, 20);
+        fbuilder.switch_to_geometric_attributes();
+        fbuilder.start_number_list_with_key("nlist", 4, index);
+        fbuilder.number_list_value(10);
+        fbuilder.number_list_value(20);
+        fbuilder.number_list_null_value();
+        fbuilder.number_list_value(30);
+        fbuilder.commit();
+    }
+
+    const std::string data = tbuilder.serialize();
+
+    vtzero::vector_tile tile{data};
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer);
+    REQUIRE(layer.name() == "test");
+    REQUIRE(layer.version() == 3);
+    REQUIRE(layer.num_features() == 1);
+    REQUIRE(layer.num_attribute_scalings() == 1);
+
+    const auto feature = layer.next_feature();
+    REQUIRE(feature);
+    REQUIRE(feature.id() == 1);
+
+    {
+        AttributeCountHandler handler;
+        const auto result = feature.decode_attributes(handler);
+        REQUIRE(result.first == 0);
+        REQUIRE(handler.count_number_list == 0);
+    }
+    {
+        AttributeCountHandler handler;
+        const auto result = feature.decode_geometric_attributes(handler);
+        REQUIRE(result.first == 1);
+        REQUIRE(handler.count_number_list == 4);
+    }
+    {
+        AttributeCountHandler handler;
+        const auto result = feature.decode_all_attributes(handler);
+        REQUIRE(result.first == 1);
+        REQUIRE(handler.count_number_list == 4);
+    }
+    {
+        std::string expected{""};
+        AttributeDumpHandler handler;
+        REQUIRE(feature.decode_attributes(handler) == expected);
+    }
+    {
+        std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
+        AttributeDumpHandler handler;
+        REQUIRE(feature.decode_geometric_attributes(handler) == expected);
+    }
+    {
+        std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
+        AttributeDumpHandler handler;
+        REQUIRE(feature.decode_all_attributes(handler) == expected);
+    }
 }
 

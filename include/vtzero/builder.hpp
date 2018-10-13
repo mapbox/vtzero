@@ -147,7 +147,7 @@ namespace vtzero {
                 m_stage = detail::stage::attributes;
                 return;
             }
-            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
         }
 
     public:
@@ -184,6 +184,23 @@ namespace vtzero {
 
         /// Builder classes can be moved
         feature_builder& operator=(feature_builder&& other) noexcept = default;
+
+        /**
+         * Call this after you have written all normal attributes, before
+         * you are writing the first geometric attribute.
+         */
+        void switch_to_geometric_attributes() {
+            if (m_stage == detail::stage::geometry) {
+                m_pbf_geometry.commit();
+            } else {
+                vtzero_assert(m_stage == detail::stage::attributes);
+                if (m_pbf_attributes.valid()) {
+                    m_pbf_attributes.commit();
+                }
+            }
+            m_stage = detail::stage::geom_attributes;
+            m_pbf_attributes = {m_feature_writer, detail::pbf_feature::geometric_attributes};
+        }
 
         /**
          * Copy the geometry from the geometry of an existing feature.
@@ -276,7 +293,7 @@ namespace vtzero {
          */
         template <typename TValue>
         void attribute_value(TValue&& value, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
             if (version() < 3) {
                 add_value_internal_vt2(std::forward<TValue>(value));
             } else {
@@ -326,7 +343,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_list_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_list, size);
         }
@@ -347,7 +364,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_number_list(std::size_t size, index_value index, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
             add_direct_value(index.value());
@@ -389,7 +406,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void number_list_value(int64_t value, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_direct_value(protozero::encode_zigzag64(value - m_value) + 1);
             m_value = value;
@@ -401,7 +418,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void number_list_null_value(std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_direct_value(0);
         }
@@ -446,7 +463,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_map_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes);
+            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
             vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_map, size);
         }
