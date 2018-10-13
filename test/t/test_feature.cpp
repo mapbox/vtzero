@@ -48,7 +48,7 @@ TEST_CASE("iterate over all attributes of a feature") {
     auto layer = tile.get_layer_by_name("bridge");
     const auto feature = layer.next_feature();
 
-    const std::string expected{"class=main\noneway=0\nosm_id=0\ntype=primary\n"};
+    const std::string expected{"class=main\noneway=sint(0)\nosm_id=sint(0)\ntype=primary\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }

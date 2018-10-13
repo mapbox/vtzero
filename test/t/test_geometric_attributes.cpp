@@ -240,17 +240,17 @@ TEST_CASE("build feature with list geometric attributes and read it again") {
         REQUIRE(result.second == 10);
     }
     {
-        const std::string expected{"some_int=111\n"};
+        const std::string expected{"some_int=uint(111)\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
     {
-        const std::string expected{"list=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
+        const std::string expected{"list=list(8)[\nfoo\nuint(17)\nsint(-22)\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_geometric_attributes(handler) == expected);
     }
     {
-        const std::string expected{"some_int=111\nlist=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
+        const std::string expected{"some_int=uint(111)\nlist=list(8)[\nfoo\nuint(17)\nsint(-22)\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_all_attributes(handler) == expected);
     }

@@ -293,7 +293,7 @@ TEST_CASE("add features using a key index") {
     const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 7);
 
-    const std::string expected{"some_key=12\n"};
+    const std::string expected{"some_key=sint(12)\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
@@ -340,7 +340,7 @@ TEST_CASE("add features using a value index") {
     const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
 
-    const std::string expected{"some_key=12\n"};
+    const std::string expected{"some_key=sint(12)\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }

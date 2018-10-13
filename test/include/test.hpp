@@ -213,10 +213,37 @@ struct AttributeDumpHandler {
         return true;
     }
 
-    template <typename T>
-    bool attribute_value(T value, std::size_t /*depth*/) {
+    bool attribute_value(double value, std::size_t /*depth*/) {
+        out += "double(";
         out += std::to_string(value);
-        out += '\n';
+        out += ")\n";
+        return true;
+    }
+
+    bool attribute_value(float value, std::size_t /*depth*/) {
+        out += "float(";
+        out += std::to_string(value);
+        out += ")\n";
+        return true;
+    }
+
+    bool attribute_value(int64_t value, std::size_t /*depth*/) {
+        out += "sint(";
+        out += std::to_string(value);
+        out += ")\n";
+        return true;
+    }
+
+    bool attribute_value(uint64_t value, std::size_t /*depth*/) {
+        out += "uint(";
+        out += std::to_string(value);
+        out += ")\n";
+        return true;
+    }
+
+    template <typename T>
+    bool attribute_value(T /*value*/, std::size_t /*depth*/) {
+        out += "ERROR\n";
         return true;
     }
 

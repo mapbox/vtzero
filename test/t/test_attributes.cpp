@@ -162,7 +162,7 @@ TEST_CASE("build feature with list and map attributes and read it again") {
         fbuilder.commit();
     }
 
-    std::string expected{"some_int=111\nlist=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\nanother_int=222\nmap=map(2)[\nx=3\ny=5\n]\na_different_int=333\n"};
+    const std::string expected{"some_int=uint(111)\nlist=list(8)[\nfoo\nuint(17)\nsint(-22)\ntrue\nfalse\nnull\nbar\nbaz\n]\nanother_int=uint(222)\nmap=map(2)[\nx=sint(3)\ny=sint(5)\n]\na_different_int=uint(333)\n"};
 
     const std::string data = tbuilder.serialize();
 
@@ -208,7 +208,7 @@ TEST_CASE("build feature with number list attributes and read it again") {
         fbuilder.commit();
     }
 
-    std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\nx=3\n"};
+    const std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\nx=sint(3)\n"};
 
     const std::string data = tbuilder.serialize();
 
@@ -275,7 +275,7 @@ TEST_CASE("build feature with list property from array and read it again") {
 
     {
         AttributeDumpHandler handler;
-        REQUIRE(feature.decode_attributes(handler) == "pi=list(8)[\n3\n1\n4\n1\n5\n9\n2\n6\n]\n");
+        REQUIRE(feature.decode_attributes(handler) == "pi=list(8)[\nsint(3)\nsint(1)\nsint(4)\nsint(1)\nsint(5)\nsint(9)\nsint(2)\nsint(6)\n]\n");
     }
 }
 

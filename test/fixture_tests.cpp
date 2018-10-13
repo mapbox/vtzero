@@ -565,7 +565,7 @@ TEST_CASE("MVT test 033: Layer with single feature with float property value") {
     const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const std::string expected{"key1=3.100000\n"};
+    const std::string expected{"key1=float(3.100000)\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
@@ -581,7 +581,7 @@ TEST_CASE("MVT test 034: Layer with single feature with double property value") 
     const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const std::string expected{"key1=1.230000\n"};
+    const std::string expected{"key1=double(1.230000)\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
@@ -597,7 +597,7 @@ TEST_CASE("MVT test 035: Layer with single feature with int property value") {
     const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const std::string expected{"key1=6\n"};
+    const std::string expected{"key1=sint(6)\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
@@ -613,7 +613,7 @@ TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
     const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const std::string expected{"key1=87948\n"};
+    const std::string expected{"key1=uint(87948)\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
@@ -629,7 +629,7 @@ TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
     const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const std::string expected{"key1=87948\n"};
+    const std::string expected{"key1=sint(87948)\n"};
     AttributeDumpHandler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
