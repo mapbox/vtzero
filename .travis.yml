@@ -48,6 +48,10 @@ addons_shortcuts:
     apt:
       sources: [ 'ubuntu-toolchain-r-test' ]
       packages: [ 'libboost1.55-dev', 'g++-6', 'gcc-6' ]
+  addons_gcc7: &gcc7
+    apt:
+      sources: [ 'ubuntu-toolchain-r-test' ]
+      packages: [ 'libboost1.55-dev', 'g++-7', 'gcc-7' ]
 
 #-----------------------------------------------------------------------------
 
@@ -117,6 +121,10 @@ matrix:
       compiler: "gcc-6"
       env: BUILD='Release' CC=gcc-6 CXX=g++-6
       addons: *gcc6
+    - os: linux
+      compiler: "gcc-7"
+      env: BUILD='Debug' CC=gcc-7 CXX=g++-7
+      addons: *gcc7
     - os: osx
       osx_image: xcode7.3
       compiler: clang
