@@ -290,10 +290,12 @@ TEST_CASE("add features using a key index") {
     REQUIRE(tile.count_layers() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 7);
-    const auto property = feature.next_property();
-    REQUIRE(property.value().int_value() == 12);
+
+    const std::string expected{"some_key=12\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 TEST_CASE("add features using a value index") {
@@ -335,9 +337,11 @@ TEST_CASE("add features using a value index") {
     REQUIRE(tile.count_layers() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);
-    const auto property = feature.next_property();
-    REQUIRE(property.value().sint_value() == 12);
+
+    const std::string expected{"some_key=12\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 

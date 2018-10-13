@@ -240,17 +240,17 @@ TEST_CASE("build feature with list geometric attributes and read it again") {
         REQUIRE(result.second == 10);
     }
     {
-        std::string expected{"some_int=111\n"};
+        const std::string expected{"some_int=111\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
     {
-        std::string expected{"list=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
+        const std::string expected{"list=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_geometric_attributes(handler) == expected);
     }
     {
-        std::string expected{"some_int=111\nlist=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
+        const std::string expected{"some_int=111\nlist=list(8)[\nfoo\n17\n-22\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_all_attributes(handler) == expected);
     }
@@ -307,17 +307,17 @@ TEST_CASE("build feature with number list geometric attributes and read it again
         REQUIRE(handler.count_number_list == 4);
     }
     {
-        std::string expected{""};
+        const std::string expected{""};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
     {
-        std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
+        const std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_geometric_attributes(handler) == expected);
     }
     {
-        std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
+        const std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_all_attributes(handler) == expected);
     }

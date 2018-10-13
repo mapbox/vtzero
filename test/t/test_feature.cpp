@@ -42,64 +42,15 @@ TEST_CASE("read a feature") {
     REQUIRE(feature.num_properties() == 4);
 }
 
-TEST_CASE("iterate over all properties of a feature") {
+TEST_CASE("iterate over all attributes of a feature") {
     const auto data = load_test_tile();
     vtzero::vector_tile tile{data};
     auto layer = tile.get_layer_by_name("bridge");
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
 
-    int count = 0;
-    SECTION("external iterator") {
-        while (auto p = feature.next_property()) {
-            ++count;
-            if (p.key() == "type") {
-                REQUIRE(p.value().type() == vtzero::property_value_type::string_value);
-                REQUIRE(p.value().string_value() == "primary");
-            }
-        }
-    }
-
-    SECTION("internal iterator") {
-        feature.for_each_property([&count](const vtzero::property& p) {
-            ++count;
-            if (p.key() == "type") {
-                REQUIRE(p.value().type() == vtzero::property_value_type::string_value);
-                REQUIRE(p.value().string_value() == "primary");
-            }
-            return true;
-        });
-    }
-
-    REQUIRE(count == 4);
-}
-
-TEST_CASE("iterate over some properties of a feature") {
-    const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
-    auto layer = tile.get_layer_by_name("bridge");
-    REQUIRE(layer.valid());
-
-    auto feature = layer.next_feature();
-    REQUIRE(feature.valid());
-
-    int count = 0;
-    SECTION("external iterator") {
-        while (auto p = feature.next_property()) {
-            ++count;
-            if (p.key() == "oneway") {
-                break;
-            }
-        }
-    }
-
-    SECTION("internal iterator") {
-        feature.for_each_property([&count](const vtzero::property& p) {
-            ++count;
-            return p.key() != "oneway";
-        });
-    }
-
-    REQUIRE(count == 2);
+    const std::string expected{"class=main\noneway=0\nosm_id=0\ntype=primary\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 struct PropertyHandler {

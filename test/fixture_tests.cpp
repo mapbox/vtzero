@@ -546,31 +546,12 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    auto prop = feature.next_property();
-    REQUIRE(prop.key() == "key1");
-    REQUIRE(prop.value().string_value() == "i am a string value");
-
-    feature.reset_property();
-    auto ii = feature.next_property_indexes();
-    REQUIRE(ii);
-    REQUIRE(ii.key().value() == 0);
-    REQUIRE(ii.value().value() == 0);
-    REQUIRE_FALSE(feature.next_property_indexes());
-
-    int32_t sum = 0;
-    int32_t count = 0;
-    feature.for_each_property_indexes([&](vtzero::index_value_pair&& ivp) {
-        sum += ivp.key().value();
-        sum += ivp.value().value();
-        ++count;
-        return true;
-    });
-
-    REQUIRE(sum == 0);
-    REQUIRE(count == 1);
+    const std::string expected{"key1=i am a string value\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 TEST_CASE("MVT test 033: Layer with single feature with float property value") {
@@ -581,12 +562,12 @@ TEST_CASE("MVT test 033: Layer with single feature with float property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const auto prop = feature.next_property();
-    REQUIRE(prop.key() == "key1");
-    REQUIRE(prop.value().float_value() == Approx(3.1));
+    const std::string expected{"key1=3.100000\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 TEST_CASE("MVT test 034: Layer with single feature with double property value") {
@@ -597,12 +578,12 @@ TEST_CASE("MVT test 034: Layer with single feature with double property value") 
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const auto prop = feature.next_property();
-    REQUIRE(prop.key() == "key1");
-    REQUIRE(prop.value().double_value() == Approx(1.23));
+    const std::string expected{"key1=1.230000\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 TEST_CASE("MVT test 035: Layer with single feature with int property value") {
@@ -613,12 +594,12 @@ TEST_CASE("MVT test 035: Layer with single feature with int property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const auto prop = feature.next_property();
-    REQUIRE(prop.key() == "key1");
-    REQUIRE(prop.value().int_value() == 6);
+    const std::string expected{"key1=6\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
@@ -629,12 +610,12 @@ TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const auto prop = feature.next_property();
-    REQUIRE(prop.key() == "key1");
-    REQUIRE(prop.value().uint_value() == 87948);
+    const std::string expected{"key1=87948\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
@@ -645,12 +626,12 @@ TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
 
-    const auto prop = feature.next_property();
-    REQUIRE(prop.key() == "key1");
-    REQUIRE(prop.value().sint_value() == 87948);
+    const std::string expected{"key1=87948\n"};
+    AttributeDumpHandler handler;
+    REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
 TEST_CASE("MVT test 038: Layer with all types of property value") {
@@ -705,21 +686,11 @@ TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the 
     REQUIRE(tile.count_layers() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
-    REQUIRE_THROWS_AS(feature.next_property(), const vtzero::out_of_range_exception&);
-}
 
-TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the layer decoded using next_property_indexes().") {
-    std::string buffer{open_tile("040/tile.mvt")};
-    vtzero::vector_tile tile{buffer};
-
-    REQUIRE(tile.count_layers() == 1);
-    auto layer = tile.next_layer();
-    REQUIRE(layer.num_features() == 1);
-    auto feature = layer.next_feature();
-    REQUIRE(feature.num_properties() == 1);
-    REQUIRE_THROWS_AS(feature.next_property_indexes(), const vtzero::out_of_range_exception&);
+    AttributeDumpHandler handler;
+    REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
 }
 
 TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
@@ -729,8 +700,10 @@ TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
     REQUIRE(tile.count_layers() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
-    auto feature = layer.next_feature();
-    REQUIRE_THROWS_AS(feature.next_property(), const vtzero::out_of_range_exception&);
+    const auto feature = layer.next_feature();
+
+    AttributeDumpHandler handler;
+    REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
 }
 
 TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in the layer.") {
@@ -740,9 +713,11 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
     REQUIRE(tile.count_layers() == 1);
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 1);
-    auto feature = layer.next_feature();
+    const auto feature = layer.next_feature();
     REQUIRE(feature.num_properties() == 1);
-    REQUIRE_THROWS_AS(feature.next_property(), const vtzero::out_of_range_exception&);
+
+    AttributeDumpHandler handler;
+    REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
 }
 
 TEST_CASE("MVT test 043: A layer with six points that all share the same key but each has a unique value.") {
@@ -753,22 +728,20 @@ TEST_CASE("MVT test 043: A layer with six points that all share the same key but
     auto layer = tile.next_layer();
     REQUIRE(layer.num_features() == 6);
 
+    AttributeDumpHandler handler;
+
     auto feature = layer.next_feature();
     REQUIRE(feature);
     REQUIRE(feature.num_properties() == 1);
 
-    auto property = feature.next_property();
-    REQUIRE(property);
-    REQUIRE(property.key() == "poi");
-    REQUIRE(property.value().string_value() == "swing");
+    const std::string expected1{"poi=swing\n"};
+    REQUIRE(feature.decode_attributes(handler) == expected1);
 
     feature = layer.next_feature();
     REQUIRE(feature);
 
-    property = feature.next_property();
-    REQUIRE(property);
-    REQUIRE(property.key() == "poi");
-    REQUIRE(property.value().string_value() == "water_fountain");
+    const std::string expected2{"poi=swing\npoi=water_fountain\n"};
+    REQUIRE(feature.decode_attributes(handler) == expected2);
 }
 
 TEST_CASE("MVT test 044: Geometry field begins with a ClosePath command, which is invalid") {
