@@ -56,12 +56,12 @@ namespace vtzero {
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
         uint32_it_range m_properties{}; // version 2 "tags"
-        uint64_it_range m_attributes{}; // version 3 attributes
         protozero::pbf_reader::const_uint32_iterator m_property_iterator{};
         std::size_t m_num_properties = 0;
 
         data_view m_geometry{};
         data_view m_elevations{};
+        data_view m_attributes{}; // version 3 attributes
         data_view m_geometric_attributes{};
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
 
@@ -85,6 +85,14 @@ namespace vtzero {
 
         elev_iterator elevations_end() const noexcept {
             return {m_elevations.data() + m_elevations.size(), m_elevations.data() + m_elevations.size()};
+        }
+
+        attr_iterator attributes_begin() const noexcept {
+            return {m_attributes.data(), m_attributes.data() + m_attributes.size()};
+        }
+
+        attr_iterator attributes_end() const noexcept {
+            return {m_attributes.data() + m_attributes.size(), m_attributes.data() + m_attributes.size()};
         }
 
         attr_iterator geometric_attributes_begin() const noexcept {
@@ -238,6 +246,17 @@ namespace vtzero {
          */
         data_view elevations_data() const noexcept {
             return m_elevations;
+        }
+
+        /**
+         * The vt3 attributes data of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * Always returns an empty data_view for invalid features.
+         */
+        data_view attributes_data() const noexcept {
+            return m_attributes;
         }
 
         /**

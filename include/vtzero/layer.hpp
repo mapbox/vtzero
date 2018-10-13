@@ -646,7 +646,7 @@ namespace vtzero {
                     if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
                         throw format_exception{"Feature has more than one tags field"};
                     }
-                    if (m_attributes.begin() != protozero::pbf_reader::const_uint64_iterator{}) {
+                    if (!m_attributes.empty()) {
                         throw format_exception{"Feature has both tags and attributes field"};
                     }
                     m_properties = reader.get_packed_uint32();
@@ -656,13 +656,13 @@ namespace vtzero {
                     if (layer->version() <= 2) {
                         throw format_exception{"Found attributes field in layer with version <= 2"};
                     }
-                    if (m_attributes.begin() != protozero::pbf_reader::const_uint64_iterator{}) {
+                    if (!m_attributes.empty()) {
                         throw format_exception{"Feature has more than one attributes field"};
                     }
                     if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
                         throw format_exception{"Feature has both tags and attributes field"};
                     }
-                    m_attributes = reader.get_packed_uint64();
+                    m_attributes = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
                         const auto type = reader.get_enum();
@@ -1058,8 +1058,9 @@ namespace vtzero {
 
     template <typename THandler>
     bool feature::decode_attributes_impl(THandler&& handler) const {
-        for (auto it = m_attributes.begin(); it != m_attributes.end();) {
-            if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, m_attributes.end())) {
+        const auto end = attributes_end();
+        for (auto it = attributes_begin(); it != end;) {
+            if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
                 return false;
             }
         }
