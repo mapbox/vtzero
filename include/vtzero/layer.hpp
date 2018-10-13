@@ -818,7 +818,7 @@ namespace vtzero {
     namespace detail {
 
         template <typename THandler, typename TIterator>
-        bool decode_property(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end);
+        bool decode_attribute(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end);
 
         template <typename TIterator>
         void skip_complex_value(std::size_t depth, TIterator& it, TIterator end) {
@@ -990,7 +990,7 @@ namespace vtzero {
                     }
                     while (vp > 0) {
                         --vp;
-                        if (!decode_property(handler, layer, depth + 1, it, end)) {
+                        if (!decode_attribute(handler, layer, depth + 1, it, end)) {
                             return false;
                         }
                     }
@@ -1035,7 +1035,7 @@ namespace vtzero {
         }
 
         template <typename THandler, typename TIterator>
-        bool decode_property(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end) {
+        bool decode_attribute(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end) {
             const auto ki = static_cast<uint32_t>(*it++);
             if (!index_value{ki}.valid()) {
                 throw out_of_range_exception{ki};
@@ -1059,7 +1059,7 @@ namespace vtzero {
     template <typename THandler>
     bool feature::decode_attributes_impl(THandler&& handler) const {
         for (auto it = m_attributes.begin(); it != m_attributes.end();) {
-            if (!detail::decode_property(std::forward<THandler>(handler), *m_layer, 0, it, m_attributes.end())) {
+            if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, m_attributes.end())) {
                 return false;
             }
         }
@@ -1133,7 +1133,7 @@ namespace vtzero {
     bool feature::decode_geometric_attributes_impl(THandler&& handler) const {
         const auto end = geometric_attributes_end();
         for (auto it = geometric_attributes_begin(); it != end;) {
-            if (!detail::decode_property(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
+            if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
                 return false;
             }
         }
