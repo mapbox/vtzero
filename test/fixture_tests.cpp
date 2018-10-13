@@ -500,7 +500,7 @@ TEST_CASE("MVT test 026: Extra value type") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = layer.next_feature();
-    REQUIRE(feature.empty());
+    REQUIRE_FALSE(feature.has_attributes());
 
     const auto& table = layer.value_table();
     REQUIRE(table.size() == 1);
@@ -674,7 +674,7 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
     auto feature = layer.next_feature();
     REQUIRE(feature.id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
-    REQUIRE(feature.empty());
+    REQUIRE_FALSE(feature.has_attributes());
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
 }

@@ -269,14 +269,16 @@ namespace vtzero {
         }
 
         /**
-         * Returns true if this feature doesn't have any properties.
+         * Returns true if this feature has any attributes;
          *
          * Complexity: Constant.
          *
          * Always returns true for invalid features.
          */
-        bool empty() const noexcept {
-            return m_num_properties == 0;
+        bool has_attributes() const noexcept {
+            return m_num_properties > 0 ||
+                   !m_attributes.empty() ||
+                   !m_geometric_attributes.empty();
         }
 
         /**
