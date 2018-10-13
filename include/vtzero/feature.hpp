@@ -95,6 +95,12 @@ namespace vtzero {
             return {m_geometric_attributes.data() + m_geometric_attributes.size(), m_geometric_attributes.data() + m_geometric_attributes.size()};
         }
 
+        template <typename THandler>
+        bool decode_attributes_impl(THandler&& handler) const;
+
+        template <typename THandler>
+        bool decode_geometric_attributes_impl(THandler&& handler) const;
+
         template <unsigned int MaxGeometricAttributes>
         using geom_decoder_type = detail::geometry_decoder<3,
               MaxGeometricAttributes,
@@ -335,7 +341,10 @@ namespace vtzero {
         bool for_each_property_indexes(TFunc&& func) const;
 
         /**
-         * Decode all properties in this feature.
+         * Decode all normal attributes of this feature.
+         *
+         * This does not decode geometric attributes. See the functions
+         * decode_geometric_attributes() or decode_all_attributes() for that.
          *
          * @tparam THandler Handler class.
          * @param handler Handler to call callback functions on.
@@ -346,6 +355,40 @@ namespace vtzero {
          */
         template <typename THandler>
         detail::get_result_t<THandler> decode_attributes(THandler&& handler) const;
+
+        /**
+         * Decode all gemetric attributes of this feature.
+         *
+         * This does not decode normal attributes. See the functions
+         * decode_attributes() or decode_all_attributes() for that.
+         *
+         * @tparam THandler Handler class.
+         * @param handler Handler to call callback functions on.
+         * @returns whatever handler.result() returns if that function exists,
+         *          void otherwise.
+         * @throws out_of_range_exception if there is an error decoding the
+         *         data.
+         * @pre layer version must be 3.
+         */
+        template <typename THandler>
+        detail::get_result_t<THandler> decode_geometric_attributes(THandler&& handler) const;
+
+        /**
+         * Decode all normal and geometric attributes of this feature.
+         *
+         * If you want to only decode normal or geometric attributes, use
+         * decode_attributes() or decode_geometric_attributes(), respectively.
+         *
+         * @tparam THandler Handler class.
+         * @param handler Handler to call callback functions on.
+         * @returns whatever handler.result() returns if that function exists,
+         *          void otherwise.
+         * @throws out_of_range_exception if there is an error decoding the
+         *         data.
+         * @pre layer version must be 3.
+         */
+        template <typename THandler>
+        detail::get_result_t<THandler> decode_all_attributes(THandler&& handler) const;
 
         /**
          * Decode a point geometry.

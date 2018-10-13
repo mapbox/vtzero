@@ -1057,6 +1057,16 @@ namespace vtzero {
     } // namespace detail
 
     template <typename THandler>
+    bool feature::decode_attributes_impl(THandler&& handler) const {
+        for (auto it = m_attributes.begin(); it != m_attributes.end();) {
+            if (!detail::decode_property(std::forward<THandler>(handler), *m_layer, 0, it, m_attributes.end())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    template <typename THandler>
     detail::get_result_t<THandler> feature::decode_attributes(THandler&& handler) const {
         vtzero_assert(valid());
         vtzero_assert(m_layer != nullptr);
@@ -1114,10 +1124,41 @@ namespace vtzero {
         }
 
         // vt3 attributes
-        for (auto it = m_attributes.begin(); it != m_attributes.end();) {
-            if (!detail::decode_property(handler, *m_layer, 0, it, m_attributes.end())) {
-                break;
+        decode_attributes_impl(std::forward<THandler>(handler));
+
+        return detail::get_result<THandler>::of(std::forward<THandler>(handler));
+    }
+
+    template <typename THandler>
+    bool feature::decode_geometric_attributes_impl(THandler&& handler) const {
+        const auto end = geometric_attributes_end();
+        for (auto it = geometric_attributes_begin(); it != end;) {
+            if (!detail::decode_property(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
+                return false;
             }
+        }
+        return true;
+    }
+
+    template <typename THandler>
+    detail::get_result_t<THandler> feature::decode_geometric_attributes(THandler&& handler) const {
+        vtzero_assert(valid());
+        vtzero_assert(m_layer != nullptr);
+        vtzero_assert(m_layer->version() == 3);
+
+        decode_geometric_attributes_impl(std::forward<THandler>(handler));
+
+        return detail::get_result<THandler>::of(std::forward<THandler>(handler));
+    }
+
+    template <typename THandler>
+    detail::get_result_t<THandler> feature::decode_all_attributes(THandler&& handler) const {
+        vtzero_assert(valid());
+        vtzero_assert(m_layer != nullptr);
+        vtzero_assert(m_layer->version() == 3);
+
+        if (decode_attributes_impl(std::forward<THandler>(handler))) {
+            decode_geometric_attributes_impl(std::forward<THandler>(handler));
         }
 
         return detail::get_result<THandler>::of(std::forward<THandler>(handler));
