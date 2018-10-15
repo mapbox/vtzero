@@ -121,13 +121,13 @@ namespace vtzero {
     /**
      * A layer according to spec 4.1. It contains a version, the extent,
      * and a name. For the most efficient way to access the features in this
-     * layer call next_feature() until it returns an invalid feature:
+     * layer use a range-for loop:
      *
      * @code
      *   std::string data = ...;
      *   const vtzero::vector_tile tile{data};
-     *   layer = *tile.begin();
-     *   while (auto feature = layer.next_feature()) {
+     *   const layer = *tile.begin();
+     *   for (const auto feature : layer) {
      *     ...
      *   }
      * @endcode
@@ -587,44 +587,6 @@ namespace vtzero {
         }
 
         /**
-         * Get the next feature in this layer.
-         *
-         * Note that the feature returned will internally contain a pointer to
-         * the layer it came from. The layer has to stay valid as long as the
-         * feature is used.
-         *
-         * Complexity: Constant.
-         *
-         * @returns The next feature or the invalid feature if there are no
-         *          more features.
-         * @throws format_exception if the layer data is ill-formed.
-         * @throws any protozero exception if the protobuf encoding is invalid.
-         * @pre @code valid() @endcode
-         */
-        feature next_feature() {
-            vtzero_assert(valid());
-
-            const bool has_next = m_layer_reader.next(detail::pbf_layer::features,
-                                                      protozero::pbf_wire_type::length_delimited);
-
-            return has_next ? feature{this, m_layer_reader.get_view()} : feature{};
-        }
-
-        /**
-         * Reset the feature iterator. The next time next_feature() is called,
-         * it will begin from the first feature again.
-         *
-         * Complexity: Constant.
-         *
-         * @pre @code valid() @endcode
-         */
-        void reset_feature() noexcept {
-            vtzero_assert_in_noexcept_function(valid());
-
-            m_layer_reader = protozero::pbf_message<detail::pbf_layer>{m_data};
-        }
-
-        /**
          * Call a function for each feature in this layer.
          *
          * @tparam The type of the function. It must take a single argument
@@ -710,11 +672,13 @@ namespace vtzero {
 
         /// Get a (const) iterator to the first feature in this layer.
         feature_iterator begin() const noexcept {
+            vtzero_assert_in_noexcept_function(m_data.data());
             return {m_data, this};
         }
 
         /// Get a (const) iterator one past the end feature in this layer.
         feature_iterator end() const noexcept {
+            vtzero_assert_in_noexcept_function(m_data.data());
             return {data_view{m_data.data() + m_data.size(), 0}, this};
         }
 

@@ -135,7 +135,7 @@ struct print_handler {
 
 }; // struct print_handler
 
-static void print_layer(vtzero::layer& layer, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
+static void print_layer(const vtzero::layer& layer, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
     std::cout << "=============================================================\n"
               << "layer: " << layer_num << '\n'
               << "  name: " << std::string(layer.name()) << '\n'
@@ -171,7 +171,7 @@ static void print_layer(vtzero::layer& layer, bool print_tables, bool print_valu
     }
 
     feature_num = 0;
-    while (auto feature = layer.next_feature()) {
+    for (const auto feature : layer) {
         std::cout << "  feature: " << feature_num << '\n'
                   << "    id: ";
         if (feature.has_id()) {
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
         const vtzero::vector_tile tile{data};
 
         if (layer_num_or_name.empty()) {
-            for (auto layer : tile) {
+            for (const auto layer : tile) {
                 if (layer_overview) {
                     print_layer_overview(layer);
                 } else {
@@ -253,7 +253,7 @@ int main(int argc, char* argv[]) {
                 ++layer_num;
             }
         } else {
-            auto layer = get_layer(tile, layer_num_or_name);
+            const auto layer = get_layer(tile, layer_num_or_name);
             if (layer_overview) {
                 print_layer_overview(layer);
             } else {

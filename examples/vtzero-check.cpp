@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
     int layer_num = 0;
     int feature_num = -1;
     try {
-        for (auto layer : tile) {
+        for (const auto layer : tile) {
             if (layer.name().empty()) {
                 std::cerr << "Error in layer " << layer_num << ": name is empty (spec 4.1)\n";
                 result.has_error();
@@ -201,7 +201,7 @@ int main(int argc, char* argv[]) {
             layer_names.insert(name);
 
             feature_num = 0;
-            while (auto feature = layer.next_feature()) {
+            for (const auto feature : layer) {
                 CheckGeomHandler handler{layer.extent(), layer_num, feature_num};
                 feature.decode_geometry(handler);
                 ++feature_num;

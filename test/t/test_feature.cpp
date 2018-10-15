@@ -26,10 +26,10 @@ TEST_CASE("read a feature") {
     const auto data = load_test_tile();
     const vtzero::vector_tile tile{data};
 
-    auto layer = tile.get_layer_by_name("bridge");
+    const auto layer = tile.get_layer_by_name("bridge");
     REQUIRE(layer.valid());
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.valid());
     REQUIRE(feature);
     REQUIRE(feature.id() == 0);
@@ -43,8 +43,8 @@ TEST_CASE("read a feature") {
 TEST_CASE("iterate over all attributes of a feature") {
     const auto data = load_test_tile();
     const vtzero::vector_tile tile{data};
-    auto layer = tile.get_layer_by_name("bridge");
-    const auto feature = layer.next_feature();
+    const auto layer = tile.get_layer_by_name("bridge");
+    const auto feature = *layer.begin();
 
     const std::string expected{"class=main\noneway=sint(0)\nosm_id=sint(0)\ntype=primary\n"};
     AttributeDumpHandler handler;
@@ -88,8 +88,8 @@ struct PropertyHandler {
 TEST_CASE("decode properties of a feature") {
     const auto data = load_test_tile();
     const vtzero::vector_tile tile{data};
-    auto layer = tile.get_layer_by_name("bridge");
-    const auto feature = layer.next_feature();
+    const auto layer = tile.get_layer_by_name("bridge");
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     PropertyHandler handler;
@@ -129,8 +129,8 @@ public:
 TEST_CASE("decode properties of a feature into map") {
     const auto data = load_test_tile();
     const vtzero::vector_tile tile{data};
-    auto layer = tile.get_layer_by_name("bridge");
-    const auto feature = layer.next_feature();
+    const auto layer = tile.get_layer_by_name("bridge");
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     MapHandler handler;

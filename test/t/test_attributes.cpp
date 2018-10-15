@@ -114,14 +114,14 @@ TEST_CASE("build feature with scalar attributes and read it again") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
     REQUIRE(feature.id() == 1);
 
@@ -168,14 +168,14 @@ TEST_CASE("build feature with list and map attributes and read it again") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
     REQUIRE(feature.id() == 1);
 
@@ -214,14 +214,14 @@ TEST_CASE("build feature with number list attributes and read it again") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.num_features() == 1);
     REQUIRE(layer.num_attribute_scalings() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
     REQUIRE(feature.id() == 1);
 
@@ -262,14 +262,14 @@ TEST_CASE("build feature with list property from array and read it again") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
     REQUIRE(feature.id() == 1);
 

@@ -63,13 +63,13 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     linestring_handler handler;
@@ -139,13 +139,13 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     linestring_handler handler;
@@ -240,14 +240,14 @@ TEST_CASE("Add linestring from container") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
 
     linestring_handler handler;
     feature.decode_linestring_geometry(handler);
@@ -305,14 +305,15 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.num_features() == 2);
 
-    auto feature = layer.next_feature();
+    auto it = layer.begin();
+    auto feature = *it++;
     REQUIRE(feature.id() == 1);
-    feature = layer.next_feature();
+    feature = *it;
     REQUIRE(feature.id() == 3);
 }
 

@@ -97,13 +97,13 @@ static void test_point_builder(bool with_id, bool with_prop) {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     point_handler handler;
@@ -168,13 +168,13 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
     REQUIRE_FALSE(feature.has_3d_geometry());
 
@@ -219,13 +219,13 @@ TEST_CASE("Point builder with 3d point") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == 17);
     REQUIRE(feature.has_3d_geometry());
 
@@ -277,13 +277,13 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     point_handler handler;
@@ -390,14 +390,14 @@ TEST_CASE("Add points from container") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
 
     point_handler handler;
     feature.decode_point_geometry(handler);

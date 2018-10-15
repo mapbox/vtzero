@@ -27,8 +27,8 @@ TEST_CASE("default constructed layer") {
     REQUIRE_THROWS_AS(layer.value(0), const assert_error&);
 
     REQUIRE_THROWS_AS(layer.get_feature_by_id(0), const assert_error&);
-    REQUIRE_THROWS_AS(layer.next_feature(), const assert_error&);
-    REQUIRE_ASSERT(layer.reset_feature());
+    REQUIRE_ASSERT(layer.begin());
+    REQUIRE_ASSERT(layer.end());
 }
 
 TEST_CASE("read a layer") {
@@ -100,7 +100,7 @@ TEST_CASE("iterate over all features in a layer") {
     std::size_t count = 0;
 
     SECTION("external iterator") {
-        while (auto feature = layer.next_feature()) {
+        for (auto it = layer.begin(); it != layer.end(); ++it) {
             ++count;
         }
     }
@@ -120,13 +120,13 @@ TEST_CASE("iterate over some features in a layer") {
     const auto data = load_test_tile();
     const vtzero::vector_tile tile{data};
 
-    auto layer = tile.get_layer_by_name("building");
+    const auto layer = tile.get_layer_by_name("building");
     REQUIRE(layer);
 
     uint64_t id_sum = 0;
 
     SECTION("external iterator") {
-        while (auto feature = layer.next_feature()) {
+        for (const auto feature : layer) {
             if (feature.id() == 10) {
                 break;
             }
@@ -148,8 +148,7 @@ TEST_CASE("iterate over some features in a layer") {
     const uint64_t expected = (10 - 1) * 10 / 2;
     REQUIRE(id_sum == expected);
 
-    layer.reset_feature();
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
     REQUIRE(feature.id() == 1);
 }

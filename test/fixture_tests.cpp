@@ -161,7 +161,7 @@ static vtzero::feature check_layer(const vtzero::vector_tile& tile) {
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "hello");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
@@ -220,10 +220,10 @@ TEST_CASE("MVT test 005: Tile with single point with broken tags array") {
 
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
 
     struct NullHandler {
     };
@@ -237,10 +237,10 @@ TEST_CASE("MVT test 006: Tile with single point with invalid GeomType") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
 
-    REQUIRE_THROWS_AS(layer.next_feature(), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(*layer.begin(), const vtzero::format_exception&);
 }
 
 TEST_CASE("MVT test 007: Layer version as string instead of as an int") {
@@ -264,14 +264,14 @@ TEST_CASE("MVT test 009: Tile layer extent missing") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
 
     REQUIRE(layer.name() == "hello");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == 1);
 }
 
@@ -280,7 +280,7 @@ TEST_CASE("MVT test 010: Tile layer value is encoded as int, but pretends to be 
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
 
     const auto pv = layer.value(0);
@@ -502,10 +502,10 @@ TEST_CASE("MVT test 026: Extra value type") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE_FALSE(feature.has_attributes());
 
     const auto& table = layer.value_table();
@@ -521,10 +521,10 @@ TEST_CASE("MVT test 027: Layer with unused bool property value") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE_FALSE(feature.has_attributes());
 
     const auto& vtab = layer.value_table();
@@ -536,10 +536,10 @@ TEST_CASE("MVT test 030: Two geometry fields") {
     std::string buffer = open_tile("030/tile.mvt");
     const vtzero::vector_tile tile{buffer};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE_FALSE(layer.empty());
 
-    REQUIRE_THROWS_AS(layer.next_feature(), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(*layer.begin(), const vtzero::format_exception&);
 }
 
 TEST_CASE("MVT test 032: Layer with single feature with string property value") {
@@ -549,10 +549,10 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=i am a string value\n"};
@@ -565,10 +565,10 @@ TEST_CASE("MVT test 033: Layer with single feature with float property value") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=float(3.100000)\n"};
@@ -581,10 +581,10 @@ TEST_CASE("MVT test 034: Layer with single feature with double property value") 
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=double(1.230000)\n"};
@@ -597,10 +597,10 @@ TEST_CASE("MVT test 035: Layer with single feature with int property value") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=sint(6)\n"};
@@ -613,10 +613,10 @@ TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=uint(87948)\n"};
@@ -629,10 +629,10 @@ TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=sint(87948)\n"};
@@ -645,7 +645,7 @@ TEST_CASE("MVT test 038: Layer with all types of property value") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
 
     const auto& vtab = layer.value_table();
     REQUIRE(vtab.size() == 7);
@@ -671,13 +671,13 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.version() == 1);
     REQUIRE(layer.name() == "hello");
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE_FALSE(feature.has_attributes());
@@ -690,9 +690,9 @@ TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the 
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     AttributeDumpHandler handler;
@@ -704,9 +704,9 @@ TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
 
     AttributeDumpHandler handler;
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
@@ -717,9 +717,9 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
     AttributeDumpHandler handler;
@@ -731,19 +731,20 @@ TEST_CASE("MVT test 043: A layer with six points that all share the same key but
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 6);
 
     AttributeDumpHandler handler;
 
-    auto feature = layer.next_feature();
+    auto it = layer.begin();
+    auto feature = *it++;
     REQUIRE(feature);
     REQUIRE(feature.has_attributes());
 
     const std::string expected1{"poi=swing\n"};
     REQUIRE(feature.decode_attributes(handler) == expected1);
 
-    feature = layer.next_feature();
+    feature = *it;
     REQUIRE(feature);
 
     const std::string expected2{"poi=swing\npoi=water_fountain\n"};
@@ -755,10 +756,10 @@ TEST_CASE("MVT test 044: Geometry field begins with a ClosePath command, which i
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
@@ -769,10 +770,10 @@ TEST_CASE("MVT test 045: Invalid point geometry that includes a MoveTo command a
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
@@ -784,10 +785,10 @@ TEST_CASE("MVT test 046: Invalid linestring geometry that includes two points in
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     geom_handler handler;
@@ -802,10 +803,10 @@ TEST_CASE("MVT test 047: Invalid polygon with wrong ClosePath count 2 (must be c
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
@@ -817,10 +818,10 @@ TEST_CASE("MVT test 048: Invalid polygon with wrong ClosePath count 0 (must be c
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
@@ -832,10 +833,10 @@ TEST_CASE("MVT test 049: decoding linestring with int32 overflow in x coordinate
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     geom_handler handler;
@@ -850,10 +851,10 @@ TEST_CASE("MVT test 050: decoding linestring with int32 overflow in y coordinate
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     geom_handler handler;
@@ -868,10 +869,10 @@ TEST_CASE("MVT test 051: multipoint with a huge count value, useful for ensuring
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
@@ -883,10 +884,10 @@ TEST_CASE("MVT test 052: multipoint with not enough points") {
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
@@ -897,10 +898,10 @@ TEST_CASE("MVT test 053: clipped square (exact extent): a polygon that covers th
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     geom_handler handler;
@@ -915,10 +916,10 @@ TEST_CASE("MVT test 054: clipped square (one unit buffer): a polygon that covers
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     geom_handler handler;
@@ -933,10 +934,10 @@ TEST_CASE("MVT test 055: clipped square (minus one unit buffer): a polygon that 
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     geom_handler handler;
@@ -951,10 +952,10 @@ TEST_CASE("MVT test 056: clipped square (large buffer): a polygon that covers th
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     geom_handler handler;
@@ -969,10 +970,10 @@ TEST_CASE("MVT test 057: A point fixture with a gigantic MoveTo command. Can be 
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
@@ -984,10 +985,10 @@ TEST_CASE("MVT test 058: A linestring fixture with a gigantic LineTo command") {
     const vtzero::vector_tile tile{buffer};
     REQUIRE(tile.count_layers() == 1);
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);

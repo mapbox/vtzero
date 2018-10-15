@@ -288,9 +288,9 @@ TEST_CASE("add features using a key index") {
     const vtzero::vector_tile tile{data};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == 7);
 
     const std::string expected{"some_key=sint(12)\n"};
@@ -335,9 +335,9 @@ TEST_CASE("add features using a value index") {
     const vtzero::vector_tile tile{data};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == 17);
 
     const std::string expected{"some_key=sint(12)\n"};

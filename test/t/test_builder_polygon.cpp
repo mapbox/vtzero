@@ -64,13 +64,13 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     polygon_handler handler;
@@ -155,13 +155,13 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
     polygon_handler handler;
@@ -282,14 +282,14 @@ TEST_CASE("Add polygon from container") {
 
     const vtzero::vector_tile tile{data};
 
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    const auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
 
     polygon_handler handler;
     feature.decode_polygon_geometry(handler);

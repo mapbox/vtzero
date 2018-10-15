@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
     try {
         vtzero::vector_tile tile{data};
 
-        auto layer = get_layer(tile, "road_label");
+        const auto layer = get_layer(tile, "road_label");
         if (!layer) {
             std::cerr << "No 'road_label' layer found\n";
             return 1;
@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         vtzero::tile_builder tb;
         vtzero::layer_builder layer_builder{tb, layer};
 
-        while (auto feature = layer.next_feature()) {
+        for (const auto feature : layer) {
             if (keep_feature(feature)) {
                 vtzero::feature_builder<3, true> feature_builder{layer_builder};
                 feature_builder.copy_id(feature);

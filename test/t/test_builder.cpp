@@ -228,9 +228,9 @@ TEST_CASE("String ids are okay in version 3 tiles") {
     const std::string data = tbuilder.serialize();
 
     const vtzero::vector_tile tile{data};
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
 
-    auto feature = layer.next_feature();
+    const auto feature = *layer.begin();
     REQUIRE_FALSE(feature.has_integer_id());
     REQUIRE(feature.has_string_id());
     REQUIRE(feature.string_id() == "foo");
@@ -316,20 +316,19 @@ TEST_CASE("Rollback feature") {
     const std::string data = tbuilder.serialize();
 
     const vtzero::vector_tile tile{data};
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
 
-    auto feature = layer.next_feature();
+    auto it = layer.begin();
+    auto feature = *it++;
     REQUIRE(feature.has_integer_id());
     REQUIRE_FALSE(feature.has_string_id());
     REQUIRE(feature.id() == 1);
-
-    feature = layer.next_feature();
+    feature = *it++;
     REQUIRE(feature.has_integer_id());
     REQUIRE_FALSE(feature.has_string_id());
     REQUIRE(feature.id() == 8);
 
-    feature = layer.next_feature();
-    REQUIRE_FALSE(feature);
+    REQUIRE(it == layer.end());
 }
 
 static vtzero::layer next_nonempty_layer(vtzero::layer_iterator& it, const vtzero::layer_iterator end) {
@@ -366,9 +365,12 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
             return false;
         }
 
-        for (auto f1 = l1.next_feature(), f2 = l2.next_feature();
-             f1 || f2;
-             f1 = l1.next_feature(), f2 = l2.next_feature()) {
+        for (auto it1 = l1.begin(), it2 = l2.begin(); it1 != l1.end() || it2 != l2.end(); ++it1, ++it2) {
+            if (it1 == l1.end() || it2 == l2.end()) {
+                return false;
+            }
+            const auto f1 = *it1;
+            const auto f2 = *it2;
             if (!f1 ||
                 !f2 ||
                 f1.id() != f2.id() ||
