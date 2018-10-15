@@ -50,17 +50,13 @@ namespace vtzero {
             string_id = 2
         };
 
-        using uint32_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint32_iterator>;
-        using uint64_it_range = protozero::iterator_range<protozero::pbf_reader::const_uint64_iterator>;
-
         const layer* m_layer = nullptr;
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
-        uint32_it_range m_properties{}; // version 2 "tags"
-        std::size_t m_num_properties = 0;
 
         data_view m_geometry{};
         data_view m_elevations{};
+        data_view m_properties{}; // version 2 "tags"
         data_view m_attributes{}; // version 3 attributes
         data_view m_geometric_attributes{};
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
@@ -69,6 +65,7 @@ namespace vtzero {
 
         using geom_iterator = protozero::pbf_reader::const_uint32_iterator;
         using elev_iterator = protozero::pbf_reader::const_sint64_iterator;
+        using prop_iterator = protozero::pbf_reader::const_uint32_iterator;
         using attr_iterator = protozero::pbf_reader::const_uint64_iterator;
 
         geom_iterator geometry_begin() const noexcept {
@@ -85,6 +82,14 @@ namespace vtzero {
 
         elev_iterator elevations_end() const noexcept {
             return {m_elevations.data() + m_elevations.size(), m_elevations.data() + m_elevations.size()};
+        }
+
+        prop_iterator properties_begin() const noexcept {
+            return {m_properties.data(), m_properties.data() + m_properties.size()};
+        }
+
+        prop_iterator properties_end() const noexcept {
+            return {m_properties.data() + m_properties.size(), m_properties.data() + m_properties.size()};
         }
 
         attr_iterator attributes_begin() const noexcept {
@@ -249,6 +254,17 @@ namespace vtzero {
         }
 
         /**
+         * The vt2 attributes data of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * Always returns an empty data_view for invalid features.
+         */
+        data_view properties_data() const noexcept {
+            return m_properties;
+        }
+
+        /**
          * The vt3 attributes data of this feature.
          *
          * Complexity: Constant.
@@ -276,14 +292,9 @@ namespace vtzero {
          * Always returns true for invalid features.
          */
         bool has_attributes() const noexcept {
-            return m_num_properties > 0 ||
+            return !m_properties.empty() ||
                    !m_attributes.empty() ||
                    !m_geometric_attributes.empty();
-        }
-
-        /// XXX helper function which might be removed later
-        bool equal_properties(const feature& other) const noexcept {
-            return std::equal(m_properties.cbegin(), m_properties.cend(), other.m_properties.cbegin());
         }
 
         /**

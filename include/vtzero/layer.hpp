@@ -737,13 +737,13 @@ namespace vtzero {
                     m_id_type = id_type::integer_id;
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
-                    if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
+                    if (!m_properties.empty()) {
                         throw format_exception{"Feature has more than one tags field"};
                     }
                     if (!m_attributes.empty()) {
                         throw format_exception{"Feature has both tags and attributes field"};
                     }
-                    m_properties = reader.get_packed_uint32();
+                    m_properties = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
@@ -752,7 +752,7 @@ namespace vtzero {
                     if (!m_attributes.empty()) {
                         throw format_exception{"Feature has more than one attributes field"};
                     }
-                    if (m_properties.begin() != protozero::pbf_reader::const_uint32_iterator{}) {
+                    if (!m_properties.empty()) {
                         throw format_exception{"Feature has both tags and attributes field"};
                     }
                     m_attributes = reader.get_view();
@@ -809,13 +809,6 @@ namespace vtzero {
         if (m_geometry.empty()) {
             throw format_exception{"Missing geometry field in feature (spec 4.2)"};
         }
-
-        // TODO(joto) this can only be removed if we check for this when decoding!
-        const auto size = m_properties.size();
-        if (size % 2 != 0) {
-            throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
-        }
-        m_num_properties = size / 2;
     }
 
     template <typename TFunc>
@@ -823,13 +816,15 @@ namespace vtzero {
         vtzero_assert(valid());
         vtzero_assert(m_layer->version() < 3);
 
-        for (auto it = m_properties.begin(); it != m_properties.end();) {
+        for (auto it = properties_begin(); it != properties_end();) {
             const uint32_t ki = *it++;
             if (!index_value{ki}.valid()) {
                 throw out_of_range_exception{ki};
             }
 
-            vtzero_assert(it != m_properties.end());
+            if (it == properties_end()) {
+                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
+            }
             const uint32_t vi = *it++;
             if (!index_value{vi}.valid()) {
                 throw out_of_range_exception{vi};
@@ -1101,13 +1096,15 @@ namespace vtzero {
         vtzero_assert(m_layer != nullptr);
 
         // vt2 properties
-        for (auto it = m_properties.begin(); it != m_properties.end();) {
+        for (auto it = properties_begin(); it != properties_end();) {
             const uint32_t ki = *it++;
             if (!index_value{ki}.valid()) {
                 throw out_of_range_exception{ki};
             }
 
-            vtzero_assert(it != m_properties.end());
+            if (it == properties_end()) {
+                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
+            }
             const uint32_t vi = *it++;
             if (!index_value{vi}.valid()) {
                 throw out_of_range_exception{vi};
