@@ -474,42 +474,6 @@ namespace vtzero {
 
     }; // class feature
 
-    /**
-     * Create some kind of mapping from property keys to property values.
-     *
-     * This can be used to read all properties into a std::map or similar
-     * object.
-     *
-     * @tparam TMap Map type (std::map, std::unordered_map, ...) Must support
-     *              the emplace() method.
-     * @tparam TKey Key type, usually the key of the map type. The data_view
-     *              of the property key is converted to this type before
-     *              adding it to the map.
-     * @tparam TValue Value type, usally the value of the map type. The
-     *                property_value is converted to this type before
-     *                adding it to the map.
-     * @tparam TMapping A struct derived from property_value_mapping with the
-     *         mapping for vtzero property value types to TValue-constructing
-     *         types. (See convert_property_value() for details.)
-     * @param feature The feature to get the properties from.
-     * @returns An object of type TMap with all the properties.
-     * @pre @code feature.valid() @endcode
-     */
-    template <typename TMap,
-              typename TKey = typename TMap::key_type,
-              typename TValue = typename TMap::mapped_type,
-              typename TMapping = property_value_mapping>
-    TMap create_properties_map(const vtzero::feature& feature) {
-        TMap map;
-
-        feature.for_each_property([&map](const property& p) {
-            map.emplace(TKey(p.key()), convert_property_value<TValue, TMapping>(p.value()));
-            return true;
-        });
-
-        return map;
-    }
-
 } // namespace vtzero
 
 #endif // VTZERO_FEATURE_HPP

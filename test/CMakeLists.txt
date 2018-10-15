@@ -36,7 +36,6 @@ set(TEST_SOURCES attributes
                  layer
                  output
                  point
-                 property_map
                  property_value
                  scaling
                  tile
