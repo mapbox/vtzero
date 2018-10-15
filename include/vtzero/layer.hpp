@@ -587,31 +587,6 @@ namespace vtzero {
         }
 
         /**
-         * Call a function for each feature in this layer.
-         *
-         * @tparam The type of the function. It must take a single argument
-         *         of type feature&& and return a bool. If the function returns
-         *         false, the iteration will be stopped.
-         * @param func The function to call.
-         * @returns true if the iteration was completed and false otherwise.
-         * @pre @code valid() @endcode
-         */
-        template <typename TFunc>
-        bool for_each_feature(TFunc&& func) const {
-            vtzero_assert(valid());
-
-            protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
-            while (layer_reader.next(detail::pbf_layer::features,
-                                     protozero::pbf_wire_type::length_delimited)) {
-                if (!std::forward<TFunc>(func)(feature{this, layer_reader.get_view()})) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /**
          * Get the feature with the specified ID. If there are several features
          * with the same ID, it is undefined which one you'll get.
          *

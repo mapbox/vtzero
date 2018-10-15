@@ -99,18 +99,8 @@ TEST_CASE("iterate over all features in a layer") {
 
     std::size_t count = 0;
 
-    SECTION("external iterator") {
-        for (auto it = layer.begin(); it != layer.end(); ++it) {
-            ++count;
-        }
-    }
-
-    SECTION("internal iterator") {
-        const bool done = layer.for_each_feature([&count](const vtzero::feature& /*feature*/) noexcept {
-            ++count;
-            return true;
-        });
-        REQUIRE(done);
+    for (auto it = layer.begin(); it != layer.end(); ++it) {
+        ++count;
     }
 
     REQUIRE(count == 937);
@@ -125,24 +115,11 @@ TEST_CASE("iterate over some features in a layer") {
 
     uint64_t id_sum = 0;
 
-    SECTION("external iterator") {
-        for (const auto feature : layer) {
-            if (feature.id() == 10) {
-                break;
-            }
-            id_sum += feature.id();
+    for (const auto feature : layer) {
+        if (feature.id() == 10) {
+            break;
         }
-    }
-
-    SECTION("internal iterator") {
-        const bool done = layer.for_each_feature([&id_sum](const vtzero::feature& feature) noexcept {
-            if (feature.id() == 10) {
-                return false;
-            }
-            id_sum += feature.id();
-            return true;
-        });
-        REQUIRE_FALSE(done);
+        id_sum += feature.id();
     }
 
     const uint64_t expected = (10 - 1) * 10 / 2;
