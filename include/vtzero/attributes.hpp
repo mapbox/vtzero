@@ -16,7 +16,6 @@ documentation.
  * @brief Contains types and functions related to attributes.
  */
 
-#include "property_value.hpp"
 #include "types.hpp"
 
 #include <cstdint>

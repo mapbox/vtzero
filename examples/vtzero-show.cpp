@@ -135,12 +135,37 @@ struct print_handler {
 
 }; // struct print_handler
 
+static void print_scaling(const vtzero::scaling& scaling) {
+    std::cout << "offset=" << scaling.offset() << " multiplier=" << scaling.multiplier() << " base=" << scaling.base() << '\n';
+}
+
 static void print_layer(const vtzero::layer& layer, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
     std::cout << "=============================================================\n"
               << "layer: " << layer_num << '\n'
               << "  name: " << std::string(layer.name()) << '\n'
               << "  version: " << layer.version() << '\n'
               << "  extent: " << layer.extent() << '\n';
+
+    if (layer.version() == 3) {
+        const auto tile = layer.get_tile();
+        std::cout << "  x: " << tile.x() << '\n';
+        std::cout << "  y: " << tile.y() << '\n';
+        std::cout << "  zoom: " << tile.zoom() << '\n';
+    }
+
+    const auto elev_scaling = layer.elevation_scaling();
+    if (elev_scaling != vtzero::scaling{}) {
+        std::cout << "  elevation scaling: ";
+        print_scaling(elev_scaling);
+    }
+
+    if (layer.num_attribute_scalings() > 0) {
+        std::cout << "  attribute scalings:\n";
+        for (uint32_t n = 0; n < layer.num_attribute_scalings(); ++n) {
+            std::cout << "    " << n << ": ";
+            print_scaling(layer.attribute_scaling(vtzero::index_value{n}));
+        }
+    }
 
     if (print_tables) {
         std::cout << "  keys:\n";
@@ -187,6 +212,12 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
         std::cout << "    attributes:\n";
         print_handler handler;
         feature.decode_attributes(handler);
+
+        if (layer.version() == 3) {
+            std::cout << "    geometric attributes:\n";
+            feature.decode_geometric_attributes(handler);
+        }
+
         ++feature_num;
     }
 }

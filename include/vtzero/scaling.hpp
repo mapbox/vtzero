@@ -70,6 +70,21 @@ namespace vtzero {
             }
         }
 
+        /// Get the offset value of this scaling.
+        int64_t offset() const noexcept {
+            return m_offset;
+        }
+
+        /// Get the multiplier value of this scaling.
+        double multiplier() const noexcept {
+            return m_multiplier;
+        }
+
+        /// Get the base value of this scaling.
+        double base() const noexcept {
+            return m_base;
+        }
+
         /// Encode a value according to the scaling.
         constexpr int64_t encode(double value) const noexcept {
             return static_cast<int64_t>((value - m_base) / m_multiplier) - m_offset;
