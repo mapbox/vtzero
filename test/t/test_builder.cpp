@@ -440,7 +440,7 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
 
     vtzero::tile_builder tbuilder;
 
-    int n = 0;
+    std::size_t n = 0;
     for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         for (const auto feature : layer) {
@@ -463,9 +463,7 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
     n = 0;
     const vtzero::vector_tile result_tile{data};
     for (const auto layer : result_tile) {
-        for (const auto feature : layer) {
-            ++n;
-        }
+        n += layer.num_features();
     }
 
     REQUIRE(n == 17);
@@ -504,7 +502,7 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
 
     vtzero::tile_builder tbuilder;
 
-    int n = 0;
+    std::size_t n = 0;
     for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         for (const auto feature : layer) {
@@ -528,9 +526,7 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
     n = 0;
     const vtzero::vector_tile result_tile{data};
     for (const auto layer : result_tile) {
-        for (const auto feature : layer) {
-            ++n;
-        }
+        n += layer.num_features();
     }
 
     REQUIRE(n == 17);
