@@ -41,8 +41,8 @@ namespace vtzero {
      *
      * @code
      *   std::string data = ...;
-     *   vector_tile tile{data};
-     *   layer = tile.next_layer();
+     *   const vtzero::vector_tile tile{data};
+     *   layer = *tile.begin();
      *   while (auto feature = layer.next_feature()) {
      *     ...
      *   }

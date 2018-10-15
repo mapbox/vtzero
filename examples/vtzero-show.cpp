@@ -241,10 +241,10 @@ int main(int argc, char* argv[]) {
     try {
         const auto data = read_file(filename);
 
-        vtzero::vector_tile tile{data};
+        const vtzero::vector_tile tile{data};
 
         if (layer_num_or_name.empty()) {
-            while (auto layer = tile.next_layer()) {
+            for (auto layer : tile) {
                 if (layer_overview) {
                     print_layer_overview(layer);
                 } else {

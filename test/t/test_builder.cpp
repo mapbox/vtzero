@@ -25,18 +25,18 @@ static_assert(movable_not_copyable<vtzero::polygon_2d_feature_builder>::value, "
 
 TEST_CASE("Create tile from existing layers") {
     const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
+    const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
 
     SECTION("add_existing_layer(layer)") {
-        while (auto layer = tile.next_layer()) {
+        for (auto layer : tile) {
             tbuilder.add_existing_layer(layer);
         }
     }
 
     SECTION("add_existing_layer(data_view)") {
-        while (auto layer = tile.next_layer()) {
+        for (auto layer : tile) {
             tbuilder.add_existing_layer(layer.data());
         }
     }
@@ -48,7 +48,7 @@ TEST_CASE("Create tile from existing layers") {
 
 TEST_CASE("Create layer based on existing layer") {
     const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
+    const vtzero::vector_tile tile{buffer};
     const auto layer = tile.get_layer_by_name("place_label");
 
     vtzero::tile_builder tbuilder;
@@ -59,8 +59,8 @@ TEST_CASE("Create layer based on existing layer") {
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
-    vtzero::vector_tile new_tile{data};
-    const auto new_layer = new_tile.next_layer();
+    const vtzero::vector_tile new_tile{data};
+    const auto new_layer = *new_tile.begin();
     REQUIRE(std::string(new_layer.name()) == "place_label");
     REQUIRE(new_layer.version() == 1);
     REQUIRE(new_layer.extent() == 4096);
@@ -127,9 +127,9 @@ TEST_CASE("Create layer and add scalings") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "name");
     REQUIRE(layer.version() == 3);
@@ -183,8 +183,8 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
-    auto layer = tile.next_layer();
+    const vtzero::vector_tile tile{data};
+    auto layer = *tile.begin();
 
     uint64_t n = 1;
     while (auto feature = layer.next_feature()) {
@@ -227,8 +227,8 @@ TEST_CASE("String ids are okay in version 3 tiles") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
-    auto layer = tile.next_layer();
+    const vtzero::vector_tile tile{data};
+    auto layer = *tile.begin();
 
     auto feature = layer.next_feature();
     REQUIRE_FALSE(feature.has_integer_id());
@@ -246,8 +246,8 @@ TEST_CASE("Create layer with x/y/zoom/extent") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
-    auto layer = tile.next_layer();
+    const vtzero::vector_tile tile{data};
+    auto layer = *tile.begin();
 
     REQUIRE(layer.get_tile().x() == 5);
     REQUIRE(layer.get_tile().y() == 3);
@@ -315,8 +315,8 @@ TEST_CASE("Rollback feature") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
-    auto layer = tile.next_layer();
+    const vtzero::vector_tile tile{data};
+    auto layer = *tile.begin();
 
     auto feature = layer.next_feature();
     REQUIRE(feature.has_integer_id());
@@ -332,9 +332,10 @@ TEST_CASE("Rollback feature") {
     REQUIRE_FALSE(feature);
 }
 
-static vtzero::layer next_nonempty_layer(vtzero::vector_tile& tile) {
-    while (auto layer = tile.next_layer()) {
-        if (layer && !layer.empty()) {
+static vtzero::layer next_nonempty_layer(vtzero::layer_iterator& it, const vtzero::layer_iterator end) {
+    while (it != end) {
+        const auto layer = *it++;
+        if (!layer.empty()) {
             return layer;
         }
     }
@@ -343,12 +344,18 @@ static vtzero::layer next_nonempty_layer(vtzero::vector_tile& tile) {
 
 // TODO(joto) this function needs to be updated for vt3
 static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
-    vtzero::vector_tile vt1{t1};
-    vtzero::vector_tile vt2{t2};
+    const vtzero::vector_tile vt1{t1};
+    const vtzero::vector_tile vt2{t2};
 
-    for (auto l1 = next_nonempty_layer(vt1), l2 = next_nonempty_layer(vt2);
+    auto it1 = vt1.begin();
+    auto it2 = vt2.begin();
+
+    const auto end1 = vt1.end();
+    const auto end2 = vt2.end();
+
+    for (auto l1 = next_nonempty_layer(it1, end1), l2 = next_nonempty_layer(it2, end2);
          l1 || l2;
-         l1 = next_nonempty_layer(vt1), l2 = next_nonempty_layer(vt2)) {
+         l1 = next_nonempty_layer(it1, end1), l2 = next_nonempty_layer(it2, end2)) {
 
         if (!l1 ||
             !l2 ||
@@ -391,11 +398,11 @@ TEST_CASE("vector_tile_equal") {
 
 TEST_CASE("Copy tile") {
     const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
+    const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
 
-    while (auto layer = tile.next_layer()) {
+    for (auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
             vtzero::copy_feature(feature, lbuilder);
@@ -408,11 +415,11 @@ TEST_CASE("Copy tile") {
 
 TEST_CASE("Copy tile using geometry_2d_feature_builder") {
     const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
+    const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
 
-    while (auto layer = tile.next_layer()) {
+    for (auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
             vtzero::feature_builder<2, false> fbuilder{lbuilder};
@@ -429,12 +436,12 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder") {
 
 TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
     const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
+    const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
 
     int n = 0;
-    while (auto layer = tile.next_layer()) {
+    for (auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
             vtzero::feature_builder<2, false> fbuilder{lbuilder};
@@ -454,8 +461,8 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
     const std::string data = tbuilder.serialize();
 
     n = 0;
-    vtzero::vector_tile result_tile{data};
-    while (auto layer = result_tile.next_layer()) {
+    const vtzero::vector_tile result_tile{data};
+    for (auto layer : result_tile) {
         while (auto feature = layer.next_feature()) {
             ++n;
         }
@@ -493,12 +500,12 @@ struct points_to_vector {
 
 TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
     const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
+    const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
 
     int n = 0;
-    while (auto layer = tile.next_layer()) {
+    for (auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
             vtzero::point_2d_feature_builder fbuilder{lbuilder};
@@ -519,8 +526,8 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
     const std::string data = tbuilder.serialize();
 
     n = 0;
-    vtzero::vector_tile result_tile{data};
-    while (auto layer = result_tile.next_layer()) {
+    const vtzero::vector_tile result_tile{data};
+    for (auto layer : result_tile) {
         while (auto feature = layer.next_feature()) {
             ++n;
         }

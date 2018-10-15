@@ -24,7 +24,7 @@ TEST_CASE("default constructed feature") {
 
 TEST_CASE("read a feature") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     auto layer = tile.get_layer_by_name("bridge");
     REQUIRE(layer.valid());
@@ -42,7 +42,7 @@ TEST_CASE("read a feature") {
 
 TEST_CASE("iterate over all attributes of a feature") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
     auto layer = tile.get_layer_by_name("bridge");
     const auto feature = layer.next_feature();
 
@@ -87,7 +87,7 @@ struct PropertyHandler {
 
 TEST_CASE("decode properties of a feature") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
     auto layer = tile.get_layer_by_name("bridge");
     const auto feature = layer.next_feature();
     REQUIRE(feature);
@@ -128,7 +128,7 @@ public:
 
 TEST_CASE("decode properties of a feature into map") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
     auto layer = tile.get_layer_by_name("bridge");
     const auto feature = layer.next_feature();
     REQUIRE(feature);

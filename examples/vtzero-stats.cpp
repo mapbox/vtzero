@@ -24,9 +24,9 @@ int main(int argc, char* argv[]) {
         std::string input_file{argv[1]};
         const auto data = read_file(input_file);
 
-        vtzero::vector_tile tile{data};
+        const vtzero::vector_tile tile{data};
 
-        while (const auto layer = tile.next_layer()) {
+        for (const auto layer : tile) {
             std::cout.write(layer.name().data(), static_cast<std::streamsize>(layer.name().size()));
             std::cout << ' '
                       << layer.num_features() << ' '

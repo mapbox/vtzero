@@ -61,9 +61,9 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
@@ -137,9 +137,9 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
@@ -238,9 +238,9 @@ TEST_CASE("Add linestring from container") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
@@ -303,9 +303,9 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.num_features() == 2);

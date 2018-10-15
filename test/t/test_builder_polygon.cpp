@@ -62,9 +62,9 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
@@ -153,9 +153,9 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);
     REQUIRE(layer.extent() == 4096);
@@ -280,9 +280,9 @@ TEST_CASE("Add polygon from container") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 2);

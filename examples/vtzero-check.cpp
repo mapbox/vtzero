@@ -181,12 +181,12 @@ int main(int argc, char* argv[]) {
 
     std::set<std::string> layer_names;
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     int layer_num = 0;
     int feature_num = -1;
     try {
-        while (auto layer = tile.next_layer()) {
+        for (auto layer : tile) {
             if (layer.name().empty()) {
                 std::cerr << "Error in layer " << layer_num << ": name is empty (spec 4.1)\n";
                 result.has_error();

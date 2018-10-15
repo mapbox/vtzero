@@ -285,10 +285,10 @@ TEST_CASE("add features using a key index") {
 
     // ============
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
     const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 7);
@@ -332,10 +332,10 @@ TEST_CASE("add features using a value index") {
 
     // ============
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     REQUIRE(tile.count_layers() == 1);
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
     const auto feature = layer.next_feature();
     REQUIRE(feature.id() == 17);

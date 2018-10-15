@@ -112,9 +112,9 @@ TEST_CASE("build feature with scalar attributes and read it again") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
@@ -166,9 +166,9 @@ TEST_CASE("build feature with list and map attributes and read it again") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
@@ -212,9 +212,9 @@ TEST_CASE("build feature with number list attributes and read it again") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);
@@ -260,9 +260,9 @@ TEST_CASE("build feature with list property from array and read it again") {
 
     const std::string data = tbuilder.serialize();
 
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
-    auto layer = tile.next_layer();
+    auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
     REQUIRE(layer.version() == 3);

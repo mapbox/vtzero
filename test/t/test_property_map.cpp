@@ -28,9 +28,9 @@ TEST_CASE("property map") {
 
     std::string data = tile.serialize();
 
-    vtzero::vector_tile vt{data};
+    const vtzero::vector_tile vt{data};
     REQUIRE(vt.count_layers() == 1);
-    auto layer = vt.next_layer();
+    auto layer = *vt.begin();
     REQUIRE(layer.valid());
     REQUIRE(layer.num_features() == 1);
 
