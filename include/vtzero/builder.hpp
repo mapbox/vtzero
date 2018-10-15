@@ -548,15 +548,7 @@ namespace vtzero {
          */
         void copy_attributes(const feature& feature) {
             this->enter_stage_attributes();
-            if (version() < 3) {
-                prepare_to_add_property_vt2();
-                feature.for_each_property([this](const property& prop) {
-                    add_property_impl_vt2(prop);
-                    return true;
-                });
-            } else {
-                feature.decode_attributes(*this);
-            }
+            feature.decode_attributes(*this);
         }
 
         /**

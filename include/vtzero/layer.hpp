@@ -811,33 +811,6 @@ namespace vtzero {
         }
     }
 
-    template <typename TFunc>
-    bool feature::for_each_property(TFunc&& func) const {
-        vtzero_assert(valid());
-        vtzero_assert(m_layer->version() < 3);
-
-        for (auto it = properties_begin(); it != properties_end();) {
-            const uint32_t ki = *it++;
-            if (!index_value{ki}.valid()) {
-                throw out_of_range_exception{ki};
-            }
-
-            if (it == properties_end()) {
-                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
-            }
-            const uint32_t vi = *it++;
-            if (!index_value{vi}.valid()) {
-                throw out_of_range_exception{vi};
-            }
-
-            if (!std::forward<TFunc>(func)(property{m_layer->key(ki), m_layer->value(vi)})) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     namespace detail {
 
         template <typename THandler, typename TIterator>

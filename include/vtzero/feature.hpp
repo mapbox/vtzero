@@ -298,19 +298,6 @@ namespace vtzero {
         }
 
         /**
-         * Call a function for each property of this feature.
-         *
-         * @tparam TFunc The type of the function. It must take a single
-         *         argument of type property&& and return a bool. If the
-         *         function returns false, the iteration will be stopped.
-         * @param func The function to call.
-         * @returns true if the iteration was completed and false otherwise.
-         * @pre @code valid() @endcode
-         */
-        template <typename TFunc>
-        bool for_each_property(TFunc&& func) const;
-
-        /**
          * Decode all normal attributes of this feature.
          *
          * This does not decode geometric attributes. See the functions
