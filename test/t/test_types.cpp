@@ -101,12 +101,6 @@ TEST_CASE("valid index value") {
     REQUIRE(v.value() == 32);
 }
 
-TEST_CASE("default constructed geometry") {
-    vtzero::geometry geom;
-    REQUIRE(geom.type() == vtzero::GeomType::UNKNOWN);
-    REQUIRE(geom.data().empty());
-}
-
 TEST_CASE("GeomType names") {
     REQUIRE(std::string{vtzero::geom_type_name(vtzero::GeomType::UNKNOWN)} == "unknown");
     REQUIRE(std::string{vtzero::geom_type_name(vtzero::GeomType::POINT)} == "point");

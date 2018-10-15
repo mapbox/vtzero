@@ -401,56 +401,6 @@ namespace vtzero {
 
     }; // class index_value_pair
 
-    /**
-     * The geometry class holds a geometry type and a reference to the data
-     * defining this geometry. To actually decode these geometries, use the
-     * decode_point_geometry(), decode_linestring_geometry(), and
-     * decode_polygon_geometry() classes.
-     */
-    class geometry {
-
-        data_view m_data{};
-        GeomType m_type = GeomType::UNKNOWN;
-
-    public:
-
-        /**
-         * A forward iterator yielding 32bit unsigned integers with the
-         * geometry encoded according to spec 4.3.
-         */
-        using const_iterator = protozero::pbf_reader::const_uint32_iterator;
-
-        /// Default construct to an invalid value.
-        constexpr geometry() noexcept = default;
-
-        /// Construct with the given values.
-        constexpr geometry(data_view data, GeomType type) noexcept :
-            m_data(data),
-            m_type(type) {
-        }
-
-        /// The data of this geometry
-        constexpr data_view data() const noexcept {
-            return m_data;
-        }
-
-        /// The type of this geometry
-        constexpr GeomType type() const noexcept {
-            return m_type;
-        }
-
-        /// Return iterator to the beginning of the data.
-        const_iterator begin() const noexcept {
-            return {m_data.data(), m_data.data() + m_data.size()};
-        }
-
-        /// Return iterator to one past the end of the data.
-        const_iterator end() const noexcept {
-            return {m_data.data() + m_data.size(), m_data.data() + m_data.size()};
-        }
-
-    }; // class geometry
-
 } // namespace vtzero
 
 #endif // VTZERO_TYPES_HPP
