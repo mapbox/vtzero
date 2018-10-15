@@ -18,17 +18,13 @@ documentation.
 
 #include "exception.hpp"
 #include "geometry.hpp"
-#include "property.hpp"
-#include "property_value.hpp"
 #include "types.hpp"
 #include "util.hpp"
 
 #include <protozero/pbf_message.hpp>
 
-#include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
 #include <type_traits>
 #include <utility>
 
@@ -45,27 +41,29 @@ namespace vtzero {
     class feature {
 
         enum class id_type {
-            no_id = 0,
+            no_id      = 0,
             integer_id = 1,
-            string_id = 2
+            string_id  = 2
         };
 
         const layer* m_layer = nullptr;
+
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
 
         data_view m_geometry{};
         data_view m_elevations{};
-        data_view m_properties{}; // version 2 "tags"
+        data_view m_tags{}; // version 2 "tags"
         data_view m_attributes{}; // version 3 attributes
         data_view m_geometric_attributes{};
+
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
 
         id_type m_id_type = id_type::no_id;
 
         using geom_iterator = protozero::pbf_reader::const_uint32_iterator;
         using elev_iterator = protozero::pbf_reader::const_sint64_iterator;
-        using prop_iterator = protozero::pbf_reader::const_uint32_iterator;
+        using tags_iterator = protozero::pbf_reader::const_uint32_iterator;
         using attr_iterator = protozero::pbf_reader::const_uint64_iterator;
 
         geom_iterator geometry_begin() const noexcept {
@@ -84,12 +82,12 @@ namespace vtzero {
             return {m_elevations.data() + m_elevations.size(), m_elevations.data() + m_elevations.size()};
         }
 
-        prop_iterator properties_begin() const noexcept {
-            return {m_properties.data(), m_properties.data() + m_properties.size()};
+        tags_iterator tags_begin() const noexcept {
+            return {m_tags.data(), m_tags.data() + m_tags.size()};
         }
 
-        prop_iterator properties_end() const noexcept {
-            return {m_properties.data() + m_properties.size(), m_properties.data() + m_properties.size()};
+        tags_iterator tags_end() const noexcept {
+            return {m_tags.data() + m_tags.size(), m_tags.data() + m_tags.size()};
         }
 
         attr_iterator attributes_begin() const noexcept {
@@ -232,6 +230,15 @@ namespace vtzero {
         }
 
         /**
+         * Does this feature have a 3d geometry?
+         *
+         * Complexity: Constant.
+         */
+        bool has_3d_geometry() const noexcept {
+            return !m_elevations.empty();
+        }
+
+        /**
          * The (2D) geometry data of this feature.
          *
          * Complexity: Constant.
@@ -254,14 +261,27 @@ namespace vtzero {
         }
 
         /**
+         * Returns true if this feature has any attributes;
+         *
+         * Complexity: Constant.
+         *
+         * Always returns true for invalid features.
+         */
+        bool has_attributes() const noexcept {
+            return !m_tags.empty() ||
+                   !m_attributes.empty() ||
+                   !m_geometric_attributes.empty();
+        }
+
+        /**
          * The vt2 attributes data of this feature.
          *
          * Complexity: Constant.
          *
          * Always returns an empty data_view for invalid features.
          */
-        data_view properties_data() const noexcept {
-            return m_properties;
+        data_view tags_data() const noexcept {
+            return m_tags;
         }
 
         /**
@@ -273,28 +293,6 @@ namespace vtzero {
          */
         data_view attributes_data() const noexcept {
             return m_attributes;
-        }
-
-        /**
-         * Does this feature have a 3d geometry?
-         *
-         * Complexity: Constant.
-         */
-        bool has_3d_geometry() const noexcept {
-            return !m_elevations.empty();
-        }
-
-        /**
-         * Returns true if this feature has any attributes;
-         *
-         * Complexity: Constant.
-         *
-         * Always returns true for invalid features.
-         */
-        bool has_attributes() const noexcept {
-            return !m_properties.empty() ||
-                   !m_attributes.empty() ||
-                   !m_geometric_attributes.empty();
         }
 
         /**

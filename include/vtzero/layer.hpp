@@ -737,13 +737,13 @@ namespace vtzero {
                     m_id_type = id_type::integer_id;
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
-                    if (!m_properties.empty()) {
+                    if (!m_tags.empty()) {
                         throw format_exception{"Feature has more than one tags field"};
                     }
                     if (!m_attributes.empty()) {
                         throw format_exception{"Feature has both tags and attributes field"};
                     }
-                    m_properties = reader.get_view();
+                    m_tags = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
@@ -752,7 +752,7 @@ namespace vtzero {
                     if (!m_attributes.empty()) {
                         throw format_exception{"Feature has more than one attributes field"};
                     }
-                    if (!m_properties.empty()) {
+                    if (!m_tags.empty()) {
                         throw format_exception{"Feature has both tags and attributes field"};
                     }
                     m_attributes = reader.get_view();
@@ -1068,14 +1068,14 @@ namespace vtzero {
         vtzero_assert(valid());
         vtzero_assert(m_layer != nullptr);
 
-        // vt2 properties
-        for (auto it = properties_begin(); it != properties_end();) {
+        // vt2 tags
+        for (auto it = tags_begin(); it != tags_end();) {
             const uint32_t ki = *it++;
             if (!index_value{ki}.valid()) {
                 throw out_of_range_exception{ki};
             }
 
-            if (it == properties_end()) {
+            if (it == tags_end()) {
                 throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
             }
             const uint32_t vi = *it++;
