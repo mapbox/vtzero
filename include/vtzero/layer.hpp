@@ -35,6 +35,90 @@ documentation.
 namespace vtzero {
 
     /**
+     * For iterating over all features in a vector tile layer.
+     *
+     * Usage:
+     * @code
+     * vtzero::layer layer = ...;
+     * for (auto feature : layer) {
+     *   ...
+     * }
+     * @endcode
+     */
+    class feature_iterator {
+
+        data_view m_data{};
+        const layer* m_layer = nullptr;
+
+        void skip_non_features() {
+            protozero::pbf_message<detail::pbf_layer> reader{m_data};
+            while (reader.next()) {
+                if (reader.tag_and_type() ==
+                        protozero::tag_and_type(detail::pbf_layer::features,
+                                                protozero::pbf_wire_type::length_delimited)) {
+                    return;
+                }
+                reader.skip();
+                m_data = reader.data();
+            }
+            m_data = reader.data();
+        }
+
+    public:
+
+        using iterator_category = std::forward_iterator_tag;
+        using value_type        = feature;
+        using difference_type   = std::ptrdiff_t;
+        using pointer           = value_type*;
+        using reference         = value_type&;
+
+        feature_iterator() noexcept = default;
+
+        feature_iterator(data_view data, const layer* layer) noexcept :
+            m_data(std::move(data)),
+            m_layer(layer) {
+            skip_non_features();
+        }
+
+        value_type operator*() const {
+            protozero::pbf_message<detail::pbf_layer> reader{m_data};
+            if (reader.next(detail::pbf_layer::features,
+                                  protozero::pbf_wire_type::length_delimited)) {
+                return {m_layer, reader.get_view()};
+            }
+            throw format_exception{"expected feature"};
+        }
+
+        feature_iterator& operator++() {
+            if (m_data.size() > 0) {
+                protozero::pbf_message<detail::pbf_layer> reader{m_data};
+                if (reader.next(detail::pbf_layer::features,
+                                      protozero::pbf_wire_type::length_delimited)) {
+                    reader.skip();
+                    m_data = reader.data();
+                    skip_non_features();
+                }
+            }
+            return *this;
+        }
+
+        feature_iterator operator++(int) {
+            const feature_iterator tmp{*this};
+            ++(*this);
+            return tmp;
+        }
+
+        friend bool operator==(feature_iterator lhs, feature_iterator rhs) noexcept {
+            return lhs.m_data == rhs.m_data;
+        }
+
+        friend bool operator!=(feature_iterator lhs, feature_iterator rhs) noexcept {
+            return !(lhs == rhs);
+        }
+
+    }; // class feature_iterator
+
+    /**
      * A layer according to spec 4.1. It contains a version, the extent,
      * and a name. For the most efficient way to access the features in this
      * layer call next_feature() until it returns an invalid feature:
@@ -622,6 +706,16 @@ namespace vtzero {
          */
         std::size_t num_attribute_scalings() const noexcept {
             return m_attribute_scalings.size();
+        }
+
+        /// Get a (const) iterator to the first feature in this layer.
+        feature_iterator begin() const noexcept {
+            return {m_data, this};
+        }
+
+        /// Get a (const) iterator one past the end feature in this layer.
+        feature_iterator end() const noexcept {
+            return {data_view{m_data.data() + m_data.size(), 0}, this};
         }
 
     }; // class layer

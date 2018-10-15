@@ -184,10 +184,10 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
     const std::string data = tbuilder.serialize();
 
     const vtzero::vector_tile tile{data};
-    auto layer = *tile.begin();
+    const auto layer = *tile.begin();
 
     uint64_t n = 1;
-    while (auto feature = layer.next_feature()) {
+    for (const auto feature : layer) {
         REQUIRE(feature.id() == n++);
     }
 
@@ -402,9 +402,9 @@ TEST_CASE("Copy tile") {
 
     vtzero::tile_builder tbuilder;
 
-    for (auto layer : tile) {
+    for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
-        while (auto feature = layer.next_feature()) {
+        for (const auto feature : layer) {
             vtzero::copy_feature(feature, lbuilder);
         }
     }
@@ -419,9 +419,9 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder") {
 
     vtzero::tile_builder tbuilder;
 
-    for (auto layer : tile) {
+    for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
-        while (auto feature = layer.next_feature()) {
+        for (const auto feature : layer) {
             vtzero::feature_builder<2, false> fbuilder{lbuilder};
             fbuilder.copy_id(feature);
             fbuilder.copy_geometry(feature);
@@ -441,9 +441,9 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
     vtzero::tile_builder tbuilder;
 
     int n = 0;
-    for (auto layer : tile) {
+    for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
-        while (auto feature = layer.next_feature()) {
+        for (const auto feature : layer) {
             vtzero::feature_builder<2, false> fbuilder{lbuilder};
             fbuilder.set_integer_id(feature.id());
             if (feature.geometry_type() == vtzero::GeomType::POINT) {
@@ -462,8 +462,8 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
 
     n = 0;
     const vtzero::vector_tile result_tile{data};
-    for (auto layer : result_tile) {
-        while (auto feature = layer.next_feature()) {
+    for (const auto layer : result_tile) {
+        for (const auto feature : layer) {
             ++n;
         }
     }
@@ -505,9 +505,9 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
     vtzero::tile_builder tbuilder;
 
     int n = 0;
-    for (auto layer : tile) {
+    for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
-        while (auto feature = layer.next_feature()) {
+        for (const auto feature : layer) {
             vtzero::point_2d_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
             if (feature.geometry_type() == vtzero::GeomType::POINT) {
@@ -527,8 +527,8 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
 
     n = 0;
     const vtzero::vector_tile result_tile{data};
-    for (auto layer : result_tile) {
-        while (auto feature = layer.next_feature()) {
+    for (const auto layer : result_tile) {
+        for (const auto feature : layer) {
             ++n;
         }
     }

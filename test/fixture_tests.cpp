@@ -167,7 +167,7 @@ static vtzero::feature check_layer(const vtzero::vector_tile& tile) {
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
-    return layer.next_feature();
+    return *layer.begin();
 }
 
 // ---------------------------------------------------------------------------
