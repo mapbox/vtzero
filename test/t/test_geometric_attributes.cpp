@@ -307,7 +307,7 @@ TEST_CASE("build feature with number list geometric attributes and read it again
         REQUIRE(handler.count_number_list == 4);
     }
     {
-        const std::string expected{""};
+        const std::string expected;
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
