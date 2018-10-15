@@ -744,7 +744,6 @@ namespace vtzero {
                         throw format_exception{"Feature has both tags and attributes field"};
                     }
                     m_properties = reader.get_packed_uint32();
-                    m_property_iterator = m_properties.begin();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {

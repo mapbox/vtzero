@@ -57,7 +57,6 @@ namespace vtzero {
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
         uint32_it_range m_properties{}; // version 2 "tags"
-        protozero::pbf_reader::const_uint32_iterator m_property_iterator{};
         std::size_t m_num_properties = 0;
 
         data_view m_geometry{};
