@@ -69,7 +69,7 @@ namespace vtzero {
         layer_iterator() noexcept = default;
 
         explicit layer_iterator(data_view data) noexcept :
-            m_data(std::move(data)) {
+            m_data(data) {
             skip_non_layers();
         }
 
@@ -83,7 +83,7 @@ namespace vtzero {
         }
 
         layer_iterator& operator++() {
-            if (m_data.size() > 0) {
+            if (!m_data.empty()) {
                 protozero::pbf_message<detail::pbf_tile> reader{m_data};
                 if (reader.next(detail::pbf_tile::layers,
                                 protozero::pbf_wire_type::length_delimited)) {
