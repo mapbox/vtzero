@@ -68,7 +68,7 @@ namespace vtzero {
 
         layer_iterator() noexcept = default;
 
-        layer_iterator(data_view data) noexcept :
+        explicit layer_iterator(data_view data) noexcept :
             m_data(std::move(data)) {
             skip_non_layers();
         }
@@ -76,7 +76,7 @@ namespace vtzero {
         value_type operator*() const {
             protozero::pbf_message<detail::pbf_tile> reader{m_data};
             if (reader.next(detail::pbf_tile::layers,
-                                 protozero::pbf_wire_type::length_delimited)) {
+                            protozero::pbf_wire_type::length_delimited)) {
                 return layer{reader.get_view()};
             }
             throw format_exception{"expected layer"};
@@ -86,7 +86,7 @@ namespace vtzero {
             if (m_data.size() > 0) {
                 protozero::pbf_message<detail::pbf_tile> reader{m_data};
                 if (reader.next(detail::pbf_tile::layers,
-                                     protozero::pbf_wire_type::length_delimited)) {
+                                protozero::pbf_wire_type::length_delimited)) {
                     reader.skip();
                     m_data = reader.data();
                     skip_non_layers();
@@ -300,12 +300,12 @@ namespace vtzero {
 
         /// Get a (const) iterator to the first layer in this vector tile.
         layer_iterator begin() const noexcept {
-            return {m_data};
+            return layer_iterator{m_data};
         }
 
         /// Get a (const) iterator one past the end layer in this vector tile.
         layer_iterator end() const noexcept {
-            return {data_view{m_data.data() + m_data.size(), 0}};
+            return layer_iterator{data_view{m_data.data() + m_data.size(), 0}};
         }
 
     }; // class vector_tile
