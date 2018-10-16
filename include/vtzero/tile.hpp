@@ -77,22 +77,22 @@ namespace vtzero {
         }
 
         /// The x coordinate.
-        uint32_t x() const noexcept {
+        constexpr uint32_t x() const noexcept {
             return m_x;
         }
 
         /// The y coordinate.
-        uint32_t y() const noexcept {
+        constexpr uint32_t y() const noexcept {
             return m_y;
         }
 
         /// The zoom level.
-        uint32_t zoom() const noexcept {
+        constexpr uint32_t zoom() const noexcept {
             return m_zoom;
         }
 
         /// The extent.
-        uint32_t extent() const noexcept {
+        constexpr uint32_t extent() const noexcept {
             return m_extent;
         }
 
@@ -128,7 +128,7 @@ namespace vtzero {
     }; // class tile
 
     /// Tiles are equal if all their attributes are equal.
-    inline bool operator==(const tile lhs, const tile rhs) noexcept {
+    inline constexpr bool operator==(const tile lhs, const tile rhs) noexcept {
         return lhs.zoom() == rhs.zoom() &&
                lhs.x() == rhs.x() &&
                lhs.y() == rhs.y() &&
@@ -136,7 +136,7 @@ namespace vtzero {
     }
 
     /// Tiles are unequal if their are not equal.
-    inline bool operator!=(const tile lhs, const tile rhs) noexcept {
+    inline constexpr bool operator!=(const tile lhs, const tile rhs) noexcept {
         return !(lhs == rhs);
     }
 

@@ -84,23 +84,23 @@ namespace vtzero {
         template <typename T>
         struct null_iterator {
 
-            bool operator==(null_iterator /*other*/) const noexcept {
+            constexpr bool operator==(null_iterator /*other*/) const noexcept {
                 return true;
             }
 
-            bool operator!=(null_iterator /*other*/) const noexcept {
+            constexpr bool operator!=(null_iterator /*other*/) const noexcept {
                 return false;
             }
 
-            T operator*() const noexcept {
+            constexpr T operator*() const noexcept {
                 return 0;
             }
 
-            null_iterator operator++() const noexcept {
+            constexpr null_iterator operator++() const noexcept {
                 return *this;
             }
 
-            null_iterator operator++(int) const noexcept {
+            constexpr null_iterator operator++(int) const noexcept {
                 return *this;
             }
 

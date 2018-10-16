@@ -71,17 +71,17 @@ namespace vtzero {
         }
 
         /// Get the offset value of this scaling.
-        int64_t offset() const noexcept {
+        constexpr int64_t offset() const noexcept {
             return m_offset;
         }
 
         /// Get the multiplier value of this scaling.
-        double multiplier() const noexcept {
+        constexpr double multiplier() const noexcept {
             return m_multiplier;
         }
 
         /// Get the base value of this scaling.
-        double base() const noexcept {
+        constexpr double base() const noexcept {
             return m_base;
         }
 
@@ -122,14 +122,14 @@ namespace vtzero {
         }
 
         /// Scalings are the same if all values are the same.
-        bool operator==(const scaling& other) const noexcept {
+        constexpr bool operator==(const scaling& other) const noexcept {
             return m_offset == other.m_offset &&
                    m_multiplier == other.m_multiplier &&
                    m_base == other.m_base;
         }
 
         /// Scalings are the different if they are not the same.
-        bool operator!=(const scaling& other) const noexcept {
+        constexpr bool operator!=(const scaling& other) const noexcept {
             return !(*this == other);
         }
 
