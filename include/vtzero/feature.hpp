@@ -378,7 +378,7 @@ namespace vtzero {
          * @returns whatever geom_handler.result() returns if that function
          *          exists, void otherwise
          * @throws geometry_error If there is a problem with the geometry.
-         * @pre Geometry must be a point geometry.
+         * @pre Geometry must be a linestring geometry.
          */
         template <typename TGeomHandler>
         detail::get_result_t<TGeomHandler> decode_linestring_geometry(TGeomHandler&& geom_handler) const {
@@ -403,7 +403,7 @@ namespace vtzero {
          * @returns whatever geom_handler.result() returns if that function
          *          exists, void otherwise
          * @throws geometry_error If there is a problem with the geometry.
-         * @pre Geometry must be a point geometry.
+         * @pre Geometry must be a polygon geometry.
          */
         template <typename TGeomHandler>
         detail::get_result_t<TGeomHandler> decode_polygon_geometry(TGeomHandler&& geom_handler) const {
