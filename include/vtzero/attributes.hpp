@@ -49,7 +49,23 @@ namespace vtzero {
         // some member function a dummy is called that always returns true.
         // If the class defines the function, it is called.
 
-        // Call a function with one parameters
+        // Call a function without parameters
+#define DEF_CALL_WRAPPER0(func) \
+        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func())>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler) { \
+            return std::forward<THandler>(handler).func(); \
+        } \
+        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().func())>::value, int>::type = 0> \
+        bool call_##func(THandler&& handler) { \
+            std::forward<THandler>(handler).func(); \
+            return true; \
+        } \
+        template <typename... TArgs> \
+        bool call_##func(TArgs&&... /*unused*/) { \
+            return true; \
+        } \
+
+        // Call a function with one parameter
 #define DEF_CALL_WRAPPER1(func, ptype) \
         template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func(std::declval<ptype>()))>::value, int>::type = 0> \
         bool call_##func(THandler&& handler, ptype param) { \
@@ -111,6 +127,7 @@ namespace vtzero {
         DEF_CALL_WRAPPER2(start_map_attribute, std::size_t, std::size_t)
         DEF_CALL_WRAPPER1(end_map_attribute, std::size_t)
 
+        DEF_CALL_WRAPPER3(start_number_list, std::size_t, index_value, std::size_t)
         DEF_CALL_WRAPPER2(number_list_value, std::int64_t, std::size_t)
         DEF_CALL_WRAPPER1(number_list_null_value, std::size_t)
         DEF_CALL_WRAPPER1(end_number_list, std::size_t)
@@ -118,8 +135,10 @@ namespace vtzero {
         DEF_CALL_WRAPPER1(points_null_attr, index_value)
         DEF_CALL_WRAPPER3(points_attr, index_value, index_value, int64_t)
 
+#undef DEF_CALL_WRAPPER0
 #undef DEF_CALL_WRAPPER1
 #undef DEF_CALL_WRAPPER2
+#undef DEF_CALL_WRAPPER3
 // @endcond
 
         // This overload matches only when the handler has the value() member function of type TValue.
@@ -138,25 +157,6 @@ namespace vtzero {
         // This overload matches always.
         template <typename... TArgs>
         bool call_attribute_value(TArgs&&... /*unused*/) {
-            return true;
-        }
-
-        // This overload matches only when the handler has the start_number_list() member function returning bool.
-        template <typename THandler, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().start_number_list(std::declval<std::size_t>(), std::declval<index_value>(), std::declval<std::size_t>()))>::value, int>::type = 0>
-        bool call_start_number_list(THandler&& handler, std::size_t count, index_value index, std::size_t depth) {
-            return std::forward<THandler>(handler).start_number_list(count, index, depth);
-        }
-
-        // This overload matches only when the handler has the start_number_list() member function returning void.
-        template <typename THandler, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().start_number_list(std::declval<std::size_t>(), std::declval<index_value>(), std::declval<std::size_t>()))>::value, int>::type = 0>
-        bool call_start_number_list(THandler&& handler, std::size_t count, index_value index, std::size_t depth) {
-            std::forward<THandler>(handler).start_number_list(count, index, depth);
-            return true;
-        }
-
-        // This overload matches always.
-        template <typename... TArgs>
-        bool call_start_number_list(TArgs&&... /*unused*/) {
             return true;
         }
 
