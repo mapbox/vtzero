@@ -387,6 +387,8 @@ namespace vtzero {
 
             template <typename THandler>
             get_result_t<THandler> decode_point(THandler&& handler) {
+                using handler_type = typename std::remove_reference<THandler>::type;
+
                 // spec 4.3.4.2 "MUST consist of a single MoveTo command"
                 if (!next_command(CommandId::MOVE_TO)) {
                     throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
@@ -401,7 +403,7 @@ namespace vtzero {
 
                 std::forward<THandler>(handler).points_begin(count());
                 while (count() > 0) {
-                    std::forward<THandler>(handler).points_point(std::forward<THandler>(handler).convert(next_point()));
+                    std::forward<THandler>(handler).points_point(handler_type::convert(next_point()));
                     for (auto& attr : geom_attributes) {
                         if (attr.get_next_value()) {
                             call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -423,6 +425,8 @@ namespace vtzero {
 
             template <typename THandler>
             get_result_t<THandler> decode_linestring(THandler&& handler) {
+                using handler_type = typename std::remove_reference<THandler>::type;
+
                 geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
 
                 // spec 4.3.4.3 "1. A MoveTo command"
@@ -447,7 +451,7 @@ namespace vtzero {
                     std::forward<THandler>(handler).linestring_begin(count() + 1);
 
                     while (true) {
-                        std::forward<THandler>(handler).linestring_point(std::forward<THandler>(handler).convert(point));
+                        std::forward<THandler>(handler).linestring_point(handler_type::convert(point));
                         for (auto& attr : geom_attributes) {
                             if (attr.get_next_value()) {
                                 call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -469,6 +473,8 @@ namespace vtzero {
 
             template <typename THandler>
             get_result_t<THandler> decode_polygon(THandler&& handler) {
+                using handler_type = typename std::remove_reference<THandler>::type;
+
                 geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
 
                 // spec 4.3.4.4 "1. A MoveTo command"
@@ -490,7 +496,7 @@ namespace vtzero {
                     std::forward<THandler>(handler).ring_begin(count() + 2);
 
                     while (true) {
-                        std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(point));
+                        std::forward<THandler>(handler).ring_point(handler_type::convert(point));
                         for (auto& attr : geom_attributes) {
                             if (attr.get_next_value()) {
                                 call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -515,7 +521,7 @@ namespace vtzero {
 
                     sum += det(point, start_point);
 
-                    std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(start_point));
+                    std::forward<THandler>(handler).ring_point(handler_type::convert(start_point));
                     for (auto& attr : geom_attributes) {
                         if (attr.get_next_value()) {
                             call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
