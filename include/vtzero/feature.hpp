@@ -296,6 +296,17 @@ namespace vtzero {
         }
 
         /**
+         * The vt3 geometric attributes data of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * Always returns an empty data_view for invalid features.
+         */
+        data_view geometric_attributes_data() const noexcept {
+            return m_geometric_attributes;
+        }
+
+        /**
          * Decode all normal attributes of this feature.
          *
          * This does not decode geometric attributes. See the functions

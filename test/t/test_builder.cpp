@@ -342,7 +342,6 @@ static vtzero::layer next_nonempty_layer(vtzero::layer_iterator& it, const vtzer
     return vtzero::layer{};
 }
 
-// TODO(joto) this function needs to be updated for vt3
 static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
     const vtzero::vector_tile vt1{t1};
     const vtzero::vector_tile vt2{t2};
@@ -360,7 +359,7 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
         if (!l1 ||
             !l2 ||
             l1.version() != l2.version() ||
-            l1.extent() != l2.extent() ||
+            l1.get_tile() != l2.get_tile() ||
             l1.num_features() != l2.num_features() ||
             l1.name() != l2.name()) {
             return false;
@@ -380,7 +379,8 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
                 f1.geometry_data() != f2.geometry_data() ||
                 f1.elevations_data() != f2.elevations_data() ||
                 f1.tags_data() != f2.tags_data() ||
-                f1.attributes_data() != f2.attributes_data()) {
+                f1.attributes_data() != f2.attributes_data() ||
+                f1.geometric_attributes_data() != f2.geometric_attributes_data()) {
                 return false;
             }
         }
