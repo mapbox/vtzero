@@ -35,8 +35,8 @@ namespace vtzero {
      * "invalid". Invalid is used when the area of the ring is 0.
      */
     enum class ring_type {
-        outer = 0,
-        inner = 1,
+        outer   = 0,
+        inner   = 1,
         invalid = 2
     }; // enum class ring_type
 
@@ -44,8 +44,8 @@ namespace vtzero {
 
         /// The command id type as specified in the vector tile spec
         enum class CommandId : uint32_t {
-            MOVE_TO = 1,
-            LINE_TO = 2,
+            MOVE_TO    = 1,
+            LINE_TO    = 2,
             CLOSE_PATH = 7
         };
 
@@ -182,7 +182,8 @@ namespace vtzero {
         template <unsigned int MaxGeometricAttributes, typename TIterator>
         class geometric_attribute_collection {
 
-            static_assert(!std::is_same<TIterator, dummy_attr_iterator>::value, "Please set MaxGeometricAttributes to 0 when dummy_attr_iterator is used");
+            static_assert(!std::is_same<TIterator, dummy_attr_iterator>::value,
+                          "Please set MaxGeometricAttributes to 0 when dummy_attr_iterator is used");
 
             geometric_attribute<TIterator> m_attrs[MaxGeometricAttributes];
 
@@ -259,7 +260,11 @@ namespace vtzero {
          * be instantiated with a different iterator type for testing than for
          * normal use.
          */
-        template <int Dimensions, unsigned int MaxGeometricAttributes, typename TGeomIterator, typename TElevIterator = dummy_elev_iterator, typename TAttrIterator = dummy_attr_iterator>
+        template <int Dimensions,
+                  unsigned int MaxGeometricAttributes,
+                  typename TGeomIterator,
+                  typename TElevIterator = dummy_elev_iterator,
+                  typename TAttrIterator = dummy_attr_iterator>
         class geometry_decoder {
 
             static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
@@ -304,7 +309,7 @@ namespace vtzero {
                 m_attr_it(attr_begin),
                 m_attr_end(attr_end),
                 m_max_count(static_cast<uint32_t>(max)) {
-                vtzero_assert(max <= detail::max_command_count());
+                vtzero_assert(max <= max_command_count());
             }
 
             uint32_t count() const noexcept {
@@ -380,8 +385,8 @@ namespace vtzero {
                 return m_cursor;
             }
 
-            template <typename TGeomHandler>
-            detail::get_result_t<TGeomHandler> decode_point(TGeomHandler&& geom_handler) {
+            template <typename THandler>
+            get_result_t<THandler> decode_point(THandler&& handler) {
                 // spec 4.3.4.2 "MUST consist of a single MoveTo command"
                 if (!next_command(CommandId::MOVE_TO)) {
                     throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
@@ -394,30 +399,30 @@ namespace vtzero {
 
                 geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
 
-                std::forward<TGeomHandler>(geom_handler).points_begin(count());
+                std::forward<THandler>(handler).points_begin(count());
                 while (count() > 0) {
-                    std::forward<TGeomHandler>(geom_handler).points_point(std::forward<TGeomHandler>(geom_handler).convert(next_point()));
-                    for (auto& geom_attr : geom_attributes) {
-                        if (geom_attr.get_next_value()) {
-                            detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                    std::forward<THandler>(handler).points_point(std::forward<THandler>(handler).convert(next_point()));
+                    for (auto& attr : geom_attributes) {
+                        if (attr.get_next_value()) {
+                            call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
                         } else {
-                            detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                            call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
                         }
                     }
                 }
 
-                // spec 4.3.4.2 "MUST consist of of a single ... command"
+                // spec 4.3.4.2 "MUST consist of a single ... command"
                 if (!done()) {
                     throw geometry_exception{"additional data after end of geometry (spec 4.3.4.2)"};
                 }
 
-                std::forward<TGeomHandler>(geom_handler).points_end();
+                std::forward<THandler>(handler).points_end();
 
-                return detail::get_result<TGeomHandler>::of(std::forward<TGeomHandler>(geom_handler));
+                return get_result<THandler>::of(std::forward<THandler>(handler));
             }
 
-            template <typename TGeomHandler>
-            detail::get_result_t<TGeomHandler> decode_linestring(TGeomHandler&& geom_handler) {
+            template <typename THandler>
+            get_result_t<THandler> decode_linestring(THandler&& handler) {
                 geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
 
                 // spec 4.3.4.3 "1. A MoveTo command"
@@ -427,7 +432,7 @@ namespace vtzero {
                         throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.3)"};
                     }
 
-                    const auto first_point = std::forward<TGeomHandler>(geom_handler).convert(next_point());
+                    const auto first_point = std::forward<THandler>(handler).convert(next_point());
 
                     // spec 4.3.4.3 "2. A LineTo command"
                     if (!next_command(CommandId::LINE_TO)) {
@@ -439,36 +444,36 @@ namespace vtzero {
                         throw geometry_exception{"LineTo command count is zero (spec 4.3.4.3)"};
                     }
 
-                    std::forward<TGeomHandler>(geom_handler).linestring_begin(count() + 1);
+                    std::forward<THandler>(handler).linestring_begin(count() + 1);
 
-                    std::forward<TGeomHandler>(geom_handler).linestring_point(first_point);
-                    for (auto& geom_attr : geom_attributes) {
-                        if (geom_attr.get_next_value()) {
-                            detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                    std::forward<THandler>(handler).linestring_point(first_point);
+                    for (auto& attr : geom_attributes) {
+                        if (attr.get_next_value()) {
+                            call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
                         } else {
-                            detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                            call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
                         }
                     }
 
                     while (count() > 0) {
-                        std::forward<TGeomHandler>(geom_handler).linestring_point(std::forward<TGeomHandler>(geom_handler).convert(next_point()));
-                        for (auto& geom_attr : geom_attributes) {
-                            if (geom_attr.get_next_value()) {
-                                detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                        std::forward<THandler>(handler).linestring_point(std::forward<THandler>(handler).convert(next_point()));
+                        for (auto& attr : geom_attributes) {
+                            if (attr.get_next_value()) {
+                                call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
                             } else {
-                                detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                                call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
                             }
                         }
                     }
 
-                    std::forward<TGeomHandler>(geom_handler).linestring_end();
+                    std::forward<THandler>(handler).linestring_end();
                 }
 
-                return detail::get_result<TGeomHandler>::of(std::forward<TGeomHandler>(geom_handler));
+                return get_result<THandler>::of(std::forward<THandler>(handler));
             }
 
-            template <typename TGeomHandler>
-            detail::get_result_t<TGeomHandler> decode_polygon(TGeomHandler&& geom_handler) {
+            template <typename THandler>
+            get_result_t<THandler> decode_polygon(THandler&& handler) {
                 geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
 
                 // spec 4.3.4.4 "1. A MoveTo command"
@@ -487,14 +492,14 @@ namespace vtzero {
                         throw geometry_exception{"expected LineTo command (spec 4.3.4.4)"};
                     }
 
-                    std::forward<TGeomHandler>(geom_handler).ring_begin(count() + 2);
+                    std::forward<THandler>(handler).ring_begin(count() + 2);
 
-                    std::forward<TGeomHandler>(geom_handler).ring_point(std::forward<TGeomHandler>(geom_handler).convert(start_point));
-                    for (auto& geom_attr : geom_attributes) {
-                        if (geom_attr.get_next_value()) {
-                            detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                    std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(start_point));
+                    for (auto& attr : geom_attributes) {
+                        if (attr.get_next_value()) {
+                            call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
                         } else {
-                            detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                            call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
                         }
                     }
 
@@ -502,12 +507,12 @@ namespace vtzero {
                         const auto p = next_point();
                         sum += det(last_point, p);
                         last_point = p;
-                        std::forward<TGeomHandler>(geom_handler).ring_point(std::forward<TGeomHandler>(geom_handler).convert(p));
-                        for (auto& geom_attr : geom_attributes) {
-                            if (geom_attr.get_next_value()) {
-                                detail::call_points_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index(), geom_attr.scaling_index(), geom_attr.value());
+                        std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(p));
+                        for (auto& attr : geom_attributes) {
+                            if (attr.get_next_value()) {
+                                call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
                             } else {
-                                detail::call_points_null_attr(std::forward<TGeomHandler>(geom_handler), geom_attr.key_index());
+                                call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
                             }
                         }
                     }
@@ -519,13 +524,13 @@ namespace vtzero {
 
                     sum += det(last_point, start_point);
 
-                    std::forward<TGeomHandler>(geom_handler).ring_point(std::forward<TGeomHandler>(geom_handler).convert(start_point));
+                    std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(start_point));
 
-                    std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0 ? ring_type::outer :
-                                                                      sum < 0 ? ring_type::inner : ring_type::invalid);
+                    std::forward<THandler>(handler).ring_end(sum > 0 ? ring_type::outer :
+                                                             sum < 0 ? ring_type::inner : ring_type::invalid);
                 }
 
-                return detail::get_result<TGeomHandler>::of(std::forward<TGeomHandler>(geom_handler));
+                return get_result<THandler>::of(std::forward<THandler>(handler));
             }
 
         }; // class geometry_decoder
