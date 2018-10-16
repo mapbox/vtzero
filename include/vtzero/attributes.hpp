@@ -63,7 +63,7 @@ namespace vtzero {
         template <typename... TArgs> \
         bool call_##func(TArgs&&... /*unused*/) { \
             return true; \
-        } \
+        }
 
         // Call a function with one parameter
 #define DEF_CALL_WRAPPER1(func, ptype) \
@@ -79,7 +79,7 @@ namespace vtzero {
         template <typename... TArgs> \
         bool call_##func(TArgs&&... /*unused*/) { \
             return true; \
-        } \
+        }
 
         // Call a function with two parameters
 #define DEF_CALL_WRAPPER2(func, ptype1, ptype2) \
@@ -95,7 +95,7 @@ namespace vtzero {
         template <typename... TArgs> \
         bool call_##func(TArgs&&... /*unused*/) { \
             return true; \
-        } \
+        }
 
         /// Call a function with three parameters
 #define DEF_CALL_WRAPPER3(func, ptype1, ptype2, ptype3) \
@@ -111,7 +111,7 @@ namespace vtzero {
         template <typename... TArgs> \
         bool call_##func(TArgs&&... /*unused*/) { \
             return true; \
-        } \
+        }
 
         DEF_CALL_WRAPPER2(key_index, index_value, std::size_t)
         DEF_CALL_WRAPPER2(attribute_key, data_view, std::size_t)
