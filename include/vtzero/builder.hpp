@@ -757,21 +757,6 @@ namespace vtzero {
         }
 
         /**
-         * Add a single point as the geometry to this feature.
-         *
-         * @tparam TPoint A type that can be converted to vtzero::point using
-         *         the create_vtzero_point function.
-         * @param p The point to add.
-         *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
-         *      this function.
-         */
-        template <typename TPoint>
-        void add_point(TPoint&& p) {
-            add_point(create_vtzero_point(std::forward<TPoint>(p)));
-        }
-
-        /**
          * Declare the intent to add a multipoint geometry with *count* points
          * to this feature.
          *
@@ -822,23 +807,6 @@ namespace vtzero {
          */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point{x, y});
-        }
-
-        /**
-         * Set a point in the multipoint geometry.
-         *
-         * @tparam TPoint A type that can be converted to vtzero::point using
-         *         the create_vtzero_point function.
-         * @param p The point to add.
-         *
-         * @pre There must have been less than *count* calls to set_point()
-         *      already after a call to add_points(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
-         */
-        template <typename TPoint>
-        void set_point(TPoint&& p) {
-            set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
         /**
@@ -975,28 +943,6 @@ namespace vtzero {
          */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point{x, y});
-        }
-
-        /**
-         * Set a point in the multilinestring geometry opened with
-         * add_linestring().
-         *
-         * @tparam TPoint A type that can be converted to vtzero::point using
-         *         the create_vtzero_point function.
-         * @param p The point to add.
-         *
-         * @throws geometry_exception if the point set is the same as the
-         *         previous point. This would create zero-length segments
-         *         which are not allowed according to the vector tile spec.
-         *
-         * @pre There must have been less than *count* calls to set_point()
-         *      already after a call to add_linestring(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
-         */
-        template <typename TPoint>
-        void set_point(TPoint&& p) {
-            set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
         /**
@@ -1147,30 +1093,6 @@ namespace vtzero {
          */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point{x, y});
-        }
-
-        /**
-         * Set a point in the ring opened with add_ring().
-         *
-         * @tparam TPoint A type that can be converted to vtzero::point using
-         *         the create_vtzero_point function.
-         * @param p The point to add.
-         *
-         * @throws geometry_exception if the point set is the same as the
-         *         previous point. This would create zero-length segments
-         *         which are not allowed according to the vector tile spec.
-         *         This exception is also thrown when the last point in the
-         *         ring is not equal to the first point, because this would
-         *         not create a closed ring.
-         *
-         * @pre There must have been less than *count* calls to set_point()
-         *      already after a call to add_ring(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
-         */
-        template <typename TPoint>
-        void set_point(TPoint&& p) {
-            set_point(create_vtzero_point(std::forward<TPoint>(p)));
         }
 
         /**

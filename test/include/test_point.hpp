@@ -39,11 +39,6 @@ std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits
     return out << '(' << p.x << ',' << p.y << ')';
 }
 
-inline vtzero::point create_vtzero_point(test_point_2d p) noexcept {
-    return {static_cast<int32_t>(p.x),
-            static_cast<int32_t>(p.y)};
-}
-
 // 3D Point
 
 struct test_point_3d {

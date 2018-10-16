@@ -82,10 +82,10 @@ static void test_point_builder(bool with_id, bool with_prop) {
             }
         }
 
-        SECTION("add point using test_point_2d / property using property") {
+        SECTION("add point using vtzero::point / property using property") {
             vtzero::encoded_property_value pv{3.5};
             vtzero::property p{"foo", vtzero::property_value{pv.data()}};
-            fbuilder.add_point(test_point_2d{10, 20});
+            fbuilder.add_point(vtzero::point{10, 20});
             if (with_prop) {
                 fbuilder.add_property(p);
             }
@@ -155,8 +155,8 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
             }
         }
 
-        SECTION("add point using test_point_2d / property using key/double value") {
-            fbuilder.add_point(test_point_2d{10, 20});
+        SECTION("add point using vtzero::point / property using key/double value") {
+            fbuilder.add_point(vtzero::point{10, 20});
             if (with_prop) {
                 fbuilder.add_scalar_attribute("foo", 3.5);
             }
@@ -266,7 +266,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     fbuilder.add_points(3);
     fbuilder.set_point(10, 20);
     fbuilder.set_point(vtzero::point{20, 30});
-    fbuilder.set_point(test_point_2d{30, 40});
+    fbuilder.set_point(vtzero::point{30, 40});
 
     if (with_prop) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});

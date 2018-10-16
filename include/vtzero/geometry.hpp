@@ -99,18 +99,6 @@ namespace vtzero {
 
     }; // struct point
 
-    /**
-     * Helper function to create a point from any type that has members x
-     * and y.
-     *
-     * If your point type doesn't have members x any y, you can overload this
-     * function for your type and it will be used by vtzero.
-     */
-    template <typename TPoint>
-    point create_vtzero_point(const TPoint& p) noexcept {
-        return {p.x, p.y};
-    }
-
     /// Points are equal if their coordinates are
     inline constexpr bool operator==(const point a, const point b) noexcept {
         return a.x == b.x && a.y == b.y;
