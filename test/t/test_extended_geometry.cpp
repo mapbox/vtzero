@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_point.hpp>
 
 #include <vtzero/geometry.hpp>
 

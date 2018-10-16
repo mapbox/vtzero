@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
 #include <vtzero/geometry.hpp>
@@ -50,7 +51,7 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
         fbuilder.add_linestring(3);
         fbuilder.set_point(10, 20);
         fbuilder.set_point(vtzero::point{20, 30});
-        fbuilder.set_point(mypoint{30, 40});
+        fbuilder.set_point(test_point_2d{30, 40});
 
         if (with_prop) {
             fbuilder.add_property("foo", "bar");
@@ -123,7 +124,7 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
     fbuilder.add_linestring(3);
     fbuilder.set_point(10, 20);
     fbuilder.set_point(vtzero::point{20, 30});
-    fbuilder.set_point(mypoint{30, 40});
+    fbuilder.set_point(test_point_2d{30, 40});
 
     fbuilder.add_linestring(2);
     fbuilder.set_point(1, 2);

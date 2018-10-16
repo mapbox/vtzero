@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
 #include <vtzero/geometry.hpp>
@@ -37,9 +38,9 @@ struct point_handler_3d {
 
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    std::vector<mypoint_3d> data;
+    std::vector<test_point_3d> data;
 
-    static mypoint_3d convert(const vtzero::unscaled_point& p) noexcept {
+    static test_point_3d convert(const vtzero::unscaled_point& p) noexcept {
         return {p.x, p.y, p.z};
     }
 
@@ -47,7 +48,7 @@ struct point_handler_3d {
         data.reserve(count);
     }
 
-    void points_point(const mypoint_3d& point) {
+    void points_point(const test_point_3d& point) {
         data.push_back(point);
     }
 
@@ -81,10 +82,10 @@ static void test_point_builder(bool with_id, bool with_prop) {
             }
         }
 
-        SECTION("add point using mypoint / property using property") {
+        SECTION("add point using test_point_2d / property using property") {
             vtzero::encoded_property_value pv{3.5};
             vtzero::property p{"foo", vtzero::property_value{pv.data()}};
-            fbuilder.add_point(mypoint{10, 20});
+            fbuilder.add_point(test_point_2d{10, 20});
             if (with_prop) {
                 fbuilder.add_property(p);
             }
@@ -154,8 +155,8 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
             }
         }
 
-        SECTION("add point using mypoint / property using key/double value") {
-            fbuilder.add_point(mypoint{10, 20});
+        SECTION("add point using test_point_2d / property using key/double value") {
+            fbuilder.add_point(test_point_2d{10, 20});
             if (with_prop) {
                 fbuilder.add_scalar_attribute("foo", 3.5);
             }
@@ -265,7 +266,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     fbuilder.add_points(3);
     fbuilder.set_point(10, 20);
     fbuilder.set_point(vtzero::point{20, 30});
-    fbuilder.set_point(mypoint{30, 40});
+    fbuilder.set_point(test_point_2d{30, 40});
 
     if (with_prop) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});

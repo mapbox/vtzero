@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
 #include <vtzero/feature.hpp>
@@ -62,53 +63,20 @@ TEST_CASE("Geometric attributes with null values") {
     REQUIRE_FALSE(ga2.get_next_value());
 }
 
-struct point_with_attr {
-    int64_t x = 0;
-    int64_t y = 0;
-    int64_t elev = 0;
-    int64_t attr1 = 0;
-    int64_t attr2 = 0;
-
-    point_with_attr(int64_t x_, int64_t y_, int64_t elev_, int64_t a1 = 0, int64_t a2 = 0) :
-        x(x_),
-        y(y_),
-        elev(elev_),
-        attr1(a1),
-        attr2(a2) {
-    }
-};
-
-inline constexpr bool operator==(const point_with_attr& a, const point_with_attr& b) noexcept {
-    return a.x == b.x &&
-           a.y == b.y &&
-           a.elev == b.elev &&
-           a.attr1 == b.attr1 &&
-           a.attr2 == b.attr2;
-}
-
-inline constexpr bool operator!=(const point_with_attr& a, const point_with_attr& b) noexcept {
-    return !(a == b);
-}
-
-template <typename TChar, typename TTraits>
-std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, const point_with_attr& p) {
-    return out << '(' << p.x << ',' << p.y << ',' << p.elev << ',' << p.attr1 << ',' << p.attr2 << ')';
-}
-
 class geom_with_attr_handler {
 
-    std::vector<point_with_attr> m_points;
+    std::vector<test_point_attr> m_points;
 
 public:
 
-    static point_with_attr convert(const vtzero::unscaled_point& p) noexcept {
+    static test_point_attr convert(const vtzero::unscaled_point& p) noexcept {
         return {p.x, p.y, p.z};
     }
 
     void points_begin(const uint32_t /*count*/) const noexcept {
     }
 
-    void points_point(const point_with_attr& point) noexcept {
+    void points_point(const test_point_attr& point) noexcept {
         m_points.push_back(point);
     }
 
@@ -118,7 +86,7 @@ public:
     void linestring_begin(const uint32_t /*count*/) const noexcept {
     }
 
-    void linestring_point(const point_with_attr& point) noexcept {
+    void linestring_point(const test_point_attr& point) noexcept {
         m_points.push_back(point);
     }
 
@@ -138,7 +106,7 @@ public:
     void points_null_attr(vtzero::index_value /*key_index*/) noexcept {
     }
 
-    const std::vector<point_with_attr>& result() const noexcept {
+    const std::vector<test_point_attr>& result() const noexcept {
         return m_points;
     }
 
@@ -160,8 +128,8 @@ TEST_CASE("Calling decode_point() decoding valid multipoint with geometric attri
     const auto result = decoder.decode_point(handler);
 
     REQUIRE(result.size() == 2);
-    REQUIRE(result[0] == point_with_attr(5, 7, 22, 4, 3));
-    REQUIRE(result[1] == point_with_attr(3, 2, 25, 7, 1));
+    REQUIRE(result[0] == test_point_attr(5, 7, 22, 4, 3));
+    REQUIRE(result[1] == test_point_attr(3, 2, 25, 7, 1));
 }
 
 TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric attributes") {
@@ -180,9 +148,9 @@ TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric 
     const auto result = decoder.decode_linestring(handler);
 
     REQUIRE(result.size() == 3);
-    REQUIRE(result[0] == point_with_attr(2, 2, 22, 4, 3));
-    REQUIRE(result[1] == point_with_attr(2, 10, 25, 7, 1));
-    REQUIRE(result[2] == point_with_attr(10, 10, 29, 0, 0));
+    REQUIRE(result[0] == test_point_attr(2, 2, 22, 4, 3));
+    REQUIRE(result[1] == test_point_attr(2, 10, 25, 7, 1));
+    REQUIRE(result[2] == test_point_attr(10, 10, 29, 0, 0));
 }
 
 TEST_CASE("build feature with list geometric attributes and read it again") {

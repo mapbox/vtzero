@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
 #include <vtzero/geometry.hpp>
@@ -50,7 +51,7 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
         fbuilder.add_ring(4);
         fbuilder.set_point(10, 20);
         fbuilder.set_point(vtzero::point{20, 30});
-        fbuilder.set_point(mypoint{30, 40});
+        fbuilder.set_point(test_point_2d{30, 40});
         fbuilder.set_point(10, 20);
 
         if (with_prop) {
@@ -130,7 +131,7 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
     fbuilder.add_ring(4);
     fbuilder.set_point(10, 20);
     fbuilder.set_point(vtzero::point{20, 30});
-    fbuilder.set_point(mypoint{30, 40});
+    fbuilder.set_point(test_point_2d{30, 40});
     fbuilder.set_point(10, 20);
 
     fbuilder.add_ring(5);

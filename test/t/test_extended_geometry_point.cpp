@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_point.hpp>
 
 #include <vtzero/geometry.hpp>
 
@@ -184,25 +185,25 @@ TEST_CASE("Extended geometry: Calling decode_point() with more data then expecte
 
 class value_geom_handler {
 
-    std::vector<mypoint_3d> m_points;
+    std::vector<test_point_3d> m_points;
 
 public:
 
-    static mypoint_3d convert(const vtzero::unscaled_point& p) noexcept {
+    static test_point_3d convert(const vtzero::unscaled_point& p) noexcept {
         return {p.x, p.y, p.z};
     }
 
     void points_begin(const uint32_t /*count*/) const noexcept {
     }
 
-    void points_point(const mypoint_3d& point) noexcept {
+    void points_point(const test_point_3d& point) noexcept {
         m_points.push_back(point);
     }
 
     void points_end() const noexcept {
     }
 
-    const std::vector<mypoint_3d>& result() const noexcept {
+    const std::vector<test_point_3d>& result() const noexcept {
         return m_points;
     }
 
@@ -221,7 +222,7 @@ TEST_CASE("Extended geometry: Calling decode_point() decoding valid multipoint")
     const auto result = decoder.decode_point(handler);
 
     REQUIRE(result.size() == 2);
-    REQUIRE(result[0] == mypoint_3d(5, 7, 22));
-    REQUIRE(result[1] == mypoint_3d(3, 2, 25));
+    REQUIRE(result[0] == test_point_3d(5, 7, 22));
+    REQUIRE(result[1] == test_point_3d(3, 2, 25));
 }
 
