@@ -128,7 +128,7 @@ namespace vtzero {
     }; // class tile
 
     /// Tiles are equal if all their attributes are equal.
-    inline constexpr bool operator==(const tile lhs, const tile rhs) noexcept {
+    inline bool operator==(const tile lhs, const tile rhs) noexcept {
         return lhs.zoom() == rhs.zoom() &&
                lhs.x() == rhs.x() &&
                lhs.y() == rhs.y() &&
@@ -136,7 +136,7 @@ namespace vtzero {
     }
 
     /// Tiles are unequal if their are not equal.
-    inline constexpr bool operator!=(const tile lhs, const tile rhs) noexcept {
+    inline bool operator!=(const tile lhs, const tile rhs) noexcept {
         return !(lhs == rhs);
     }
 
