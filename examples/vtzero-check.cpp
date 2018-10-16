@@ -47,7 +47,7 @@ public:
 
 class CheckGeomHandler {
 
-    vtzero::point m_prev_point{};
+    vtzero::point_3d m_prev_point{};
     int m_layer_num;
     int m_feature_num;
     int64_t m_extent;
@@ -75,7 +75,7 @@ class CheckGeomHandler {
         std::cerr << message << '\n';
     }
 
-    void check_point_location(const vtzero::point point) const {
+    void check_point_location(const vtzero::point_3d point) const {
         if (point.x < -m_extent ||
             point.y < -m_extent ||
             point.x > 2 * m_extent ||
@@ -86,6 +86,7 @@ class CheckGeomHandler {
 
 public:
 
+    constexpr static const int dimensions = 3;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
     CheckGeomHandler(uint32_t extent, int layer_num, int feature_num) :
@@ -94,8 +95,8 @@ public:
         m_extent(static_cast<int64_t>(extent)) {
     }
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
-        return {p.x, p.y};
+    static vtzero::point_3d convert(const vtzero::point_3d p) noexcept {
+        return p;
     }
 
     // ----------------------------------------------------------------------
@@ -103,7 +104,7 @@ public:
     void points_begin(const uint32_t /*count*/) const {
     }
 
-    void points_point(const vtzero::point point) const {
+    void points_point(const vtzero::point_3d point) const {
         check_point_location(point);
     }
 
@@ -119,7 +120,7 @@ public:
         m_is_first_point = true;
     }
 
-    void linestring_point(const vtzero::point point) {
+    void linestring_point(const vtzero::point_3d point) {
         if (m_is_first_point) {
             m_is_first_point = false;
         } else {
@@ -145,7 +146,7 @@ public:
         m_is_first_point = true;
     }
 
-    void ring_point(const vtzero::point point) {
+    void ring_point(const vtzero::point_3d point) {
         if (m_is_first_point) {
             m_is_first_point = false;
         } else {

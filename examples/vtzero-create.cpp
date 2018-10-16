@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
 
     vtzero::point_2d_feature_builder feature1{layer_points};
     feature1.set_integer_id(5);
-    feature1.add_point(vtzero::point{20, 20});
+    feature1.add_point(vtzero::point_2d{20, 20});
     feature1.add_scalar_attribute("otherkey", "attr");
     feature1.commit();
 
@@ -98,8 +98,8 @@ int main(int argc, char* argv[]) {
         feature.add_linestring(3);
         feature.set_point(10, 10);
         feature.set_point(10, 20);
-        feature.set_point(vtzero::point{20, 20});
-        std::vector<vtzero::point> points = {{11, 11}, {12, 13}};
+        feature.set_point(vtzero::point_2d{20, 20});
+        std::vector<vtzero::point_2d> points = {{11, 11}, {12, 13}};
         feature.add_linestring_from_container(points);
         feature.add_scalar_attribute("highway", "primary");
         feature.add_scalar_attribute(std::string{"maxspeed"}, 50);

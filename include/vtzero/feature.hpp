@@ -112,8 +112,8 @@ namespace vtzero {
         template <typename THandler>
         bool decode_geometric_attributes_impl(THandler&& handler) const;
 
-        template <unsigned int MaxGeometricAttributes>
-        using geom_decoder_type = detail::geometry_decoder<3,
+        template <int Dimensions, unsigned int MaxGeometricAttributes>
+        using geom_decoder_type = detail::geometry_decoder<Dimensions,
               MaxGeometricAttributes,
               geom_iterator,
               protozero::pbf_reader::const_sint64_iterator,
@@ -359,9 +359,10 @@ namespace vtzero {
         detail::get_result_t<TGeomHandler> decode_point_geometry(TGeomHandler&& geom_handler) const {
             vtzero_assert(geometry_type() == GeomType::POINT);
 
+            constexpr static const int dimensions = std::remove_reference<TGeomHandler>::type::dimensions;
             constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
-            geom_decoder_type<max> decoder{
+            geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
@@ -384,9 +385,10 @@ namespace vtzero {
         detail::get_result_t<TGeomHandler> decode_linestring_geometry(TGeomHandler&& geom_handler) const {
             vtzero_assert(geometry_type() == GeomType::LINESTRING);
 
+            constexpr static const int dimensions = std::remove_reference<TGeomHandler>::type::dimensions;
             constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
-            geom_decoder_type<max> decoder{
+            geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
@@ -409,9 +411,10 @@ namespace vtzero {
         detail::get_result_t<TGeomHandler> decode_polygon_geometry(TGeomHandler&& geom_handler) const {
             vtzero_assert(geometry_type() == GeomType::POLYGON);
 
+            constexpr static const int dimensions = std::remove_reference<TGeomHandler>::type::dimensions;
             constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
-            geom_decoder_type<max> decoder{
+            geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
@@ -432,9 +435,10 @@ namespace vtzero {
          */
         template <typename TGeomHandler>
         detail::get_result_t<TGeomHandler> decode_geometry(TGeomHandler&& geom_handler) const {
+            constexpr static const int dimensions = std::remove_reference<TGeomHandler>::type::dimensions;
             constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
 
-            geom_decoder_type<max> decoder{
+            geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),

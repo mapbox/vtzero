@@ -105,7 +105,7 @@ namespace vtzero {
          * @param p Vector tile coordinates
          * @returns coordinate pair of web mercator coordinates (in millimeters).
          */
-        std::pair<int64_t, int64_t> transform_int(const point p) const noexcept {
+        std::pair<int64_t, int64_t> transform_int(const point_2d p) const noexcept {
             const int64_t d = static_cast<int64_t>(detail::num_tiles_in_zoom(m_zoom)) * m_extent;
             const int64_t x = 2 * detail::max_coordinate_epsg3857_mm * (static_cast<int64_t>(m_extent * m_x) + p.x) / d - detail::max_coordinate_epsg3857_mm;
             const int64_t y = 2 * detail::max_coordinate_epsg3857_mm * (static_cast<int64_t>(m_extent * m_y) + p.y) / d - detail::max_coordinate_epsg3857_mm;
@@ -119,7 +119,7 @@ namespace vtzero {
          * @param p Vector tile coordinates
          * @returns coordinate pair of web mercator coordinates (in meters).
          */
-        std::pair<double, double> transform_double(const point p) const noexcept {
+        std::pair<double, double> transform_double(const point_2d p) const noexcept {
             const auto r = transform_int(p);
             return {static_cast<double>(r.first) / 1000,
                     static_cast<double>(r.second) / 1000};

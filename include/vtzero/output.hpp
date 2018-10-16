@@ -53,15 +53,15 @@ namespace vtzero {
         return out << "invalid";
     }
 
-    /// Overload of the << operator for points
+    /// Overload of the << operator for 2d points
     template <typename TChar, typename TTraits>
-    std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, const point p) {
+    std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, const point<2> p) {
         return out << '(' << p.x << ',' << p.y << ')';
     }
 
-    /// Overload of the << operator for unscaled_points
+    /// Overload of the << operator for 3d points
     template <typename TChar, typename TTraits>
-    std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, const unscaled_point& p) {
+    std::basic_ostream<TChar, TTraits>& operator<<(std::basic_ostream<TChar, TTraits>& out, const point<3>& p) {
         return out << '(' << p.x << ',' << p.y << ',' << p.z << ')';
     }
 

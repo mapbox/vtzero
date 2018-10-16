@@ -69,7 +69,7 @@ class geom_with_attr_handler {
 
 public:
 
-    static test_point_attr convert(const vtzero::unscaled_point& p) noexcept {
+    static test_point_attr convert(const vtzero::point_3d& p) noexcept {
         return {p.x, p.y, p.z};
     }
 

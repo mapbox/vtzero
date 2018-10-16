@@ -21,15 +21,18 @@ class dummy_geom_handler {
 
 public:
 
-    static vtzero::point convert(const vtzero::unscaled_point& /*p*/) noexcept {
-        return {};
+    constexpr static const int dimensions = 3;
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
+    static vtzero::point_3d convert(const vtzero::point_3d& p) noexcept {
+        return p;
     }
 
     void points_begin(const uint32_t /*count*/) noexcept {
         ++value;
     }
 
-    void points_point(const vtzero::point /*point*/) noexcept {
+    void points_point(const vtzero::point_3d /*point*/) noexcept {
         value += 100;
     }
 
@@ -189,7 +192,10 @@ class value_geom_handler {
 
 public:
 
-    static test_point_3d convert(const vtzero::unscaled_point& p) noexcept {
+    constexpr static const int dimensions = 3;
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
+    static test_point_3d convert(const vtzero::point_3d& p) noexcept {
         return {p.x, p.y, p.z};
     }
 

@@ -24,16 +24,17 @@ class geom_handler {
 
 public:
 
+    constexpr static const int dimensions = 3;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
-        return {p.x, p.y};
+    static vtzero::point_3d convert(const vtzero::point_3d p) noexcept {
+        return p;
     }
 
     void points_begin(const uint32_t /*count*/) const noexcept {
     }
 
-    void points_point(const vtzero::point point) const {
+    void points_point(const vtzero::point_3d point) const {
         std::cout << "      POINT(" << point.x << ',' << point.y << ")\n";
     }
 
@@ -46,7 +47,7 @@ public:
         output += "](";
     }
 
-    void linestring_point(const vtzero::point point) {
+    void linestring_point(const vtzero::point_3d point) {
         output += std::to_string(point.x);
         output += ' ';
         output += std::to_string(point.y);
@@ -70,7 +71,7 @@ public:
         output += "](";
     }
 
-    void ring_point(const vtzero::point point) {
+    void ring_point(const vtzero::point_3d point) {
         output += std::to_string(point.x);
         output += ' ';
         output += std::to_string(point.y);

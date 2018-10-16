@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
 #include <vtzero/index.hpp>
@@ -110,7 +111,7 @@ TEST_CASE("Create layer and add scalings") {
 
     { // we need to add a feature, otherwise the layer will not be serialized
         vtzero::point_feature_builder<3, true> fbuilder{lbuilder};
-        fbuilder.add_point(vtzero::unscaled_point{});
+        fbuilder.add_point(vtzero::point_3d{});
         fbuilder.commit();
     }
 
@@ -473,26 +474,27 @@ TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
 
 struct points_to_vector {
 
+    constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    std::vector<vtzero::point> m_points{};
+    std::vector<vtzero::point_2d> m_points{};
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
-        return {p.x, p.y};
+    static vtzero::point_2d convert(const vtzero::point_2d& p) noexcept {
+        return p;
     }
 
     void points_begin(const uint32_t count) {
         m_points.reserve(count);
     }
 
-    void points_point(const vtzero::point point) {
+    void points_point(const vtzero::point_2d point) {
         m_points.push_back(point);
     }
 
     void points_end() const {
     }
 
-    std::vector<vtzero::point> result() {
+    std::vector<vtzero::point_2d> result() {
         return m_points;
     }
 
@@ -543,11 +545,11 @@ TEST_CASE("Build point feature from container with too many points") {
             return 1ul << 29u;
         }
 
-        vtzero::point* begin() const noexcept {
+        vtzero::point_2d* begin() const noexcept {
             return nullptr;
         }
 
-        vtzero::point* end() const noexcept {
+        vtzero::point_2d* end() const noexcept {
             return nullptr;
         }
 

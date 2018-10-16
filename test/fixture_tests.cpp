@@ -36,19 +36,20 @@ static std::string open_tile(const std::string& path) {
 
 struct point_handler {
 
+    constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    std::vector<vtzero::point> data{};
+    std::vector<vtzero::point_2d> data{};
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
-        return {p.x, p.y};
+    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
+        return p;
     }
 
     void points_begin(uint32_t count) {
         data.reserve(count);
     }
 
-    void points_point(const vtzero::point point) {
+    void points_point(const vtzero::point_2d point) {
         data.push_back(point);
     }
 
@@ -59,12 +60,13 @@ struct point_handler {
 
 struct linestring_handler {
 
+    constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    std::vector<std::vector<vtzero::point>> data{};
+    std::vector<std::vector<vtzero::point_2d>> data{};
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
-        return {p.x, p.y};
+    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
+        return p;
     }
 
     void linestring_begin(uint32_t count) {
@@ -72,7 +74,7 @@ struct linestring_handler {
         data.back().reserve(count);
     }
 
-    void linestring_point(const vtzero::point point) {
+    void linestring_point(const vtzero::point_2d point) {
         data.back().push_back(point);
     }
 
@@ -83,12 +85,13 @@ struct linestring_handler {
 
 struct polygon_handler {
 
+    constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    std::vector<std::vector<vtzero::point>> data{};
+    std::vector<std::vector<vtzero::point_2d>> data{};
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
-        return {p.x, p.y};
+    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
+        return p;
     }
 
     void ring_begin(uint32_t count) {
@@ -96,7 +99,7 @@ struct polygon_handler {
         data.back().reserve(count);
     }
 
-    void ring_point(const vtzero::point point) {
+    void ring_point(const vtzero::point_2d point) {
         data.back().push_back(point);
     }
 
@@ -109,20 +112,21 @@ struct polygon_handler {
 
 struct geom_handler {
 
+    constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    std::vector<vtzero::point> point_data{};
-    std::vector<std::vector<vtzero::point>> line_data{};
+    std::vector<vtzero::point_2d> point_data{};
+    std::vector<std::vector<vtzero::point_2d>> line_data{};
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
-        return {p.x, p.y};
+    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
+        return p;
     }
 
     void points_begin(uint32_t count) {
         point_data.reserve(count);
     }
 
-    void points_point(const vtzero::point point) {
+    void points_point(const vtzero::point_2d point) {
         point_data.push_back(point);
     }
 
@@ -134,7 +138,7 @@ struct geom_handler {
         line_data.back().reserve(count);
     }
 
-    void linestring_point(const vtzero::point point) {
+    void linestring_point(const vtzero::point_2d point) {
         line_data.back().push_back(point);
     }
 
@@ -146,7 +150,7 @@ struct geom_handler {
         line_data.back().reserve(count);
     }
 
-    void ring_point(const vtzero::point point) {
+    void ring_point(const vtzero::point_2d point) {
         line_data.back().push_back(point);
     }
 
@@ -193,7 +197,7 @@ TEST_CASE("MVT test 002: Tile with single point feature without id") {
     point_handler handler;
     feature.decode_point_geometry(handler);
 
-    std::vector<vtzero::point> expected = {{25, 17}};
+    std::vector<vtzero::point_2d> expected = {{25, 17}};
     REQUIRE(handler.data == expected);
 }
 
@@ -356,7 +360,7 @@ TEST_CASE("MVT test 017: Valid point geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
-    const std::vector<vtzero::point> expected = {{25, 17}};
+    const std::vector<vtzero::point_2d> expected = {{25, 17}};
 
     SECTION("decode_point_geometry") {
         point_handler handler;
@@ -379,7 +383,7 @@ TEST_CASE("MVT test 018: Valid linestring geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{2, 2}, {2,10}, {10, 10}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{2, 2}, {2,10}, {10, 10}}};
 
     SECTION("decode_linestring_geometry") {
         linestring_handler handler;
@@ -402,7 +406,7 @@ TEST_CASE("MVT test 019: Valid polygon geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{3, 6}, {8,12}, {20, 34}, {3, 6}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{3, 6}, {8,12}, {20, 34}, {3, 6}}};
 
     SECTION("deocode_polygon_geometry") {
         polygon_handler handler;
@@ -428,7 +432,7 @@ TEST_CASE("MVT test 020: Valid multipoint geometry") {
     point_handler handler;
     feature.decode_point_geometry(handler);
 
-    const std::vector<vtzero::point> expected = {{5, 7}, {3,2}};
+    const std::vector<vtzero::point_2d> expected = {{5, 7}, {3,2}};
 
     REQUIRE(handler.data == expected);
 }
@@ -444,7 +448,7 @@ TEST_CASE("MVT test 021: Valid multilinestring geometry") {
     linestring_handler handler;
     feature.decode_linestring_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{2, 2}, {2,10}, {10, 10}}, {{1,1}, {3, 5}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{2, 2}, {2,10}, {10, 10}}, {{1,1}, {3, 5}}};
 
     REQUIRE(handler.data == expected);
 }
@@ -460,7 +464,7 @@ TEST_CASE("MVT test 022: Valid multipolygon geometry") {
     polygon_handler handler;
     feature.decode_polygon_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {
+    const std::vector<std::vector<vtzero::point_2d>> expected = {
         {{0, 0}, {10, 0}, {10, 10}, {0,10}, {0, 0}},
         {{11, 11}, {20, 11}, {20, 20}, {11, 20}, {11, 11}},
         {{13, 13}, {13, 17}, {17, 17}, {17, 13}, {13, 13}}
@@ -794,7 +798,7 @@ TEST_CASE("MVT test 046: Invalid linestring geometry that includes two points in
     geom_handler handler;
     feature.decode_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{2, 2}, {2, 10}, {2, 10}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{2, 2}, {2, 10}, {2, 10}}};
     REQUIRE(handler.line_data == expected);
 }
 
@@ -842,7 +846,7 @@ TEST_CASE("MVT test 049: decoding linestring with int32 overflow in x coordinate
     geom_handler handler;
     feature.decode_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{std::numeric_limits<int32_t>::max(), 0}, {std::numeric_limits<int32_t>::min(), 1}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{std::numeric_limits<int32_t>::max(), 0}, {std::numeric_limits<int32_t>::min(), 1}}};
     REQUIRE(handler.line_data == expected);
 }
 
@@ -860,7 +864,7 @@ TEST_CASE("MVT test 050: decoding linestring with int32 overflow in y coordinate
     geom_handler handler;
     feature.decode_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{0, std::numeric_limits<int32_t>::min()}, {-1, std::numeric_limits<int32_t>::max()}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{0, std::numeric_limits<int32_t>::min()}, {-1, std::numeric_limits<int32_t>::max()}}};
     REQUIRE(handler.line_data == expected);
 }
 
@@ -907,7 +911,7 @@ TEST_CASE("MVT test 053: clipped square (exact extent): a polygon that covers th
     geom_handler handler;
     feature.decode_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{0, 0}, {4096, 0}, {4096, 4096}, {0, 4096}, {0, 0}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{0, 0}, {4096, 0}, {4096, 4096}, {0, 4096}, {0, 0}}};
     REQUIRE(handler.line_data == expected);
 }
 
@@ -925,7 +929,7 @@ TEST_CASE("MVT test 054: clipped square (one unit buffer): a polygon that covers
     geom_handler handler;
     feature.decode_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{-1, -1}, {4097, -1}, {4097, 4097}, {-1, 4097}, {-1, -1}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{-1, -1}, {4097, -1}, {4097, 4097}, {-1, 4097}, {-1, -1}}};
     REQUIRE(handler.line_data == expected);
 }
 
@@ -943,7 +947,7 @@ TEST_CASE("MVT test 055: clipped square (minus one unit buffer): a polygon that 
     geom_handler handler;
     feature.decode_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{1, 1}, {4095, 1}, {4095, 4095}, {1, 4095}, {1, 1}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{1, 1}, {4095, 1}, {4095, 4095}, {1, 4095}, {1, 1}}};
     REQUIRE(handler.line_data == expected);
 }
 
@@ -961,7 +965,7 @@ TEST_CASE("MVT test 056: clipped square (large buffer): a polygon that covers th
     geom_handler handler;
     feature.decode_geometry(handler);
 
-    const std::vector<std::vector<vtzero::point>> expected = {{{-200, -200}, {4296, -200}, {4296, 4296}, {-200, 4296}, {-200, -200}}};
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{-200, -200}, {4296, -200}, {4296, 4296}, {-200, 4296}, {-200, -200}}};
     REQUIRE(handler.line_data == expected);
 }
 

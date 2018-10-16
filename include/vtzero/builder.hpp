@@ -655,7 +655,7 @@ namespace vtzero {
         countdown_value m_num_points;
 
         /// Last point (used to calculate delta between coordinates)
-        point m_cursor{0, 0};
+        point<Dimensions> m_cursor{};
 
         /**
          * Constructor
@@ -711,20 +711,22 @@ namespace vtzero {
         }
 
         /**
-         * Add a single unscaled_point as the geometry to this feature.
+         * Add a single 3d point as the geometry to this feature.
          *
          * @param p The point to add.
          *
          * @pre You must be in stage "id", "id_set", or "geometry" to call
          *      this function.
          */
-        void add_point(const unscaled_point p) {
+        void add_point(const point_3d p) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
             this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
-            this->m_elevations.add(p.z);
+            if (Dimensions == 3) {
+                this->m_elevations.add(p.z);
+            }
         }
 
         /**
@@ -735,7 +737,7 @@ namespace vtzero {
          * @pre You must be in stage "id", "id_set", or "geometry" to call
          *      this function.
          */
-        void add_point(const point p) {
+        void add_point(const point_2d p) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
             this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -753,7 +755,7 @@ namespace vtzero {
          *      this function.
          */
         void add_point(const int32_t x, const int32_t y) {
-            add_point(point{x, y});
+            add_point(point_2d{x, y});
         }
 
         /**
@@ -785,7 +787,7 @@ namespace vtzero {
          *
          * @pre You must be in stage "geometry" to call this function.
          */
-        void set_point(const point p) {
+        void set_point(const point<Dimensions> p) {
             vtzero_assert(this->m_stage == detail::stage::geometry);
             vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
@@ -806,7 +808,7 @@ namespace vtzero {
          * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const int32_t x, const int32_t y) {
-            set_point(point{x, y});
+            set_point(point_2d{x, y});
         }
 
         /**
@@ -906,7 +908,7 @@ namespace vtzero {
          *
          * @pre You must be in stage "geometry" to call this function.
          */
-        void set_point(const point p) {
+        void set_point(const point<Dimensions> p) {
             vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
             if (m_start_line) {
@@ -942,7 +944,7 @@ namespace vtzero {
          * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const int32_t x, const int32_t y) {
-            set_point(point{x, y});
+            set_point(point_2d{x, y});
         }
 
         /**
@@ -996,7 +998,7 @@ namespace vtzero {
     template <int Dimensions, bool WithGeometricAttributes>
     class polygon_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
 
-        point m_first_point{0, 0};
+        point<Dimensions> m_first_point{};
         bool m_start_ring = false;
 
     public:
@@ -1046,7 +1048,7 @@ namespace vtzero {
          *
          * @pre You must be in stage "geometry" to call this function.
          */
-        void set_point(const point p) {
+        void set_point(const point<Dimensions> p) {
             vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
             if (m_start_ring) {
@@ -1092,7 +1094,7 @@ namespace vtzero {
          * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const int32_t x, const int32_t y) {
-            set_point(point{x, y});
+            set_point(point_2d{x, y});
         }
 
         /**

@@ -18,6 +18,7 @@ documentation.
 
 #include "attributes.hpp"
 #include "exception.hpp"
+#include "point.hpp"
 #include "types.hpp"
 #include "util.hpp"
 
@@ -76,74 +77,6 @@ namespace vtzero {
         inline constexpr uint32_t max_command_count() noexcept {
             return get_command_count(std::numeric_limits<uint32_t>::max());
         }
-
-    } // namespace detail
-
-    /// A simple point class
-    struct point {
-
-        /// X coordinate
-        int32_t x = 0;
-
-        /// Y coordinate
-        int32_t y = 0;
-
-        /// Default construct to 0 coordinates
-        constexpr point() noexcept = default;
-
-        /// Constructor
-        constexpr point(int32_t x_, int32_t y_) noexcept :
-            x(x_),
-            y(y_) {
-        }
-
-    }; // struct point
-
-    /// Points are equal if their coordinates are
-    inline constexpr bool operator==(const point a, const point b) noexcept {
-        return a.x == b.x && a.y == b.y;
-    }
-
-    /// Points are not equal if their coordinates aren't
-    inline constexpr bool operator!=(const point a, const point b) noexcept {
-        return !(a == b);
-    }
-
-    /// A simple point class
-    struct unscaled_point {
-
-        /// X coordinate
-        int32_t x = 0;
-
-        /// Y coordinate
-        int32_t y = 0;
-
-        /// elevation
-        int64_t z = 0;
-
-        /// Default construct to 0 coordinates
-        constexpr unscaled_point() noexcept = default;
-
-        /// Constructor
-        constexpr unscaled_point(int32_t x_, int32_t y_, int64_t z_ = 0) noexcept :
-            x(x_),
-            y(y_),
-            z(z_) {
-        }
-
-    }; // struct unscaled_point
-
-    /// unscaled_points are equal if their coordinates are
-    inline constexpr bool operator==(const unscaled_point& a, const unscaled_point& b) noexcept {
-        return a.x == b.x && a.y == b.y && a.z == b.z;
-    }
-
-    /// unscaled_points are not equal if their coordinates aren't
-    inline constexpr bool operator!=(const unscaled_point& a, const unscaled_point& b) noexcept {
-        return !(a == b);
-    }
-
-    namespace detail {
 
         // The null_iterator simply does nothing but has a valid iterator
         // interface. It is used for simple 2D geometries without geometric
@@ -331,7 +264,7 @@ namespace vtzero {
 
             static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
 
-            static inline constexpr int64_t det(const unscaled_point& a, const unscaled_point& b) noexcept {
+            static inline constexpr int64_t det(const point<Dimensions>& a, const point<Dimensions>& b) noexcept {
                 return static_cast<int64_t>(a.x) * static_cast<int64_t>(b.y) -
                        static_cast<int64_t>(b.x) * static_cast<int64_t>(a.y);
             }
@@ -345,7 +278,7 @@ namespace vtzero {
             TAttrIterator m_attr_it;
             TAttrIterator m_attr_end;
 
-            unscaled_point m_cursor;
+            point<Dimensions> m_cursor;
 
             // maximum value for m_count before we throw an exception
             uint32_t m_max_count;
@@ -415,7 +348,7 @@ namespace vtzero {
                 return true;
             }
 
-            unscaled_point next_point() {
+            point<Dimensions> next_point() {
                 vtzero_assert(m_count > 0);
 
                 if (m_geom_it == m_geom_end || std::next(m_geom_it) == m_geom_end) {
@@ -439,7 +372,7 @@ namespace vtzero {
                 m_cursor.y = static_cast<int32_t>(y);
 
                 if (Dimensions == 3 && m_elev_it != m_elev_end) {
-                    m_cursor.z += *m_elev_it++;
+                    m_cursor.add_to_z(*m_elev_it++);
                 }
 
                 --m_count;

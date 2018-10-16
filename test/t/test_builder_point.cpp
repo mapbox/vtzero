@@ -13,11 +13,12 @@
 
 struct point_handler {
 
+    constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    std::vector<vtzero::point> data;
+    std::vector<test_point_2d> data;
 
-    static vtzero::point convert(const vtzero::unscaled_point& p) noexcept {
+    static test_point_2d convert(const vtzero::point_2d& p) noexcept {
         return {p.x, p.y};
     }
 
@@ -25,7 +26,7 @@ struct point_handler {
         data.reserve(count);
     }
 
-    void points_point(const vtzero::point point) {
+    void points_point(const test_point_2d point) {
         data.push_back(point);
     }
 
@@ -36,11 +37,12 @@ struct point_handler {
 
 struct point_handler_3d {
 
+    constexpr static const int dimensions = 3;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
     std::vector<test_point_3d> data;
 
-    static test_point_3d convert(const vtzero::unscaled_point& p) noexcept {
+    static test_point_3d convert(const vtzero::point_3d& p) noexcept {
         return {p.x, p.y, p.z};
     }
 
@@ -76,7 +78,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
         }
 
         SECTION("add point using vtzero::point / property using key/value") {
-            fbuilder.add_point(vtzero::point{10, 20});
+            fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_prop) {
                 fbuilder.add_property("foo", vtzero::encoded_property_value{22});
             }
@@ -85,7 +87,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
         SECTION("add point using vtzero::point / property using property") {
             vtzero::encoded_property_value pv{3.5};
             vtzero::property p{"foo", vtzero::property_value{pv.data()}};
-            fbuilder.add_point(vtzero::point{10, 20});
+            fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_prop) {
                 fbuilder.add_property(p);
             }
@@ -110,7 +112,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
     point_handler handler;
     feature.decode_point_geometry(handler);
 
-    const std::vector<vtzero::point> result = {{10, 20}};
+    const std::vector<test_point_2d> result = {{10, 20}};
     REQUIRE(handler.data == result);
 }
 
@@ -149,14 +151,14 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
         }
 
         SECTION("add point using vtzero::point / property using key/int value") {
-            fbuilder.add_point(vtzero::point{10, 20});
+            fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_prop) {
                 fbuilder.add_scalar_attribute("foo", 22);
             }
         }
 
         SECTION("add point using vtzero::point / property using key/double value") {
-            fbuilder.add_point(vtzero::point{10, 20});
+            fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_prop) {
                 fbuilder.add_scalar_attribute("foo", 3.5);
             }
@@ -182,7 +184,7 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
     point_handler handler;
     feature.decode_point_geometry(handler);
 
-    const std::vector<vtzero::point> result = {{10, 20}};
+    const std::vector<test_point_2d> result = {{10, 20}};
     REQUIRE(handler.data == result);
 }
 
@@ -213,7 +215,7 @@ TEST_CASE("Point builder with 3d point") {
     {
         vtzero::point_feature_builder<3, true> fbuilder{lbuilder};
         fbuilder.set_integer_id(17);
-        fbuilder.add_point(vtzero::unscaled_point{10, 20, elev});
+        fbuilder.add_point(vtzero::point_3d{10, 20, elev});
         fbuilder.commit();
     }
     const std::string data = tbuilder.serialize();
@@ -265,8 +267,8 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
 
     fbuilder.add_points(3);
     fbuilder.set_point(10, 20);
-    fbuilder.set_point(vtzero::point{20, 30});
-    fbuilder.set_point(vtzero::point{30, 40});
+    fbuilder.set_point(vtzero::point_2d{20, 30});
+    fbuilder.set_point(vtzero::point_2d{30, 40});
 
     if (with_prop) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
@@ -290,7 +292,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     point_handler handler;
     feature.decode_point_geometry(handler);
 
-    const std::vector<vtzero::point> result = {{10, 20}, {20, 30}, {30, 40}};
+    const std::vector<test_point_2d> result = {{10, 20}, {20, 30}, {30, 40}};
     REQUIRE(handler.data == result);
 }
 
@@ -364,7 +366,8 @@ TEST_CASE("Calling point_2d_feature_builder::set_point() too often throws assert
 }
 
 TEST_CASE("Add points from container") {
-    const std::vector<vtzero::point> points = {{10, 20}, {20, 30}, {30, 40}};
+    const std::vector<vtzero::point_2d> points = {{10, 20}, {20, 30}, {30, 40}};
+    const std::vector<test_point_2d> results = {{10, 20}, {20, 30}, {30, 40}};
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
@@ -403,11 +406,11 @@ TEST_CASE("Add points from container") {
     point_handler handler;
     feature.decode_point_geometry(handler);
 
-    REQUIRE(handler.data == points);
+    REQUIRE(handler.data == results);
 }
 /*
 TEST_CASE("Add points from iterator with wrong count throws assert") {
-    const std::vector<vtzero::point> points = {{10, 20}, {20, 30}, {30, 40}};
+    const std::vector<vtzero::point_2d> points = {{10, 20}, {20, 30}, {30, 40}};
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};

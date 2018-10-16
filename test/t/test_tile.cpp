@@ -44,8 +44,8 @@ TEST_CASE("Tile: max extent") {
         const vtzero::tile min{      0,       0, zoom};
         const vtzero::tile max{maxtile, maxtile, zoom};
 
-        const vtzero::point pmin{   0,    0};
-        const vtzero::point pmax{4096, 4096};
+        const vtzero::point_2d pmin{   0,    0};
+        const vtzero::point_2d pmax{4096, 4096};
 
         const auto rmin = min.transform_int(pmin);
         const auto rmax = max.transform_int(pmax);
