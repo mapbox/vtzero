@@ -480,7 +480,7 @@ namespace vtzero {
 
                     int64_t sum = 0;
                     const auto start_point = next_point();
-                    auto last_point = start_point;
+                    auto point = start_point;
 
                     // spec 4.3.4.4 "2. A LineTo command"
                     if (!next_command(CommandId::LINE_TO)) {
@@ -488,6 +488,32 @@ namespace vtzero {
                     }
 
                     std::forward<THandler>(handler).ring_begin(count() + 2);
+
+                    while (true) {
+                        std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(point));
+                        for (auto& attr : geom_attributes) {
+                            if (attr.get_next_value()) {
+                                call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
+                            } else {
+                                call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
+                            }
+                        }
+
+                        if (count() == 0) {
+                            break;
+                        }
+
+                        const auto new_point = next_point();
+                        sum += det(point, new_point);
+                        point = new_point;
+                    }
+
+                    // spec 4.3.4.4 "3. A ClosePath command"
+                    if (!next_command(CommandId::CLOSE_PATH)) {
+                        throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
+                    }
+
+                    sum += det(point, start_point);
 
                     std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(start_point));
                     for (auto& attr : geom_attributes) {
@@ -497,29 +523,6 @@ namespace vtzero {
                             call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
                         }
                     }
-
-                    while (count() > 0) {
-                        const auto p = next_point();
-                        sum += det(last_point, p);
-                        last_point = p;
-                        std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(p));
-                        for (auto& attr : geom_attributes) {
-                            if (attr.get_next_value()) {
-                                call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
-                            } else {
-                                call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
-                            }
-                        }
-                    }
-
-                    // spec 4.3.4.4 "3. A ClosePath command"
-                    if (!next_command(CommandId::CLOSE_PATH)) {
-                        throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
-                    }
-
-                    sum += det(last_point, start_point);
-
-                    std::forward<THandler>(handler).ring_point(std::forward<THandler>(handler).convert(start_point));
 
                     std::forward<THandler>(handler).ring_end(sum > 0 ? ring_type::outer :
                                                              sum < 0 ? ring_type::inner : ring_type::invalid);
