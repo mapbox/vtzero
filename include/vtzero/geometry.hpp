@@ -432,7 +432,7 @@ namespace vtzero {
                         throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.3)"};
                     }
 
-                    const auto first_point = std::forward<THandler>(handler).convert(next_point());
+                    auto point = next_point();
 
                     // spec 4.3.4.3 "2. A LineTo command"
                     if (!next_command(CommandId::LINE_TO)) {
@@ -446,17 +446,8 @@ namespace vtzero {
 
                     std::forward<THandler>(handler).linestring_begin(count() + 1);
 
-                    std::forward<THandler>(handler).linestring_point(first_point);
-                    for (auto& attr : geom_attributes) {
-                        if (attr.get_next_value()) {
-                            call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
-                        } else {
-                            call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
-                        }
-                    }
-
-                    while (count() > 0) {
-                        std::forward<THandler>(handler).linestring_point(std::forward<THandler>(handler).convert(next_point()));
+                    while (true) {
+                        std::forward<THandler>(handler).linestring_point(std::forward<THandler>(handler).convert(point));
                         for (auto& attr : geom_attributes) {
                             if (attr.get_next_value()) {
                                 call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -464,6 +455,10 @@ namespace vtzero {
                                 call_points_null_attr(std::forward<THandler>(handler), attr.key_index());
                             }
                         }
+                        if (count() == 0) {
+                            break;
+                        }
+                        point = next_point();
                     }
 
                     std::forward<THandler>(handler).linestring_end();
