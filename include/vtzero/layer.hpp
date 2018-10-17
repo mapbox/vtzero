@@ -448,7 +448,6 @@ namespace vtzero {
          */
         const std::vector<property_value>& value_table() const {
             vtzero_assert(valid());
-            vtzero_assert(version() < 3);
 
             if (m_value_table_size > 0) {
                 initialize_tables();
