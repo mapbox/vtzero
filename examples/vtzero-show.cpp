@@ -20,12 +20,38 @@
 
 class geom_handler {
 
-    std::string output{};
+    std::string m_output{};
+
+    bool m_is_3d = false;
+
+    void close_list() {
+        if (m_output.empty()) {
+            return;
+        }
+        if (m_output.back() == ',') {
+            m_output.back() = ')';
+        }
+    }
+
+    void append_point(const vtzero::point_3d& point) {
+        m_output += std::to_string(point.x);
+        m_output += ' ';
+        m_output += std::to_string(point.y);
+        if (m_is_3d) {
+            m_output += ' ';
+            m_output += std::to_string(point.z);
+        }
+        m_output += ',';
+    }
 
 public:
 
     constexpr static const int dimensions = 3;
     constexpr static const unsigned int max_geometric_attributes = 0;
+
+    geom_handler(bool is_3d) :
+        m_is_3d(is_3d) {
+    }
 
     static vtzero::point_3d convert(const vtzero::point_3d p) noexcept {
         return p;
@@ -35,67 +61,55 @@ public:
     }
 
     void points_point(const vtzero::point_3d point) const {
-        std::cout << "      POINT(" << point.x << ',' << point.y << ")\n";
+        std::cout << "      POINT(" << point.x << ' ' << point.y;
+        if (m_is_3d) {
+            std::cout << ' ' << point.z;
+        }
+        std::cout << ")\n";
     }
 
     void points_end() const noexcept {
     }
 
     void linestring_begin(const uint32_t count) {
-        output = "      LINESTRING[count=";
-        output += std::to_string(count);
-        output += "](";
+        m_output = "      LINESTRING[count=";
+        m_output += std::to_string(count);
+        m_output += "](";
     }
 
     void linestring_point(const vtzero::point_3d point) {
-        output += std::to_string(point.x);
-        output += ' ';
-        output += std::to_string(point.y);
-        output += ',';
+        append_point(point);
     }
 
     void linestring_end() {
-        if (output.empty()) {
-            return;
-        }
-        if (output.back() == ',') {
-            output.resize(output.size() - 1);
-        }
-        output += ")\n";
-        std::cout << output;
+        close_list();
+        m_output += '\n';
+        std::cout << m_output;
     }
 
     void ring_begin(const uint32_t count) {
-        output = "      RING[count=";
-        output += std::to_string(count);
-        output += "](";
+        m_output = "      RING[count=";
+        m_output += std::to_string(count);
+        m_output += "](";
     }
 
     void ring_point(const vtzero::point_3d point) {
-        output += std::to_string(point.x);
-        output += ' ';
-        output += std::to_string(point.y);
-        output += ',';
+        append_point(point);
     }
 
     void ring_end(const vtzero::ring_type rt) {
-        if (output.empty()) {
-            return;
-        }
-        if (output.back() == ',') {
-            output.back() = ')';
-        }
+        close_list();
         switch (rt) {
             case vtzero::ring_type::outer:
-                output += "[OUTER]\n";
+                m_output += "[OUTER]\n";
                 break;
             case vtzero::ring_type::inner:
-                output += "[INNER]\n";
+                m_output += "[INNER]\n";
                 break;
             default:
-                output += "[INVALID]\n";
+                m_output += "[INVALID]\n";
         }
-        std::cout << output;
+        std::cout << m_output;
     }
 
 }; // class geom_handler
@@ -237,9 +251,13 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
         } else {
             std::cout << "(none)\n";
         }
-        std::cout << "    geomtype: " << vtzero::geom_type_name(feature.geometry_type()) << '\n'
+        std::cout << "    geomtype: "
+                  << vtzero::geom_type_name(feature.geometry_type())
+                  << ' '
+                  << (feature.has_3d_geometry() ? '3' : '2')
+                  << "D\n"
                   << "    geometry:\n";
-        feature.decode_geometry(geom_handler{});
+        feature.decode_geometry(geom_handler{feature.has_3d_geometry()});
         std::cout << "    attributes:\n";
         print_handler handler;
         feature.decode_attributes(handler);
