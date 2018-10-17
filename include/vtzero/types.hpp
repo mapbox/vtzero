@@ -45,11 +45,12 @@ namespace vtzero {
     // based on https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto
 
     /// The geometry type as specified in the vector tile spec
-    enum class GeomType {
+    enum class GeomType : int32_t {
         UNKNOWN    = 0,
         POINT      = 1,
         LINESTRING = 2,
-        POLYGON    = 3
+        POLYGON    = 3,
+        max        = 3
     };
 
     /**

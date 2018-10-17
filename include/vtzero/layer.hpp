@@ -697,9 +697,9 @@ namespace vtzero {
                     m_attributes = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
-                        const auto type = reader.get_enum();
+                        const int32_t type = reader.get_enum();
                         // spec 4.3.4 "Geometry Types"
-                        if (type < 0 || type > 3) {
+                        if (type < 0 || type > static_cast<int32_t>(GeomType::max)) {
                             throw format_exception{"Unknown geometry type (spec 4.3.4)"};
                         }
                         m_geometry_type = static_cast<GeomType>(type);
