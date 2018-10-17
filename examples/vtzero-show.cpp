@@ -121,8 +121,16 @@ struct print_value {
 
 struct print_handler {
 
+    void key_index(vtzero::index_value index, std::size_t /*depth*/) const {
+        std::cout << "      [" << index.value() << "] ";
+    }
+
     void attribute_key(const vtzero::data_view& key, std::size_t /*depth*/) const {
-        std::cout << "      " << key << '=';
+        std::cout << key << " = ";
+    }
+
+    void value_index(vtzero::index_value index, std::size_t /*depth*/) const {
+        std::cout << '[' << index.value() << "] ";
     }
 
     template <typename T>
@@ -169,16 +177,18 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
     }
 
     if (print_tables) {
-        std::cout << "  keys:\n";
-        int n = 0;
-        for (const auto& key : layer.key_table()) {
-            std::cout << "    " << n++ << ": " << key << '\n';
+        if (!layer.key_table().empty()) {
+            std::cout << "  keys:\n";
+            int n = 0;
+            for (const auto& key : layer.key_table()) {
+                std::cout << "    [" << n++ << "] " << key << '\n';
+            }
         }
-        if (layer.version() <= 2) {
+        if (!layer.value_table().empty()) {
             std::cout << "  values:\n";
-            n = 0;
+            int n = 0;
             for (const vtzero::property_value& value : layer.value_table()) {
-                std::cout << "    " << n++ << ": ";
+                std::cout << "    [" << n++ << "] ";
                 vtzero::apply_visitor(print_value{}, value);
                 if (print_value_types) {
                     std::cout << " [" << vtzero::property_value_type_name(value.type()) << "]\n";
@@ -188,10 +198,30 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
             }
         }
         if (layer.version() == 3) {
-            std::cout << "  string values:\n";
-            n = 0;
-            for (const vtzero::data_view& value : layer.string_table()) {
-                std::cout << "    " << n++ << ": " << value << '\n';
+            if (!layer.string_table().empty()) {
+                std::cout << "  string values:\n";
+                int n = 0;
+                for (const vtzero::data_view& value : layer.string_table()) {
+                    std::cout << "    [" << n++ << "] " << value << '\n';
+                }
+            }
+            if (!layer.float_table().empty()) {
+                std::cout << "  float values:\n";
+                for (std::uint32_t n = 0; n < layer.float_table().size(); ++n) {
+                    std::cout << "    [" << n << "] " << layer.float_table().at(n) << '\n';
+                }
+            }
+            if (!layer.double_table().empty()) {
+                std::cout << "  double values:\n";
+                for (std::uint32_t n = 0; n < layer.double_table().size(); ++n) {
+                    std::cout << "    [" << n << "] " << layer.double_table().at(n) << '\n';
+                }
+            }
+            if (!layer.int_table().empty()) {
+                std::cout << "  int values:\n";
+                for (std::uint32_t i = 0; i < layer.int_table().size(); ++i) {
+                    std::cout << "    [" << i << "] " << layer.int_table().at(i) << '\n';
+                }
             }
         }
     }
