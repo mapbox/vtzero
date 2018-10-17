@@ -62,7 +62,7 @@ namespace vtzero {
         id_type m_id_type = id_type::no_id;
 
         using geom_iterator = protozero::pbf_reader::const_uint32_iterator;
-        using elev_iterator = protozero::pbf_reader::const_sint64_iterator;
+        using elev_iterator = protozero::pbf_reader::const_sint32_iterator;
         using tags_iterator = protozero::pbf_reader::const_uint32_iterator;
         using attr_iterator = protozero::pbf_reader::const_uint64_iterator;
 
@@ -116,8 +116,8 @@ namespace vtzero {
         using geom_decoder_type = detail::geometry_decoder<Dimensions,
               MaxGeometricAttributes,
               geom_iterator,
-              protozero::pbf_reader::const_sint64_iterator,
-              protozero::pbf_reader::const_uint64_iterator>;
+              elev_iterator,
+              attr_iterator>;
 
     public:
 

@@ -52,7 +52,7 @@ namespace vtzero {
         }
 
         /// Add value to z value (dummy function for 2d coordinates)
-        void add_to_z(int64_t /*value*/) const noexcept {
+        void add_to_z(int32_t /*value*/) const noexcept {
         }
 
     }; // struct point
@@ -73,21 +73,21 @@ namespace vtzero {
         int32_t y = 0;
 
         /// elevation
-        int64_t z = 0;
+        int32_t z = 0;
 
         /// Default construct to 0 coordinates
         constexpr point<3>() noexcept = default;
 
         /// Constructor
-        constexpr point<3>(int32_t x_, int32_t y_, int64_t z_ = 0) noexcept :
+        constexpr point<3>(int32_t x_, int32_t y_, int32_t z_ = 0) noexcept :
             x(x_),
             y(y_),
             z(z_) {
         }
 
         /// Add value to z value
-        void add_to_z(int64_t value) noexcept {
-            z += value;
+        void add_to_z(int32_t value) noexcept {
+            z = static_cast<int32_t>(static_cast<int64_t>(z) + static_cast<int64_t>(value));
         }
 
     }; // struct point

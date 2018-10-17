@@ -85,9 +85,20 @@ namespace vtzero {
             return m_base;
         }
 
-        /// Encode a value according to the scaling.
-        constexpr int64_t encode(double value) const noexcept {
+        /**
+         * Encode a value according to the scaling.
+         */
+        constexpr int64_t encode64(double value) const noexcept {
             return static_cast<int64_t>((value - m_base) / m_multiplier) - m_offset;
+        }
+
+        /**
+         * Encode a value according to the scaling.
+         *
+         * The result value is converted into a 32bit integer.
+         */
+        constexpr int32_t encode32(double value) const noexcept {
+            return static_cast<int32_t>(static_cast<int64_t>((value - m_base) / m_multiplier) - m_offset);
         }
 
         /// Decode a value according to the scaling.

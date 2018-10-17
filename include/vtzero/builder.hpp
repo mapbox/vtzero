@@ -39,7 +39,7 @@ namespace vtzero {
 
         public:
 
-            void add(int64_t /*value*/) const noexcept {
+            void add(int32_t /*value*/) const noexcept {
             }
 
             void serialize(protozero::pbf_builder<detail::pbf_feature>& /*builder*/) const noexcept {
@@ -50,16 +50,16 @@ namespace vtzero {
         template <>
         class elevations_policy<3> {
 
-            std::vector<int64_t> m_values;
+            std::vector<int32_t> m_values;
 
         public:
 
-            void add(int64_t value) {
+            void add(int32_t value) {
                 m_values.push_back(value);
             }
 
             void serialize(protozero::pbf_builder<detail::pbf_feature>& builder) const {
-                builder.add_packed_sint64(detail::pbf_feature::elevations, m_values.cbegin(), m_values.cend());
+                builder.add_packed_sint32(detail::pbf_feature::elevations, m_values.cbegin(), m_values.cend());
             }
 
         }; // class elevations_policy<3>

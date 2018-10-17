@@ -206,7 +206,7 @@ TEST_CASE("Point builder with id/with properties (vt3)") {
 
 TEST_CASE("Point builder with 3d point") {
     vtzero::scaling scaling{10, 1.0, 3.0};
-    const auto elev = scaling.encode(30.0);
+    const auto elev = scaling.encode32(30.0);
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};

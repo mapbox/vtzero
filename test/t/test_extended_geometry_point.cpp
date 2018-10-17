@@ -10,7 +10,7 @@
 using geom_container = std::vector<uint32_t>;
 using geom_iterator = geom_container::const_iterator;
 
-using elev_container = std::vector<int64_t>;
+using elev_container = std::vector<int32_t>;
 using elev_iterator = elev_container::const_iterator;
 
 using geom_decoder = vtzero::detail::geometry_decoder<3, 0, geom_iterator, elev_iterator>;

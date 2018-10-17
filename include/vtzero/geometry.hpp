@@ -106,7 +106,7 @@ namespace vtzero {
 
         }; // struct null_iterator
 
-        using dummy_elev_iterator = null_iterator<int64_t>;
+        using dummy_elev_iterator = null_iterator<int32_t>;
         using dummy_attr_iterator = null_iterator<uint64_t>;
 
         template <typename TIterator>
@@ -318,7 +318,7 @@ namespace vtzero {
 
             bool done() const noexcept {
                 return m_geom_it == m_geom_end &&
-                       m_elev_it == m_elev_end;
+                       (Dimensions == 2 || m_elev_it == m_elev_end);
             }
 
             bool next_command(const CommandId expected_command_id) {
