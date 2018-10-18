@@ -107,6 +107,7 @@ namespace vtzero {
         }; // struct null_iterator
 
         using dummy_elev_iterator = null_iterator<int32_t>;
+        using dummy_knot_iterator = null_iterator<double>;
         using dummy_attr_iterator = null_iterator<uint64_t>;
 
         template <typename TIterator>
@@ -264,6 +265,7 @@ namespace vtzero {
                   unsigned int MaxGeometricAttributes,
                   typename TGeomIterator,
                   typename TElevIterator = dummy_elev_iterator,
+                  typename TKnotIterator = dummy_knot_iterator,
                   typename TAttrIterator = dummy_attr_iterator>
         class geometry_decoder {
 
@@ -279,6 +281,9 @@ namespace vtzero {
 
             TElevIterator m_elev_it;
             TElevIterator m_elev_end;
+
+            TKnotIterator m_knot_it;
+            TKnotIterator m_knot_end;
 
             TAttrIterator m_attr_it;
             TAttrIterator m_attr_end;
@@ -301,11 +306,14 @@ namespace vtzero {
             geometry_decoder(std::size_t max,
                              TGeomIterator geom_begin, TGeomIterator geom_end,
                              TElevIterator elev_begin = TElevIterator{}, TElevIterator elev_end = TElevIterator{},
+                             TKnotIterator knot_begin = TKnotIterator{}, TKnotIterator knot_end = TKnotIterator{},
                              TAttrIterator attr_begin = TAttrIterator{}, TAttrIterator attr_end = TAttrIterator{}) :
                 m_geom_it(geom_begin),
                 m_geom_end(geom_end),
                 m_elev_it(elev_begin),
                 m_elev_end(elev_end),
+                m_knot_it(knot_begin),
+                m_knot_end(knot_end),
                 m_attr_it(attr_begin),
                 m_attr_end(attr_end),
                 m_max_count(static_cast<uint32_t>(max)) {
@@ -318,7 +326,8 @@ namespace vtzero {
 
             bool done() const noexcept {
                 return m_geom_it == m_geom_end &&
-                       (Dimensions == 2 || m_elev_it == m_elev_end);
+                       (Dimensions == 2 || m_elev_it == m_elev_end) &&
+                       m_knot_it == m_knot_end;
             }
 
             bool next_command(const CommandId expected_command_id) {
@@ -532,6 +541,59 @@ namespace vtzero {
 
                     std::forward<THandler>(handler).ring_end(sum > 0 ? ring_type::outer :
                                                              sum < 0 ? ring_type::inner : ring_type::invalid);
+                }
+
+                return get_result<THandler>::of(std::forward<THandler>(handler));
+            }
+
+            template <typename THandler>
+            typename get_result<THandler>::type decode_curve(THandler&& handler) {
+                using handler_type = typename std::remove_reference<THandler>::type;
+
+                // spec 4.3.4.3 "1. A MoveTo command"
+                if (next_command(CommandId::MOVE_TO)) {
+                    // spec 4.3.4.3 "with a command count of 1"
+                    if (count() != 1) {
+                        throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.3)"};
+                    }
+
+                    const auto first_point = next_point();
+
+                    // spec 4.3.4.3 "2. A LineTo command"
+                    if (!next_command(CommandId::LINE_TO)) {
+                        throw geometry_exception{"expected LineTo command (spec 4.3.4.3)"};
+                    }
+
+                    // spec 4.3.4.3 "with a command count greater than 0"
+                    if (count() == 0) {
+                        throw geometry_exception{"LineTo command count is zero (spec 4.3.4.3)"};
+                    }
+
+                    call_controlpoints_begin(std::forward<THandler>(handler), count() + 1);
+
+                    std::forward<THandler>(handler).controlpoints_point(handler_type::convert(first_point));
+                    while (count() > 0) {
+                        std::forward<THandler>(handler).controlpoints_point(handler_type::convert(next_point()));
+                    }
+                    call_controlpoints_end(std::forward<THandler>(handler));
+
+                    // static_cast is okay here, because
+                    // a) the distance can never be negative
+                    // b) if the distance is larger that what will fit into
+                    //    the uint32_t, we'll just decode some smaller part
+                    //    of them (in real world data this can't happen)
+                    const auto num_knots = static_cast<uint32_t>(std::distance(m_knot_it, m_knot_end));
+                    call_knots_begin(std::forward<THandler>(handler), num_knots);
+
+                    while (m_knot_it != m_knot_end) {
+                        call_knots_value(std::forward<THandler>(handler), *m_knot_it++);
+                    }
+
+                    call_knots_end(std::forward<THandler>(handler));
+                }
+
+                if (!done()) {
+                    throw geometry_exception{"additional data after end of geometry (spec 4.3.4.2)"};
                 }
 
                 return get_result<THandler>::of(std::forward<THandler>(handler));

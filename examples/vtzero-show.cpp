@@ -112,6 +112,38 @@ public:
         std::cout << m_output;
     }
 
+    void controlpoints_begin(const uint32_t count) {
+        m_output = "      CURVE[count=";
+        m_output += std::to_string(count);
+        m_output += "](";
+    }
+
+    void controlpoints_point(const vtzero::point_3d point) {
+        append_point(point);
+    }
+
+    void controlpoints_end() {
+        close_list();
+        m_output += ',';
+    }
+
+    void knots_begin(const uint32_t count) {
+        m_output += "KNOTS[count=";
+        m_output += std::to_string(count);
+        m_output += "](";
+    }
+
+    void knots_value(double val) {
+        m_output += std::to_string(val);
+        m_output += ',';
+    }
+
+    void knots_end() {
+        close_list();
+        m_output += '\n';
+        std::cout << m_output;
+    }
+
 }; // class geom_handler
 
 template <typename TChar, typename TTraits>

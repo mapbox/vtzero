@@ -744,6 +744,12 @@ namespace vtzero {
                     m_string_id = reader.get_view();
                     m_id_type = id_type::string_id;
                     break;
+                case protozero::tag_and_type(detail::pbf_feature::knots, protozero::pbf_wire_type::length_delimited):
+                    if (!m_knots.empty()) {
+                        throw format_exception{"Feature has more than one knots field"};
+                    }
+                    m_knots = reader.get_view();
+                    break;
                 default:
                     reader.skip(); // ignore unknown fields
             }

@@ -53,6 +53,7 @@ namespace vtzero {
 
         data_view m_geometry{};
         data_view m_elevations{};
+        data_view m_knots{}; // for curves
         data_view m_tags{}; // version 2 "tags"
         data_view m_attributes{}; // version 3 attributes
         data_view m_geometric_attributes{};
@@ -63,6 +64,7 @@ namespace vtzero {
 
         using geom_iterator = protozero::pbf_reader::const_uint32_iterator;
         using elev_iterator = protozero::pbf_reader::const_sint32_iterator;
+        using knot_iterator = protozero::pbf_reader::const_double_iterator;
         using tags_iterator = protozero::pbf_reader::const_uint32_iterator;
         using attr_iterator = protozero::pbf_reader::const_uint64_iterator;
 
@@ -80,6 +82,14 @@ namespace vtzero {
 
         elev_iterator elevations_end() const noexcept {
             return {m_elevations.data() + m_elevations.size(), m_elevations.data() + m_elevations.size()};
+        }
+
+        knot_iterator knots_begin() const noexcept {
+            return knot_iterator{m_knots.data()};
+        }
+
+        knot_iterator knots_end() const noexcept {
+            return knot_iterator{m_knots.data() + m_knots.size()};
         }
 
         tags_iterator tags_begin() const noexcept {
@@ -117,6 +127,7 @@ namespace vtzero {
               MaxGeometricAttributes,
               geom_iterator,
               elev_iterator,
+              knot_iterator,
               attr_iterator>;
 
     public:
@@ -377,6 +388,7 @@ namespace vtzero {
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
+                knots_begin(), knots_end(),
                 geometric_attributes_begin(), geometric_attributes_end()};
 
             return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
@@ -403,6 +415,7 @@ namespace vtzero {
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
+                knots_begin(), knots_end(),
                 geometric_attributes_begin(), geometric_attributes_end()};
 
             return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
@@ -429,9 +442,37 @@ namespace vtzero {
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
+                knots_begin(), knots_end(),
                 geometric_attributes_begin(), geometric_attributes_end()};
 
             return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
+        }
+
+        /**
+         * Decode a curve geometry.
+         *
+         * @tparam TGeomHandler Handler class. See tutorial for details.
+         * @param geom_handler An object of TGeomHandler.
+         * @returns whatever geom_handler.result() returns if that function
+         *          exists, void otherwise
+         * @throws geometry_error If there is a problem with the geometry.
+         * @pre Geometry must be a curve geometry.
+         */
+        template <typename TGeomHandler>
+        detail::get_result_t<TGeomHandler> decode_curve_geometry(TGeomHandler&& geom_handler) const {
+            vtzero_assert(geometry_type() == GeomType::CURVE);
+
+            constexpr static const int dimensions = std::remove_reference<TGeomHandler>::type::dimensions;
+            constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
+
+            geom_decoder_type<dimensions, max> decoder{
+                m_geometry.size() / 2,
+                geometry_begin(), geometry_end(),
+                elevations_begin(), elevations_end(),
+                knots_begin(), knots_end(),
+                geometric_attributes_begin(), geometric_attributes_end()};
+
+            return decoder.decode_curve(std::forward<TGeomHandler>(geom_handler));
         }
 
         /**
@@ -453,6 +494,7 @@ namespace vtzero {
                 m_geometry.size() / 2,
                 geometry_begin(), geometry_end(),
                 elevations_begin(), elevations_end(),
+                knots_begin(), knots_end(),
                 geometric_attributes_begin(), geometric_attributes_end()};
 
             switch (geometry_type()) {
@@ -462,6 +504,8 @@ namespace vtzero {
                     return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
                 case GeomType::POLYGON:
                     return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
+                case GeomType::CURVE:
+                    return decoder.decode_curve(std::forward<TGeomHandler>(geom_handler));
                 default:
                     break;
             }

@@ -18,6 +18,8 @@ using geom_iterator = geom_container::const_iterator;
 using elev_container = std::vector<int32_t>;
 using elev_iterator = elev_container::const_iterator;
 
+using knot_iterator = vtzero::detail::dummy_knot_iterator;
+
 using attr_container = std::vector<uint64_t>;
 using attr_iterator = attr_container::const_iterator;
 
@@ -118,10 +120,11 @@ TEST_CASE("Calling decode_point() decoding valid multipoint with geometric attri
     const attr_container attr = {10 + (0u << 4u), 2, 0, 9, 7,
                                  10 + (1u << 4u), 2, 0, 7, 4};
 
-    vtzero::detail::geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
+    vtzero::detail::geometry_decoder<3, 4, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
+        knot_iterator{}, knot_iterator{},
         attr.cbegin(), attr.cend()};
 
     geom_with_attr_handler handler;
@@ -138,10 +141,11 @@ TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric 
     const attr_container attr = {10 + (0u << 4u), 2, 0, 9, 7,
                                  10 + (1u << 4u), 2, 0, 7, 4};
 
-    vtzero::detail::geometry_decoder<3, 4, geom_iterator, elev_iterator, attr_iterator> decoder{
+    vtzero::detail::geometry_decoder<3, 4, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
         geom.size() / 2,
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend(),
+        knot_iterator{}, knot_iterator{},
         attr.cbegin(), attr.cend()};
 
     geom_with_attr_handler handler;
