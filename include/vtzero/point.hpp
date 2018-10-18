@@ -60,6 +60,10 @@ namespace vtzero {
         void add_to_z(int32_t /*value*/) const noexcept {
         }
 
+        /// Set z value (dummy function for 2d coordinates)
+        void set_z(int32_t /*value*/) const noexcept {
+        }
+
     }; // struct point
 
     /// Points are equal if their coordinates are.
@@ -98,6 +102,11 @@ namespace vtzero {
         /// Add value to z value
         void add_to_z(int32_t value) noexcept {
             z = static_cast<int32_t>(static_cast<int64_t>(z) + static_cast<int64_t>(value));
+        }
+
+        /// Set z value
+        void set_z(int32_t value) noexcept {
+            z = value;
         }
 
     }; // struct point
