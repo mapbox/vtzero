@@ -648,7 +648,7 @@ namespace vtzero {
         /// Number of points still to be set for the geometry to be complete.
         countdown_value m_num_points;
 
-        /// Last point (used to calculate delta between coordinates)
+        /// Previous point (used to calculate delta between coordinates).
         point<Dimensions> m_cursor{};
 
         /**
@@ -660,9 +660,7 @@ namespace vtzero {
             feature_builder<Dimensions, WithGeometricAttributes>(layer) {
         }
 
-        /**
-         * Add specified point to the data doing the zigzag encoding.
-         */
+        /// Add specified point to the data doing the zigzag encoding.
         void add_point_impl(const point<Dimensions> p) {
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
@@ -672,14 +670,12 @@ namespace vtzero {
         }
 
         /// Helper function doing subtraction with no integer overflow possible.
-        static int32_t sub(int32_t a, int32_t b) noexcept {
+        static int32_t sub(const int32_t a, const int32_t b) noexcept {
             return static_cast<int32_t>(static_cast<int64_t>(a) -
                                         static_cast<int64_t>(b));
         }
 
-        /**
-         * Add specified point to the data with delta encoding.
-         */
+        /// Add specified point to the data with delta encoding.
         void set_point_impl(const point<Dimensions> p) {
             point<Dimensions> q{sub(p.x, m_cursor.x), sub(p.y, m_cursor.y)};
             if (Dimensions == 3) {
@@ -697,17 +693,32 @@ namespace vtzero {
      * specific order:
      *
      * * Optionally add the ID using set_integer/string_id().
-     * * Add the (multi)point geometry using add_point(), add_points() and
-     *   set_point(), or add_points_from_container().
+     * * Add the (multi)point geometry using add_point() or add_points() and
+     *   set_point().
      * * Optionally add any number of attributes.
+     *
+     * Single point:
      *
      * @code
      * vtzero::tile_builder tb;
      * vtzero::layer_builder lb{tb};
-     * vtzero::point_feature_builder fb{lb};
-     * fb.set_integer_id(123); // optionally set ID
-     * fb.add_point(10, 20) // add point geometry
-     * fb.add_scalar_attribute("foo", "bar"); // add attribute
+     * vtzero::point_feature_builder<> fb{lb};
+     * fb.set_integer_id(123);
+     * fb.add_point(10, 20);
+     * fb.add_scalar_attribute("foo", "bar");
+     * @endcode
+     *
+     * Multipoint:
+     *
+     * @code
+     * vtzero::tile_builder tb;
+     * vtzero::layer_builder lb{tb};
+     * vtzero::point_feature_builder<> fb{lb};
+     * fb.set_integer_id(123);
+     * fb.add_points(2);
+     * fb.set_point(10, 20);
+     * fb.set_point(20, 20);
+     * fb.add_scalar_attribute("foo", "bar");
      * @endcode
      */
     template <int Dimensions = 2, bool WithGeometricAttributes = false>
@@ -725,7 +736,7 @@ namespace vtzero {
         }
 
         /**
-         * Add a single 3d point as the geometry to this feature.
+         * Add a single point as the geometry to this feature.
          *
          * @param p The point to add.
          *
@@ -809,15 +820,15 @@ namespace vtzero {
      * feature in a specific order:
      *
      * * Optionally add the ID using set_integer/string_id().
-     * * Add the (multi)linestring geometry using add_linestring() or
-     *   add_linestring_from_container().
+     * * Add the (multi)linestring geometry using add_linestring() and
+     *   set_point().
      * * Optionally add any number of attributes.
      *
      * @code
      * vtzero::tile_builder tb;
      * vtzero::layer_builder lb{tb};
-     * vtzero::linestring_feature_builder fb{lb};
-     * fb.set_integer_id(123); // optionally set ID
+     * vtzero::linestring_feature_builder<> fb{lb};
+     * fb.set_integer_id(123);
      * fb.add_linestring(2);
      * fb.set_point(10, 10);
      * fb.set_point(10, 20);
@@ -919,15 +930,14 @@ namespace vtzero {
      * feature in a specific order:
      *
      * * Optionally add the ID using set_integer/string_id().
-     * * Add the (multi)polygon geometry using add_ring() or
-     *   add_ring_from_container().
+     * * Add the (multi)polygon geometry using add_ring() and set_point().
      * * Optionally add any number of attributes.
      *
      * @code
      * vtzero::tile_builder tb;
      * vtzero::layer_builder lb{tb};
-     * vtzero::polygon_feature_builder fb{lb};
-     * fb.set_integer_id(123); // optionally set ID
+     * vtzero::polygon_feature_builder<> fb{lb};
+     * fb.set_integer_id(123);
      * fb.add_ring(5);
      * fb.set_point(10, 10);
      * ...
