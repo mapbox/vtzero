@@ -23,6 +23,20 @@ documentation.
 
 namespace vtzero {
 
+    /**
+     * Copy a feature from an existing layer to a new layer. The feature
+     * will be copied completely over to the new layer including its id,
+     * geometry and all its attributes.
+     */
+    template <typename TLayerBuilder>
+    void copy_feature(const feature& feature, TLayerBuilder& layer_builder) {
+        feature_builder<3, true> feature_builder{layer_builder};
+        feature_builder.copy_id(feature);
+        feature_builder.copy_geometry(feature);
+        feature_builder.copy_attributes(feature);
+        feature_builder.commit();
+    }
+
     namespace detail {
 
         /// Helper function to check size isn't too large

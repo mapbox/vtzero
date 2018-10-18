@@ -9,6 +9,7 @@
 #include "utils.hpp"
 
 #include <vtzero/builder.hpp>
+#include <vtzero/builder_helper.hpp>
 #include <vtzero/vector_tile.hpp>
 
 #include <clara.hpp>
