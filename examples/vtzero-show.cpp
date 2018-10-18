@@ -49,7 +49,7 @@ public:
     constexpr static const int dimensions = 3;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    geom_handler(bool is_3d) :
+    explicit geom_handler(bool is_3d) :
         m_is_3d(is_3d) {
     }
 
