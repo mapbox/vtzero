@@ -547,7 +547,7 @@ namespace vtzero {
             }
 
             template <typename THandler>
-            typename get_result<THandler>::type decode_curve(THandler&& handler) {
+            typename get_result<THandler>::type decode_spline(THandler&& handler) {
                 using handler_type = typename std::remove_reference<THandler>::type;
 
                 // spec 4.3.4.3 "1. A MoveTo command"

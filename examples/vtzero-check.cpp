@@ -173,7 +173,7 @@ public:
 
     void controlpoints_begin(const uint32_t count) {
         if (count < 2) {
-            print_error("Not enough points in curve control points");
+            print_error("Not enough points in spline control points");
         }
         m_is_first_point = true;
     }
@@ -197,7 +197,7 @@ public:
 
     void knots_begin(const uint32_t count) {
         if (count < 4) {
-            print_error("Not enough knots in curve");
+            print_error("Not enough knots in spline");
         }
     }
 

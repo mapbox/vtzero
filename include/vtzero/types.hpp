@@ -50,7 +50,7 @@ namespace vtzero {
         POINT      = 1,
         LINESTRING = 2,
         POLYGON    = 3,
-        CURVE      = 4,
+        SPLINE     = 4,
         max        = 4
     };
 
@@ -59,7 +59,7 @@ namespace vtzero {
      */
     inline const char* geom_type_name(GeomType type) noexcept {
         static const char* names[] = {
-            "unknown", "point", "linestring", "polygon", "curve"
+            "unknown", "point", "linestring", "polygon", "spline"
         };
         return names[static_cast<int>(type)]; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
     }
@@ -123,8 +123,9 @@ namespace vtzero {
             attributes           =  5,
             geometric_attributes =  6,
             elevations           =  7,
-            string_id            = 10,
-            knots                = 11
+            spline_knots         =  8,
+            spline_degree        =  9,
+            string_id            = 10
         };
 
         using pbf_value = property_value_type;

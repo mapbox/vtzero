@@ -108,7 +108,7 @@ struct polygon_handler {
 
 }; // struct polygon_handler
 
-struct curve_handler {
+struct spline_handler {
 
     std::vector<vtzero::point_2d> control_points{};
     std::vector<double> knots{};
@@ -135,7 +135,7 @@ struct curve_handler {
     void knots_end() const noexcept {
     }
 
-}; // struct curve_handler
+}; // struct spline_handler
 
 // ---------------------------------------------------------------------------
 

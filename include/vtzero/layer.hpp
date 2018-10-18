@@ -744,11 +744,17 @@ namespace vtzero {
                     m_string_id = reader.get_view();
                     m_id_type = id_type::string_id;
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::knots, protozero::pbf_wire_type::length_delimited):
+                case protozero::tag_and_type(detail::pbf_feature::spline_knots, protozero::pbf_wire_type::length_delimited):
                     if (!m_knots.empty()) {
-                        throw format_exception{"Feature has more than one knots field"};
+                        throw format_exception{"Feature has more than one spline_knots field"};
                     }
                     m_knots = reader.get_view();
+                    break;
+                case protozero::tag_and_type(detail::pbf_feature::spline_degree, protozero::pbf_wire_type::length_delimited):
+                    m_spline_degree = reader.get_uint32();
+                    if (m_spline_degree < 2 || m_spline_degree > 3) {
+                        throw format_exception{"Spline degree must be 2 or 3"};
+                    }
                     break;
                 default:
                     reader.skip(); // ignore unknown fields

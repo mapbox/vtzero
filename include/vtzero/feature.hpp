@@ -53,10 +53,12 @@ namespace vtzero {
 
         data_view m_geometry{};
         data_view m_elevations{};
-        data_view m_knots{}; // for curves
+        data_view m_knots{}; // for splines
         data_view m_tags{}; // version 2 "tags"
         data_view m_attributes{}; // version 3 attributes
         data_view m_geometric_attributes{};
+
+        uint32_t m_spline_degree = 2;
 
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
 
@@ -449,18 +451,18 @@ namespace vtzero {
         }
 
         /**
-         * Decode a curve geometry.
+         * Decode a spline geometry.
          *
          * @tparam TGeomHandler Handler class. See tutorial for details.
          * @param geom_handler An object of TGeomHandler.
          * @returns whatever geom_handler.result() returns if that function
          *          exists, void otherwise
          * @throws geometry_error If there is a problem with the geometry.
-         * @pre Geometry must be a curve geometry.
+         * @pre Geometry must be a spline geometry.
          */
         template <typename TGeomHandler>
-        detail::get_result_t<TGeomHandler> decode_curve_geometry(TGeomHandler&& geom_handler) const {
-            vtzero_assert(geometry_type() == GeomType::CURVE);
+        detail::get_result_t<TGeomHandler> decode_spline_geometry(TGeomHandler&& geom_handler) const {
+            vtzero_assert(geometry_type() == GeomType::SPLINE);
 
             constexpr static const int dimensions = std::remove_reference<TGeomHandler>::type::dimensions;
             constexpr static const unsigned int max = std::remove_reference<TGeomHandler>::type::max_geometric_attributes;
@@ -472,7 +474,7 @@ namespace vtzero {
                 knots_begin(), knots_end(),
                 geometric_attributes_begin(), geometric_attributes_end()};
 
-            return decoder.decode_curve(std::forward<TGeomHandler>(geom_handler));
+            return decoder.decode_spline(std::forward<TGeomHandler>(geom_handler));
         }
 
         /**
@@ -504,8 +506,8 @@ namespace vtzero {
                     return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
                 case GeomType::POLYGON:
                     return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
-                case GeomType::CURVE:
-                    return decoder.decode_curve(std::forward<TGeomHandler>(geom_handler));
+                case GeomType::SPLINE:
+                    return decoder.decode_spline(std::forward<TGeomHandler>(geom_handler));
                 default:
                     break;
             }

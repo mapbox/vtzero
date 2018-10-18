@@ -113,7 +113,7 @@ public:
     }
 
     void controlpoints_begin(const uint32_t count) {
-        m_output = "      CURVE[count=";
+        m_output = "      SPLINE[count=";
         m_output += std::to_string(count);
         m_output += "](";
     }
