@@ -12,14 +12,15 @@
 #include <type_traits>
 #include <vector>
 
-using ls_type = std::vector<std::vector<test_point_2d>>;
+using ls2d_type = std::vector<std::vector<test_point_2d>>;
+using ls3d_type = std::vector<std::vector<test_point_3d>>;
 
-struct linestring_handler {
+struct linestring_handler_2d {
 
     constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    ls_type data;
+    ls2d_type data;
 
     static test_point_2d convert(const vtzero::point_2d& p) noexcept {
         return {p.x, p.y};
@@ -37,7 +38,32 @@ struct linestring_handler {
     void linestring_end() const noexcept {
     }
 
-}; // struct linestring_handler
+}; // struct linestring_handler_2d
+
+struct linestring_handler_3d {
+
+    constexpr static const int dimensions = 3;
+    constexpr static const unsigned int max_geometric_attributes = 0;
+
+    ls3d_type data;
+
+    static test_point_3d convert(const vtzero::point_3d& p) noexcept {
+        return {p.x, p.y, p.z};
+    }
+
+    void linestring_begin(uint32_t count) {
+        data.emplace_back();
+        data.back().reserve(count);
+    }
+
+    void linestring_point(const test_point_3d point) {
+        data.back().push_back(point);
+    }
+
+    void linestring_end() const noexcept {
+    }
+
+}; // struct linestring_handler_3d
 
 static void test_linestring_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
@@ -75,10 +101,10 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
-    linestring_handler handler;
+    linestring_handler_2d handler;
     feature.decode_linestring_geometry(handler);
 
-    const ls_type result = {{{10, 20}, {20, 30}, {30, 40}}};
+    const ls2d_type result = {{{10, 20}, {20, 30}, {30, 40}}};
     REQUIRE(handler.data == result);
 }
 
@@ -151,10 +177,10 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
-    linestring_handler handler;
+    linestring_handler_2d handler;
     feature.decode_linestring_geometry(handler);
 
-    const ls_type result = {{{10, 20}, {20, 30}, {30, 40}}, {{1, 2}, {2, 1}}};
+    const ls2d_type result = {{{10, 20}, {20, 30}, {30, 40}}, {{1, 2}, {2, 1}}};
     REQUIRE(handler.data == result);
 }
 
@@ -214,7 +240,7 @@ TEST_CASE("Calling linestring_2d_feature_builder::set_point() too often throws a
 }
 
 TEST_CASE("Add linestring from container") {
-    const ls_type expected = {{{10, 20}, {20, 30}, {30, 40}}};
+    const ls2d_type expected = {{{10, 20}, {20, 30}, {30, 40}}};
     const std::vector<std::vector<vtzero::point_2d>> points = {{{10, 20}, {20, 30}, {30, 40}}};
 
     vtzero::tile_builder tbuilder;
@@ -237,7 +263,37 @@ TEST_CASE("Add linestring from container") {
 
     const auto feature = *layer.begin();
 
-    linestring_handler handler;
+    linestring_handler_2d handler;
+    feature.decode_linestring_geometry(handler);
+
+    REQUIRE(handler.data == expected);
+}
+
+TEST_CASE("Add linestring from container (3D)") {
+    const ls3d_type expected = {{{10, 20, 4}, {20, 30, 2}, {30, 40, 5}}};
+    const std::vector<std::vector<vtzero::point_3d>> points = {{{10, 20, 4}, {20, 30, 2}, {30, 40, 5}}};
+
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+
+    vtzero::linestring_feature_builder<3> fbuilder{lbuilder};
+    vtzero::add_linestring_from_container(points[0], fbuilder);
+    fbuilder.commit();
+
+    const std::string data = tbuilder.serialize();
+
+    const vtzero::vector_tile tile{data};
+
+    const auto layer = *tile.begin();
+    REQUIRE(layer);
+    REQUIRE(layer.name() == "test");
+    REQUIRE(layer.version() == 3);
+    REQUIRE(layer.extent() == 4096);
+    REQUIRE(layer.num_features() == 1);
+
+    const auto feature = *layer.begin();
+
+    linestring_handler_3d handler;
     feature.decode_linestring_geometry(handler);
 
     REQUIRE(handler.data == expected);

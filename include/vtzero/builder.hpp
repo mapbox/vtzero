@@ -696,7 +696,7 @@ namespace vtzero {
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
-    template <int Dimensions, bool WithGeometricAttributes>
+    template <int Dimensions = 2, bool WithGeometricAttributes = false>
     class point_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
 
     public:
@@ -814,7 +814,7 @@ namespace vtzero {
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
-    template <int Dimensions, bool WithGeometricAttributes>
+    template <int Dimensions = 2, bool WithGeometricAttributes = false>
     class linestring_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
 
         bool m_start_line = false;
@@ -924,7 +924,7 @@ namespace vtzero {
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
-    template <int Dimensions, bool WithGeometricAttributes>
+    template <int Dimensions = 2, bool WithGeometricAttributes = false>
     class polygon_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
 
         point<Dimensions> m_first_point{};
