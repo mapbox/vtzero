@@ -9,6 +9,7 @@
 #include "utils.hpp"
 
 #include <vtzero/builder.hpp>
+#include <vtzero/builder_helper.hpp>
 #include <vtzero/index.hpp>
 
 #include <clara.hpp>
@@ -100,7 +101,7 @@ int main(int argc, char* argv[]) {
         feature.set_point(10, 20);
         feature.set_point(vtzero::point_2d{20, 20});
         std::vector<vtzero::point_2d> points = {{11, 11}, {12, 13}};
-        feature.add_linestring_from_container(points);
+        vtzero::add_linestring_from_container(points, feature);
         feature.add_scalar_attribute("highway", "primary");
         feature.add_scalar_attribute(std::string{"maxspeed"}, 50);
         feature.commit();

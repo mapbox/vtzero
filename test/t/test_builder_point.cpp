@@ -3,6 +3,7 @@
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
+#include <vtzero/builder_helper.hpp>
 #include <vtzero/geometry.hpp>
 #include <vtzero/index.hpp>
 
@@ -372,7 +373,7 @@ TEST_CASE("Add points from container") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     vtzero::point_2d_feature_builder fbuilder{lbuilder};
-    fbuilder.add_points_from_container(points);
+    vtzero::add_points_from_container(points, fbuilder);
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();

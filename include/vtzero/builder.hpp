@@ -666,15 +666,6 @@ namespace vtzero {
             feature_builder<Dimensions, WithGeometricAttributes>(layer) {
         }
 
-        /// Helper function to check size isn't too large
-        template <typename T>
-        static uint32_t check_num_points(T size) {
-            if (size >= (1ul << 29u)) {
-                throw geometry_exception{"Maximum of 2^29 - 1 points allowed in geometry"};
-            }
-            return static_cast<uint32_t>(size);
-        }
-
         void set_point_impl(const point<Dimensions> p) {
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
@@ -800,29 +791,6 @@ namespace vtzero {
             set_point(point_2d{x, y});
         }
 
-        /**
-         * Add the points from the specified container as multipoint geometry
-         * to this feature.
-         *
-         * @tparam TContainer The container type. Must support the size()
-         *         method, be iterable using a range for loop, and contain
-         *         objects of type vtzero::point or something convertible to
-         *         it.
-         * @param container The container to read the points from.
-         *
-         * @throws geometry_exception If there are more than 2^32-1 members in
-         *         the container.
-         *
-         * @pre You must be in stage "id" or "has_id" to call this function.
-         */
-        template <typename TContainer>
-        void add_points_from_container(const TContainer& container) {
-            add_points(this->check_num_points(container.size()));
-            for (const auto& element : container) {
-                set_point(element);
-            }
-        }
-
     }; // class point_feature_builder
 
     /**
@@ -931,31 +899,6 @@ namespace vtzero {
          */
         void set_point(const int32_t x, const int32_t y) {
             set_point(point_2d{x, y});
-        }
-
-        /**
-         * Add the points from the specified container as a linestring geometry
-         * to this feature.
-         *
-         * @tparam TContainer The container type. Must support the size()
-         *         method, be iterable using a range for loop, and contain
-         *         objects of type vtzero::point or something convertible to
-         *         it.
-         * @param container The container to read the points from.
-         *
-         * @throws geometry_exception If there are more than 2^32-1 members in
-         *         the container or if two consecutive points in the container
-         *         are identical.
-         *
-         * @pre You must be in stage "id", "has_id", or "geometry" to call
-         *      this function.
-         */
-        template <typename TContainer>
-        void add_linestring_from_container(const TContainer& container) {
-            add_linestring(this->check_num_points(container.size()));
-            for (const auto& element : container) {
-                set_point(element);
-            }
         }
 
     }; // class linestring_feature_builder
@@ -1095,32 +1038,6 @@ namespace vtzero {
                           "wrong number of points in ring");
             this->m_pbf_geometry.add_element(detail::command_close_path());
             this->m_num_points.decrement();
-        }
-
-        /**
-         * Add the points from the specified container as a ring to this
-         * feature.
-         *
-         * @tparam TContainer The container type. Must support the size()
-         *         method, be iterable using a range for loop, and contain
-         *         objects of type vtzero::point or something convertible to
-         *         it.
-         * @param container The container to read the points from.
-         *
-         * @throws geometry_exception If there are more than 2^32-1 members in
-         *         the container or if two consecutive points in the container
-         *         are identical or if the last point is not the same as the
-         *         first point.
-         *
-         * @pre You must be in stage "id", "has_id", or "geometry" to call
-         *      this function.
-         */
-        template <typename TContainer>
-        void add_ring_from_container(const TContainer& container) {
-            add_ring(this->check_num_points(container.size()));
-            for (const auto& element : container) {
-                set_point(element);
-            }
         }
 
     }; // class polygon_feature_builder

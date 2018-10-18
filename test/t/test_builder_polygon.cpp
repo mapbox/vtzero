@@ -3,6 +3,7 @@
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
+#include <vtzero/builder_helper.hpp>
 #include <vtzero/geometry.hpp>
 #include <vtzero/index.hpp>
 
@@ -262,7 +263,7 @@ TEST_CASE("Add polygon from container") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     vtzero::polygon_2d_feature_builder fbuilder{lbuilder};
-    fbuilder.add_ring_from_container(points[0]);
+    vtzero::add_ring_from_container(points[0], fbuilder);
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();

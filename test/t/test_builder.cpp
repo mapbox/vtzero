@@ -3,6 +3,7 @@
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
+#include <vtzero/builder_helper.hpp>
 #include <vtzero/index.hpp>
 #include <vtzero/output.hpp>
 
@@ -515,7 +516,7 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
             fbuilder.copy_id(feature);
             if (feature.geometry_type() == vtzero::GeomType::POINT) {
                 const auto points = feature.decode_point_geometry(points_to_vector{});
-                fbuilder.add_points_from_container(points);
+                vtzero::add_points_from_container(points, fbuilder);
                 fbuilder.copy_attributes(feature);
                 fbuilder.commit();
                 ++n;
@@ -563,7 +564,7 @@ TEST_CASE("Build point feature from container with too many points") {
     fbuilder.set_integer_id(1);
 
     test_container tc;
-    REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(vtzero::add_points_from_container(tc, fbuilder), const vtzero::geometry_exception&);
 }
 
 TEST_CASE("Moving a feature builder is allowed") {

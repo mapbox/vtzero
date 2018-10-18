@@ -3,6 +3,7 @@
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
+#include <vtzero/builder_helper.hpp>
 #include <vtzero/geometry.hpp>
 #include <vtzero/index.hpp>
 
@@ -220,7 +221,7 @@ TEST_CASE("Add linestring from container") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
-    fbuilder.add_linestring_from_container(points[0]);
+    vtzero::add_linestring_from_container(points[0], fbuilder);
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
