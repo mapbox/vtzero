@@ -51,6 +51,11 @@ namespace vtzero {
             y(y_) {
         }
 
+        /// Get z value (dummy function for 2d coordinates)
+        int32_t get_z() const noexcept {
+            return 0;
+        }
+
         /// Add value to z value (dummy function for 2d coordinates)
         void add_to_z(int32_t /*value*/) const noexcept {
         }
@@ -83,6 +88,11 @@ namespace vtzero {
             x(x_),
             y(y_),
             z(z_) {
+        }
+
+        /// Get z value
+        int32_t get_z() const noexcept {
+            return z;
         }
 
         /// Add value to z value

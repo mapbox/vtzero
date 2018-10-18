@@ -675,6 +675,15 @@ namespace vtzero {
             return static_cast<uint32_t>(size);
         }
 
+        void set_point_impl(const point<Dimensions> p) {
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+            if (Dimensions == 3) {
+                this->m_elevations.add(p.get_z() - this->m_cursor.get_z());
+            }
+            this->m_cursor = p;
+        }
+
     }; // class feature_builder_with_geometry
 
     /**
@@ -715,34 +724,17 @@ namespace vtzero {
          *
          * @param p The point to add.
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
-         *      this function.
+         * @pre You must be in stage "id" or "has_id" to call this function.
          */
-        void add_point(const point_3d p) {
+        void add_point(const point<Dimensions> p) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
             this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
             if (Dimensions == 3) {
-                this->m_elevations.add(p.z);
+                this->m_elevations.add(p.get_z());
             }
-        }
-
-        /**
-         * Add a single point as the geometry to this feature.
-         *
-         * @param p The point to add.
-         *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
-         *      this function.
-         */
-        void add_point(const point_2d p) {
-            vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
-            this->enter_stage_geometry(GeomType::POINT);
-            this->m_pbf_geometry.add_element(detail::command_move_to(1));
-            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
-            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
         }
 
         /**
@@ -751,8 +743,7 @@ namespace vtzero {
          * @param x X coordinate of the point to add.
          * @param y Y coordinate of the point to add.
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
-         *      this function.
+         * @pre You must be in stage "id" or "has_id" to call this function.
          */
         void add_point(const int32_t x, const int32_t y) {
             add_point(point_2d{x, y});
@@ -766,8 +757,8 @@ namespace vtzero {
          *
          * @pre @code count > 0 && count < 2^29 @endcode
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
-         *      this function.
+         * @pre You must be in stage "id" or "has_id" to call this function.
+         * @post You are in stage "geometry" after calling this function.
          */
         void add_points(uint32_t count) {
             vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
@@ -791,9 +782,7 @@ namespace vtzero {
             vtzero_assert(this->m_stage == detail::stage::geometry);
             vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
-            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
-            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
-            this->m_cursor = p;
+            this->set_point_impl(p);
         }
 
         /**
@@ -824,8 +813,7 @@ namespace vtzero {
          * @throws geometry_exception If there are more than 2^32-1 members in
          *         the container.
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
-         *      this function.
+         * @pre You must be in stage "id" or "has_id" to call this function.
          */
         template <typename TContainer>
         void add_points_from_container(const TContainer& container) {
@@ -882,8 +870,9 @@ namespace vtzero {
          *
          * @pre @code count > 1 && count < 2^29 @endcode
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         * @pre You must be in stage "id", "has_id", or "geometry" to call
          *      this function.
+         * @post You are in stage "geometry" after calling this function.
          */
         void add_linestring(const uint32_t count) {
             vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
@@ -913,18 +902,15 @@ namespace vtzero {
             this->m_num_points.decrement();
             if (m_start_line) {
                 this->m_pbf_geometry.add_element(detail::command_move_to(1));
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+                this->set_point_impl(p);
                 this->m_pbf_geometry.add_element(detail::command_line_to(this->m_num_points.value()));
                 m_start_line = false;
             } else {
                 if (p == this->m_cursor) {
                     throw geometry_exception{"Zero-length segments in linestrings are not allowed."};
                 }
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+                this->set_point_impl(p);
             }
-            this->m_cursor = p;
         }
 
         /**
@@ -961,7 +947,7 @@ namespace vtzero {
          *         the container or if two consecutive points in the container
          *         are identical.
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         * @pre You must be in stage "id", "has_id", or "geometry" to call
          *      this function.
          */
         template <typename TContainer>
@@ -1020,7 +1006,7 @@ namespace vtzero {
          *
          * @pre @code count > 3 && count < 2^29 @endcode
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         * @pre You must be in stage "id", "has_id", or "geometry" to call
          *      this function.
          */
         void add_ring(const uint32_t count) {
@@ -1054,11 +1040,9 @@ namespace vtzero {
             if (m_start_ring) {
                 m_first_point = p;
                 this->m_pbf_geometry.add_element(detail::command_move_to(1));
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
+                this->set_point_impl(p);
                 this->m_pbf_geometry.add_element(detail::command_line_to(this->m_num_points.value() - 1));
                 m_start_ring = false;
-                this->m_cursor = p;
             } else if (this->m_num_points.value() == 0) {
                 if (p != m_first_point) {
                     throw geometry_exception{"Last point in a ring must be the same as the first point."};
@@ -1069,9 +1053,7 @@ namespace vtzero {
                 if (p == this->m_cursor) {
                     throw geometry_exception{"Zero-length segments in linestrings are not allowed."};
                 }
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - this->m_cursor.x));
-                this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - this->m_cursor.y));
-                this->m_cursor = p;
+                this->set_point_impl(p);
             }
         }
 
@@ -1130,7 +1112,7 @@ namespace vtzero {
          *         are identical or if the last point is not the same as the
          *         first point.
          *
-         * @pre You must be in stage "id", "id_set", or "geometry" to call
+         * @pre You must be in stage "id", "has_id", or "geometry" to call
          *      this function.
          */
         template <typename TContainer>
