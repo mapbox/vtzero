@@ -36,7 +36,7 @@ struct linestring_handler {
     void linestring_end() const noexcept {
     }
 
-};
+}; // struct linestring_handler
 
 static void test_linestring_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
@@ -212,32 +212,16 @@ TEST_CASE("Calling linestring_2d_feature_builder::set_point() too often throws a
     REQUIRE_THROWS_AS(fbuilder.set_point(30, 20), const assert_error&);
 }
 
-#if 0
 TEST_CASE("Add linestring from container") {
-    const ls_type points = {{{10, 20}, {20, 30}, {30, 40}}};
+    const ls_type expected = {{{10, 20}, {20, 30}, {30, 40}}};
+    const std::vector<std::vector<vtzero::point_2d>> points = {{{10, 20}, {20, 30}, {30, 40}}};
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
-    {
-        vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
-
-#if 0
-        SECTION("using iterators") {
-            fbuilder.add_linestring(points[0].cbegin(), points[0].cend());
-        }
-
-        SECTION("using iterators and size") {
-            fbuilder.add_linestring(points[0].cbegin(), points[0].cend(), static_cast<uint32_t>(points[0].size()));
-        }
-#endif
-
-        SECTION("using container directly") {
-            fbuilder.add_linestring_from_container(points[0]);
-        }
-
-        fbuilder.commit();
-    }
+    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    fbuilder.add_linestring_from_container(points[0]);
+    fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
 
@@ -255,23 +239,8 @@ TEST_CASE("Add linestring from container") {
     linestring_handler handler;
     feature.decode_linestring_geometry(handler);
 
-    REQUIRE(handler.data == points);
+    REQUIRE(handler.data == expected);
 }
-#endif
-
-#if 0
-TEST_CASE("Add linestring from iterator with wrong count throws assert") {
-    const std::vector<vtzero::point_2d> points = {{10, 20}, {20, 30}, {30, 40}};
-
-    vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
-
-    REQUIRE_THROWS_AS(fbuilder.add_linestring(points.cbegin(),
-                                              points.cend(),
-                                              static_cast<uint32_t>(points.size() + 1)), const assert_error&);
-}
-#endif
 
 TEST_CASE("Adding several linestrings with feature rollback in the middle") {
     vtzero::tile_builder tbuilder;

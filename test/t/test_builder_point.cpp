@@ -8,10 +8,9 @@
 
 #include <cstdint>
 #include <string>
-#include <type_traits>
 #include <vector>
 
-struct point_handler {
+struct point_handler_2d {
 
     constexpr static const int dimensions = 2;
     constexpr static const unsigned int max_geometric_attributes = 0;
@@ -33,7 +32,7 @@ struct point_handler {
     void points_end() const noexcept {
     }
 
-};
+}; // struct point_handler_2d
 
 struct point_handler_3d {
 
@@ -57,7 +56,7 @@ struct point_handler_3d {
     void points_end() const noexcept {
     }
 
-};
+}; // struct point_handler_3d
 
 static void test_point_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
@@ -109,7 +108,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
-    point_handler handler;
+    point_handler_2d handler;
     feature.decode_point_geometry(handler);
 
     const std::vector<test_point_2d> result = {{10, 20}};
@@ -181,7 +180,7 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
     REQUIRE(feature.id() == (with_id ? 17 : 0));
     REQUIRE_FALSE(feature.has_3d_geometry());
 
-    point_handler handler;
+    point_handler_2d handler;
     feature.decode_point_geometry(handler);
 
     const std::vector<test_point_2d> result = {{10, 20}};
@@ -289,7 +288,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     const auto feature = *layer.begin();
     REQUIRE(feature.id() == (with_id ? 17 : 0));
 
-    point_handler handler;
+    point_handler_2d handler;
     feature.decode_point_geometry(handler);
 
     const std::vector<test_point_2d> result = {{10, 20}, {20, 30}, {30, 40}};
@@ -372,23 +371,9 @@ TEST_CASE("Add points from container") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
-    {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
-
-/*        SECTION("using iterators") {
-            fbuilder.add_points(points.cbegin(), points.cend());
-        }
-
-        SECTION("using iterators and size") {
-            fbuilder.add_points(points.cbegin(), points.cend(), static_cast<uint32_t>(points.size()));
-        }*/
-
-        SECTION("using container directly") {
-            fbuilder.add_points_from_container(points);
-        }
-
-        fbuilder.commit();
-    }
+    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    fbuilder.add_points_from_container(points);
+    fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
 
@@ -397,27 +382,13 @@ TEST_CASE("Add points from container") {
     const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
-    REQUIRE(layer.version() == 2);
-    REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
 
-    point_handler handler;
+    point_handler_2d handler;
     feature.decode_point_geometry(handler);
 
     REQUIRE(handler.data == results);
 }
-/*
-TEST_CASE("Add points from iterator with wrong count throws assert") {
-    const std::vector<vtzero::point_2d> points = {{10, 20}, {20, 30}, {30, 40}};
-
-    vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::point_2d_feature_builder fbuilder{lbuilder};
-
-    REQUIRE_THROWS_AS(fbuilder.add_points(points.cbegin(),
-                                          points.cend(),
-                                          static_cast<uint32_t>(points.size() + 1)), const assert_error&);
-}*/
 

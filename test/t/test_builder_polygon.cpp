@@ -36,7 +36,7 @@ struct polygon_handler {
     void ring_end(vtzero::ring_type /* type */) const noexcept {
     }
 
-};
+}; // struct polygon_handler
 
 static void test_polygon_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
@@ -254,32 +254,16 @@ TEST_CASE("Calling polygon_2d_feature_builder::set_point() creating unclosed rin
     REQUIRE_THROWS_AS(fbuilder.set_point(20, 30), const vtzero::geometry_exception&);
 }
 
-#if 0
 TEST_CASE("Add polygon from container") {
-    const polygon_type points = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
+    const polygon_type expected = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
+    const std::vector<std::vector<vtzero::point_2d>> points = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
-    {
-        vtzero::polygon_2d_feature_builder fbuilder{lbuilder};
-
-#if 0
-        SECTION("using iterators") {
-            fbuilder.add_ring(points[0].cbegin(), points[0].cend());
-        }
-
-        SECTION("using iterators and size") {
-            fbuilder.add_ring(points[0].cbegin(), points[0].cend(), static_cast<uint32_t>(points[0].size()));
-        }
-#endif
-
-        SECTION("using container directly") {
-            fbuilder.add_ring_from_container(points[0]);
-        }
-
-        fbuilder.commit();
-    }
+    vtzero::polygon_2d_feature_builder fbuilder{lbuilder};
+    fbuilder.add_ring_from_container(points[0]);
+    fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
 
@@ -297,21 +281,6 @@ TEST_CASE("Add polygon from container") {
     polygon_handler handler;
     feature.decode_polygon_geometry(handler);
 
-    REQUIRE(handler.data == points);
+    REQUIRE(handler.data == expected);
 }
-#endif
-
-#if 0
-TEST_CASE("Add polygon from iterator with wrong count throws assert") {
-    const std::vector<vtzero::point_2d> points = {{10, 20}, {20, 30}, {30, 40}, {10, 20}};
-
-    vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::polygon_2d_feature_builder fbuilder{lbuilder};
-
-    REQUIRE_THROWS_AS(fbuilder.add_ring(points.cbegin(),
-                                        points.cend(),
-                                        static_cast<uint32_t>(points.size() + 1)), const assert_error&);
-}
-#endif
 
