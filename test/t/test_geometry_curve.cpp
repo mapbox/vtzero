@@ -96,7 +96,7 @@ TEST_CASE("Calling decode_curve_geometry() with a point geometry fails") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_curve(dummy_geom_handler{}),
-                          vtzero::geometry_exception);
+                          const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_curve(dummy_geom_handler{}),
@@ -116,7 +116,7 @@ TEST_CASE("Calling decode_curve_geometry() with a polygon geometry fails") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_curve(dummy_geom_handler{}),
-                          vtzero::geometry_exception);
+                          const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_curve(dummy_geom_handler{}),
@@ -136,7 +136,7 @@ TEST_CASE("Calling decode_curve_geometry() with something other than MoveTo comm
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_curve(dummy_geom_handler{}),
-                          vtzero::geometry_exception);
+                          const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_curve(dummy_geom_handler{}),
@@ -156,7 +156,7 @@ TEST_CASE("Calling decode_curve_geometry() with a count of 0") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_curve(dummy_geom_handler{}),
-                          vtzero::geometry_exception);
+                          const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_curve(dummy_geom_handler{}),
@@ -176,7 +176,7 @@ TEST_CASE("Calling decode_curve_geometry() with a count of 2") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_curve(dummy_geom_handler{}),
-                          vtzero::geometry_exception);
+                          const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_curve(dummy_geom_handler{}),
@@ -197,7 +197,7 @@ TEST_CASE("Calling decode_curve_geometry() with 2nd command not a LineTo") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_curve(dummy_geom_handler{}),
-                          vtzero::geometry_exception);
+                          const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_curve(dummy_geom_handler{}),
@@ -218,7 +218,7 @@ TEST_CASE("Calling decode_curve_geometry() with LineTo and 0 count") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_curve(dummy_geom_handler{}),
-                          vtzero::geometry_exception);
+                          const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_curve(dummy_geom_handler{}),
