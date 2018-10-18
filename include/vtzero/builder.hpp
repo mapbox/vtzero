@@ -1042,15 +1042,6 @@ namespace vtzero {
 
     }; // class polygon_feature_builder
 
-    /// alias for 2D point feature builder
-    using point_2d_feature_builder = point_feature_builder<2, false>;
-
-    /// alias for 2D linestring feature builder
-    using linestring_2d_feature_builder = linestring_feature_builder<2, false>;
-
-    /// alias for 2D polygon feature builder
-    using polygon_2d_feature_builder = polygon_feature_builder<2, false>;
-
     /**
      * Copy a feature from an existing layer to a new layer. The feature
      * will be copied completely over to the new layer including its id,

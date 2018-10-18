@@ -21,9 +21,9 @@ struct movable_not_copyable {
 };
 
 static_assert(movable_not_copyable<vtzero::tile_builder>::value, "tile_builder should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::point_2d_feature_builder>::value, "point_feature_builder should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::linestring_2d_feature_builder>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::polygon_2d_feature_builder>::value, "polygon_feature_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::point_feature_builder<2>>::value, "point_feature_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::linestring_feature_builder<2>>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::polygon_feature_builder<2>>::value, "polygon_feature_builder should be nothrow movable, but not copyable");
 
 TEST_CASE("Create tile from existing layers") {
     const auto buffer = load_test_tile();
@@ -56,7 +56,7 @@ TEST_CASE("Create layer based on existing layer") {
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, layer};
-    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    vtzero::point_feature_builder<2> fbuilder{lbuilder};
     fbuilder.set_integer_id(42);
     fbuilder.add_point(10, 20);
     fbuilder.commit();
@@ -151,14 +151,14 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     { // explicit commit after geometry
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 10);
         fbuilder.commit();
     }
 
     { // explicit commit after properties
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
         fbuilder.add_point(10, 10);
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
@@ -166,7 +166,7 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
     }
 
     { // extra commits or rollbacks are okay but no other calls
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(3);
         fbuilder.add_point(10, 10);
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
@@ -202,12 +202,12 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     SECTION("explicit immediate commit") {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
     }
 
     SECTION("explicit commit after setting id") {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
         REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
     }
@@ -216,14 +216,14 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
 TEST_CASE("String ids are not allowed in version 2 tiles") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    vtzero::point_feature_builder<2> fbuilder{lbuilder};
     REQUIRE_THROWS_AS(fbuilder.set_string_id("foo"), const assert_error&);
 }
 
 TEST_CASE("String ids are okay in version 3 tiles") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
-    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    vtzero::point_feature_builder<2> fbuilder{lbuilder};
     fbuilder.set_string_id("foo");
     fbuilder.add_point(10, 10);
     fbuilder.commit();
@@ -242,7 +242,7 @@ TEST_CASE("String ids are okay in version 3 tiles") {
 TEST_CASE("Create layer with x/y/zoom/extent") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3, vtzero::tile{5, 3, 12, 8192}};
-    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    vtzero::point_feature_builder<2> fbuilder{lbuilder};
     fbuilder.set_string_id("foo");
     fbuilder.add_point(10, 10);
     fbuilder.commit();
@@ -263,33 +263,33 @@ TEST_CASE("Rollback feature") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 10);
         fbuilder.commit();
     }
 
     { // immediate rollback
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
         fbuilder.rollback();
     }
 
     { // rollback after setting id
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(3);
         fbuilder.rollback();
     }
 
     { // rollback after geometry
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(4);
         fbuilder.add_point(20, 20);
         fbuilder.rollback();
     }
 
     { // rollback after properties
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(5);
         fbuilder.add_point(20, 20);
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
@@ -297,20 +297,20 @@ TEST_CASE("Rollback feature") {
     }
 
     { // implicit rollback after geometry
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(6);
         fbuilder.add_point(10, 10);
     }
 
     { // implicit rollback after properties
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(7);
         fbuilder.add_point(10, 10);
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
     {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(8);
         fbuilder.add_point(30, 30);
         fbuilder.commit();
@@ -418,7 +418,7 @@ TEST_CASE("Copy tile") {
     REQUIRE(vector_tile_equal(buffer, data));
 }
 
-TEST_CASE("Copy tile using geometry_2d_feature_builder") {
+TEST_CASE("Copy tile using geometry_feature_builder<2>") {
     const auto buffer = load_test_tile();
     const vtzero::vector_tile tile{buffer};
 
@@ -439,7 +439,7 @@ TEST_CASE("Copy tile using geometry_2d_feature_builder") {
     REQUIRE(vector_tile_equal(buffer, data));
 }
 
-TEST_CASE("Copy only point geometries using geometry_2d_feature_builder") {
+TEST_CASE("Copy only point geometries using geometry_feature_builder<2>") {
     const auto buffer = load_test_tile();
     const vtzero::vector_tile tile{buffer};
 
@@ -502,7 +502,7 @@ struct points_to_vector {
 
 }; // struct points_to_vector
 
-TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
+TEST_CASE("Copy only point geometries using point_feature_builder<2>") {
     const auto buffer = load_test_tile();
     const vtzero::vector_tile tile{buffer};
 
@@ -512,7 +512,7 @@ TEST_CASE("Copy only point geometries using point_2d_feature_builder") {
     for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         for (const auto feature : layer) {
-            vtzero::point_2d_feature_builder fbuilder{lbuilder};
+            vtzero::point_feature_builder<2> fbuilder{lbuilder};
             fbuilder.copy_id(feature);
             if (feature.geometry_type() == vtzero::GeomType::POINT) {
                 const auto points = feature.decode_point_geometry(points_to_vector{});
@@ -559,7 +559,7 @@ TEST_CASE("Build point feature from container with too many points") {
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    vtzero::point_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.set_integer_id(1);
 
@@ -570,9 +570,9 @@ TEST_CASE("Build point feature from container with too many points") {
 TEST_CASE("Moving a feature builder is allowed") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::point_2d_feature_builder fbuilder{lbuilder};
+    vtzero::point_feature_builder<2> fbuilder{lbuilder};
 
     auto fbuilder2 = std::move(fbuilder);
-    vtzero::point_2d_feature_builder fbuilder3{std::move(fbuilder2)};
+    vtzero::point_feature_builder<2> fbuilder3{std::move(fbuilder2)};
 }
 

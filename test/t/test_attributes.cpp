@@ -94,7 +94,7 @@ TEST_CASE("build feature with scalar attributes and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_scalar_attribute("data_view", vtzero::data_view{"foo"}); // 1
@@ -141,7 +141,7 @@ TEST_CASE("build feature with list and map attributes and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_scalar_attribute("some_int", 111u);
@@ -196,7 +196,7 @@ TEST_CASE("build feature with number list attributes and read it again") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     const auto index = lbuilder.add_attribute_scaling(vtzero::scaling{0, 2.0, 0.0});
     {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.start_number_list_with_key("nlist", 4, index);
@@ -243,7 +243,7 @@ TEST_CASE("build feature with list property from array and read it again") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
 
     SECTION("without size") {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_list_attribute("pi", pi.begin(), pi.end());
@@ -251,7 +251,7 @@ TEST_CASE("build feature with list property from array and read it again") {
     }
 
     SECTION("with size") {
-        vtzero::point_2d_feature_builder fbuilder{lbuilder};
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(10, 20);
         fbuilder.add_list_attribute("pi", pi.begin(), pi.end(), pi.size());

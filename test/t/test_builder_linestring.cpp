@@ -70,7 +70,7 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
-        vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+        vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
         if (with_id) {
             fbuilder.set_integer_id(17);
@@ -127,7 +127,7 @@ TEST_CASE("linestring builder with id/with properties") {
 TEST_CASE("Calling add_linestring() with bad values throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     SECTION("0") {
         REQUIRE_THROWS_AS(fbuilder.add_linestring(0), const assert_error&);
@@ -143,7 +143,7 @@ TEST_CASE("Calling add_linestring() with bad values throws assert") {
 static void test_multilinestring_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     if (with_id) {
         fbuilder.set_integer_id(17);
@@ -204,34 +204,34 @@ TEST_CASE("Multilinestring builder with id/with properties") {
 TEST_CASE("Calling add_linestring() twice throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_linestring(3);
     REQUIRE_ASSERT(fbuilder.add_linestring(2));
 }
 
-TEST_CASE("Calling linestring_2d_feature_builder::set_point() throws assert") {
+TEST_CASE("Calling linestring_feature_builder<2>::set_point() throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const assert_error&);
 }
 
-TEST_CASE("Calling linestring_2d_feature_builder::set_point() with same point throws") {
+TEST_CASE("Calling linestring_feature_builder<2>::set_point() with same point throws") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_linestring(2);
     fbuilder.set_point(10, 10);
     REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const vtzero::geometry_exception&);
 }
 
-TEST_CASE("Calling linestring_2d_feature_builder::set_point() too often throws assert") {
+TEST_CASE("Calling linestring_feature_builder<2>::set_point() too often throws assert") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_linestring(2);
     fbuilder.set_point(10, 20);
@@ -246,7 +246,7 @@ TEST_CASE("Add linestring from container") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
-    vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+    vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
     vtzero::add_linestring_from_container(points[0], fbuilder);
     fbuilder.commit();
 
@@ -304,7 +304,7 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
-        vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+        vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_linestring(2);
         fbuilder.set_point(10, 10);
@@ -313,7 +313,7 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
     }
 
     try {
-        vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+        vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
         fbuilder.add_linestring(2);
         fbuilder.set_point(10, 10);
@@ -323,7 +323,7 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
     }
 
     {
-        vtzero::linestring_2d_feature_builder fbuilder{lbuilder};
+        vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(3);
         fbuilder.add_linestring(2);
         fbuilder.set_point(10, 20);
