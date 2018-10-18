@@ -266,7 +266,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     }
 
     fbuilder.add_points(3);
-    fbuilder.set_point(10, 20);
+    fbuilder.set_point(vtzero::point_2d{10, 20});
     fbuilder.set_point(vtzero::point_2d{20, 30});
     fbuilder.set_point(vtzero::point_2d{30, 40});
 
@@ -327,7 +327,7 @@ TEST_CASE("Calling add_point() and then other geometry functions throws assert")
         REQUIRE_THROWS_AS(fbuilder.add_points(2), const assert_error&);
     }
     SECTION("set_point()") {
-        REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
     }
 }
 
@@ -336,7 +336,7 @@ TEST_CASE("Calling point_feature_builder<2>::set_point() throws assert") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
 
-    REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
 }
 
 TEST_CASE("Calling add_points() and then other geometry functions throws assert") {
@@ -360,9 +360,9 @@ TEST_CASE("Calling point_feature_builder<2>::set_point() too often throws assert
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_points(2);
-    fbuilder.set_point(10, 20);
-    fbuilder.set_point(20, 20);
-    REQUIRE_THROWS_AS(fbuilder.set_point(30, 20), const assert_error&);
+    fbuilder.set_point(vtzero::point_2d{10, 20});
+    fbuilder.set_point(vtzero::point_2d{20, 20});
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
 }
 
 TEST_CASE("Add points from container") {

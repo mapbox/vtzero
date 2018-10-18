@@ -716,8 +716,8 @@ namespace vtzero {
      * vtzero::point_feature_builder<> fb{lb};
      * fb.set_integer_id(123);
      * fb.add_points(2);
-     * fb.set_point(10, 20);
-     * fb.set_point(20, 20);
+     * fb.set_point(vtzero::point_2d{10, 20});
+     * fb.set_point(vtzero::point_2d{20, 20});
      * fb.add_scalar_attribute("foo", "bar");
      * @endcode
      */
@@ -797,21 +797,6 @@ namespace vtzero {
             this->set_point_impl(p);
         }
 
-        /**
-         * Set a point in the multipoint geometry.
-         *
-         * @param x X coordinate of the point to set.
-         * @param y Y coordinate of the point to set.
-         *
-         * @pre There must have been less than *count* calls to set_point()
-         *      already after a call to add_points(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
-         */
-        void set_point(const int32_t x, const int32_t y) {
-            set_point(point_2d{x, y});
-        }
-
     }; // class point_feature_builder
 
     /**
@@ -830,8 +815,8 @@ namespace vtzero {
      * vtzero::linestring_feature_builder<> fb{lb};
      * fb.set_integer_id(123);
      * fb.add_linestring(2);
-     * fb.set_point(10, 10);
-     * fb.set_point(10, 20);
+     * fb.set_point(vtzero::point_2d{10, 20});
+     * fb.set_point(vtzero::point_2d{20, 20});
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
@@ -902,26 +887,6 @@ namespace vtzero {
             }
         }
 
-        /**
-         * Set a point in the multilinestring geometry opened with
-         * add_linestring().
-         *
-         * @param x X coordinate of the point to set.
-         * @param y Y coordinate of the point to set.
-         *
-         * @throws geometry_exception if the point set is the same as the
-         *         previous point. This would create zero-length segments
-         *         which are not allowed according to the vector tile spec.
-         *
-         * @pre There must have been less than *count* calls to set_point()
-         *      already after a call to add_linestring(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
-         */
-        void set_point(const int32_t x, const int32_t y) {
-            set_point(point_2d{x, y});
-        }
-
     }; // class linestring_feature_builder
 
     /**
@@ -939,7 +904,7 @@ namespace vtzero {
      * vtzero::polygon_feature_builder<> fb{lb};
      * fb.set_integer_id(123);
      * fb.add_ring(5);
-     * fb.set_point(10, 10);
+     * fb.set_point(vtzero::point_2d{10, 10});
      * ...
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
@@ -1018,28 +983,6 @@ namespace vtzero {
                 }
                 this->set_point_impl(p);
             }
-        }
-
-        /**
-         * Set a point in the ring opened with add_ring().
-         *
-         * @param x X coordinate of the point to set.
-         * @param y Y coordinate of the point to set.
-         *
-         * @throws geometry_exception if the point set is the same as the
-         *         previous point. This would create zero-length segments
-         *         which are not allowed according to the vector tile spec.
-         *         This exception is also thrown when the last point in the
-         *         ring is not equal to the first point, because this would
-         *         not create a closed ring.
-         *
-         * @pre There must have been less than *count* calls to set_point()
-         *      already after a call to add_ring(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
-         */
-        void set_point(const int32_t x, const int32_t y) {
-            set_point(point_2d{x, y});
         }
 
         /**

@@ -51,10 +51,10 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
         }
 
         fbuilder.add_ring(4);
-        fbuilder.set_point(10, 20);
+        fbuilder.set_point(vtzero::point_2d{10, 20});
         fbuilder.set_point(vtzero::point_2d{20, 30});
         fbuilder.set_point(vtzero::point_2d{30, 40});
-        fbuilder.set_point(10, 20);
+        fbuilder.set_point(vtzero::point_2d{10, 20});
 
         if (with_prop) {
             fbuilder.add_property("foo", "bar");
@@ -131,19 +131,19 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
     }
 
     fbuilder.add_ring(4);
-    fbuilder.set_point(10, 20);
+    fbuilder.set_point(vtzero::point_2d{10, 20});
     fbuilder.set_point(vtzero::point_2d{20, 30});
     fbuilder.set_point(vtzero::point_2d{30, 40});
-    fbuilder.set_point(10, 20);
+    fbuilder.set_point(vtzero::point_2d{10, 20});
 
     fbuilder.add_ring(5);
-    fbuilder.set_point(1, 1);
-    fbuilder.set_point(2, 1);
-    fbuilder.set_point(2, 2);
-    fbuilder.set_point(1, 2);
+    fbuilder.set_point(vtzero::point_2d{1, 1});
+    fbuilder.set_point(vtzero::point_2d{2, 1});
+    fbuilder.set_point(vtzero::point_2d{2, 2});
+    fbuilder.set_point(vtzero::point_2d{1, 2});
 
     if (with_id) {
-        fbuilder.set_point(1, 1);
+        fbuilder.set_point(vtzero::point_2d{1, 1});
     } else {
         fbuilder.close_ring();
     }
@@ -207,7 +207,7 @@ TEST_CASE("Calling polygon_feature_builder<2>::set_point()/close_ring() throws a
     vtzero::polygon_feature_builder<2> fbuilder{lbuilder};
 
     SECTION("set_point") {
-        REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
     }
     SECTION("close_ring") {
         REQUIRE_THROWS_AS(fbuilder.close_ring(), const assert_error&);
@@ -220,13 +220,13 @@ TEST_CASE("Calling polygon_feature_builder<2>::set_point()/close_ring() too ofte
     vtzero::polygon_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
-    fbuilder.set_point(10, 20);
-    fbuilder.set_point(20, 20);
-    fbuilder.set_point(30, 20);
-    fbuilder.set_point(10, 20);
+    fbuilder.set_point(vtzero::point_2d{10, 20});
+    fbuilder.set_point(vtzero::point_2d{20, 20});
+    fbuilder.set_point(vtzero::point_2d{30, 20});
+    fbuilder.set_point(vtzero::point_2d{10, 20});
 
     SECTION("set_point") {
-        REQUIRE_THROWS_AS(fbuilder.set_point(50, 20), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
     }
     SECTION("close_ring") {
         REQUIRE_THROWS_AS(fbuilder.close_ring(), const assert_error&);
@@ -239,8 +239,8 @@ TEST_CASE("Calling polygon_feature_builder<2>::set_point() with same point throw
     vtzero::polygon_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
-    fbuilder.set_point(10, 10);
-    REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const vtzero::geometry_exception&);
+    fbuilder.set_point(vtzero::point_2d{10, 10});
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d(10, 10)), const vtzero::geometry_exception&);
 }
 
 TEST_CASE("Calling polygon_feature_builder<2>::set_point() creating unclosed ring throws") {
@@ -249,10 +249,10 @@ TEST_CASE("Calling polygon_feature_builder<2>::set_point() creating unclosed rin
     vtzero::polygon_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
-    fbuilder.set_point(10, 10);
-    fbuilder.set_point(10, 20);
-    fbuilder.set_point(20, 20);
-    REQUIRE_THROWS_AS(fbuilder.set_point(20, 30), const vtzero::geometry_exception&);
+    fbuilder.set_point(vtzero::point_2d{10, 10});
+    fbuilder.set_point(vtzero::point_2d{10, 20});
+    fbuilder.set_point(vtzero::point_2d{20, 20});
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const vtzero::geometry_exception&);
 }
 
 TEST_CASE("Add polygon from container") {

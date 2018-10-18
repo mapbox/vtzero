@@ -77,7 +77,7 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
         }
 
         fbuilder.add_linestring(3);
-        fbuilder.set_point(10, 20);
+        fbuilder.set_point(vtzero::point_2d{10, 20});
         fbuilder.set_point(vtzero::point_2d{20, 30});
         fbuilder.set_point(vtzero::point_2d{30, 40});
 
@@ -150,13 +150,13 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
     }
 
     fbuilder.add_linestring(3);
-    fbuilder.set_point(10, 20);
+    fbuilder.set_point(vtzero::point_2d{10, 20});
     fbuilder.set_point(vtzero::point_2d{20, 30});
     fbuilder.set_point(vtzero::point_2d{30, 40});
 
     fbuilder.add_linestring(2);
-    fbuilder.set_point(1, 2);
-    fbuilder.set_point(2, 1);
+    fbuilder.set_point(vtzero::point_2d{1, 2});
+    fbuilder.set_point(vtzero::point_2d{2, 1});
 
     if (with_prop) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
@@ -215,7 +215,7 @@ TEST_CASE("Calling linestring_feature_builder<2>::set_point() throws assert") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
-    REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
 }
 
 TEST_CASE("Calling linestring_feature_builder<2>::set_point() with same point throws") {
@@ -224,8 +224,8 @@ TEST_CASE("Calling linestring_feature_builder<2>::set_point() with same point th
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_linestring(2);
-    fbuilder.set_point(10, 10);
-    REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), const vtzero::geometry_exception&);
+    fbuilder.set_point(vtzero::point_2d{10, 10});
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d(10, 10)), const vtzero::geometry_exception&);
 }
 
 TEST_CASE("Calling linestring_feature_builder<2>::set_point() too often throws assert") {
@@ -234,9 +234,9 @@ TEST_CASE("Calling linestring_feature_builder<2>::set_point() too often throws a
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_linestring(2);
-    fbuilder.set_point(10, 20);
-    fbuilder.set_point(20, 20);
-    REQUIRE_THROWS_AS(fbuilder.set_point(30, 20), const assert_error&);
+    fbuilder.set_point(vtzero::point_2d{10, 20});
+    fbuilder.set_point(vtzero::point_2d{20, 20});
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
 }
 
 TEST_CASE("Add linestring from container") {
@@ -307,8 +307,8 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
         vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_linestring(2);
-        fbuilder.set_point(10, 10);
-        fbuilder.set_point(20, 20);
+        fbuilder.set_point(vtzero::point_2d{10, 10});
+        fbuilder.set_point(vtzero::point_2d{20, 20});
         fbuilder.commit();
     }
 
@@ -316,8 +316,8 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
         vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
         fbuilder.add_linestring(2);
-        fbuilder.set_point(10, 10);
-        fbuilder.set_point(10, 10);
+        fbuilder.set_point(vtzero::point_2d{10, 10});
+        fbuilder.set_point(vtzero::point_2d{10, 10});
         fbuilder.commit();
     } catch (vtzero::geometry_exception&) {
     }
@@ -326,8 +326,8 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
         vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(3);
         fbuilder.add_linestring(2);
-        fbuilder.set_point(10, 20);
-        fbuilder.set_point(20, 10);
+        fbuilder.set_point(vtzero::point_2d{10, 20});
+        fbuilder.set_point(vtzero::point_2d{20, 10});
         fbuilder.commit();
     }
 
