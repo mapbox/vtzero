@@ -168,6 +168,7 @@ namespace vtzero {
         detail::unaligned_table<uint64_t> m_int_table;
 
         uint32_t m_version = 1; // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
+        uint32_t m_extent = 4096; // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
 
         void initialize_tables() const {
             m_key_table.reserve(m_key_table_size);
@@ -219,7 +220,7 @@ namespace vtzero {
             uint32_t x = 0;
             uint32_t y = 0;
             uint32_t zoom = 0;
-            uint32_t extent = 4096;
+            bool has_x_y_zoom = false;
             while (reader.next()) {
                 switch (reader.tag_and_type()) {
                     case protozero::tag_and_type(detail::pbf_layer::version, protozero::pbf_wire_type::varint):
@@ -241,7 +242,7 @@ namespace vtzero {
                         ++m_value_table_size;
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
-                        extent = reader.get_uint32();
+                        m_extent = reader.get_uint32();
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::string_values, protozero::pbf_wire_type::length_delimited):
                         reader.skip();
@@ -273,15 +274,18 @@ namespace vtzero {
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::tile_x, protozero::pbf_wire_type::varint):
                         x = reader.get_uint32();
+                        has_x_y_zoom = true;
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::tile_y, protozero::pbf_wire_type::varint):
                         y = reader.get_uint32();
+                        has_x_y_zoom = true;
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::tile_zoom, protozero::pbf_wire_type::varint):
                         zoom = reader.get_uint32();
                         if (zoom >= tile::max_zoom) {
                             throw format_exception{"zoom level too large"};
                         }
+                        has_x_y_zoom = true;
                         break;
                     default:
                         throw format_exception{"unknown field in layer (tag=" +
@@ -324,15 +328,17 @@ namespace vtzero {
                 throw format_exception{"missing name field in layer (spec 4.1)"};
             }
 
-            if (x >= detail::num_tiles_in_zoom(zoom)) {
-                throw format_exception{"tile x value out of range"};
-            }
+            if (has_x_y_zoom) {
+                if (x >= detail::num_tiles_in_zoom(zoom)) {
+                    throw format_exception{"tile x value out of range"};
+                }
 
-            if (y >= detail::num_tiles_in_zoom(zoom)) {
-                throw format_exception{"tile y value out of range"};
-            }
+                if (y >= detail::num_tiles_in_zoom(zoom)) {
+                    throw format_exception{"tile y value out of range"};
+                }
 
-            m_tile = {x, y, zoom, extent};
+                m_tile = {x, y, zoom, m_extent};
+            }
         }
 
         /**
@@ -399,7 +405,7 @@ namespace vtzero {
         std::uint32_t extent() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
 
-            return m_tile.extent();
+            return m_extent;
         }
 
         /**

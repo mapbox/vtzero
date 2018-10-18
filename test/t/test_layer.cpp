@@ -40,7 +40,7 @@ TEST_CASE("read a layer") {
     REQUIRE(layer);
 
     REQUIRE(layer.version() == 1);
-    REQUIRE(layer.get_tile() == vtzero::tile{});
+    REQUIRE_FALSE(layer.get_tile().valid());
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.name() == "bridge");
 

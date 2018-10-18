@@ -51,6 +51,7 @@ TEST_CASE("Create layer based on existing layer") {
     const auto buffer = load_test_tile();
     const vtzero::vector_tile tile{buffer};
     const auto layer = tile.get_layer_by_name("place_label");
+    REQUIRE(layer.extent() == 4096);
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, layer};

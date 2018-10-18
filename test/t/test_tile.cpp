@@ -11,18 +11,21 @@ static_assert(vtzero::detail::num_tiles_in_zoom(20) == 1048576, "wrong number of
 
 TEST_CASE("Tile") {
     vtzero::tile t1;
+    REQUIRE_FALSE(t1.valid());
     REQUIRE(t1.x() == 0);
     REQUIRE(t1.y() == 0);
     REQUIRE(t1.zoom() == 0);
-    REQUIRE(t1.extent() == 4096);
+    REQUIRE(t1.extent() == 0);
 
     vtzero::tile t2{1, 2, 3};
+    REQUIRE(t2.valid());
     REQUIRE(t2.x() == 1);
     REQUIRE(t2.y() == 2);
     REQUIRE(t2.zoom() == 3);
     REQUIRE(t2.extent() == 4096);
 
     vtzero::tile t3{0, 200, 12, 8192};
+    REQUIRE(t3.valid());
     REQUIRE(t3.x() == 0);
     REQUIRE(t3.y() == 200);
     REQUIRE(t3.zoom() == 12);

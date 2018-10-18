@@ -169,8 +169,8 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
               << "  version: " << layer.version() << '\n'
               << "  extent: " << layer.extent() << '\n';
 
-    if (layer.version() == 3) {
-        const auto tile = layer.get_tile();
+    const auto tile = layer.get_tile();
+    if (tile.valid()) {
         std::cout << "  x: " << tile.x() << '\n';
         std::cout << "  y: " << tile.y() << '\n';
         std::cout << "  zoom: " << tile.zoom() << '\n';
