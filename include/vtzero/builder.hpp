@@ -604,10 +604,10 @@ namespace vtzero {
 
         public:
 
-            countdown_value() noexcept = default;
+            constexpr countdown_value() noexcept = default;
 
             ~countdown_value() noexcept {
-                assert_is_zero();
+                vtzero_assert_in_noexcept_function(is_zero());
             }
 
             countdown_value(const countdown_value&) = delete;
@@ -625,11 +625,11 @@ namespace vtzero {
                 return *this;
             }
 
-            uint32_t value() const noexcept {
+            constexpr uint32_t value() const noexcept {
                 return m_value;
             }
 
-            bool is_zero() const noexcept {
+            constexpr bool is_zero() const noexcept {
                 return m_value == 0;
             }
 
@@ -637,17 +637,11 @@ namespace vtzero {
                 m_value = value;
             }
 
-            void decrement() {
-                vtzero_assert(m_value > 0 && "too many calls to set_point()");
+            void decrement() noexcept {
                 --m_value;
             }
 
-            void assert_is_zero() const noexcept {
-                vtzero_assert_in_noexcept_function(m_value == 0 &&
-                                                   "not enough calls to set_point()");
-            }
-
-        }; // countdown_value
+        }; // class countdown_value
 
     protected:
 
@@ -860,7 +854,7 @@ namespace vtzero {
          */
         void add_linestring(const uint32_t count) {
             vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
-            this->m_num_points.assert_is_zero();
+            vtzero_assert(this->m_num_points.is_zero());
             this->enter_stage_geometry(GeomType::LINESTRING);
             this->m_num_points.set(count);
             m_start_line = true;
@@ -970,8 +964,8 @@ namespace vtzero {
          */
         void add_ring(const uint32_t count) {
             vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
+            vtzero_assert(this->m_num_points.is_zero());
             this->enter_stage_geometry(GeomType::POLYGON);
-            this->m_num_points.assert_is_zero();
             this->m_num_points.set(count);
             m_start_ring = true;
         }

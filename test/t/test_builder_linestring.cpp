@@ -207,7 +207,7 @@ TEST_CASE("Calling add_linestring() twice throws assert") {
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_linestring(3);
-    REQUIRE_ASSERT(fbuilder.add_linestring(2));
+    REQUIRE_THROWS_AS(fbuilder.add_linestring(2), const assert_error&);
 }
 
 TEST_CASE("Calling linestring_feature_builder<2>::set_point() throws assert") {

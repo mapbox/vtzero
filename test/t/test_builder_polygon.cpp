@@ -198,7 +198,7 @@ TEST_CASE("Calling add_ring() twice throws assert") {
     vtzero::polygon_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
-    REQUIRE_ASSERT(fbuilder.add_ring(4));
+    REQUIRE_THROWS_AS(fbuilder.add_ring(4), const assert_error&);
 }
 
 TEST_CASE("Calling polygon_feature_builder<2>::set_point()/close_ring() throws assert") {
