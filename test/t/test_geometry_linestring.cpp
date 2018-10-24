@@ -48,14 +48,18 @@ TEST_CASE("Calling decode_linestring_geometry() with empty input") {
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a valid linestring") {
-    const container g = {9, 4, 4, 18, 0, 16, 16, 0};
+    const container g = {command_move_to(1), 4, 4,
+                         command_line_to(2), 0, 16, 16, 0};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     REQUIRE(decoder.decode_linestring(dummy_geom_handler{}) == 10301);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a valid multilinestring") {
-    const container g = {9, 4, 4, 18, 0, 16, 16, 0, 9, 17, 17, 10, 4, 8};
+    const container g = {command_move_to(1), 4, 4,
+                         command_line_to(2), 0, 16, 16, 0,
+                         command_move_to(1), 17, 17,
+                         command_line_to(1), 4, 8};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     dummy_geom_handler handler;
@@ -64,7 +68,7 @@ TEST_CASE("Calling decode_linestring_geometry() with a valid multilinestring") {
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a point geometry fails") {
-    const container g = {9, 50, 34}; // this is a point geometry
+    const container g = {command_move_to(1), 50, 34}; // this is a point geometry
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -78,7 +82,9 @@ TEST_CASE("Calling decode_linestring_geometry() with a point geometry fails") {
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a polygon geometry fails") {
-    const container g = {9, 6, 12, 18, 10, 12, 24, 44, 15}; // this is a polygon geometry
+    const container g = {command_move_to(1), 6, 12,
+                         command_line_to(2), 10, 12, 24, 44,
+                         command_close_path()}; // this is a polygon geometry
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -92,7 +98,7 @@ TEST_CASE("Calling decode_linestring_geometry() with a polygon geometry fails") 
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with something other than MoveTo command") {
-    const container g = {vtzero::detail::command_line_to(3)};
+    const container g = {command_line_to(3)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -106,7 +112,7 @@ TEST_CASE("Calling decode_linestring_geometry() with something other than MoveTo
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a count of 0") {
-    const container g = {vtzero::detail::command_move_to(0)};
+    const container g = {command_move_to(0)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -120,7 +126,7 @@ TEST_CASE("Calling decode_linestring_geometry() with a count of 0") {
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a count of 2") {
-    const container g = {vtzero::detail::command_move_to(2), 10, 20, 20, 10};
+    const container g = {command_move_to(2), 10, 20, 20, 10};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -134,8 +140,8 @@ TEST_CASE("Calling decode_linestring_geometry() with a count of 2") {
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with 2nd command not a LineTo") {
-    const container g = {vtzero::detail::command_move_to(1), 3, 4,
-                         vtzero::detail::command_move_to(1)};
+    const container g = {command_move_to(1), 3, 4,
+                         command_move_to(1)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -149,8 +155,8 @@ TEST_CASE("Calling decode_linestring_geometry() with 2nd command not a LineTo") 
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with LineTo and 0 count") {
-    const container g = {vtzero::detail::command_move_to(1), 3, 4,
-                         vtzero::detail::command_line_to(0)};
+    const container g = {command_move_to(1), 3, 4,
+                         command_line_to(0)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {

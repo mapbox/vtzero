@@ -24,6 +24,10 @@ extern bool got_an_assert;
 
 std::string load_test_tile();
 
+using vtzero::detail::command_move_to;
+using vtzero::detail::command_line_to;
+using vtzero::detail::command_close_path;
+
 struct AttributeCountHandler {
 
     int count_ki = 0;

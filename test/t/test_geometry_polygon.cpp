@@ -48,14 +48,18 @@ TEST_CASE("Calling decode_polygon_geometry() with empty input") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a valid polygon") {
-    const container g = {9, 6, 12, 18, 10, 12, 24, 44, 15};
+    const container g = {command_move_to(1), 6, 12,
+                         command_line_to(2), 10, 12, 24, 44,
+                         command_close_path()};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10401);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a duplicate end point") {
-    const container g = {9, 6, 12, 26, 10, 12, 24, 44, 33, 55, 15};
+    const container g = {command_move_to(1), 6, 12,
+                         command_line_to(3), 10, 12, 24, 44, 33, 55,
+                         command_close_path()};
 
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
     dummy_geom_handler handler;
@@ -64,8 +68,15 @@ TEST_CASE("Calling decode_polygon_geometry() with a duplicate end point") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a valid multipolygon") {
-    const container g = {9, 0, 0, 26, 20, 0, 0, 20, 19, 0, 15, 9, 22, 2, 26, 18,
-                         0, 0, 18, 17, 0, 15, 9, 4, 13, 26, 0, 8, 8, 0, 0, 7, 15};
+    const container g = {command_move_to(1), 0, 0,
+                         command_line_to(3), 20, 0, 0, 20, 19, 0,
+                         command_close_path(),
+                         command_move_to(1), 22, 2,
+                         command_line_to(3), 18, 0, 0, 18, 17, 0,
+                         command_close_path(),
+                         command_move_to(1), 4, 13,
+                         command_line_to(3), 0, 8, 8, 0, 0, 7,
+                         command_close_path()};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     dummy_geom_handler handler;
@@ -74,7 +85,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a valid multipolygon") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a point geometry fails") {
-    const container g = {9, 50, 34}; // this is a point geometry
+    const container g = {command_move_to(1), 50, 34}; // this is a point geometry
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -88,7 +99,8 @@ TEST_CASE("Calling decode_polygon_geometry() with a point geometry fails") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a linestring geometry fails") {
-    const container g = {9, 4, 4, 18, 0, 16, 16, 0}; // this is a linestring geometry
+    const container g = {command_move_to(1), 4, 4,
+                         command_line_to(2), 0, 16, 16, 0}; // this is a linestring geometry
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -102,7 +114,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a linestring geometry fails") 
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with something other than MoveTo command") {
-    const container g = {vtzero::detail::command_line_to(3)};
+    const container g = {command_line_to(3)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -116,7 +128,7 @@ TEST_CASE("Calling decode_polygon_geometry() with something other than MoveTo co
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a count of 0") {
-    const container g = {vtzero::detail::command_move_to(0)};
+    const container g = {command_move_to(0)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -130,7 +142,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a count of 0") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a count of 2") {
-    const container g = {vtzero::detail::command_move_to(2), 1, 2, 3, 4};
+    const container g = {command_move_to(2), 1, 2, 3, 4};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -144,8 +156,8 @@ TEST_CASE("Calling decode_polygon_geometry() with a count of 2") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with 2nd command not a LineTo") {
-    const container g = {vtzero::detail::command_move_to(1), 3, 4,
-                         vtzero::detail::command_move_to(1)};
+    const container g = {command_move_to(1), 3, 4,
+                         command_move_to(1)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -159,9 +171,9 @@ TEST_CASE("Calling decode_polygon_geometry() with 2nd command not a LineTo") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
-    const container g = {vtzero::detail::command_move_to(1), 3, 4,
-                         vtzero::detail::command_line_to(0),
-                         vtzero::detail::command_close_path()};
+    const container g = {command_move_to(1), 3, 4,
+                         command_line_to(0),
+                         command_close_path()};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     dummy_geom_handler handler;
@@ -170,9 +182,9 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
-    const container g = {vtzero::detail::command_move_to(1), 3, 4,
-                         vtzero::detail::command_line_to(1), 5, 6,
-                         vtzero::detail::command_close_path()};
+    const container g = {command_move_to(1), 3, 4,
+                         command_line_to(1), 5, 6,
+                         command_close_path()};
 
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
     dummy_geom_handler handler;
@@ -181,9 +193,9 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") {
-    const container g = {vtzero::detail::command_move_to(1), 3, 4,
-                         vtzero::detail::command_line_to(2), 4, 5, 6, 7,
-                         vtzero::detail::command_line_to(0)};
+    const container g = {command_move_to(1), 3, 4,
+                         command_line_to(2), 4, 5, 6, 7,
+                         command_line_to(0)};
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
 
     SECTION("check exception type") {
@@ -197,9 +209,9 @@ TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") 
 }
 
 TEST_CASE("Calling decode_polygon_geometry() on polygon with zero area") {
-    const container g = {vtzero::detail::command_move_to(1), 0, 0,
-                         vtzero::detail::command_line_to(3), 2, 0, 0, 4, 2, 0,
-                         vtzero::detail::command_close_path()};
+    const container g = {command_move_to(1), 0, 0,
+                         command_line_to(3), 2, 0, 0, 4, 2, 0,
+                         command_close_path()};
 
     geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
     dummy_geom_handler handler;

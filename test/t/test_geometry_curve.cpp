@@ -76,7 +76,8 @@ TEST_CASE("Calling decode_spline_geometry() with empty input") {
 }
 
 TEST_CASE("Calling decode_spline_geometry() with a valid spline") {
-    const geom_container geom = {9, 4, 4, 18, 0, 16, 16, 0};
+    const geom_container geom = {command_move_to(1), 4, 4,
+                                 command_line_to(2), 0, 16, 16, 0};
     const knot_container knot = {number_list(6), 0, 1, 1, 1, 1, 1, 1};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
@@ -89,7 +90,7 @@ TEST_CASE("Calling decode_spline_geometry() with a valid spline") {
 }
 
 TEST_CASE("Calling decode_spline_geometry() with a point geometry fails") {
-    const geom_container geom = {9, 50, 34}; // this is a point geometry
+    const geom_container geom = {command_move_to(1), 50, 34}; // this is a point geometry
     const knot_container knot = {number_list(4), 0, 1, 0, 0, 0};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
@@ -109,7 +110,9 @@ TEST_CASE("Calling decode_spline_geometry() with a point geometry fails") {
 }
 
 TEST_CASE("Calling decode_spline_geometry() with a polygon geometry fails") {
-    const geom_container geom = {9, 6, 12, 18, 10, 12, 24, 44, 15}; // this is a polygon geometry
+    const geom_container geom = {command_move_to(1), 6, 12,
+                                 command_line_to(2), 10, 12, 24, 44,
+                                 command_close_path()}; // this is a polygon geometry
     const knot_container knot = {number_list(6), 0, 1, 1, 1, 1, 1, 1};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
@@ -129,7 +132,7 @@ TEST_CASE("Calling decode_spline_geometry() with a polygon geometry fails") {
 }
 
 TEST_CASE("Calling decode_spline_geometry() with something other than MoveTo command") {
-    const geom_container geom = {vtzero::detail::command_line_to(3)};
+    const geom_container geom = {command_line_to(3)};
     const knot_container knot = {number_list(2), 0, 1, 1};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
@@ -149,7 +152,7 @@ TEST_CASE("Calling decode_spline_geometry() with something other than MoveTo com
 }
 
 TEST_CASE("Calling decode_spline_geometry() with a count of 0") {
-    const geom_container geom = {vtzero::detail::command_move_to(0)};
+    const geom_container geom = {command_move_to(0)};
     const knot_container knot = {number_list(2), 0, 1, 1};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
@@ -169,7 +172,7 @@ TEST_CASE("Calling decode_spline_geometry() with a count of 0") {
 }
 
 TEST_CASE("Calling decode_spline_geometry() with a count of 2") {
-    const geom_container geom = {vtzero::detail::command_move_to(2), 10, 20, 20, 10};
+    const geom_container geom = {command_move_to(2), 10, 20, 20, 10};
     const knot_container knot = {number_list(2), 0, 1, 1};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
@@ -189,8 +192,8 @@ TEST_CASE("Calling decode_spline_geometry() with a count of 2") {
 }
 
 TEST_CASE("Calling decode_spline_geometry() with 2nd command not a LineTo") {
-    const geom_container geom = {vtzero::detail::command_move_to(1), 3, 4,
-                                 vtzero::detail::command_move_to(1)};
+    const geom_container geom = {command_move_to(1), 3, 4,
+                                 command_move_to(1)};
     const knot_container knot = {number_list(3), 0, 1, 1, 1};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
@@ -210,8 +213,8 @@ TEST_CASE("Calling decode_spline_geometry() with 2nd command not a LineTo") {
 }
 
 TEST_CASE("Calling decode_spline_geometry() with LineTo and 0 count") {
-    const geom_container geom = {vtzero::detail::command_move_to(1), 3, 4,
-                                 vtzero::detail::command_line_to(0)};
+    const geom_container geom = {command_move_to(1), 3, 4,
+                                 command_line_to(0)};
     const knot_container knot = {number_list(3), 0, 1, 1, 1};
 
     vtzero::detail::geometry_decoder<2, 0, geom_iterator, elev_iterator, knot_iterator, attr_iterator> decoder{
