@@ -201,7 +201,7 @@ public:
         }
     }
 
-    void knots_value(double /*value*/) {
+    void knots_value(const int64_t /*value*/) {
     }
 
     void knots_end() {

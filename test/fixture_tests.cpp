@@ -111,7 +111,7 @@ struct polygon_handler {
 struct spline_handler {
 
     std::vector<vtzero::point_2d> control_points{};
-    std::vector<double> knots{};
+    std::vector<int64_t> knots{};
 
     void controlpoints_begin(uint32_t count) {
         control_points.reserve(count);
@@ -124,11 +124,11 @@ struct spline_handler {
     void controlpoints_end() const noexcept {
     }
 
-    void knots_begin(uint32_t count) {
+    void knots_begin(const uint32_t count) {
         knots.reserve(count);
     }
 
-    void knots_value(double value) {
+    void knots_value(const int64_t value) {
         knots.push_back(value);
     }
 
@@ -147,7 +147,7 @@ struct geom_handler {
     std::vector<vtzero::point_2d> point_data{};
     std::vector<std::vector<vtzero::point_2d>> line_data{};
     std::vector<vtzero::point_2d> control_points{};
-    std::vector<double> knots{};
+    std::vector<int64_t> knots{};
 
     static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
         return p;
@@ -199,11 +199,11 @@ struct geom_handler {
     void controlpoints_end() const noexcept {
     }
 
-    void knots_begin(uint32_t count) {
+    void knots_begin(const uint32_t count) {
         knots.reserve(count);
     }
 
-    void knots_value(double value) {
+    void knots_value(const int64_t value) {
         knots.push_back(value);
     }
 
