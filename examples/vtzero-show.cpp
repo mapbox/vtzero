@@ -133,7 +133,7 @@ public:
         m_output += "](";
     }
 
-    void knots_value(double val) {
+    void knots_value(const int64_t val) {
         m_output += std::to_string(val);
         m_output += ',';
     }
@@ -287,8 +287,11 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
                   << vtzero::geom_type_name(feature.geometry_type())
                   << ' '
                   << (feature.has_3d_geometry() ? '3' : '2')
-                  << "D\n"
-                  << "    geometry:\n";
+                  << "D\n";
+        if (feature.geometry_type() == vtzero::GeomType::SPLINE) {
+            std::cout << "    spline degrees: " << feature.spline_degree() << "\n";
+        }
+        std::cout << "    geometry:\n";
         feature.decode_geometry(geom_handler{feature.has_3d_geometry()});
         std::cout << "    attributes:\n";
         print_handler handler;

@@ -326,8 +326,7 @@ namespace vtzero {
 
             bool done() const noexcept {
                 return m_geom_it == m_geom_end &&
-                       (Dimensions == 2 || m_elev_it == m_elev_end) &&
-                       m_knot_it == m_knot_end;
+                       (Dimensions == 2 || m_elev_it == m_elev_end);
             }
 
             bool next_command(const CommandId expected_command_id) {
@@ -569,6 +568,26 @@ namespace vtzero {
                         throw geometry_exception{"LineTo command count is zero (spec 4.3.4.3)"};
                     }
 
+                    const uint64_t complex_value = *m_knot_it++;
+                    if ((complex_value & 0xfu) != static_cast<uint64_t>(complex_value_type::cvt_number_list)) {
+                        throw geometry_exception{"Knots must be of type number list"};
+                    }
+                    if (m_knot_it == m_knot_end) {
+                        throw format_exception{"Knots end too soon"};
+                    }
+
+                    const uint64_t knots_count = complex_value >> 4u;
+                    if (knots_count < count() + 1 + 2 /*degree*/ + 1) {
+                        throw format_exception{"Wrong number of knots: " + std::to_string(knots_count)};
+                    }
+
+                    const uint64_t scaling_index = *m_knot_it++;
+                    if (m_knot_it == m_knot_end) {
+                        throw format_exception{"Knots end too soon"};
+                    }
+
+                    geometric_attribute<TKnotIterator> knots{m_knot_it, 0, scaling_index, knots_count};
+
                     call_controlpoints_begin(std::forward<THandler>(handler), count() + 1);
 
                     std::forward<THandler>(handler).controlpoints_point(handler_type::convert(first_point));
@@ -577,16 +596,14 @@ namespace vtzero {
                     }
                     call_controlpoints_end(std::forward<THandler>(handler));
 
-                    // static_cast is okay here, because
-                    // a) the distance can never be negative
-                    // b) if the distance is larger that what will fit into
-                    //    the uint32_t, we'll just decode some smaller part
-                    //    of them (in real world data this can't happen)
-                    const auto num_knots = static_cast<uint32_t>(std::distance(m_knot_it, m_knot_end));
-                    call_knots_begin(std::forward<THandler>(handler), num_knots);
+                    // static_cast is okay here, because if the knots_count is
+                    // larger that what will fit into the uint32_t, we'll just
+                    // decode some smaller part of them (in real world data
+                    // this can't happen)
+                    call_knots_begin(std::forward<THandler>(handler), static_cast<uint32_t>(knots_count));
 
-                    while (m_knot_it != m_knot_end) {
-                        call_knots_value(std::forward<THandler>(handler), *m_knot_it++);
+                    while (knots.get_next_value()) {
+                        call_knots_value(std::forward<THandler>(handler), knots.value());
                     }
 
                     call_knots_end(std::forward<THandler>(handler));

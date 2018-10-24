@@ -66,7 +66,7 @@ namespace vtzero {
 
         using geom_iterator = protozero::pbf_reader::const_uint32_iterator;
         using elev_iterator = protozero::pbf_reader::const_sint32_iterator;
-        using knot_iterator = protozero::pbf_reader::const_double_iterator;
+        using knot_iterator = protozero::pbf_reader::const_uint64_iterator;
         using tags_iterator = protozero::pbf_reader::const_uint32_iterator;
         using attr_iterator = protozero::pbf_reader::const_uint64_iterator;
 
@@ -87,11 +87,11 @@ namespace vtzero {
         }
 
         knot_iterator knots_begin() const noexcept {
-            return knot_iterator{m_knots.data()};
+            return knot_iterator{m_knots.data(), m_knots.data() + m_knots.size()};
         }
 
         knot_iterator knots_end() const noexcept {
-            return knot_iterator{m_knots.data() + m_knots.size()};
+            return knot_iterator{m_knots.data() + m_knots.size(), m_knots.data() + m_knots.size()};
         }
 
         tags_iterator tags_begin() const noexcept {
@@ -249,6 +249,15 @@ namespace vtzero {
          */
         bool has_3d_geometry() const noexcept {
             return !m_elevations.empty();
+        }
+
+        /**
+         * The number of degrees the spline has.
+         *
+         * @pre @code geometry_type() == GeomType::SPLINE @endcode
+         */
+        uint32_t spline_degree() const noexcept {
+            return m_spline_degree;
         }
 
         /**
