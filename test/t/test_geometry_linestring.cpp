@@ -62,9 +62,7 @@ TEST_CASE("Calling decode_linestring_geometry() with a valid multilinestring") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
-    decoder.decode_linestring(handler);
-    REQUIRE(handler.result() == 20502);
+    REQUIRE(decoder.decode_linestring(dummy_geom_handler{}) == 20502);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a point geometry fails") {

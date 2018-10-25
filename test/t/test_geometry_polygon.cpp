@@ -61,9 +61,8 @@ TEST_CASE("Calling decode_polygon_geometry() with a duplicate end point") {
                                  command_close_path()};
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
-    dummy_geom_handler handler;
-    decoder.decode_polygon(handler);
-    REQUIRE(handler.result() == 10501);
+
+    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10501);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a valid multipolygon") {
@@ -79,9 +78,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a valid multipolygon") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
-    decoder.decode_polygon(handler);
-    REQUIRE(handler.result() == 31503);
+    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 31503);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a point geometry fails") {
@@ -183,9 +180,7 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
-    decoder.decode_polygon(handler);
-    REQUIRE(handler.result() == 10201);
+    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10201);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
@@ -195,9 +190,7 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
-    decoder.decode_polygon(handler);
-    REQUIRE(handler.result() == 10301);
+    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10301);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") {
@@ -224,8 +217,6 @@ TEST_CASE("Calling decode_polygon_geometry() on polygon with zero area") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
-    decoder.decode_polygon(handler);
-    REQUIRE(handler.result() == 10501);
+    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10501);
 }
 
