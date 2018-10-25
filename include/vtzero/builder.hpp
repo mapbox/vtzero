@@ -591,12 +591,7 @@ namespace vtzero {
 
     }; // class feature_builder
 
-    /**
-     * Internal class which can not be instantiated. Instantiate one of its
-     * derived classes instead.
-     */
-    template <int Dimensions, bool WithGeometricAttributes>
-    class feature_builder_with_geometry : public feature_builder<Dimensions, WithGeometricAttributes> {
+    namespace detail {
 
         class countdown_value {
 
@@ -643,10 +638,19 @@ namespace vtzero {
 
         }; // class countdown_value
 
+    } // namespace detail
+
+    /**
+     * Internal class which can not be instantiated. Instantiate one of its
+     * derived classes instead.
+     */
+    template <int Dimensions, bool WithGeometricAttributes>
+    class feature_builder_with_geometry : public feature_builder<Dimensions, WithGeometricAttributes> {
+
     protected:
 
         /// Number of points still to be set for the geometry to be complete.
-        countdown_value m_num_points;
+        detail::countdown_value m_num_points;
 
         /// Previous point (used to calculate delta between coordinates).
         point<Dimensions> m_cursor{};
