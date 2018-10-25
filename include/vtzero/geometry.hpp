@@ -195,13 +195,12 @@ namespace vtzero {
             geometric_attribute_collection(TIterator it, const TIterator end) :
                 m_attrs() {
                 while (it != end && m_size < MaxGeometricAttributes) {
+                    const auto key_index = *it++;
+                    if (it == end) {
+                        throw format_exception{"geometric attributes end too soon"};
+                    }
                     const uint64_t complex_value = *it++;
                     if ((complex_value & 0xfu) == static_cast<uint64_t>(complex_value_type::cvt_number_list)) {
-                        if (it == end) {
-                            throw format_exception{"geometric attributes end too soon"};
-                        }
-
-                        auto attr_count = *it++;
                         if (it == end) {
                             throw format_exception{"geometric attributes end too soon"};
                         }
@@ -210,7 +209,8 @@ namespace vtzero {
                             throw format_exception{"geometric attributes end too soon"};
                         }
 
-                        m_attrs[m_size] = {it, complex_value >> 4u, scaling, attr_count};
+                        auto attr_count = complex_value >>4u;
+                        m_attrs[m_size] = geometric_attribute<TIterator>{it, key_index, scaling, attr_count};
                         ++m_size;
 
                         while (attr_count > 0) {

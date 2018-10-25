@@ -44,11 +44,6 @@ namespace vtzero {
             max             = 10
         };
 
-        inline uint64_t create_complex_value(const complex_value_type type, const uint64_t param) noexcept {
-            vtzero_assert_in_noexcept_function((param & 0xf0000000u) == 0u);
-            return static_cast<uint64_t>(type) | (param << 4u);
-        }
-
 // @cond internal
         // These macros are used to define "wrapper" functions for calling
         // member functions on a handler class. If the class doesn't define

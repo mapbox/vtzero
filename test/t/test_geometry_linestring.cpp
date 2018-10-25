@@ -1,7 +1,6 @@
 
 #include <test.hpp>
-
-#include <vtzero/geometry.hpp>
+#include <test_geometry.hpp>
 
 #include <cstdint>
 #include <vector>

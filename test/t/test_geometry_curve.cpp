@@ -1,7 +1,7 @@
 
 #include <test.hpp>
-
-#include <vtzero/geometry.hpp>
+#include <test_attr.hpp>
+#include <test_geometry.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -15,10 +15,6 @@ using knot_container = std::vector<uint64_t>;
 using knot_iterator = knot_container::const_iterator;
 
 using attr_iterator = vtzero::detail::dummy_attr_iterator;
-
-uint64_t number_list(const uint64_t count) noexcept {
-    return vtzero::detail::create_complex_value(vtzero::detail::complex_value_type::cvt_number_list, count);
-}
 
 class counter_handler {
 
