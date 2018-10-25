@@ -599,7 +599,7 @@ namespace vtzero {
 
         public:
 
-            constexpr countdown_value() noexcept = default;
+            countdown_value() noexcept = default;
 
             ~countdown_value() noexcept {
                 vtzero_assert_in_noexcept_function(is_zero());
@@ -620,11 +620,11 @@ namespace vtzero {
                 return *this;
             }
 
-            constexpr uint32_t value() const noexcept {
+            uint32_t value() const noexcept {
                 return m_value;
             }
 
-            constexpr bool is_zero() const noexcept {
+            bool is_zero() const noexcept {
                 return m_value == 0;
             }
 
