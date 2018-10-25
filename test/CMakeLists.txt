@@ -29,10 +29,10 @@ set(TEST_SOURCES attributes
                  feature
                  geometric_attributes
                  geometry
-                 geometry_curve
                  geometry_linestring
                  geometry_point
                  geometry_polygon
+                 geometry_spline
                  index
                  layer
                  output
