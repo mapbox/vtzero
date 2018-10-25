@@ -118,8 +118,8 @@ namespace vtzero {
                 add_key_internal(m_layer->add_key(data_view{std::forward<T>(key)}));
             }
 
-            void add_complex_value(detail::complex_value_type type, uint64_t param) {
-                m_pbf_attributes.add_element(static_cast<uint64_t>(type) | (param << 4u));
+            void add_complex_value(complex_value_type type, uint64_t param) {
+                m_pbf_attributes.add_element(create_complex_value(type, param));
             }
 
             void add_direct_value(uint64_t value) {
