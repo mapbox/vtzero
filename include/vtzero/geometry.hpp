@@ -142,7 +142,7 @@ namespace vtzero {
                 if (m_count == 0) {
                     return false;
                 }
-                const uint64_t raw_value = *m_it++;
+                const uint64_t raw_value = *m_it++; // XXX test against end it?
                 --m_count;
                 if (raw_value == 0) {
                     return false;
@@ -576,7 +576,7 @@ namespace vtzero {
                         throw format_exception{"Knots end too soon"};
                     }
 
-                    const uint64_t knots_count = complex_value >> 4u;
+                    uint64_t knots_count = complex_value >> 4u;
                     if (knots_count < count() + 1 + 2 /*degree*/ + 1) {
                         throw format_exception{"Wrong number of knots: " + std::to_string(knots_count)};
                     }
@@ -602,8 +602,12 @@ namespace vtzero {
                     // this can't happen)
                     call_knots_begin(std::forward<THandler>(handler), static_cast<uint32_t>(knots_count));
 
-                    while (knots.get_next_value()) {
+                    while (knots_count > 0) {
+                        if (!knots.get_next_value()) {
+                            throw format_exception{"Null value in knots not allowed"};
+                        }
                         call_knots_value(std::forward<THandler>(handler), knots.value());
+                        --knots_count;
                     }
 
                     call_knots_end(std::forward<THandler>(handler));
