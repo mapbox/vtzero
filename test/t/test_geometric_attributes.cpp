@@ -14,9 +14,6 @@
 #include <cstdint>
 #include <vector>
 
-using geom_container = std::vector<uint32_t>;
-using geom_iterator = geom_container::const_iterator;
-
 using elev_container = std::vector<int32_t>;
 using elev_iterator = elev_container::const_iterator;
 

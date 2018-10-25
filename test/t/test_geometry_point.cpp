@@ -5,9 +5,7 @@
 #include <cstdint>
 #include <vector>
 
-using container = std::vector<uint32_t>;
-using iterator = container::const_iterator;
-using geom_decoder = vtzero::detail::geometry_decoder<2, 0, iterator>;
+using geom_decoder = vtzero::detail::geometry_decoder<2, 0, geom_iterator>;
 
 class dummy_geom_handler {
 
@@ -38,8 +36,9 @@ public:
 }; // class dummy_geom_handler
 
 TEST_CASE("Calling decode_point() with empty input") {
-    const container g;
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom;
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -52,8 +51,9 @@ TEST_CASE("Calling decode_point() with empty input") {
 }
 
 TEST_CASE("Calling decode_point() with a valid point") {
-    const container g = {command_move_to(1), 50, 34};
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom = {command_move_to(1), 50, 34};
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     dummy_geom_handler handler;
     decoder.decode_point(handler);
@@ -61,16 +61,18 @@ TEST_CASE("Calling decode_point() with a valid point") {
 }
 
 TEST_CASE("Calling decode_point() with a valid multipoint") {
-    const container g = {command_move_to(2), 10, 14, 3, 9};
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom = {command_move_to(2), 10, 14, 3, 9};
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     REQUIRE(decoder.decode_point(dummy_geom_handler{}) == 10201);
 }
 
 TEST_CASE("Calling decode_point() with a linestring geometry fails") {
-    const container g = {command_move_to(1), 4, 4,
-                         command_line_to(2), 0, 16, 16, 0}; // this is a linestring geometry
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom = {command_move_to(1), 4, 4,
+                                 command_line_to(2), 0, 16, 16, 0}; // this is a linestring geometry
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -83,10 +85,11 @@ TEST_CASE("Calling decode_point() with a linestring geometry fails") {
 }
 
 TEST_CASE("Calling decode_point() with a polygon geometry fails") {
-    const container g = {command_move_to(1), 6, 12,
-                         command_line_to(2), 10, 12, 24, 44,
-                         command_close_path()}; // this is a polygon geometry
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom = {command_move_to(1), 6, 12,
+                                 command_line_to(2), 10, 12, 24, 44,
+                                 command_close_path()}; // this is a polygon geometry
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -99,8 +102,9 @@ TEST_CASE("Calling decode_point() with a polygon geometry fails") {
 }
 
 TEST_CASE("Calling decode_point() with something other than MoveTo command") {
-    const container g = {command_line_to(3)};
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom = {command_line_to(3)};
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -113,8 +117,9 @@ TEST_CASE("Calling decode_point() with something other than MoveTo command") {
 }
 
 TEST_CASE("Calling decode_point() with a count of 0") {
-    const container g = {command_move_to(0)};
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom = {command_move_to(0)};
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
@@ -127,8 +132,9 @@ TEST_CASE("Calling decode_point() with a count of 0") {
 }
 
 TEST_CASE("Calling decode_point() with more data then expected") {
-    const container g = {command_move_to(1), 50, 34, 9};
-    geom_decoder decoder{g.size() / 2, g.cbegin(), g.cend()};
+    const geom_container geom = {command_move_to(1), 50, 34, 9};
+
+    geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),

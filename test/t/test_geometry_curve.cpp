@@ -6,9 +6,6 @@
 #include <cstdint>
 #include <vector>
 
-using geom_container = std::vector<uint32_t>;
-using geom_iterator = geom_container::const_iterator;
-
 using elev_iterator = vtzero::detail::dummy_elev_iterator;
 
 using knot_container = std::vector<uint64_t>;
