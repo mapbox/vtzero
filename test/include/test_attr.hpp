@@ -2,6 +2,7 @@
 #define TEST_ATTR_HPP
 
 #include <vtzero/attributes.hpp>
+
 #include <cstdint>
 
 inline uint64_t create_complex_value(const vtzero::detail::complex_value_type type, const uint64_t param) noexcept {
