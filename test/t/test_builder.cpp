@@ -29,9 +29,6 @@ static_assert(movable_not_copyable<vtzero::feature_builder<2, true>>::value, "fe
 //static_assert(movable_not_copyable<vtzero::feature_builder<3, false>>::value, "feature_builder<3, false> should be nothrow movable, but not copyable");
 //static_assert(movable_not_copyable<vtzero::feature_builder<3, true>>::value, "feature_builder<3, true> should be nothrow movable, but not copyable");
 
-static_assert(movable_not_copyable<vtzero::feature_builder_with_geometry<2, false>>::value, "feature_builder_with_geometry<2, false> should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::feature_builder_with_geometry<2, true>>::value, "feature_builder_with_geometry<2, true> should be nothrow movable, but not copyable");
-
 static_assert(movable_not_copyable<vtzero::point_feature_builder<2>>::value, "point_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::linestring_feature_builder<2>>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::polygon_feature_builder<2>>::value, "polygon_feature_builder should be nothrow movable, but not copyable");

@@ -169,6 +169,12 @@ namespace vtzero {
         /// Encoded geometry.
         protozero::packed_field_uint32 m_pbf_geometry{};
 
+        /// Number of points still to be set for the geometry to be complete.
+        detail::countdown_value m_num_points;
+
+        /// Previous point (used to calculate delta between coordinates).
+        point<Dimensions> m_cursor{};
+
         /**
          * Enter the "geometry" stage. Do nothing if we are already in the
          * "geometry" stage.
@@ -195,6 +201,31 @@ namespace vtzero {
                 return;
             }
             vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
+        }
+
+        /// Add specified point to the data doing the zigzag encoding.
+        void add_point_impl(const point<Dimensions> p) {
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
+            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
+            if (Dimensions == 3) {
+                this->m_elevations.add(p.get_z());
+            }
+        }
+
+        /// Helper function doing subtraction with no integer overflow possible.
+        static int32_t sub(const int32_t a, const int32_t b) noexcept {
+            return static_cast<int32_t>(static_cast<int64_t>(a) -
+                                        static_cast<int64_t>(b));
+        }
+
+        /// Add specified point to the data with delta encoding.
+        void set_point_impl(const point<Dimensions> p) {
+            point<Dimensions> q{sub(p.x, m_cursor.x), sub(p.y, m_cursor.y)};
+            if (Dimensions == 3) {
+                q.set_z(sub(p.get_z(), m_cursor.get_z()));
+            }
+            add_point_impl(q);
+            m_cursor = p;
         }
 
     public:
@@ -639,57 +670,6 @@ namespace vtzero {
     }; // class feature_builder
 
     /**
-     * Internal class which can not be instantiated. Instantiate one of its
-     * derived classes instead.
-     */
-    template <int Dimensions, bool WithGeometricAttributes>
-    class feature_builder_with_geometry : public feature_builder<Dimensions, WithGeometricAttributes> {
-
-    protected:
-
-        /// Number of points still to be set for the geometry to be complete.
-        detail::countdown_value m_num_points;
-
-        /// Previous point (used to calculate delta between coordinates).
-        point<Dimensions> m_cursor{};
-
-        /**
-         * Constructor
-         *
-         * @param layer The layer we want to create this feature in.
-         */
-        explicit feature_builder_with_geometry(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
-        }
-
-        /// Add specified point to the data doing the zigzag encoding.
-        void add_point_impl(const point<Dimensions> p) {
-            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
-            this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
-            if (Dimensions == 3) {
-                this->m_elevations.add(p.get_z());
-            }
-        }
-
-        /// Helper function doing subtraction with no integer overflow possible.
-        static int32_t sub(const int32_t a, const int32_t b) noexcept {
-            return static_cast<int32_t>(static_cast<int64_t>(a) -
-                                        static_cast<int64_t>(b));
-        }
-
-        /// Add specified point to the data with delta encoding.
-        void set_point_impl(const point<Dimensions> p) {
-            point<Dimensions> q{sub(p.x, m_cursor.x), sub(p.y, m_cursor.y)};
-            if (Dimensions == 3) {
-                q.set_z(sub(p.get_z(), m_cursor.get_z()));
-            }
-            add_point_impl(q);
-            m_cursor = p;
-        }
-
-    }; // class feature_builder_with_geometry
-
-    /**
      * Used for adding a feature with a point geometry to a layer. After
      * creating an object of this class you can add data to the feature in a
      * specific order:
@@ -724,7 +704,7 @@ namespace vtzero {
      * @endcode
      */
     template <int Dimensions = 2, bool WithGeometricAttributes = false>
-    class point_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
+    class point_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
 
     public:
 
@@ -734,7 +714,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit point_feature_builder(layer_builder layer) :
-            feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
         }
 
         /**
@@ -823,7 +803,7 @@ namespace vtzero {
      * @endcode
      */
     template <int Dimensions = 2, bool WithGeometricAttributes = false>
-    class linestring_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
+    class linestring_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
 
         bool m_start_line = false;
 
@@ -835,7 +815,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit linestring_feature_builder(layer_builder layer) :
-            feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
         }
 
         /**
@@ -912,7 +892,7 @@ namespace vtzero {
      * @endcode
      */
     template <int Dimensions = 2, bool WithGeometricAttributes = false>
-    class polygon_feature_builder : public feature_builder_with_geometry<Dimensions, WithGeometricAttributes> {
+    class polygon_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
 
         point<Dimensions> m_first_point{};
         bool m_start_ring = false;
@@ -925,7 +905,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit polygon_feature_builder(layer_builder layer) :
-            feature_builder_with_geometry<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
         }
 
         /**
