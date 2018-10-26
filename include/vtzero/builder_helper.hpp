@@ -30,7 +30,7 @@ namespace vtzero {
      */
     template <typename TLayerBuilder>
     void copy_feature(const feature& feature, TLayerBuilder& layer_builder) {
-        feature_builder<3, true> feature_builder{layer_builder};
+        feature_builder<3> feature_builder{layer_builder};
         feature_builder.copy_id(feature);
         feature_builder.copy_geometry(feature);
         feature_builder.copy_attributes(feature);
@@ -66,8 +66,8 @@ namespace vtzero {
      *
      * @pre Feature builder must be in stage "id" or "has_id" to call this function.
      */
-    template <typename TContainer, int Dimensions, bool WithGeometricAttributes>
-    void add_points_from_container(const TContainer& container, point_feature_builder<Dimensions, WithGeometricAttributes>& builder) {
+    template <typename TContainer, int Dimensions>
+    void add_points_from_container(const TContainer& container, point_feature_builder<Dimensions>& builder) {
         builder.add_points(detail::check_num_points(container.size()));
         for (const auto& element : container) {
             builder.set_point(element);
@@ -92,8 +92,8 @@ namespace vtzero {
      * @pre Feature builder must be in stage "id", "has_id", or "geometry" to
      *      call this function.
      */
-    template <typename TContainer, int Dimensions, bool WithGeometricAttributes>
-    void add_linestring_from_container(const TContainer& container, linestring_feature_builder<Dimensions, WithGeometricAttributes>& builder) {
+    template <typename TContainer, int Dimensions>
+    void add_linestring_from_container(const TContainer& container, linestring_feature_builder<Dimensions>& builder) {
         builder.add_linestring(detail::check_num_points(container.size()));
         for (const auto& element : container) {
             builder.set_point(element);
@@ -119,8 +119,8 @@ namespace vtzero {
      * @pre Feature builder must be in stage "id", "has_id", or "geometry" to
      *      call this function.
      */
-    template <typename TContainer, int Dimensions, bool WithGeometricAttributes>
-    void add_ring_from_container(const TContainer& container, polygon_feature_builder<Dimensions, WithGeometricAttributes>& builder) {
+    template <typename TContainer, int Dimensions>
+    void add_ring_from_container(const TContainer& container, polygon_feature_builder<Dimensions>& builder) {
         builder.add_ring(detail::check_num_points(container.size()));
         for (const auto& element : container) {
             builder.set_point(element);

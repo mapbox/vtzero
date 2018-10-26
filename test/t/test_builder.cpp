@@ -22,12 +22,10 @@ struct movable_not_copyable {
 
 static_assert(movable_not_copyable<vtzero::tile_builder>::value, "tile_builder should be nothrow movable, but not copyable");
 
-static_assert(movable_not_copyable<vtzero::feature_builder<2, false>>::value, "feature_builder<2, false> should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::feature_builder<2, true>>::value, "feature_builder<2, true> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::feature_builder<2>>::value, "feature_builder<2> should be nothrow movable, but not copyable");
 
 // these are not noexcept movable due the std::vector inside the elevations_policy<3> not beeing noexcept movable befor C++17
-//static_assert(movable_not_copyable<vtzero::feature_builder<3, false>>::value, "feature_builder<3, false> should be nothrow movable, but not copyable");
-//static_assert(movable_not_copyable<vtzero::feature_builder<3, true>>::value, "feature_builder<3, true> should be nothrow movable, but not copyable");
+//static_assert(movable_not_copyable<vtzero::feature_builder<3>>::value, "feature_builder<3> should be nothrow movable, but not copyable");
 
 static_assert(movable_not_copyable<vtzero::point_feature_builder<2>>::value, "point_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::linestring_feature_builder<2>>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
@@ -120,7 +118,7 @@ TEST_CASE("Create layer and add scalings") {
     vtzero::layer_builder lbuilder{tbuilder, "name", 3};
 
     { // we need to add a feature, otherwise the layer will not be serialized
-        vtzero::point_feature_builder<3, true> fbuilder{lbuilder};
+        vtzero::point_feature_builder<3> fbuilder{lbuilder};
         fbuilder.add_point(vtzero::point_3d{});
         fbuilder.commit();
     }
@@ -435,7 +433,7 @@ TEST_CASE("Copy tile using geometry_feature_builder<2>") {
     for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         for (const auto feature : layer) {
-            vtzero::feature_builder<2, false> fbuilder{lbuilder};
+            vtzero::feature_builder<2> fbuilder{lbuilder};
             fbuilder.copy_id(feature);
             fbuilder.copy_geometry(feature);
             fbuilder.copy_attributes(feature);
@@ -457,7 +455,7 @@ TEST_CASE("Copy only point geometries using geometry_feature_builder<2>") {
     for (const auto layer : tile) {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         for (const auto feature : layer) {
-            vtzero::feature_builder<2, false> fbuilder{lbuilder};
+            vtzero::feature_builder<2> fbuilder{lbuilder};
             fbuilder.set_integer_id(feature.id());
             if (feature.geometry_type() == vtzero::GeomType::POINT) {
                 fbuilder.copy_geometry(feature);

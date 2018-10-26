@@ -64,20 +64,6 @@ namespace vtzero {
 
         }; // class elevations_policy<3>
 
-        template <bool WithGeometricAttributes>
-        class geometric_attributes_policy {
-
-        public:
-
-        }; // class geometric_attributes_policy
-
-        template <>
-        class geometric_attributes_policy<true> {
-
-        public:
-
-        }; // class geometric_attributes_policy<true>
-
         class countdown_value {
 
             uint32_t m_value = 0;
@@ -151,7 +137,7 @@ namespace vtzero {
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
-    template <int Dimensions, bool WithGeometricAttributes>
+    template <int Dimensions>
     class feature_builder : public detail::feature_builder_base {
 
         static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
@@ -162,9 +148,6 @@ namespace vtzero {
 
         /// The elevations store (if using 3D geometries).
         detail::elevations_policy<Dimensions> m_elevations;
-
-        /// The geometric attributes store (optional).
-        detail::geometric_attributes_policy<WithGeometricAttributes> m_geometric_attributes;
 
         /// Encoded geometry.
         protozero::packed_field_uint32 m_pbf_geometry{};
@@ -703,8 +686,8 @@ namespace vtzero {
      * fb.add_scalar_attribute("foo", "bar");
      * @endcode
      */
-    template <int Dimensions = 2, bool WithGeometricAttributes = false>
-    class point_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
+    template <int Dimensions = 2>
+    class point_feature_builder : public feature_builder<Dimensions> {
 
     public:
 
@@ -714,7 +697,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit point_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder<Dimensions>(layer) {
         }
 
         /**
@@ -802,8 +785,8 @@ namespace vtzero {
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
-    template <int Dimensions = 2, bool WithGeometricAttributes = false>
-    class linestring_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
+    template <int Dimensions = 2>
+    class linestring_feature_builder : public feature_builder<Dimensions> {
 
         bool m_start_line = false;
 
@@ -815,7 +798,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit linestring_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder<Dimensions>(layer) {
         }
 
         /**
@@ -891,8 +874,8 @@ namespace vtzero {
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
      * @endcode
      */
-    template <int Dimensions = 2, bool WithGeometricAttributes = false>
-    class polygon_feature_builder : public feature_builder<Dimensions, WithGeometricAttributes> {
+    template <int Dimensions = 2>
+    class polygon_feature_builder : public feature_builder<Dimensions> {
 
         point<Dimensions> m_first_point{};
         bool m_start_ring = false;
@@ -905,7 +888,7 @@ namespace vtzero {
          * @param layer The layer we want to create this feature in.
          */
         explicit polygon_feature_builder(layer_builder layer) :
-            feature_builder<Dimensions, WithGeometricAttributes>(layer) {
+            feature_builder<Dimensions>(layer) {
         }
 
         /**

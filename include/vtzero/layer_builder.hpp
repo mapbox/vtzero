@@ -34,7 +34,7 @@ namespace vtzero {
 
         vtzero::detail::layer_builder_impl* m_layer;
 
-        template <int Dimensions, bool WithGeometricAttributes>
+        template <int Dimensions>
         friend class feature_builder;
 
         vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {

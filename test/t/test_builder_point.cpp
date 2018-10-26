@@ -213,7 +213,7 @@ TEST_CASE("Point builder with 3d point") {
     lbuilder.set_elevation_scaling(scaling);
     REQUIRE(lbuilder.elevation_scaling() == scaling);
     {
-        vtzero::point_feature_builder<3, true> fbuilder{lbuilder};
+        vtzero::point_feature_builder<3> fbuilder{lbuilder};
         fbuilder.set_integer_id(17);
         fbuilder.add_point(vtzero::point_3d{10, 20, elev});
         fbuilder.commit();
