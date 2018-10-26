@@ -78,7 +78,53 @@ namespace vtzero {
 
         }; // class geometric_attributes_policy<true>
 
+        class countdown_value {
+
+            uint32_t m_value = 0;
+
+        public:
+
+            countdown_value() noexcept = default;
+
+            ~countdown_value() noexcept {
+                vtzero_assert_in_noexcept_function(is_zero());
+            }
+
+            countdown_value(const countdown_value&) = delete;
+
+            countdown_value& operator=(const countdown_value&) = delete;
+
+            countdown_value(countdown_value&& other) noexcept :
+                m_value(other.m_value) {
+                other.m_value = 0;
+            }
+
+            countdown_value& operator=(countdown_value&& other) noexcept {
+                m_value = other.m_value;
+                other.m_value = 0;
+                return *this;
+            }
+
+            uint32_t value() const noexcept {
+                return m_value;
+            }
+
+            bool is_zero() const noexcept {
+                return m_value == 0;
+            }
+
+            void set(const uint32_t value) noexcept {
+                m_value = value;
+            }
+
+            void decrement() noexcept {
+                --m_value;
+            }
+
+        }; // class countdown_value
+
     } // namespace detail
+
 
     /**
      * Parent class for the point_feature_builder, linestring_feature_builder
@@ -144,6 +190,7 @@ namespace vtzero {
         void enter_stage_attributes() {
             if (m_stage == detail::stage::geometry) {
                 m_pbf_geometry.commit();
+                m_elevations.serialize(m_feature_writer);
                 m_stage = detail::stage::attributes;
                 return;
             }
@@ -590,55 +637,6 @@ namespace vtzero {
         }
 
     }; // class feature_builder
-
-    namespace detail {
-
-        class countdown_value {
-
-            uint32_t m_value = 0;
-
-        public:
-
-            countdown_value() noexcept = default;
-
-            ~countdown_value() noexcept {
-                vtzero_assert_in_noexcept_function(is_zero());
-            }
-
-            countdown_value(const countdown_value&) = delete;
-
-            countdown_value& operator=(const countdown_value&) = delete;
-
-            countdown_value(countdown_value&& other) noexcept :
-                m_value(other.m_value) {
-                other.m_value = 0;
-            }
-
-            countdown_value& operator=(countdown_value&& other) noexcept {
-                m_value = other.m_value;
-                other.m_value = 0;
-                return *this;
-            }
-
-            uint32_t value() const noexcept {
-                return m_value;
-            }
-
-            bool is_zero() const noexcept {
-                return m_value == 0;
-            }
-
-            void set(const uint32_t value) noexcept {
-                m_value = value;
-            }
-
-            void decrement() noexcept {
-                --m_value;
-            }
-
-        }; // class countdown_value
-
-    } // namespace detail
 
     /**
      * Internal class which can not be instantiated. Instantiate one of its

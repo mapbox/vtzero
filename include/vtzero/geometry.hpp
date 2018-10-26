@@ -577,7 +577,7 @@ namespace vtzero {
                     }
 
                     uint64_t knots_count = complex_value >> 4u;
-                    if (knots_count < count() + 1 + 2 /*degree*/ + 1) {
+                    if (knots_count < count() + 1 + 2 /*degree*/ + 1) { // XXX better check?
                         throw format_exception{"Wrong number of knots: " + std::to_string(knots_count)};
                     }
 
