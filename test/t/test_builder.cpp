@@ -21,6 +21,17 @@ struct movable_not_copyable {
 };
 
 static_assert(movable_not_copyable<vtzero::tile_builder>::value, "tile_builder should be nothrow movable, but not copyable");
+
+static_assert(movable_not_copyable<vtzero::feature_builder<2, false>>::value, "feature_builder<2, false> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::feature_builder<2, true>>::value, "feature_builder<2, true> should be nothrow movable, but not copyable");
+
+// these are not noexcept movable due the std::vector inside the elevations_policy<3> not beeing noexcept movable befor C++17
+//static_assert(movable_not_copyable<vtzero::feature_builder<3, false>>::value, "feature_builder<3, false> should be nothrow movable, but not copyable");
+//static_assert(movable_not_copyable<vtzero::feature_builder<3, true>>::value, "feature_builder<3, true> should be nothrow movable, but not copyable");
+
+static_assert(movable_not_copyable<vtzero::feature_builder_with_geometry<2, false>>::value, "feature_builder_with_geometry<2, false> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::feature_builder_with_geometry<2, true>>::value, "feature_builder_with_geometry<2, true> should be nothrow movable, but not copyable");
+
 static_assert(movable_not_copyable<vtzero::point_feature_builder<2>>::value, "point_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::linestring_feature_builder<2>>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::polygon_feature_builder<2>>::value, "polygon_feature_builder should be nothrow movable, but not copyable");
