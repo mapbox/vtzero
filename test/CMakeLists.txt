@@ -23,6 +23,7 @@ set(TEST_SOURCES attributes
                  builder_linestring
                  builder_point
                  builder_polygon
+                 builder_spline
                  exceptions
                  extended_geometry
                  extended_geometry_point

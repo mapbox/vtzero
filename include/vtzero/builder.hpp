@@ -158,6 +158,9 @@ namespace vtzero {
         /// Previous point (used to calculate delta between coordinates).
         point<Dimensions> m_cursor{};
 
+        /// The number of knots still to write.
+        detail::countdown_value m_num_knots;
+
         /**
          * Enter the "geometry" stage. Do nothing if we are already in the
          * "geometry" stage.
@@ -180,6 +183,11 @@ namespace vtzero {
             if (m_stage == detail::stage::geometry) {
                 m_pbf_geometry.commit();
                 m_elevations.serialize(m_feature_writer);
+                vtzero_assert(m_num_knots.is_zero());
+                if (!knots().empty()) {
+                    m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
+                    knots().clear();
+                }
                 m_stage = detail::stage::attributes;
                 return;
             }
@@ -220,6 +228,7 @@ namespace vtzero {
          */
         explicit feature_builder(layer_builder layer) :
             feature_builder_base(&layer.get_layer_impl()) {
+            knots().clear();
         }
 
         /**
@@ -626,6 +635,11 @@ namespace vtzero {
                 if (m_pbf_geometry.valid()) {
                     m_pbf_geometry.commit();
                     m_elevations.serialize(m_feature_writer);
+                    vtzero_assert(m_num_knots.is_zero());
+                    if (!knots().empty()) {
+                        m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
+                        knots().clear();
+                    }
                 }
                 do_commit();
             }
@@ -969,6 +983,131 @@ namespace vtzero {
         }
 
     }; // class polygon_feature_builder
+
+    /**
+     * Used for adding a feature with a (multi)spline geometry to a layer.
+     * After creating an object of this class you can add data to the
+     * feature in a specific order:
+     *
+     * * Optionally add the ID using set_integer/string_id().
+     * * Add the (multi)spline geometry using add_linestring(), set_point(),
+     *   add_knots(), and set_knot().
+     * * Optionally add any number of attributes.
+     *
+     * @code
+     * vtzero::tile_builder tb;
+     * vtzero::layer_builder lb{tb};
+     * vtzero::linestring_feature_builder<> fb{lb};
+     * fb.set_integer_id(123);
+     * fb.add_spline(2);
+     * fb.set_point(vtzero::point_2d{10, 20});
+     * fb.set_point(vtzero::point_2d{20, 20});
+     * fb.add_scalar_attribute("foo", "bar"); // add attribute
+     * @endcode
+     */
+    template <int Dimensions = 2>
+    class spline_feature_builder : public feature_builder<Dimensions> {
+
+        int64_t m_knots_old_value = 0;
+        uint32_t m_spline_degree;
+        bool m_start_line = false;
+
+    public:
+
+        /**
+         * Constructor
+         *
+         * @param layer The layer we want to create this feature in.
+         * @param spline_degree The degree for the spline.
+         *
+         * @pre @code spline_degree == 2 || spline_degree == 3 @endcode
+         */
+        explicit spline_feature_builder(layer_builder layer, const uint32_t spline_degree = 2) :
+            feature_builder<Dimensions>(layer),
+            m_spline_degree(spline_degree) {
+            vtzero_assert(spline_degree == 2 || spline_degree == 3);
+            this->m_feature_writer.add_uint32(detail::pbf_feature::spline_degree, spline_degree);
+        }
+
+        /**
+         * Declare the intent to add a spline geometry with *count* points
+         * to this feature.
+         *
+         * @param count The number of control points in the spline.
+         * @param knots_index The index of the scaling used for the knots.
+         *
+         * @pre @code count > 1 && count < 2^29 @endcode
+         *
+         * @pre You must be in stage "id", "has_id", or "geometry" to call
+         *      this function.
+         * @post You are in stage "geometry" after calling this function.
+         */
+        void add_spline(const uint32_t count, const index_value knots_index) {
+            vtzero_assert(count > 1 && count < (1ul << 29u) && "add_spline() must be called with 1 < count < 2^29");
+            vtzero_assert(this->m_num_points.is_zero());
+            vtzero_assert(this->m_num_knots.is_zero() && "splines must have number of control points + degree + 1 knots");
+            this->enter_stage_geometry(GeomType::SPLINE);
+            this->m_num_points.set(count);
+            this->m_num_knots.set(count + m_spline_degree + 1);
+            this->knots().reserve(this->knots().size() + this->m_num_knots.value());
+            this->knots().push_back(create_complex_value(detail::complex_value_type::cvt_number_list, this->m_num_knots.value()));
+            this->knots().push_back(knots_index.value());
+            m_start_line = true;
+            m_knots_old_value = 0;
+        }
+
+        /**
+         * Set a control point in the (multi)spline geometry opened with
+         * add_spline().
+         *
+         * @param p The point.
+         *
+         * @throws geometry_exception if the point set is the same as the
+         *         previous point. This would create zero-length segments
+         *         which are not allowed according to the vector tile spec.
+         *
+         * @pre There must have been less than *count* calls to set_point()
+         *      already after a call to add_spline(count, index).
+         *
+         * @pre You must be in stage "geometry" to call this function.
+         */
+        void set_point(const point<Dimensions> p) {
+            vtzero_assert(!this->m_num_points.is_zero());
+            this->m_num_points.decrement();
+            if (m_start_line) {
+                this->m_pbf_geometry.add_element(detail::command_move_to(1));
+                this->set_point_impl(p);
+                this->m_pbf_geometry.add_element(detail::command_line_to(this->m_num_points.value()));
+                m_start_line = false;
+            } else {
+                if (p == this->m_cursor) {
+                    throw geometry_exception{"Zero-length segments in splines are not allowed."};
+                }
+                this->set_point_impl(p);
+            }
+        }
+
+        /**
+         * Set a knot in the (multi)spline geometry opened with add_spline().
+         *
+         * @param value The value of the knot. Must be scaled with the
+         *        scaling used for this geometry.
+         *
+         * @pre There must have been less than *count + degree + 1* calls to
+         *      set_knot() already after a call to add_spline(count, index).
+         *
+         * @pre You must be in stage "geometry" to call this function.
+         */
+        void set_knot(const int64_t value) {
+            vtzero_assert(!this->m_num_knots.is_zero());
+            this->m_num_knots.decrement();
+
+            const auto delta = value - m_knots_old_value;
+            this->knots().push_back(protozero::encode_zigzag64(delta) + 1);
+            m_knots_old_value = value;
+        }
+
+    }; // class spline_feature_builder
 
 } // namespace vtzero
 

@@ -215,6 +215,8 @@ namespace vtzero {
 
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
 
+            std::vector<uint64_t> m_knots;
+
             // The number of features in the layer
             std::size_t m_num_features = 0;
 
@@ -258,6 +260,10 @@ namespace vtzero {
 
             uint32_t version() const noexcept {
                 return m_version;
+            }
+
+            std::vector<uint64_t>& knots() noexcept {
+                return m_knots;
             }
 
             index_value add_key_without_dup_check(const data_view text) {

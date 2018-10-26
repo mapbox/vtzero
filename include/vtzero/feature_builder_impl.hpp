@@ -78,6 +78,10 @@ namespace vtzero {
                 return m_layer->version();
             }
 
+            std::vector<uint64_t>& knots() noexcept {
+                return m_layer->knots();
+            }
+
             void set_integer_id_impl(const uint64_t id) {
                 m_feature_writer.add_uint64(detail::pbf_feature::id, id);
             }

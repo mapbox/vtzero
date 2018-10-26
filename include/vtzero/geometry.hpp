@@ -155,6 +155,10 @@ namespace vtzero {
                 return m_value;
             }
 
+            TIterator iterator() const noexcept {
+                return m_it;
+            }
+
         }; // class geometric_attribute
 
         template <>
@@ -550,7 +554,7 @@ namespace vtzero {
                 using handler_type = typename std::remove_reference<THandler>::type;
 
                 // spec 4.3.4.3 "1. A MoveTo command"
-                if (next_command(CommandId::MOVE_TO)) {
+                while (next_command(CommandId::MOVE_TO)) {
                     // spec 4.3.4.3 "with a command count of 1"
                     if (count() != 1) {
                         throw geometry_exception{"MoveTo command count is not 1 (spec 4.3.4.3)"};
@@ -611,6 +615,8 @@ namespace vtzero {
                     }
 
                     call_knots_end(std::forward<THandler>(handler));
+
+                    m_knot_it = knots.iterator();
                 }
 
                 if (!done()) {

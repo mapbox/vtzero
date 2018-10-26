@@ -120,7 +120,7 @@ TEST_CASE("Calling decode_spline_geometry() with a polygon geometry fails") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}),
-                            "additional data after end of geometry (spec 4.3.4.2)");
+                            "expected command 1 but got 7");
     }
 }
 
