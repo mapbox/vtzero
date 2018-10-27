@@ -95,10 +95,6 @@ public:
         m_extent(static_cast<int64_t>(extent)) {
     }
 
-    static vtzero::point_3d convert(const vtzero::point_3d p) noexcept {
-        return p;
-    }
-
     // ----------------------------------------------------------------------
 
     void points_begin(const uint32_t /*count*/) const {

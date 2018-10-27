@@ -41,10 +41,6 @@ struct point_handler {
 
     std::vector<vtzero::point_2d> data{};
 
-    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
-        return p;
-    }
-
     void points_begin(uint32_t count) {
         data.reserve(count);
     }
@@ -64,10 +60,6 @@ struct linestring_handler {
     constexpr static const unsigned int max_geometric_attributes = 0;
 
     std::vector<std::vector<vtzero::point_2d>> data{};
-
-    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
-        return p;
-    }
 
     void linestring_begin(uint32_t count) {
         data.emplace_back();
@@ -89,10 +81,6 @@ struct polygon_handler {
     constexpr static const unsigned int max_geometric_attributes = 0;
 
     std::vector<std::vector<vtzero::point_2d>> data{};
-
-    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
-        return p;
-    }
 
     void ring_begin(uint32_t count) {
         data.emplace_back();
@@ -148,10 +136,6 @@ struct geom_handler {
     std::vector<std::vector<vtzero::point_2d>> line_data{};
     std::vector<vtzero::point_2d> control_points{};
     std::vector<int64_t> knots{};
-
-    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
-        return p;
-    }
 
     void points_begin(uint32_t count) {
         point_data.reserve(count);

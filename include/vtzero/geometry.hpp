@@ -260,6 +260,24 @@ namespace vtzero {
 
         }; // class geometric_attribute_collection<0, TIterator>
 
+        // These empty classes are used to make sure only one of the
+        // following overloads of convert_point() matches.
+        class convert_point_prio2 {};
+        class convert_point_prio1 : public convert_point_prio2 {};
+
+        // This overload is used when the handler has a convert() method.
+        template <int Dimensions, typename THandler>
+        auto convert_point(THandler&& handler, const vtzero::point<Dimensions> p, convert_point_prio1 /*dummy*/) -> decltype(std::declval<THandler>().convert(std::declval<point<Dimensions>>())) {
+            return std::forward<THandler>(handler).convert(p);
+        }
+
+        // This overload is used as fallback when the handler doesn't have
+        // a convert() method.
+        template <int Dimensions, typename THandler>
+        vtzero::point<Dimensions> convert_point(THandler&& /*handler*/, const vtzero::point<Dimensions> p, convert_point_prio2 /*dummy*/) {
+            return p;
+        }
+
         /**
          * Decode a geometry as specified in spec 4.3. This templated class can
          * be instantiated with a different iterator type for testing than for
@@ -399,8 +417,6 @@ namespace vtzero {
 
             template <typename THandler>
             get_result_t<THandler> decode_point(THandler&& handler) {
-                using handler_type = typename std::remove_reference<THandler>::type;
-
                 // spec 4.3.4.2 "MUST consist of a single MoveTo command"
                 if (!next_command(CommandId::MOVE_TO)) {
                     throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
@@ -415,7 +431,7 @@ namespace vtzero {
 
                 std::forward<THandler>(handler).points_begin(count());
                 while (count() > 0) {
-                    std::forward<THandler>(handler).points_point(handler_type::convert(next_point()));
+                    std::forward<THandler>(handler).points_point(convert_point<Dimensions>(std::forward<THandler>(handler), next_point(), convert_point_prio1{}));
                     for (auto& attr : geom_attributes) {
                         if (attr.get_next_value()) {
                             call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -437,8 +453,6 @@ namespace vtzero {
 
             template <typename THandler>
             get_result_t<THandler> decode_linestring(THandler&& handler) {
-                using handler_type = typename std::remove_reference<THandler>::type;
-
                 geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
 
                 // spec 4.3.4.3 "1. A MoveTo command"
@@ -463,7 +477,7 @@ namespace vtzero {
                     std::forward<THandler>(handler).linestring_begin(count() + 1);
 
                     while (true) {
-                        std::forward<THandler>(handler).linestring_point(handler_type::convert(point));
+                        std::forward<THandler>(handler).linestring_point(convert_point<Dimensions>(std::forward<THandler>(handler), point, convert_point_prio1{}));
                         for (auto& attr : geom_attributes) {
                             if (attr.get_next_value()) {
                                 call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -485,8 +499,6 @@ namespace vtzero {
 
             template <typename THandler>
             get_result_t<THandler> decode_polygon(THandler&& handler) {
-                using handler_type = typename std::remove_reference<THandler>::type;
-
                 geometric_attribute_collection<MaxGeometricAttributes, TAttrIterator> geom_attributes{m_attr_it, m_attr_end};
 
                 // spec 4.3.4.4 "1. A MoveTo command"
@@ -508,7 +520,7 @@ namespace vtzero {
                     std::forward<THandler>(handler).ring_begin(count() + 2);
 
                     while (true) {
-                        std::forward<THandler>(handler).ring_point(handler_type::convert(point));
+                        std::forward<THandler>(handler).ring_point(convert_point<Dimensions>(std::forward<THandler>(handler), point, convert_point_prio1{}));
                         for (auto& attr : geom_attributes) {
                             if (attr.get_next_value()) {
                                 call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -533,7 +545,7 @@ namespace vtzero {
 
                     sum += det(point, start_point);
 
-                    std::forward<THandler>(handler).ring_point(handler_type::convert(start_point));
+                    std::forward<THandler>(handler).ring_point(convert_point<Dimensions>(std::forward<THandler>(handler), start_point, convert_point_prio1{}));
                     for (auto& attr : geom_attributes) {
                         if (attr.get_next_value()) {
                             call_points_attr(std::forward<THandler>(handler), attr.key_index(), attr.scaling_index(), attr.value());
@@ -551,8 +563,6 @@ namespace vtzero {
 
             template <typename THandler>
             typename get_result<THandler>::type decode_spline(THandler&& handler) {
-                using handler_type = typename std::remove_reference<THandler>::type;
-
                 // spec 4.3.4.3 "1. A MoveTo command"
                 while (next_command(CommandId::MOVE_TO)) {
                     // spec 4.3.4.3 "with a command count of 1"
@@ -594,9 +604,9 @@ namespace vtzero {
 
                     std::forward<THandler>(handler).controlpoints_begin(count() + 1);
 
-                    std::forward<THandler>(handler).controlpoints_point(handler_type::convert(first_point));
+                    std::forward<THandler>(handler).controlpoints_point(convert_point<Dimensions>(std::forward<THandler>(handler), first_point, convert_point_prio1{}));
                     while (count() > 0) {
-                        std::forward<THandler>(handler).controlpoints_point(handler_type::convert(next_point()));
+                        std::forward<THandler>(handler).controlpoints_point(convert_point<Dimensions>(std::forward<THandler>(handler), next_point(), convert_point_prio1{}));
                     }
                     std::forward<THandler>(handler).controlpoints_end();
 

@@ -19,10 +19,6 @@ class counter_handler {
 
 public:
 
-    static vtzero::point_2d convert(const vtzero::point_2d p) noexcept {
-        return p;
-    }
-
     void controlpoints_begin(const uint32_t /*count*/) noexcept {
         ++value;
     }

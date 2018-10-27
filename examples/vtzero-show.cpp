@@ -53,10 +53,6 @@ public:
         m_is_3d(is_3d) {
     }
 
-    static vtzero::point_3d convert(const vtzero::point_3d p) noexcept {
-        return p;
-    }
-
     void points_begin(const uint32_t /*count*/) const noexcept {
     }
 
