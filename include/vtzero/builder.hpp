@@ -297,7 +297,14 @@ namespace vtzero {
         /**
          * Copy the geometry from the geometry of an existing feature.
          *
+         * If the geometry is a 3D geometry, elevations data will be copied.
+         * If the geometry is a spline, control points and knots will be
+         * copied. Geometric attributes are not copied.
+         *
          * @param feature The feature to copy the geometry from.
+         *
+         * @pre Stage must be "want_id" or "has_id".
+         * @post Stage is "has_geometry".
          */
         void copy_geometry(const feature& feature) {
             vtzero_assert((m_stage == detail::stage::want_id || m_stage == detail::stage::has_id) &&
@@ -307,6 +314,10 @@ namespace vtzero {
             this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
             if (feature.has_3d_geometry()) {
                 this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
+            }
+            if (!feature.knots_data().empty()) {
+                this->m_feature_writer.add_uint32(detail::pbf_feature::spline_degree, feature.spline_degree());
+                this->m_feature_writer.add_string(detail::pbf_feature::spline_knots, feature.knots_data());
             }
 
             m_stage = detail::stage::has_geometry;

@@ -283,6 +283,17 @@ namespace vtzero {
         }
 
         /**
+         * The knots data of this feature.
+         *
+         * Complexity: Constant.
+         *
+         * Always returns an empty data_view for invalid features.
+         */
+        data_view knots_data() const noexcept {
+            return m_knots;
+        }
+
+        /**
          * Returns true if this feature has any attributes;
          *
          * Complexity: Constant.
