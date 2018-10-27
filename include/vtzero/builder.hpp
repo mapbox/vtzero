@@ -176,19 +176,31 @@ namespace vtzero {
         }
 
         /**
+         * Commit a started geometry.
+         */
+        void commit_geometry() {
+            if (!m_pbf_geometry.valid()) {
+                return;
+            }
+            vtzero_assert(m_num_points.is_zero());
+            vtzero_assert(m_num_knots.is_zero());
+            m_pbf_geometry.commit();
+            m_elevations.serialize(m_feature_writer);
+            if (!knots().empty()) {
+                m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
+                knots().clear();
+            }
+            m_stage = detail::stage::has_geometry;
+        }
+
+        /**
          * Enter the "attributes" stage. Do nothing if we are already in the
          * "attributes" stage.
          */
         void enter_stage_attributes() {
             vtzero_assert(version() == 3);
             if (m_stage == detail::stage::want_geometry) {
-                m_pbf_geometry.commit();
-                m_elevations.serialize(m_feature_writer);
-                vtzero_assert(m_num_knots.is_zero());
-                if (!knots().empty()) {
-                    m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
-                    knots().clear();
-                }
+                commit_geometry();
                 m_pbf_attributes = {m_feature_writer, detail::pbf_feature::attributes};
                 m_stage = detail::stage::want_attrs;
                 return;
@@ -207,9 +219,7 @@ namespace vtzero {
          */
         void enter_stage_tags() {
             if (m_stage == detail::stage::want_geometry) {
-                m_pbf_geometry.commit();
-                m_elevations.serialize(m_feature_writer);
-                vtzero_assert(m_num_knots.is_zero());
+                commit_geometry();
                 m_pbf_attributes = {m_feature_writer, detail::pbf_feature::tags};
                 m_stage = detail::stage::want_tags;
                 return;
@@ -250,7 +260,6 @@ namespace vtzero {
          */
         explicit feature_builder(layer_builder layer) :
             feature_builder_base(&layer.get_layer_impl()) {
-            knots().clear();
         }
 
         /**
@@ -283,7 +292,7 @@ namespace vtzero {
          */
         void switch_to_geometric_attributes() {
             if (m_stage == detail::stage::want_geometry) {
-                m_pbf_geometry.commit();
+                commit_geometry();
             } else {
                 vtzero_assert(m_stage == detail::stage::has_geometry || m_stage == detail::stage::want_attrs);
                 if (m_pbf_attributes.valid()) {
@@ -696,16 +705,7 @@ namespace vtzero {
                 return;
             }
             vtzero_assert(m_stage != detail::stage::want_id && m_stage != detail::stage::has_id);
-            if (m_pbf_geometry.valid()) {
-                vtzero_assert(m_num_points.is_zero());
-                m_pbf_geometry.commit();
-                m_elevations.serialize(m_feature_writer);
-                vtzero_assert(m_num_knots.is_zero());
-                if (!knots().empty()) {
-                    m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
-                    knots().clear();
-                }
-            }
+            commit_geometry();
             do_commit();
         }
 
@@ -792,9 +792,7 @@ namespace vtzero {
             this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->add_point_impl(p);
-            this->m_pbf_geometry.commit();
-            this->m_elevations.serialize(this->m_feature_writer);
-            this->m_stage = detail::stage::has_geometry;
+            this->commit_geometry();
         }
 
         /**
