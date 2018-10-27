@@ -205,7 +205,6 @@ namespace vtzero {
             }
 
             void do_commit() {
-                vtzero_assert(m_stage == stage::want_geometry || m_stage == stage::has_geometry || m_stage == stage::want_tags || m_stage == stage::want_attrs || m_stage == stage::want_geom_attrs);
                 if (m_pbf_attributes.valid()) {
                     m_pbf_attributes.commit();
                 }
@@ -215,7 +214,6 @@ namespace vtzero {
             }
 
             void do_rollback() {
-                vtzero_assert(m_stage != stage::done);
                 if (m_pbf_attributes.valid()) {
                     m_pbf_attributes.rollback();
                 }
@@ -228,13 +226,13 @@ namespace vtzero {
             /**
              * Set the integer ID of this feature.
              *
-             * You can only call any of the functions setting an ID once and
-             * it has to be in the "id" stage.
-             *
              * @param id The ID.
+             *
+             * @pre The feature_builder must be in the "want_id" stage.
+             * @post The feature_builder is in the "has_id" stage.
              */
             void set_integer_id(const uint64_t id) {
-                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to set id");
+                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to call set_integer_id()");
                 set_integer_id_impl(id);
                 m_stage = stage::has_id;
             }
@@ -242,14 +240,15 @@ namespace vtzero {
             /**
              * Set the string ID of this feature.
              *
-             * You can only call any of the functions setting an ID once and
-             * it has to be in the "id" stage.
-             *
              * @param id The ID.
+             *
+             * @pre Layer version is 3.
+             * @pre The feature_builder must be in the "want_id" stage.
+             * @post The feature_builder is in the "has_id" stage.
              */
             void set_string_id(const data_view& id) {
-                vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
-                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to set id");
+                vtzero_assert(version() == 3 && "string_id is only allowed in version 3 layers");
+                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to call set_string_id()");
                 set_string_id_impl(id);
                 m_stage = stage::has_id;
             }
@@ -258,16 +257,16 @@ namespace vtzero {
              * Copy the ID of an existing feature to this feature. If the
              * feature doesn't have an ID, no ID is set.
              *
-             * You can only call any of the functions setting an ID once and
-             * it has to be in the "id" stage.
-             *
-             * If you are building a vt3 feature, a string_id will not be
-             * copied!
+             * If you are building a version 2 layer, a string_id will not
+             * be copied!
              *
              * @param feature The feature to copy the ID from.
+             *
+             * @pre The feature_builder must be in the "want_id" stage.
+             * @post The feature_builder is in the "has_id" stage.
              */
             void copy_id(const feature& feature) {
-                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to set id");
+                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to call copy_id()");
                 if (feature.has_integer_id()) {
                     set_integer_id_impl(feature.id());
                 } else if (version() == 3 && feature.has_string_id()) {

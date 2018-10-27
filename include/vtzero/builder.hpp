@@ -300,12 +300,15 @@ namespace vtzero {
          * @param feature The feature to copy the geometry from.
          */
         void copy_geometry(const feature& feature) {
-            vtzero_assert(m_stage == detail::stage::want_id || m_stage == detail::stage::has_id);
+            vtzero_assert((m_stage == detail::stage::want_id || m_stage == detail::stage::has_id) &&
+                          "copy_geometry() can only be called in stage 'want_id' or 'has_id'.");
+
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(feature.geometry_type()));
             this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
             if (feature.has_3d_geometry()) {
                 this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
             }
+
             m_stage = detail::stage::has_geometry;
         }
 
@@ -320,7 +323,9 @@ namespace vtzero {
          */
         template <typename TProp>
         void add_property(TProp&& prop) {
-            vtzero_assert(version() < 3);
+            vtzero_assert(version() < 3 &&
+                          "Calling add_property() is not allowed in version 3 layers.");
+
             this->enter_stage_tags();
             add_property_impl_vt2(std::forward<TProp>(prop));
         }
@@ -340,7 +345,9 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_property(TKey&& key, TValue&& value) {
-            vtzero_assert(version() < 3);
+            vtzero_assert(version() < 3 &&
+                          "Calling add_property() is not allowed in version 3 layers.");
+
             this->enter_stage_tags();
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
         }
@@ -383,10 +390,12 @@ namespace vtzero {
         template <typename TValue>
         void attribute_value(TValue&& value, std::size_t /*depth*/ = 0) {
             if (version() < 3) {
-                vtzero_assert(m_stage == detail::stage::want_tags && "XXX");
+                vtzero_assert(m_stage == detail::stage::want_tags &&
+                              "Must call attribute_key() before attribute_value().");
                 add_value_internal_vt2(std::forward<TValue>(value));
             } else {
-                vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
+                vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
+                              "Must call attribute_key() before attribute_value().");
                 add_value_internal_vt3(std::forward<TValue>(value));
             }
         }
@@ -432,8 +441,11 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_list_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
-            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "list attributes are only allowed in version 3 layers");
+            vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
+                          "Must call attribute_key() before start_list_attribute().");
+
             add_complex_value(detail::complex_value_type::cvt_list, size);
         }
 
@@ -453,8 +465,11 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_number_list(std::size_t size, index_value index, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
-            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "list attributes are only allowed in version 3 layers");
+            vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
+                          "Must call attribute_key() before start_number_list().");
+
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
             add_direct_value(index.value());
         }
@@ -478,7 +493,9 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_number_list_with_key(TKey&& key, std::size_t size, index_value index) {
-            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "list attributes are only allowed in version 3 layers");
+
             this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
@@ -494,8 +511,11 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void number_list_value(int64_t value, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
-            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "list attributes are only allowed in version 3 layers");
+            vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
+                          "Must call start_number_list(with_key)() before number_list_value().");
+
             add_direct_value(protozero::encode_zigzag64(value - m_value) + 1);
             m_value = value;
         }
@@ -506,8 +526,11 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void number_list_null_value(std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
-            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "list attributes are only allowed in version 3 layers");
+            vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
+                          "Must call start_number_list(with_key)() before number_list_value_null().");
+
             add_direct_value(0);
         }
 
@@ -529,7 +552,9 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_list_attribute_with_key(TKey&& key, std::size_t size) {
-            vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "list attributes are only allowed in version 3 layers");
+
             this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_list, size);
@@ -550,8 +575,11 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_map_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
-            vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "map attributes are only allowed in version 3 layers");
+            vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
+                          "Must call attribute_key() before start_map_attribute().");
+
             add_complex_value(detail::complex_value_type::cvt_map, size);
         }
 
@@ -649,24 +677,29 @@ namespace vtzero {
          *
          * Once a feature has been committed or rolled back, further calls
          * to commit() or rollback() don't do anything.
+         *
+         * @pre Complete geometry on this feature must have been set.
          */
         void commit() {
-            if (m_feature_writer.valid()) {
-                if (m_pbf_geometry.valid()) {
-                    m_pbf_geometry.commit();
-                    m_elevations.serialize(m_feature_writer);
-                    vtzero_assert(m_num_knots.is_zero());
-                    if (!knots().empty()) {
-                        m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
-                        knots().clear();
-                    }
-                }
-                do_commit();
+            if (!m_feature_writer.valid()) {
+                return;
             }
+            vtzero_assert(m_stage != detail::stage::want_id && m_stage != detail::stage::has_id);
+            if (m_pbf_geometry.valid()) {
+                vtzero_assert(m_num_points.is_zero());
+                m_pbf_geometry.commit();
+                m_elevations.serialize(m_feature_writer);
+                vtzero_assert(m_num_knots.is_zero());
+                if (!knots().empty()) {
+                    m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
+                    knots().clear();
+                }
+            }
+            do_commit();
         }
 
         /**
-         * Rollback this feature. Removed all traces of this feature from
+         * Roll back this feature. Removes all traces of this feature from
          * the layer_builder. Useful when you started creating a feature
          * but then find out that its geometry is invalid or something like
          * it. This will also happen automatically when the feature_builder
@@ -676,12 +709,14 @@ namespace vtzero {
          * to commit() or rollback() don't do anything.
          */
         void rollback() {
-            if (m_feature_writer.valid()) {
-                if (m_pbf_geometry.valid()) {
-                    m_pbf_geometry.rollback();
-                }
-                do_rollback();
+            if (!m_feature_writer.valid()) {
+                return;
             }
+            if (m_pbf_geometry.valid()) {
+                m_pbf_geometry.rollback();
+            }
+            knots().clear();
+            do_rollback();
         }
 
     }; // class feature_builder
