@@ -1019,6 +1019,7 @@ namespace vtzero {
         explicit spline_feature_builder(layer_builder layer, const uint32_t spline_degree = 2) :
             feature_builder<Dimensions>(layer),
             m_spline_degree(spline_degree) {
+            vtzero_assert(layer.version() == 3);
             vtzero_assert(spline_degree == 2 || spline_degree == 3);
             this->m_feature_writer.add_uint32(detail::pbf_feature::spline_degree, spline_degree);
         }

@@ -89,7 +89,7 @@ struct spline_handler_3d {
 
 static void test_spline_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
 
     {
         vtzero::spline_feature_builder<2> fbuilder{lbuilder};
@@ -110,7 +110,7 @@ static void test_spline_builder(const bool with_id, const bool with_attr) {
         fbuilder.set_knot(6);
 
         if (with_attr) {
-            fbuilder.add_property("foo", "bar");
+            fbuilder.add_scalar_attribute("foo", "bar");
         }
 
         fbuilder.commit();
@@ -122,7 +122,7 @@ static void test_spline_builder(const bool with_id, const bool with_attr) {
 
     const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
-    REQUIRE(layer.version() == 2);
+    REQUIRE(layer.version() == 3);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
@@ -154,7 +154,7 @@ TEST_CASE("spline builder with id/with attributes") {
 
 TEST_CASE("Calling add_spline() with bad values throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     SECTION("0") {
@@ -170,7 +170,7 @@ TEST_CASE("Calling add_spline() with bad values throws assert") {
 
 static void test_multispline_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     if (with_id) {
@@ -198,7 +198,7 @@ static void test_multispline_builder(const bool with_id, const bool with_attr) {
     fbuilder.set_knot(5);
 
     if (with_attr) {
-        fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
+        fbuilder.add_scalar_attribute("foo", "bar");
     }
 
     fbuilder.commit();
@@ -209,7 +209,7 @@ static void test_multispline_builder(const bool with_id, const bool with_attr) {
 
     const auto layer = *tile.begin();
     REQUIRE(layer.name() == "test");
-    REQUIRE(layer.version() == 2);
+    REQUIRE(layer.version() == 3);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
@@ -243,7 +243,7 @@ TEST_CASE("Multispline builder with id/with attributes") {
 
 TEST_CASE("Calling add_spline() twice throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_spline(3, 0);
@@ -252,7 +252,7 @@ TEST_CASE("Calling add_spline() twice throws assert") {
 
 TEST_CASE("Calling spline_feature_builder<2>::set_point() throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
@@ -260,7 +260,7 @@ TEST_CASE("Calling spline_feature_builder<2>::set_point() throws assert") {
 
 TEST_CASE("Calling spline_feature_builder<2>::set_point() with same point throws") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_spline(2, 0);
@@ -270,7 +270,7 @@ TEST_CASE("Calling spline_feature_builder<2>::set_point() with same point throws
 
 TEST_CASE("Calling spline_feature_builder<2>::set_point() too often throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_spline(2, 0);
@@ -281,7 +281,7 @@ TEST_CASE("Calling spline_feature_builder<2>::set_point() too often throws asser
 
 TEST_CASE("Adding several splines with feature rollback in the middle") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
 
     {
         vtzero::spline_feature_builder<2> fbuilder{lbuilder};

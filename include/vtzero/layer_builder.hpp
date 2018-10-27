@@ -86,6 +86,11 @@ namespace vtzero {
             m_layer(tile_builder.add_layer(std::forward<TString>(name), version, tile)) {
         }
 
+        /// Get the version of the layer we are building.
+        uint32_t version() const noexcept {
+            return m_layer->version();
+        }
+
         /// Get the elevation scaling currently set.
         const scaling& elevation_scaling() const noexcept {
             return m_layer->elevation_scaling();
