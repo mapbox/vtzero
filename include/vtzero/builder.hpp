@@ -162,8 +162,11 @@ namespace vtzero {
         detail::countdown_value m_num_knots;
 
         /**
-         * Enter the "geometry" stage. Do nothing if we are already in the
-         * "geometry" stage.
+         * Enter the "want_geometry" stage. Do nothing if we are already in
+         * the "want_geometry" stage.
+         *
+         * @pre Feature builder is in stage "want_id" or "has_id".
+         * @post Feature builder is in stage "has_geometry".
          */
         void enter_stage_geometry(GeomType type) {
             if (m_stage == detail::stage::want_id || m_stage == detail::stage::has_id) {
@@ -177,6 +180,9 @@ namespace vtzero {
 
         /**
          * Commit a started geometry.
+         *
+         * @pre Feature builder is in stage "want_geometry".
+         * @post Feature builder is in stage "has_geometry".
          */
         void commit_geometry() {
             if (!m_pbf_geometry.valid()) {
@@ -194,8 +200,8 @@ namespace vtzero {
         }
 
         /**
-         * Enter the "attributes" stage. Do nothing if we are already in the
-         * "attributes" stage.
+         * Enter the "want_attrs" stage. Do nothing if we are already in the
+         * "want_attrs" or "want_geom_attrs" stage.
          */
         void enter_stage_attributes() {
             vtzero_assert(version() == 3);
@@ -214,8 +220,12 @@ namespace vtzero {
         }
 
         /**
-         * Enter the "tags" stage. Do nothing if we are already in the
-         * "tags" stage.
+         * Enter the "want_tags" stage. Do nothing if we are already in the
+         * "want_tags" stage.
+         *
+         * @pre Feature builder is in stage "want_geometry", "has_geometry",
+         *      or "want_tags".
+         * @post Feature builder is in stage "want_tags".
          */
         void enter_stage_tags() {
             if (m_stage == detail::stage::want_geometry) {
@@ -229,7 +239,8 @@ namespace vtzero {
                 m_stage = detail::stage::want_tags;
                 return;
             }
-            vtzero_assert(m_stage == detail::stage::want_tags && "Must be in stage 'want_geometry', 'has_geometry', or 'want_tags'");
+            vtzero_assert(m_stage == detail::stage::want_tags &&
+                          "Must be in stage 'want_geometry', 'has_geometry', or 'want_tags'");
         }
 
         /// Add specified point to the data doing the zigzag encoding.
@@ -289,6 +300,10 @@ namespace vtzero {
         /**
          * Call this after you have written all normal attributes, before
          * you are writing the first geometric attribute.
+         *
+         * @pre Feature builder is in stage "want_geometry", "has_geometry",
+         *      or "want_attrs".
+         * @post Feature builder is in stage "want_geom_attrs".
          */
         void switch_to_geometric_attributes() {
             if (m_stage == detail::stage::want_geometry) {
@@ -312,8 +327,8 @@ namespace vtzero {
          *
          * @param feature The feature to copy the geometry from.
          *
-         * @pre Stage must be "want_id" or "has_id".
-         * @post Stage is "has_geometry".
+         * @pre Feature builder is in stage "want_id" or "has_id".
+         * @post Feature builder is in stage "has_geometry".
          */
         void copy_geometry(const feature& feature) {
             vtzero_assert((m_stage == detail::stage::want_id || m_stage == detail::stage::has_id) &&
@@ -621,7 +636,9 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_map_attribute_with_key(TKey&& key, std::size_t size) {
-            vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
+            vtzero_assert(version() == 3 &&
+                          "map attributes are only allowed in version 3 layers");
+
             this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_map, size);
@@ -737,7 +754,7 @@ namespace vtzero {
      * creating an object of this class you can add data to the feature in a
      * specific order:
      *
-     * * Optionally add the ID using set_integer/string_id().
+     * * Optionally add the ID using set_integer_id()/set_string_id().
      * * Add the (multi)point geometry using add_point() or add_points() and
      *   set_point().
      * * Optionally add any number of attributes.
@@ -751,6 +768,7 @@ namespace vtzero {
      * fb.set_integer_id(123);
      * fb.add_point(10, 20);
      * fb.add_scalar_attribute("foo", "bar");
+     * fb.commit();
      * @endcode
      *
      * Multipoint:
@@ -764,6 +782,7 @@ namespace vtzero {
      * fb.set_point(vtzero::point_2d{10, 20});
      * fb.set_point(vtzero::point_2d{20, 20});
      * fb.add_scalar_attribute("foo", "bar");
+     * fb.commit();
      * @endcode
      */
     template <int Dimensions = 2>
@@ -775,6 +794,8 @@ namespace vtzero {
          * Constructor
          *
          * @param layer The layer we want to create this feature in.
+         *
+         * @post Feature builder is in stage "want_id".
          */
         explicit point_feature_builder(layer_builder layer) :
             feature_builder<Dimensions>(layer) {
@@ -785,10 +806,12 @@ namespace vtzero {
          *
          * @param p The point to add.
          *
-         * @pre You must be in stage "id" or "has_id" to call this function.
+         * @pre Feature builder is in stage "want_id" or "has_id".
+         * @post Feature builder is in stage "has_geometry".
          */
         void add_point(const point<Dimensions> p) {
             vtzero_assert(this->m_stage == detail::stage::want_id || this->m_stage == detail::stage::has_id);
+
             this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->add_point_impl(p);
@@ -801,7 +824,8 @@ namespace vtzero {
          * @param x X coordinate of the point to add.
          * @param y Y coordinate of the point to add.
          *
-         * @pre You must be in stage "id" or "has_id" to call this function.
+         * @pre Feature builder is in stage "want_id" or "has_id".
+         * @post Feature builder is in stage "has_geometry".
          */
         void add_point(const int32_t x, const int32_t y) {
             add_point(point_2d{x, y});
@@ -815,13 +839,16 @@ namespace vtzero {
          *
          * @pre @code count > 0 && count < 2^29 @endcode
          *
-         * @pre You must be in stage "id" or "has_id" to call this function.
-         * @post You are in stage "geometry" after calling this function.
+         * @pre Feature builder is in stage "want_id, "has_id", or
+         *      "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void add_points(uint32_t count) {
             vtzero_assert(this->m_stage == detail::stage::want_id || this->m_stage == detail::stage::has_id);
+            vtzero_assert(count > 0 && count < (1ul << 29u) &&
+                          "add_points() must be called with 0 < count < 2^29");
+
             this->enter_stage_geometry(GeomType::POINT);
-            vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
             this->m_num_points.set(count);
             this->m_pbf_geometry.add_element(detail::command_move_to(count));
         }
@@ -834,11 +861,13 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_points(count).
          *
-         * @pre You must be in stage "geometry" to call this function.
+         * @pre Feature builder is in stage "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void set_point(const point<Dimensions> p) {
             vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(!this->m_num_points.is_zero());
+
             this->m_num_points.decrement();
             this->set_point_impl(p);
         }
@@ -850,7 +879,7 @@ namespace vtzero {
      * After creating an object of this class you can add data to the
      * feature in a specific order:
      *
-     * * Optionally add the ID using set_integer/string_id().
+     * * Optionally add the ID using set_integer_id()/set_string_id().
      * * Add the (multi)linestring geometry using add_linestring() and
      *   set_point().
      * * Optionally add any number of attributes.
@@ -864,6 +893,7 @@ namespace vtzero {
      * fb.set_point(vtzero::point_2d{10, 20});
      * fb.set_point(vtzero::point_2d{20, 20});
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
+     * fb.commit();
      * @endcode
      */
     template <int Dimensions = 2>
@@ -877,6 +907,8 @@ namespace vtzero {
          * Constructor
          *
          * @param layer The layer we want to create this feature in.
+         *
+         * @post Feature builder is in stage "want_id".
          */
         explicit linestring_feature_builder(layer_builder layer) :
             feature_builder<Dimensions>(layer) {
@@ -890,13 +922,15 @@ namespace vtzero {
          *
          * @pre @code count > 1 && count < 2^29 @endcode
          *
-         * @pre You must be in stage "id", "has_id", or "geometry" to call
-         *      this function.
-         * @post You are in stage "geometry" after calling this function.
+         * @pre Feature builder is in stage "want_id", "has_id", or
+         *      "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void add_linestring(const uint32_t count) {
-            vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
+            vtzero_assert(count > 1 && count < (1ul << 29u) &&
+                          "add_linestring() must be called with 1 < count < 2^29");
             vtzero_assert(this->m_num_points.is_zero());
+
             this->enter_stage_geometry(GeomType::LINESTRING);
             this->m_num_points.set(count);
             m_start_line = true;
@@ -914,11 +948,13 @@ namespace vtzero {
          *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_linestring(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
+         * @pre Feature builder is in stage "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void set_point(const point<Dimensions> p) {
+            vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(!this->m_num_points.is_zero());
+
             this->m_num_points.decrement();
             if (m_start_line) {
                 this->m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -940,8 +976,9 @@ namespace vtzero {
      * After creating an object of this class you can add data to the
      * feature in a specific order:
      *
-     * * Optionally add the ID using set_integer/string_id().
-     * * Add the (multi)polygon geometry using add_ring() and set_point().
+     * * Optionally add the ID using set_integer_id()/set_string_id().
+     * * Add the (multi)polygon geometry using add_ring(), set_point(), and
+     *   close_ring().
      * * Optionally add any number of attributes.
      *
      * @code
@@ -953,6 +990,7 @@ namespace vtzero {
      * fb.set_point(vtzero::point_2d{10, 10});
      * ...
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
+     * fb.commit();
      * @endcode
      */
     template <int Dimensions = 2>
@@ -967,6 +1005,8 @@ namespace vtzero {
          * Constructor
          *
          * @param layer The layer we want to create this feature in.
+         *
+         * @post Feature builder is in stage "want_id".
          */
         explicit polygon_feature_builder(layer_builder layer) :
             feature_builder<Dimensions>(layer) {
@@ -979,13 +1019,15 @@ namespace vtzero {
          * @param count The number of points in the ring.
          *
          * @pre @code count > 3 && count < 2^29 @endcode
-         *
-         * @pre You must be in stage "id", "has_id", or "geometry" to call
-         *      this function.
+         * @pre Feature builder is in stage "want_id", "has_id", or
+         *      "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void add_ring(const uint32_t count) {
-            vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
+            vtzero_assert(count > 3 && count < (1ul << 29u) &&
+                          "add_ring() must be called with 3 < count < 2^29");
             vtzero_assert(this->m_num_points.is_zero());
+
             this->enter_stage_geometry(GeomType::POLYGON);
             this->m_num_points.set(count);
             m_start_ring = true;
@@ -1006,10 +1048,13 @@ namespace vtzero {
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_ring(count).
          *
-         * @pre You must be in stage "geometry" to call this function.
+         * @pre Feature builder is in stage "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void set_point(const point<Dimensions> p) {
+            vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(!this->m_num_points.is_zero());
+
             this->m_num_points.decrement();
             if (m_start_ring) {
                 m_first_point = p;
@@ -1038,13 +1083,14 @@ namespace vtzero {
          *
          * @pre There must have been *count* - 1 calls to set_point()
          *      already after a call to add_ring(count).
-         *
-         * @pre You must be in stage "geometry" to call this function.
+         * @pre Feature builder is in stage "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void close_ring() {
             vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(this->m_num_points.value() == 1 &&
                           "wrong number of points in ring");
+
             this->m_pbf_geometry.add_element(detail::command_close_path());
             this->m_num_points.decrement();
         }
@@ -1056,20 +1102,24 @@ namespace vtzero {
      * After creating an object of this class you can add data to the
      * feature in a specific order:
      *
-     * * Optionally add the ID using set_integer/string_id().
-     * * Add the (multi)spline geometry using add_linestring(), set_point(),
-     *   add_knots(), and set_knot().
+     * * Optionally add the ID using set_integer_id()/set_string_id().
+     * * Add the (multi)spline geometry using add_spline(), set_point(),
+     *   and set_knot().
      * * Optionally add any number of attributes.
      *
      * @code
      * vtzero::tile_builder tb;
      * vtzero::layer_builder lb{tb};
-     * vtzero::linestring_feature_builder<> fb{lb};
+     * vtzero::spline_feature_builder<> fb{lb, 2}; // degree == 2
      * fb.set_integer_id(123);
-     * fb.add_spline(2);
-     * fb.set_point(vtzero::point_2d{10, 20});
-     * fb.set_point(vtzero::point_2d{20, 20});
+     * fb.add_spline(2, 0); // 2 control points
+     * fb.set_point(vtzero::point_2d{10, 20}); // 1.
+     * fb.set_point(vtzero::point_2d{20, 20}); // 2.
+     * fb.set_knot(1); // 2 control points + 2 (degree) + 1 == number of knots
+     * ...
+     * fb.set_knot(5);
      * fb.add_scalar_attribute("foo", "bar"); // add attribute
+     * fb.commit();
      * @endcode
      */
     template <int Dimensions = 2>
@@ -1085,35 +1135,40 @@ namespace vtzero {
          * Constructor
          *
          * @param layer The layer we want to create this feature in.
-         * @param spline_degree The degree for the spline.
+         * @param spline_degree The degree of the spline.
          *
          * @pre @code spline_degree == 2 || spline_degree == 3 @endcode
+         * @post Feature builder is in stage "want_id".
          */
         explicit spline_feature_builder(layer_builder layer, const uint32_t spline_degree = 2) :
             feature_builder<Dimensions>(layer),
             m_spline_degree(spline_degree) {
             vtzero_assert(layer.version() == 3);
             vtzero_assert(spline_degree == 2 || spline_degree == 3);
+
             this->m_feature_writer.add_uint32(detail::pbf_feature::spline_degree, spline_degree);
         }
 
         /**
-         * Declare the intent to add a spline geometry with *count* points
-         * to this feature.
+         * Declare the intent to add a spline geometry with *count* control
+         * points to this feature.
          *
          * @param count The number of control points in the spline.
          * @param knots_index The index of the scaling used for the knots.
          *
          * @pre @code count > 1 && count < 2^29 @endcode
-         *
-         * @pre You must be in stage "id", "has_id", or "geometry" to call
-         *      this function.
-         * @post You are in stage "geometry" after calling this function.
+         * @pre All splines started with add_spline() before must be complete.
+         * @pre Feature builder is in stage "want_id", "has_id", or "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void add_spline(const uint32_t count, const index_value knots_index) {
-            vtzero_assert(count > 1 && count < (1ul << 29u) && "add_spline() must be called with 1 < count < 2^29");
-            vtzero_assert(this->m_num_points.is_zero());
-            vtzero_assert(this->m_num_knots.is_zero() && "splines must have number of control points + degree + 1 knots");
+            vtzero_assert(count > 1 && count < (1ul << 29u) &&
+                          "add_spline() must be called with 1 < count < 2^29");
+            vtzero_assert(this->m_num_points.is_zero() &&
+                          "Previously started spline is not complete (missing control points).");
+            vtzero_assert(this->m_num_knots.is_zero() &&
+                          "Previously started spline is not complete (missing knots).");
+
             this->enter_stage_geometry(GeomType::SPLINE);
             this->m_num_points.set(count);
             this->m_num_knots.set(count + m_spline_degree + 1);
@@ -1136,11 +1191,13 @@ namespace vtzero {
          *
          * @pre There must have been less than *count* calls to set_point()
          *      already after a call to add_spline(count, index).
-         *
-         * @pre You must be in stage "geometry" to call this function.
+         * @pre Feature builder is in stage "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void set_point(const point<Dimensions> p) {
+            vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(!this->m_num_points.is_zero());
+
             this->m_num_points.decrement();
             if (m_start_line) {
                 this->m_pbf_geometry.add_element(detail::command_move_to(1));
@@ -1164,12 +1221,14 @@ namespace vtzero {
          * @pre There must have been less than *count + degree + 1* calls to
          *      set_knot() already after a call to add_spline(count, index).
          *
-         * @pre You must be in stage "geometry" to call this function.
+         * @pre Feature builder is in stage "want_geometry".
+         * @post Feature builder is in stage "want_geometry".
          */
         void set_knot(const int64_t value) {
+            vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(!this->m_num_knots.is_zero());
-            this->m_num_knots.decrement();
 
+            this->m_num_knots.decrement();
             const auto delta = value - m_knots_old_value;
             this->knots().push_back(protozero::encode_zigzag64(delta) + 1);
             m_knots_old_value = value;
