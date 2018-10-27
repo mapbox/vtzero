@@ -70,21 +70,14 @@ static void test_point_builder(const bool with_id, const bool with_attr) {
             fbuilder.set_integer_id(17);
         }
 
-        SECTION("add point using coordinates / property using key/value") {
-            fbuilder.add_point(10, 20);
-            if (with_attr) {
-                fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
-            }
-        }
-
-        SECTION("add point using vtzero::point / property using key/value") {
+        SECTION("add point using point_2d / property using key/value") {
             fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_attr) {
                 fbuilder.add_property("foo", vtzero::encoded_property_value{22});
             }
         }
 
-        SECTION("add point using vtzero::point / property using property") {
+        SECTION("add point using point_2d / property using property") {
             vtzero::encoded_property_value pv{3.5};
             vtzero::property p{"foo", vtzero::property_value{pv.data()}};
             fbuilder.add_point(vtzero::point_2d{10, 20});
@@ -143,21 +136,21 @@ static void test_point_builder_vt3(const bool with_id, const bool with_attr) {
             fbuilder.set_integer_id(17);
         }
 
-        SECTION("add point using coordinates / property using key/string value") {
-            fbuilder.add_point(10, 20);
+        SECTION("add point using point_2d / property using key/string value") {
+            fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_attr) {
                 fbuilder.add_scalar_attribute("foo", vtzero::data_view{"bar"});
             }
         }
 
-        SECTION("add point using vtzero::point / property using key/int value") {
+        SECTION("add point using point_2d / property using key/int value") {
             fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_attr) {
                 fbuilder.add_scalar_attribute("foo", 22);
             }
         }
 
-        SECTION("add point using vtzero::point / property using key/double value") {
+        SECTION("add point using point_2d / property using key/double value") {
             fbuilder.add_point(vtzero::point_2d{10, 20});
             if (with_attr) {
                 fbuilder.add_scalar_attribute("foo", 3.5);
@@ -318,10 +311,10 @@ TEST_CASE("Calling add_point() and then other geometry functions throws assert")
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
 
-    fbuilder.add_point(10, 20);
+    fbuilder.add_point(vtzero::point_2d{10, 20});
 
     SECTION("add_point()") {
-        REQUIRE_THROWS_AS(fbuilder.add_point(10, 20), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_point(vtzero::point_2d{10, 20}), const assert_error&);
     }
     SECTION("add_points()") {
         REQUIRE_THROWS_AS(fbuilder.add_points(2), const assert_error&);
@@ -347,7 +340,7 @@ TEST_CASE("Calling add_points() and then other geometry functions throws assert"
     fbuilder.add_points(2);
 
     SECTION("add_point()") {
-        REQUIRE_THROWS_AS(fbuilder.add_point(10, 20), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_point(vtzero::point_2d{10, 20}), const assert_error&);
     }
     SECTION("add_points()") {
         REQUIRE_THROWS_AS(fbuilder.add_points(2), const assert_error&);

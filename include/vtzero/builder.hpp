@@ -819,19 +819,6 @@ namespace vtzero {
         }
 
         /**
-         * Add a single point as the geometry to this feature.
-         *
-         * @param x X coordinate of the point to add.
-         * @param y Y coordinate of the point to add.
-         *
-         * @pre Feature builder is in stage "want_id" or "has_id".
-         * @post Feature builder is in stage "has_geometry".
-         */
-        void add_point(const int32_t x, const int32_t y) {
-            add_point(point_2d{x, y});
-        }
-
-        /**
          * Declare the intent to add a multipoint geometry with *count* points
          * to this feature.
          *

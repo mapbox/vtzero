@@ -66,14 +66,14 @@ int main(int argc, char* argv[]) {
     {
         vtzero::point_feature_builder<2> fbuilder{layer_points};
         fbuilder.set_integer_id(2);
-        fbuilder.add_point(20, 20);
+        fbuilder.add_point(vtzero::point_2d{20, 20});
         fbuilder.add_scalar_attribute(some, "attr");
         fbuilder.commit();
     }
     {
         vtzero::point_feature_builder<2> fbuilder{layer_points};
         fbuilder.set_integer_id(3);
-        fbuilder.add_point(20, 20);
+        fbuilder.add_point(vtzero::point_2d{20, 20});
         fbuilder.add_scalar_attribute(idx("some"), "attr");
         fbuilder.commit();
     }
@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
     {
         vtzero::point_feature_builder<2> fbuilder{layer_points};
         fbuilder.set_integer_id(4);
-        fbuilder.add_point(20, 20);
+        fbuilder.add_point(vtzero::point_2d{20, 20});
         fbuilder.add_scalar_attribute(idx("some"), "otherattr");
         fbuilder.commit();
     }

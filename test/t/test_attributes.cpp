@@ -96,7 +96,7 @@ TEST_CASE("build feature with scalar attributes and read it again") {
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 20);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.add_scalar_attribute("data_view", vtzero::data_view{"foo"}); // 1
         fbuilder.add_scalar_attribute("uint", 17u); // 2
         fbuilder.add_scalar_attribute("sint", -22); // 3
@@ -143,7 +143,7 @@ TEST_CASE("build feature with list and map attributes and read it again") {
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 20);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.add_scalar_attribute("some_int", 111u);
         fbuilder.start_list_attribute_with_key("list", 8);
         fbuilder.attribute_value(vtzero::data_view{"foo"}); // 1
@@ -198,7 +198,7 @@ TEST_CASE("build feature with number list attributes and read it again") {
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 20);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.start_number_list_with_key("nlist", 4, index);
         fbuilder.number_list_value(10);
         fbuilder.number_list_value(20);
@@ -245,7 +245,7 @@ TEST_CASE("build feature with list property from array and read it again") {
     SECTION("without size") {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 20);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.add_list_attribute("pi", pi.begin(), pi.end());
         fbuilder.commit();
     }
@@ -253,7 +253,7 @@ TEST_CASE("build feature with list property from array and read it again") {
     SECTION("with size") {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 20);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.add_list_attribute("pi", pi.begin(), pi.end(), pi.size());
         fbuilder.commit();
     }

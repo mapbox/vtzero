@@ -64,7 +64,7 @@ TEST_CASE("Create layer based on existing layer") {
     vtzero::layer_builder lbuilder{tbuilder, layer};
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
     fbuilder.set_integer_id(42);
-    fbuilder.add_point(10, 20);
+    fbuilder.add_point(vtzero::point_2d{10, 20});
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
@@ -159,14 +159,14 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
     { // explicit commit after geometry
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 10);
+        fbuilder.add_point(vtzero::point_2d{10, 10});
         fbuilder.commit();
     }
 
     { // explicit commit after attributes
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
-        fbuilder.add_point(10, 10);
+        fbuilder.add_point(vtzero::point_2d{10, 10});
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
         fbuilder.commit();
     }
@@ -174,7 +174,7 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
     { // extra commits or rollbacks are okay but no other calls
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(3);
-        fbuilder.add_point(10, 10);
+        fbuilder.add_point(vtzero::point_2d{10, 10});
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
         fbuilder.commit();
 
@@ -186,7 +186,7 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
         }
 
         REQUIRE_THROWS_AS(fbuilder.set_integer_id(10), const assert_error&);
-        REQUIRE_THROWS_AS(fbuilder.add_point(20, 20), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_point(vtzero::point_2d{20, 20}), const assert_error&);
         REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), const assert_error&);
     }
 
@@ -231,7 +231,7 @@ TEST_CASE("String ids are okay in version 3 tiles") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
     fbuilder.set_string_id("foo");
-    fbuilder.add_point(10, 10);
+    fbuilder.add_point(vtzero::point_2d{10, 10});
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
@@ -250,7 +250,7 @@ TEST_CASE("Create layer with x/y/zoom/extent") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3, vtzero::tile{5, 3, 12, 8192}};
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
     fbuilder.set_string_id("foo");
-    fbuilder.add_point(10, 10);
+    fbuilder.add_point(vtzero::point_2d{10, 10});
     fbuilder.commit();
 
     const std::string data = tbuilder.serialize();
@@ -271,7 +271,7 @@ TEST_CASE("Rollback feature") {
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 10);
+        fbuilder.add_point(vtzero::point_2d{10, 10});
         fbuilder.commit();
     }
 
@@ -290,14 +290,14 @@ TEST_CASE("Rollback feature") {
     { // rollback after geometry
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(4);
-        fbuilder.add_point(20, 20);
+        fbuilder.add_point(vtzero::point_2d{20, 20});
         fbuilder.rollback();
     }
 
     { // rollback after attributes
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(5);
-        fbuilder.add_point(20, 20);
+        fbuilder.add_point(vtzero::point_2d{20, 20});
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
         fbuilder.rollback();
     }
@@ -305,20 +305,20 @@ TEST_CASE("Rollback feature") {
     { // implicit rollback after geometry
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(6);
-        fbuilder.add_point(10, 10);
+        fbuilder.add_point(vtzero::point_2d{10, 10});
     }
 
     { // implicit rollback after attributes
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(7);
-        fbuilder.add_point(10, 10);
+        fbuilder.add_point(vtzero::point_2d{10, 10});
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(8);
-        fbuilder.add_point(30, 30);
+        fbuilder.add_point(vtzero::point_2d{30, 30});
         fbuilder.commit();
     }
 

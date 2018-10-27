@@ -163,7 +163,7 @@ TEST_CASE("build feature with list geometric attributes and read it again") {
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 20);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.add_scalar_attribute("some_int", 111u);
         fbuilder.switch_to_geometric_attributes();
         fbuilder.start_list_attribute_with_key("list", 8);
@@ -235,7 +235,7 @@ TEST_CASE("build feature with number list geometric attributes and read it again
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
-        fbuilder.add_point(10, 20);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.switch_to_geometric_attributes();
         fbuilder.start_number_list_with_key("nlist", 4, index);
         fbuilder.number_list_value(10);
