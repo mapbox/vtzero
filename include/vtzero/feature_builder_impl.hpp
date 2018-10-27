@@ -90,6 +90,10 @@ namespace vtzero {
                 return m_layer->version();
             }
 
+            std::vector<int32_t>& elevations() noexcept {
+                return m_layer->elevations();
+            }
+
             std::vector<uint64_t>& knots() noexcept {
                 return m_layer->knots();
             }

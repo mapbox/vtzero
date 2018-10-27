@@ -23,13 +23,16 @@ struct movable_not_copyable {
 static_assert(movable_not_copyable<vtzero::tile_builder>::value, "tile_builder should be nothrow movable, but not copyable");
 
 static_assert(movable_not_copyable<vtzero::feature_builder<2>>::value, "feature_builder<2> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::feature_builder<3>>::value, "feature_builder<3> should be nothrow movable, but not copyable");
 
-// these are not noexcept movable due the std::vector inside the elevations_policy<3> not beeing noexcept movable befor C++17
-//static_assert(movable_not_copyable<vtzero::feature_builder<3>>::value, "feature_builder<3> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::point_feature_builder<2>>::value, "point_feature_builder<2> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::point_feature_builder<3>>::value, "point_feature_builder<3> should be nothrow movable, but not copyable");
 
-static_assert(movable_not_copyable<vtzero::point_feature_builder<2>>::value, "point_feature_builder should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::linestring_feature_builder<2>>::value, "linestring_feature_builder should be nothrow movable, but not copyable");
-static_assert(movable_not_copyable<vtzero::polygon_feature_builder<2>>::value, "polygon_feature_builder should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::linestring_feature_builder<2>>::value, "linestring_feature_builder<2> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::linestring_feature_builder<3>>::value, "linestring_feature_builder<3> should be nothrow movable, but not copyable");
+
+static_assert(movable_not_copyable<vtzero::polygon_feature_builder<2>>::value, "polygon_feature_builder<2> should be nothrow movable, but not copyable");
+static_assert(movable_not_copyable<vtzero::polygon_feature_builder<3>>::value, "polygon_feature_builder<3> should be nothrow movable, but not copyable");
 
 TEST_CASE("Create tile from existing layers") {
     const auto buffer = load_test_tile();

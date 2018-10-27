@@ -34,36 +34,6 @@ namespace vtzero {
 
     namespace detail {
 
-        template <int Dimensions>
-        class elevations_policy {
-
-        public:
-
-            void add(int32_t /*value*/) const noexcept {
-            }
-
-            void serialize(protozero::pbf_builder<detail::pbf_feature>& /*builder*/) const noexcept {
-            }
-
-        }; // class elevations_policy
-
-        template <>
-        class elevations_policy<3> {
-
-            std::vector<int32_t> m_values;
-
-        public:
-
-            void add(int32_t value) {
-                m_values.push_back(value);
-            }
-
-            void serialize(protozero::pbf_builder<detail::pbf_feature>& builder) const {
-                builder.add_packed_sint32(detail::pbf_feature::elevations, m_values.cbegin(), m_values.cend());
-            }
-
-        }; // class elevations_policy<3>
-
         class countdown_value {
 
             uint32_t m_value = 0;
@@ -146,9 +116,6 @@ namespace vtzero {
 
     protected:
 
-        /// The elevations store (if using 3D geometries).
-        detail::elevations_policy<Dimensions> m_elevations;
-
         /// Encoded geometry.
         protozero::packed_field_uint32 m_pbf_geometry{};
 
@@ -191,7 +158,10 @@ namespace vtzero {
             vtzero_assert(m_num_points.is_zero());
             vtzero_assert(m_num_knots.is_zero());
             m_pbf_geometry.commit();
-            m_elevations.serialize(m_feature_writer);
+            if (Dimensions == 3 && !elevations().empty()) {
+                m_feature_writer.add_packed_sint32(detail::pbf_feature::elevations, elevations().cbegin(), elevations().cend());
+                elevations().clear();
+            }
             if (!knots().empty()) {
                 m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
                 knots().clear();
@@ -248,7 +218,7 @@ namespace vtzero {
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x));
             this->m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y));
             if (Dimensions == 3) {
-                this->m_elevations.add(p.get_z());
+                elevations().push_back(p.get_z());
             }
         }
 
@@ -742,6 +712,9 @@ namespace vtzero {
             }
             if (m_pbf_geometry.valid()) {
                 m_pbf_geometry.rollback();
+            }
+            if (Dimensions == 3) {
+                elevations().clear();
             }
             knots().clear();
             do_rollback();
