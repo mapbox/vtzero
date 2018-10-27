@@ -592,29 +592,29 @@ namespace vtzero {
 
                     geometric_attribute<TKnotIterator> knots{m_knot_it, 0, scaling_index, knots_count};
 
-                    call_controlpoints_begin(std::forward<THandler>(handler), count() + 1);
+                    std::forward<THandler>(handler).controlpoints_begin(count() + 1);
 
                     std::forward<THandler>(handler).controlpoints_point(handler_type::convert(first_point));
                     while (count() > 0) {
                         std::forward<THandler>(handler).controlpoints_point(handler_type::convert(next_point()));
                     }
-                    call_controlpoints_end(std::forward<THandler>(handler));
+                    std::forward<THandler>(handler).controlpoints_end();
 
                     // static_cast is okay here, because if the knots_count is
                     // larger that what will fit into the uint32_t, we'll just
                     // decode some smaller part of them (in real world data
                     // this can't happen)
-                    call_knots_begin(std::forward<THandler>(handler), static_cast<uint32_t>(knots_count));
+                    std::forward<THandler>(handler).knots_begin(static_cast<uint32_t>(knots_count));
 
                     while (knots_count > 0) {
                         if (!knots.get_next_value()) {
                             throw format_exception{"Null value in knots not allowed"};
                         }
-                        call_knots_value(std::forward<THandler>(handler), knots.value());
+                        std::forward<THandler>(handler).knots_value(knots.value());
                         --knots_count;
                     }
 
-                    call_knots_end(std::forward<THandler>(handler));
+                    std::forward<THandler>(handler).knots_end();
 
                     m_knot_it = knots.iterator();
                 }

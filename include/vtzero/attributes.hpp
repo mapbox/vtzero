@@ -141,13 +141,6 @@ namespace vtzero {
         DEF_CALL_WRAPPER1(points_null_attr, index_value)
         DEF_CALL_WRAPPER3(points_attr, index_value, index_value, int64_t)
 
-        DEF_CALL_WRAPPER1(controlpoints_begin, std::uint32_t)
-        DEF_CALL_WRAPPER0(controlpoints_end)
-
-        DEF_CALL_WRAPPER1(knots_begin, std::uint32_t)
-        DEF_CALL_WRAPPER1(knots_value, std::int64_t)
-        DEF_CALL_WRAPPER0(knots_end)
-
 #undef DEF_CALL_WRAPPER0
 #undef DEF_CALL_WRAPPER1
 #undef DEF_CALL_WRAPPER2
