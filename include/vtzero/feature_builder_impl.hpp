@@ -60,7 +60,6 @@ namespace vtzero {
         protected:
 
             protozero::pbf_builder<detail::pbf_feature> m_feature_writer;
-            protozero::packed_field_uint32 m_pbf_tags;
             protozero::packed_field_uint64 m_pbf_attributes;
 
             stage m_stage = stage::want_id;
@@ -97,11 +96,7 @@ namespace vtzero {
 
             void add_key_internal(index_value idx) {
                 vtzero_assert(idx.valid());
-                if (version() < 3) {
-                    m_pbf_tags.add_element(idx.value());
-                } else {
-                    m_pbf_attributes.add_element(idx.value());
-                }
+                m_pbf_attributes.add_element(idx.value());
             }
 
             template <typename T>
@@ -119,7 +114,7 @@ namespace vtzero {
 
             void add_value_internal_vt2(index_value idx) {
                 vtzero_assert(idx.valid());
-                m_pbf_tags.add_element(idx.value());
+                m_pbf_attributes.add_element(idx.value());
             }
 
             void add_value_internal_vt2(property_value value) {
@@ -211,9 +206,6 @@ namespace vtzero {
 
             void do_commit() {
                 vtzero_assert(m_stage == stage::want_geometry || m_stage == stage::has_geometry || m_stage == stage::want_tags || m_stage == stage::want_attrs || m_stage == stage::want_geom_attrs);
-                if (m_pbf_tags.valid()) {
-                    m_pbf_tags.commit();
-                }
                 if (m_pbf_attributes.valid()) {
                     m_pbf_attributes.commit();
                 }
@@ -224,9 +216,6 @@ namespace vtzero {
 
             void do_rollback() {
                 vtzero_assert(m_stage != stage::done);
-                if (m_pbf_tags.valid()) {
-                    m_pbf_tags.rollback();
-                }
                 if (m_pbf_attributes.valid()) {
                     m_pbf_attributes.rollback();
                 }

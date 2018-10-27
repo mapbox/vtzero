@@ -210,12 +210,12 @@ namespace vtzero {
                 m_pbf_geometry.commit();
                 m_elevations.serialize(m_feature_writer);
                 vtzero_assert(m_num_knots.is_zero());
-                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+                m_pbf_attributes = {m_feature_writer, detail::pbf_feature::tags};
                 m_stage = detail::stage::want_tags;
                 return;
             }
             if (m_stage == detail::stage::has_geometry) {
-                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+                m_pbf_attributes = {m_feature_writer, detail::pbf_feature::tags};
                 m_stage = detail::stage::want_tags;
                 return;
             }
