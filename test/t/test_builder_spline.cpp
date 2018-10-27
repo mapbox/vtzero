@@ -87,7 +87,7 @@ struct spline_handler_3d {
 
 }; // struct spline_handler_3d
 
-static void test_spline_builder(bool with_id, bool with_prop) {
+static void test_spline_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -109,7 +109,7 @@ static void test_spline_builder(bool with_id, bool with_prop) {
         fbuilder.set_knot(5);
         fbuilder.set_knot(6);
 
-        if (with_prop) {
+        if (with_attr) {
             fbuilder.add_property("foo", "bar");
         }
 
@@ -136,19 +136,19 @@ static void test_spline_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("spline builder without id/without properties") {
+TEST_CASE("spline builder without id/without attributes") {
     test_spline_builder(false, false);
 }
 
-TEST_CASE("spline builder without id/with properties") {
+TEST_CASE("spline builder without id/with attributes") {
     test_spline_builder(false, true);
 }
 
-TEST_CASE("spline builder with id/without properties") {
+TEST_CASE("spline builder with id/without attributes") {
     test_spline_builder(true, false);
 }
 
-TEST_CASE("spline builder with id/with properties") {
+TEST_CASE("spline builder with id/with attributes") {
     test_spline_builder(true, true);
 }
 
@@ -168,7 +168,7 @@ TEST_CASE("Calling add_spline() with bad values throws assert") {
     }
 }
 
-static void test_multispline_builder(bool with_id, bool with_prop) {
+static void test_multispline_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
@@ -197,7 +197,7 @@ static void test_multispline_builder(bool with_id, bool with_prop) {
     fbuilder.set_knot(4);
     fbuilder.set_knot(5);
 
-    if (with_prop) {
+    if (with_attr) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
@@ -225,19 +225,19 @@ static void test_multispline_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.knots == knot_result);
 }
 
-TEST_CASE("Multispline builder without id/without properties") {
+TEST_CASE("Multispline builder without id/without attributes") {
     test_multispline_builder(false, false);
 }
 
-TEST_CASE("Multispline builder without id/with properties") {
+TEST_CASE("Multispline builder without id/with attributes") {
     test_multispline_builder(false, true);
 }
 
-TEST_CASE("Multispline builder with id/without properties") {
+TEST_CASE("Multispline builder with id/without attributes") {
     test_multispline_builder(true, false);
 }
 
-TEST_CASE("Multispline builder with id/with properties") {
+TEST_CASE("Multispline builder with id/with attributes") {
     test_multispline_builder(true, true);
 }
 

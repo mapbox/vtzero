@@ -39,7 +39,7 @@ struct polygon_handler {
 
 }; // struct polygon_handler
 
-static void test_polygon_builder(bool with_id, bool with_prop) {
+static void test_polygon_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -56,7 +56,7 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
         fbuilder.set_point(vtzero::point_2d{30, 40});
         fbuilder.set_point(vtzero::point_2d{10, 20});
 
-        if (with_prop) {
+        if (with_attr) {
             fbuilder.add_property("foo", "bar");
         }
 
@@ -83,19 +83,19 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("polygon builder without id/without properties") {
+TEST_CASE("polygon builder without id/without attributes") {
     test_polygon_builder(false, false);
 }
 
-TEST_CASE("polygon builder without id/with properties") {
+TEST_CASE("polygon builder without id/with attributes") {
     test_polygon_builder(false, true);
 }
 
-TEST_CASE("polygon builder with id/without properties") {
+TEST_CASE("polygon builder with id/without attributes") {
     test_polygon_builder(true, false);
 }
 
-TEST_CASE("polygon builder with id/with properties") {
+TEST_CASE("polygon builder with id/with attributes") {
     test_polygon_builder(true, true);
 }
 
@@ -121,7 +121,7 @@ TEST_CASE("Calling add_ring() with bad values throws assert") {
     }
 }
 
-static void test_multipolygon_builder(bool with_id, bool with_prop) {
+static void test_multipolygon_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder<2> fbuilder{lbuilder};
@@ -148,7 +148,7 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
         fbuilder.close_ring();
     }
 
-    if (with_prop) {
+    if (with_attr) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
@@ -176,19 +176,19 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
 }
 
 
-TEST_CASE("Multipolygon builder without id/without properties") {
+TEST_CASE("Multipolygon builder without id/without attributes") {
     test_multipolygon_builder(false, false);
 }
 
-TEST_CASE("Multipolygon builder without id/with properties") {
+TEST_CASE("Multipolygon builder without id/with attributes") {
     test_multipolygon_builder(false, true);
 }
 
-TEST_CASE("Multipolygon builder with id/without properties") {
+TEST_CASE("Multipolygon builder with id/without attributes") {
     test_multipolygon_builder(true, false);
 }
 
-TEST_CASE("Multipolygon builder with id/with properties") {
+TEST_CASE("Multipolygon builder with id/with attributes") {
     test_multipolygon_builder(true, true);
 }
 

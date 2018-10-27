@@ -140,7 +140,7 @@ namespace vtzero {
     template <int Dimensions>
     class feature_builder : public detail::feature_builder_base {
 
-        static_assert(Dimensions == 2 || Dimensions == 3, "Need 2 or 3 dimensions");
+        static_assert(Dimensions == 2 || Dimensions == 3, "Dimensions template parameter can only be 2 or 3");
 
         int64_t m_value = 0;
 
@@ -201,12 +201,6 @@ namespace vtzero {
             if (Dimensions == 3) {
                 this->m_elevations.add(p.get_z());
             }
-        }
-
-        /// Helper function doing subtraction with no integer overflow possible.
-        static int32_t sub(const int32_t a, const int32_t b) noexcept {
-            return static_cast<int32_t>(static_cast<int64_t>(a) -
-                                        static_cast<int64_t>(b));
         }
 
         /// Add specified point to the data with delta encoding.
@@ -300,7 +294,7 @@ namespace vtzero {
         void add_property(TProp&& prop) {
             this->enter_stage_attributes();
             vtzero_assert(version() < 3);
-            prepare_to_add_property_vt2();
+            prepare_to_add_vt2_attribute();
             add_property_impl_vt2(std::forward<TProp>(prop));
         }
 
@@ -321,7 +315,7 @@ namespace vtzero {
         void add_property(TKey&& key, TValue&& value) {
             this->enter_stage_attributes();
             vtzero_assert(version() < 3);
-            prepare_to_add_property_vt2();
+            prepare_to_add_vt2_attribute();
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
         }
 
@@ -342,9 +336,9 @@ namespace vtzero {
         void attribute_key(TKey&& key, std::size_t /*depth*/ = 0) {
             this->enter_stage_attributes();
             if (version() < 3) {
-                prepare_to_add_property_vt2();
+                prepare_to_add_vt2_attribute();
             } else {
-                prepare_to_add_property_vt3();
+                prepare_to_add_vt3_attribute();
             }
             add_key_internal(std::forward<TKey>(key));
         }
@@ -388,11 +382,11 @@ namespace vtzero {
         void add_scalar_attribute(TKey&& key, TValue&& value) {
             this->enter_stage_attributes();
             if (version() < 3) {
-                prepare_to_add_property_vt2();
+                prepare_to_add_vt2_attribute();
                 add_key_internal(std::forward<TKey>(key));
                 add_value_internal_vt2(std::forward<TValue>(value));
             } else {
-                prepare_to_add_property_vt3();
+                prepare_to_add_vt3_attribute();
                 add_key_internal(std::forward<TKey>(key));
                 add_value_internal_vt3(std::forward<TValue>(value));
             }
@@ -461,7 +455,7 @@ namespace vtzero {
         void start_number_list_with_key(TKey&& key, std::size_t size, index_value index) {
             this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
-            prepare_to_add_property_vt3();
+            prepare_to_add_vt3_attribute();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
             add_direct_value(index.value());
@@ -513,7 +507,7 @@ namespace vtzero {
         void start_list_attribute_with_key(TKey&& key, std::size_t size) {
             this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
-            prepare_to_add_property_vt3();
+            prepare_to_add_vt3_attribute();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_list, size);
         }
@@ -558,7 +552,7 @@ namespace vtzero {
         void start_map_attribute_with_key(TKey&& key, std::size_t size) {
             this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
-            prepare_to_add_property_vt3();
+            prepare_to_add_vt3_attribute();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_map, size);
         }

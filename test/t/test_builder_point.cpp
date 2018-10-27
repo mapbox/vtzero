@@ -59,7 +59,7 @@ struct point_handler_3d {
 
 }; // struct point_handler_3d
 
-static void test_point_builder(bool with_id, bool with_prop) {
+static void test_point_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -72,14 +72,14 @@ static void test_point_builder(bool with_id, bool with_prop) {
 
         SECTION("add point using coordinates / property using key/value") {
             fbuilder.add_point(10, 20);
-            if (with_prop) {
+            if (with_attr) {
                 fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
             }
         }
 
         SECTION("add point using vtzero::point / property using key/value") {
             fbuilder.add_point(vtzero::point_2d{10, 20});
-            if (with_prop) {
+            if (with_attr) {
                 fbuilder.add_property("foo", vtzero::encoded_property_value{22});
             }
         }
@@ -88,7 +88,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
             vtzero::encoded_property_value pv{3.5};
             vtzero::property p{"foo", vtzero::property_value{pv.data()}};
             fbuilder.add_point(vtzero::point_2d{10, 20});
-            if (with_prop) {
+            if (with_attr) {
                 fbuilder.add_property(p);
             }
         }
@@ -116,23 +116,23 @@ static void test_point_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("Point builder without id/without properties") {
+TEST_CASE("Point builder without id/without attributes") {
     test_point_builder(false, false);
 }
 
-TEST_CASE("Point builder without id/with properties") {
+TEST_CASE("Point builder without id/with attributes") {
     test_point_builder(false, true);
 }
 
-TEST_CASE("Point builder with id/without properties") {
+TEST_CASE("Point builder with id/without attributes") {
     test_point_builder(true, false);
 }
 
-TEST_CASE("Point builder with id/with properties") {
+TEST_CASE("Point builder with id/with attributes") {
     test_point_builder(true, true);
 }
 
-static void test_point_builder_vt3(bool with_id, bool with_prop) {
+static void test_point_builder_vt3(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
 
@@ -145,21 +145,21 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
 
         SECTION("add point using coordinates / property using key/string value") {
             fbuilder.add_point(10, 20);
-            if (with_prop) {
+            if (with_attr) {
                 fbuilder.add_scalar_attribute("foo", vtzero::data_view{"bar"});
             }
         }
 
         SECTION("add point using vtzero::point / property using key/int value") {
             fbuilder.add_point(vtzero::point_2d{10, 20});
-            if (with_prop) {
+            if (with_attr) {
                 fbuilder.add_scalar_attribute("foo", 22);
             }
         }
 
         SECTION("add point using vtzero::point / property using key/double value") {
             fbuilder.add_point(vtzero::point_2d{10, 20});
-            if (with_prop) {
+            if (with_attr) {
                 fbuilder.add_scalar_attribute("foo", 3.5);
             }
         }
@@ -188,19 +188,19 @@ static void test_point_builder_vt3(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("Point builder without id/without properties (vt3)") {
+TEST_CASE("Point builder without id/without attributes (vt3)") {
     test_point_builder_vt3(false, false);
 }
 
-TEST_CASE("Point builder without id/with properties (vt3)") {
+TEST_CASE("Point builder without id/with attributes (vt3)") {
     test_point_builder_vt3(false, true);
 }
 
-TEST_CASE("Point builder with id/without properties (vt3)") {
+TEST_CASE("Point builder with id/without attributes (vt3)") {
     test_point_builder_vt3(true, false);
 }
 
-TEST_CASE("Point builder with id/with properties (vt3)") {
+TEST_CASE("Point builder with id/with attributes (vt3)") {
     test_point_builder_vt3(true, true);
 }
 
@@ -256,7 +256,7 @@ TEST_CASE("Calling add_points() with bad values throws assert") {
     }
 }
 
-static void test_multipoint_builder(bool with_id, bool with_prop) {
+static void test_multipoint_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
@@ -270,7 +270,7 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     fbuilder.set_point(vtzero::point_2d{20, 30});
     fbuilder.set_point(vtzero::point_2d{30, 40});
 
-    if (with_prop) {
+    if (with_attr) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
@@ -297,19 +297,19 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
 }
 
 
-TEST_CASE("Multipoint builder without id/without properties") {
+TEST_CASE("Multipoint builder without id/without attributes") {
     test_multipoint_builder(false, false);
 }
 
-TEST_CASE("Multipoint builder without id/with properties") {
+TEST_CASE("Multipoint builder without id/with attributes") {
     test_multipoint_builder(false, true);
 }
 
-TEST_CASE("Multipoint builder with id/without properties") {
+TEST_CASE("Multipoint builder with id/without attributes") {
     test_multipoint_builder(true, false);
 }
 
-TEST_CASE("Multipoint builder with id/with properties") {
+TEST_CASE("Multipoint builder with id/with attributes") {
     test_multipoint_builder(true, true);
 }
 

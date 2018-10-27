@@ -74,6 +74,12 @@ namespace vtzero {
 
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
 
+            /// Helper function doing subtraction with no integer overflow possible.
+            static int32_t sub(const int32_t a, const int32_t b) noexcept {
+                return static_cast<int32_t>(static_cast<int64_t>(a) -
+                                            static_cast<int64_t>(b));
+            }
+
             uint32_t version() const noexcept {
                 return m_layer->version();
             }
@@ -90,16 +96,22 @@ namespace vtzero {
                 m_feature_writer.add_string(detail::pbf_feature::string_id, id);
             }
 
-            /// Helper function to make sure we have everything before adding a property
-            void prepare_to_add_property_vt2() {
+            /**
+             * Helper function to make sure we have everything before adding
+             * a vt2 attribute.
+             */
+            void prepare_to_add_vt2_attribute() {
                 vtzero_assert(m_stage == stage::attributes);
                 if (!m_pbf_tags.valid()) {
                     m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
                 }
             }
 
-            /// Helper function to make sure we have everything before adding a property
-            void prepare_to_add_property_vt3() {
+            /**
+             * Helper function to make sure we have everything before adding
+             * a vt3 attribute.
+             */
+            void prepare_to_add_vt3_attribute() {
                 vtzero_assert(m_stage == stage::attributes || m_stage == stage::geom_attributes);
                 if (!m_pbf_attributes.valid()) {
                     m_pbf_attributes = {m_feature_writer, detail::pbf_feature::attributes};
@@ -109,10 +121,10 @@ namespace vtzero {
             void add_key_internal(index_value idx) {
                 vtzero_assert(idx.valid());
                 if (version() < 3) {
-                    prepare_to_add_property_vt2();
+                    prepare_to_add_vt2_attribute();
                     m_pbf_tags.add_element(idx.value());
                 } else {
-                    prepare_to_add_property_vt3();
+                    prepare_to_add_vt3_attribute();
                     m_pbf_attributes.add_element(idx.value());
                 }
             }

@@ -65,7 +65,7 @@ struct linestring_handler_3d {
 
 }; // struct linestring_handler_3d
 
-static void test_linestring_builder(bool with_id, bool with_prop) {
+static void test_linestring_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -81,7 +81,7 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
         fbuilder.set_point(vtzero::point_2d{20, 30});
         fbuilder.set_point(vtzero::point_2d{30, 40});
 
-        if (with_prop) {
+        if (with_attr) {
             fbuilder.add_property("foo", "bar");
         }
 
@@ -108,19 +108,19 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("linestring builder without id/without properties") {
+TEST_CASE("linestring builder without id/without attributes") {
     test_linestring_builder(false, false);
 }
 
-TEST_CASE("linestring builder without id/with properties") {
+TEST_CASE("linestring builder without id/with attributes") {
     test_linestring_builder(false, true);
 }
 
-TEST_CASE("linestring builder with id/without properties") {
+TEST_CASE("linestring builder with id/without attributes") {
     test_linestring_builder(true, false);
 }
 
-TEST_CASE("linestring builder with id/with properties") {
+TEST_CASE("linestring builder with id/with attributes") {
     test_linestring_builder(true, true);
 }
 
@@ -140,7 +140,7 @@ TEST_CASE("Calling add_linestring() with bad values throws assert") {
     }
 }
 
-static void test_multilinestring_builder(bool with_id, bool with_prop) {
+static void test_multilinestring_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
@@ -158,7 +158,7 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
     fbuilder.set_point(vtzero::point_2d{1, 2});
     fbuilder.set_point(vtzero::point_2d{2, 1});
 
-    if (with_prop) {
+    if (with_attr) {
         fbuilder.add_property("foo", vtzero::encoded_property_value{"bar"});
     }
 
@@ -185,19 +185,19 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
 }
 
 
-TEST_CASE("Multilinestring builder without id/without properties") {
+TEST_CASE("Multilinestring builder without id/without attributes") {
     test_multilinestring_builder(false, false);
 }
 
-TEST_CASE("Multilinestring builder without id/with properties") {
+TEST_CASE("Multilinestring builder without id/with attributes") {
     test_multilinestring_builder(false, true);
 }
 
-TEST_CASE("Multilinestring builder with id/without properties") {
+TEST_CASE("Multilinestring builder with id/without attributes") {
     test_multilinestring_builder(true, false);
 }
 
-TEST_CASE("Multilinestring builder with id/with properties") {
+TEST_CASE("Multilinestring builder with id/with attributes") {
     test_multilinestring_builder(true, true);
 }
 

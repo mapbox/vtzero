@@ -237,7 +237,7 @@ TEST_CASE("MVT test 001: Empty tile") {
     REQUIRE(tile.count_layers() == 0); // NOLINT(readability-container-size-empty)
 }
 
-TEST_CASE("MVT test 002: Tile with single point feature without id") {
+TEST_CASE("MVT test 002: Tile with version 2 layer with single point feature without id") {
     std::string buffer{open_tile("002/tile.mvt")};
     const vtzero::vector_tile tile{buffer};
 
@@ -254,7 +254,7 @@ TEST_CASE("MVT test 002: Tile with single point feature without id") {
     REQUIRE(handler.data == expected);
 }
 
-TEST_CASE("MVT test 003: Tile with single point with missing geometry type") {
+TEST_CASE("MVT test 003: Tile with version 2 layer with single point with missing geometry type") {
     std::string buffer{open_tile("003/tile.mvt")};
     const vtzero::vector_tile tile{buffer};
 
@@ -264,14 +264,14 @@ TEST_CASE("MVT test 003: Tile with single point with missing geometry type") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
 }
 
-TEST_CASE("MVT test 004: Tile with single point with missing geometry") {
+TEST_CASE("MVT test 004: Tile with version 2 layer with single point with missing geometry") {
     std::string buffer{open_tile("004/tile.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_THROWS_AS(check_layer(tile), const vtzero::format_exception&);
 }
 
-TEST_CASE("MVT test 005: Tile with single point with broken tags array") {
+TEST_CASE("MVT test 005: Tile with version 2 layer with single point with broken tags array") {
     std::string buffer{open_tile("005/tile.mvt")};
     const vtzero::vector_tile tile{buffer};
 
@@ -289,7 +289,7 @@ TEST_CASE("MVT test 005: Tile with single point with broken tags array") {
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::format_exception&);
 }
 
-TEST_CASE("MVT test 006: Tile with single point with invalid GeomType") {
+TEST_CASE("MVT test 006: Tile with version 2 layer with single point with invalid GeomType") {
     std::string buffer{open_tile("006/tile.mvt")};
     const vtzero::vector_tile tile{buffer};
 
@@ -394,7 +394,7 @@ TEST_CASE("MVT test 015: Two layers with the same name") {
     REQUIRE(layer.name() == "hello");
 }
 
-TEST_CASE("MVT test 016: Valid unknown geometry") {
+TEST_CASE("MVT test 016: Version 2 layer with valid unknown geometry") {
     std::string buffer{open_tile("016/tile.mvt")};
     const vtzero::vector_tile tile{buffer};
 
@@ -402,7 +402,7 @@ TEST_CASE("MVT test 016: Valid unknown geometry") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
 }
 
-TEST_CASE("MVT test 017: Valid point geometry") {
+TEST_CASE("MVT test 017: Version 2 layer with valid point geometry") {
     std::string buffer{open_tile("017/tile.mvt")};
     const vtzero::vector_tile tile{buffer};
 
@@ -428,7 +428,7 @@ TEST_CASE("MVT test 017: Valid point geometry") {
     }
 }
 
-TEST_CASE("MVT test 018: Valid linestring geometry") {
+TEST_CASE("MVT test 018: Version 2 layer with valid linestring geometry") {
     std::string buffer = open_tile("018/tile.mvt");
     const vtzero::vector_tile tile{buffer};
 
@@ -451,7 +451,7 @@ TEST_CASE("MVT test 018: Valid linestring geometry") {
     }
 }
 
-TEST_CASE("MVT test 019: Valid polygon geometry") {
+TEST_CASE("MVT test 019: Version 2 layer with valid polygon geometry") {
     std::string buffer = open_tile("019/tile.mvt");
     const vtzero::vector_tile tile{buffer};
 
@@ -474,7 +474,7 @@ TEST_CASE("MVT test 019: Valid polygon geometry") {
     }
 }
 
-TEST_CASE("MVT test 020: Valid multipoint geometry") {
+TEST_CASE("MVT test 020: Version 2 layer with valid multipoint geometry") {
     std::string buffer = open_tile("020/tile.mvt");
     const vtzero::vector_tile tile{buffer};
 
@@ -490,7 +490,7 @@ TEST_CASE("MVT test 020: Valid multipoint geometry") {
     REQUIRE(handler.data == expected);
 }
 
-TEST_CASE("MVT test 021: Valid multilinestring geometry") {
+TEST_CASE("MVT test 021: Version 2 layer with valid multilinestring geometry") {
     std::string buffer = open_tile("021/tile.mvt");
     const vtzero::vector_tile tile{buffer};
 
@@ -506,7 +506,7 @@ TEST_CASE("MVT test 021: Valid multilinestring geometry") {
     REQUIRE(handler.data == expected);
 }
 
-TEST_CASE("MVT test 022: Valid multipolygon geometry") {
+TEST_CASE("MVT test 022: Version 2 layer with valid multipolygon geometry") {
     std::string buffer = open_tile("022/tile.mvt");
     const vtzero::vector_tile tile{buffer};
 

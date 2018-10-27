@@ -163,7 +163,7 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
         fbuilder.commit();
     }
 
-    { // explicit commit after properties
+    { // explicit commit after attributes
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
         fbuilder.add_point(10, 10);
@@ -294,7 +294,7 @@ TEST_CASE("Rollback feature") {
         fbuilder.rollback();
     }
 
-    { // rollback after properties
+    { // rollback after attributes
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(5);
         fbuilder.add_point(20, 20);
@@ -308,7 +308,7 @@ TEST_CASE("Rollback feature") {
         fbuilder.add_point(10, 10);
     }
 
-    { // implicit rollback after properties
+    { // implicit rollback after attributes
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(7);
         fbuilder.add_point(10, 10);

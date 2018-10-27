@@ -51,7 +51,7 @@ TEST_CASE("iterate over all attributes of a feature") {
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
-struct PropertyHandler {
+struct AttributeHandler {
 
     int count_ki = 0;
     int count_k = 0;
@@ -83,16 +83,16 @@ struct PropertyHandler {
         }
     }
 
-}; // class PropertyHandler
+}; // class AttributeHandler
 
-TEST_CASE("decode properties of a feature") {
+TEST_CASE("decode attributes of a feature") {
     const auto data = load_test_tile();
     const vtzero::vector_tile tile{data};
     const auto layer = tile.get_layer_by_name("bridge");
     const auto feature = *layer.begin();
     REQUIRE(feature);
 
-    PropertyHandler handler;
+    AttributeHandler handler;
     feature.decode_attributes(handler);
     REQUIRE(handler.count_ki == 4);
     REQUIRE(handler.count_k == 4);
@@ -126,7 +126,7 @@ public:
 
 }; // class MapHandler
 
-TEST_CASE("decode properties of a feature into map") {
+TEST_CASE("decode attributes of a feature into map") {
     const auto data = load_test_tile();
     const vtzero::vector_tile tile{data};
     const auto layer = tile.get_layer_by_name("bridge");

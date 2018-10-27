@@ -775,7 +775,7 @@ namespace vtzero {
         template <typename TIterator>
         void skip_complex_value(std::size_t depth, TIterator& it, TIterator end) {
             if (it == end) {
-                throw format_exception{"Properties list is missing value"};
+                throw format_exception{"Attributes list is missing value"};
             }
 
             const uint64_t complex_value = *it++;
@@ -799,7 +799,7 @@ namespace vtzero {
                     --vp;
                     ++it; // skip key
                     if (it == end) {
-                        throw format_exception{"Properties map is missing value"};
+                        throw format_exception{"Attributes map is missing value"};
                     }
                     skip_complex_value(depth + 1, it, end);
                 }
@@ -809,7 +809,7 @@ namespace vtzero {
         template <typename THandler, typename TIterator>
         bool decode_complex_value(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end) {
             if (it == end) {
-                throw format_exception{"Properties list is missing value"};
+                throw format_exception{"Attributes list is missing value"};
             }
 
             const uint64_t complex_value = *it++;
@@ -953,7 +953,7 @@ namespace vtzero {
                 case detail::complex_value_type::cvt_number_list: {
                     index_value index{static_cast<uint32_t>(*it++)};
                     if (it == end) {
-                        throw format_exception{"Properties list is missing value"};
+                        throw format_exception{"Attributes list is missing value"};
                     }
                     if (!detail::call_start_number_list<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), index, depth)) {
                         return false;
@@ -961,7 +961,7 @@ namespace vtzero {
                     int64_t value = 0;
                     while (vp > 0) {
                         if (it == end) {
-                            throw format_exception{"Properties list is missing value"};
+                            throw format_exception{"Attributes list is missing value"};
                         }
                         --vp;
                         const auto encoded_value = *it++;
