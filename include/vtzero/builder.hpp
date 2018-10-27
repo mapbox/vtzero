@@ -166,13 +166,13 @@ namespace vtzero {
          * "geometry" stage.
          */
         void enter_stage_geometry(GeomType type) {
-            if (m_stage == detail::stage::id || m_stage == detail::stage::has_id) {
-                m_stage = detail::stage::geometry;
+            if (m_stage == detail::stage::want_id || m_stage == detail::stage::has_id) {
+                m_stage = detail::stage::want_geometry;
                 this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(type));
                 this->m_pbf_geometry = {this->m_feature_writer, detail::pbf_feature::geometry};
                 return;
             }
-            vtzero_assert(m_stage == detail::stage::geometry);
+            vtzero_assert(m_stage == detail::stage::want_geometry);
         }
 
         /**
@@ -180,7 +180,8 @@ namespace vtzero {
          * "attributes" stage.
          */
         void enter_stage_attributes() {
-            if (m_stage == detail::stage::geometry) {
+            vtzero_assert(version() == 3);
+            if (m_stage == detail::stage::want_geometry) {
                 m_pbf_geometry.commit();
                 m_elevations.serialize(m_feature_writer);
                 vtzero_assert(m_num_knots.is_zero());
@@ -188,10 +189,37 @@ namespace vtzero {
                     m_feature_writer.add_packed_uint64(detail::pbf_feature::spline_knots, knots().cbegin(), knots().cend());
                     knots().clear();
                 }
-                m_stage = detail::stage::attributes;
+                m_pbf_attributes = {m_feature_writer, detail::pbf_feature::attributes};
+                m_stage = detail::stage::want_attrs;
                 return;
             }
-            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
+            if (m_stage == detail::stage::has_geometry) {
+                m_pbf_attributes = {m_feature_writer, detail::pbf_feature::attributes};
+                m_stage = detail::stage::want_attrs;
+                return;
+            }
+            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
+        }
+
+        /**
+         * Enter the "tags" stage. Do nothing if we are already in the
+         * "tags" stage.
+         */
+        void enter_stage_tags() {
+            if (m_stage == detail::stage::want_geometry) {
+                m_pbf_geometry.commit();
+                m_elevations.serialize(m_feature_writer);
+                vtzero_assert(m_num_knots.is_zero());
+                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+                m_stage = detail::stage::want_tags;
+                return;
+            }
+            if (m_stage == detail::stage::has_geometry) {
+                m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
+                m_stage = detail::stage::want_tags;
+                return;
+            }
+            vtzero_assert(m_stage == detail::stage::want_tags && "Must be in stage 'want_geometry', 'has_geometry', or 'want_tags'");
         }
 
         /// Add specified point to the data doing the zigzag encoding.
@@ -254,15 +282,15 @@ namespace vtzero {
          * you are writing the first geometric attribute.
          */
         void switch_to_geometric_attributes() {
-            if (m_stage == detail::stage::geometry) {
+            if (m_stage == detail::stage::want_geometry) {
                 m_pbf_geometry.commit();
             } else {
-                vtzero_assert(m_stage == detail::stage::attributes);
+                vtzero_assert(m_stage == detail::stage::has_geometry || m_stage == detail::stage::want_attrs);
                 if (m_pbf_attributes.valid()) {
                     m_pbf_attributes.commit();
                 }
             }
-            m_stage = detail::stage::geom_attributes;
+            m_stage = detail::stage::want_geom_attrs;
             m_pbf_attributes = {m_feature_writer, detail::pbf_feature::geometric_attributes};
         }
 
@@ -272,13 +300,13 @@ namespace vtzero {
          * @param feature The feature to copy the geometry from.
          */
         void copy_geometry(const feature& feature) {
-            vtzero_assert(m_stage == detail::stage::id || m_stage == detail::stage::has_id);
+            vtzero_assert(m_stage == detail::stage::want_id || m_stage == detail::stage::has_id);
             this->m_feature_writer.add_enum(detail::pbf_feature::type, static_cast<int32_t>(feature.geometry_type()));
             this->m_feature_writer.add_string(detail::pbf_feature::geometry, feature.geometry_data());
             if (feature.has_3d_geometry()) {
                 this->m_feature_writer.add_string(detail::pbf_feature::elevations, feature.elevations_data());
             }
-            m_stage = detail::stage::attributes;
+            m_stage = detail::stage::has_geometry;
         }
 
         /**
@@ -292,9 +320,8 @@ namespace vtzero {
          */
         template <typename TProp>
         void add_property(TProp&& prop) {
-            this->enter_stage_attributes();
             vtzero_assert(version() < 3);
-            prepare_to_add_vt2_attribute();
+            this->enter_stage_tags();
             add_property_impl_vt2(std::forward<TProp>(prop));
         }
 
@@ -313,9 +340,8 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_property(TKey&& key, TValue&& value) {
-            this->enter_stage_attributes();
             vtzero_assert(version() < 3);
-            prepare_to_add_vt2_attribute();
+            this->enter_stage_tags();
             add_property_impl_vt2(std::forward<TKey>(key), std::forward<TValue>(value));
         }
 
@@ -334,11 +360,10 @@ namespace vtzero {
          */
         template <typename TKey>
         void attribute_key(TKey&& key, std::size_t /*depth*/ = 0) {
-            this->enter_stage_attributes();
             if (version() < 3) {
-                prepare_to_add_vt2_attribute();
+                this->enter_stage_tags();
             } else {
-                prepare_to_add_vt3_attribute();
+                this->enter_stage_attributes();
             }
             add_key_internal(std::forward<TKey>(key));
         }
@@ -357,10 +382,11 @@ namespace vtzero {
          */
         template <typename TValue>
         void attribute_value(TValue&& value, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
             if (version() < 3) {
+                vtzero_assert(m_stage == detail::stage::want_tags && "XXX");
                 add_value_internal_vt2(std::forward<TValue>(value));
             } else {
+                vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
                 add_value_internal_vt3(std::forward<TValue>(value));
             }
         }
@@ -380,13 +406,12 @@ namespace vtzero {
          */
         template <typename TKey, typename TValue>
         void add_scalar_attribute(TKey&& key, TValue&& value) {
-            this->enter_stage_attributes();
             if (version() < 3) {
-                prepare_to_add_vt2_attribute();
+                this->enter_stage_tags();
                 add_key_internal(std::forward<TKey>(key));
                 add_value_internal_vt2(std::forward<TValue>(value));
             } else {
-                prepare_to_add_vt3_attribute();
+                this->enter_stage_attributes();
                 add_key_internal(std::forward<TKey>(key));
                 add_value_internal_vt3(std::forward<TValue>(value));
             }
@@ -407,7 +432,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_list_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
+            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_list, size);
         }
@@ -428,7 +453,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_number_list(std::size_t size, index_value index, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
+            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
             add_direct_value(index.value());
@@ -453,9 +478,8 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_number_list_with_key(TKey&& key, std::size_t size, index_value index) {
-            this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
-            prepare_to_add_vt3_attribute();
+            this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_number_list, size);
             add_direct_value(index.value());
@@ -470,7 +494,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void number_list_value(int64_t value, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
+            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_direct_value(protozero::encode_zigzag64(value - m_value) + 1);
             m_value = value;
@@ -482,7 +506,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void number_list_null_value(std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
+            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
             add_direct_value(0);
         }
@@ -505,9 +529,8 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_list_attribute_with_key(TKey&& key, std::size_t size) {
-            this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "list attributes are only allowed in version 3 layers");
-            prepare_to_add_vt3_attribute();
+            this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_list, size);
         }
@@ -527,7 +550,7 @@ namespace vtzero {
          * @pre layer version is 3
          */
         void start_map_attribute(std::size_t size, std::size_t /*depth*/ = 0) {
-            vtzero_assert(m_stage == detail::stage::attributes || m_stage == detail::stage::geom_attributes);
+            vtzero_assert(m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs);
             vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
             add_complex_value(detail::complex_value_type::cvt_map, size);
         }
@@ -550,9 +573,8 @@ namespace vtzero {
          */
         template <typename TKey>
         void start_map_attribute_with_key(TKey&& key, std::size_t size) {
-            this->enter_stage_attributes();
             vtzero_assert(version() == 3 && "map attributes are only allowed in version 3 layers");
-            prepare_to_add_vt3_attribute();
+            this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
             add_complex_value(detail::complex_value_type::cvt_map, size);
         }
@@ -611,7 +633,11 @@ namespace vtzero {
          * @param feature The feature to copy the attributes from.
          */
         void copy_attributes(const feature& feature) {
-            this->enter_stage_attributes();
+            if (version() < 3) {
+                this->enter_stage_tags();
+            } else {
+                this->enter_stage_attributes();
+            }
             feature.decode_attributes(*this);
         }
 
@@ -716,10 +742,13 @@ namespace vtzero {
          * @pre You must be in stage "id" or "has_id" to call this function.
          */
         void add_point(const point<Dimensions> p) {
-            vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
+            vtzero_assert(this->m_stage == detail::stage::want_id || this->m_stage == detail::stage::has_id);
             this->enter_stage_geometry(GeomType::POINT);
             this->m_pbf_geometry.add_element(detail::command_move_to(1));
             this->add_point_impl(p);
+            this->m_pbf_geometry.commit();
+            this->m_elevations.serialize(this->m_feature_writer);
+            this->m_stage = detail::stage::has_geometry;
         }
 
         /**
@@ -746,7 +775,7 @@ namespace vtzero {
          * @post You are in stage "geometry" after calling this function.
          */
         void add_points(uint32_t count) {
-            vtzero_assert(this->m_stage == detail::stage::id || this->m_stage == detail::stage::has_id);
+            vtzero_assert(this->m_stage == detail::stage::want_id || this->m_stage == detail::stage::has_id);
             this->enter_stage_geometry(GeomType::POINT);
             vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
             this->m_num_points.set(count);
@@ -764,7 +793,7 @@ namespace vtzero {
          * @pre You must be in stage "geometry" to call this function.
          */
         void set_point(const point<Dimensions> p) {
-            vtzero_assert(this->m_stage == detail::stage::geometry);
+            vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(!this->m_num_points.is_zero());
             this->m_num_points.decrement();
             this->set_point_impl(p);
@@ -969,7 +998,7 @@ namespace vtzero {
          * @pre You must be in stage "geometry" to call this function.
          */
         void close_ring() {
-            vtzero_assert(this->m_stage == detail::stage::geometry);
+            vtzero_assert(this->m_stage == detail::stage::want_geometry);
             vtzero_assert(this->m_num_points.value() == 1 &&
                           "wrong number of points in ring");
             this->m_pbf_geometry.add_element(detail::command_close_path());

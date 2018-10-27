@@ -31,24 +31,31 @@ namespace vtzero {
 
     namespace detail {
 
-        // Features are built in these stages. The feature builder start
-        // out in stage "id". After an integer or string id has been set,
-        // it goes to stage "has_id". Any code adding (parts of) a geometry
-        // will switch it to the "geometry" stage and any code adding
-        // attributes will switch it to the "attributes" stage. After a
-        // commit or rollback it will be in the "done" stage.
+        // Features are built in these stages. The feature builder starts
+        // out in stage "want_id". After that the builder progresses through
+        // (some of) the other stages until it is "done".
         enum class stage {
-            id              = 0,
-            has_id          = 1,
-            geometry        = 2,
-            attributes      = 3,
-            geom_attributes = 4,
-            done            = 5
+            want_id         = 0, // start stage, waiting for ID
+            has_id          = 1, // ID has been set
+            want_geometry   = 2, // geometry is being set
+            has_geometry    = 3, // full geometry has been set
+            want_tags       = 4, // tags (version 2) are being set
+            want_attrs      = 5, // attributes (version 3) are being set
+            want_geom_attrs = 6, // geometric attributes are being set
+            done            = 7  // after commit or rollback
         };
 
         class feature_builder_base {
 
             layer_builder_impl* m_layer;
+
+            void set_integer_id_impl(const uint64_t id) {
+                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
+            }
+
+            void set_string_id_impl(const data_view& id) {
+                m_feature_writer.add_string(detail::pbf_feature::string_id, id);
+            }
 
         protected:
 
@@ -56,7 +63,7 @@ namespace vtzero {
             protozero::packed_field_uint32 m_pbf_tags;
             protozero::packed_field_uint64 m_pbf_attributes;
 
-            stage m_stage = stage::id;
+            stage m_stage = stage::want_id;
 
             explicit feature_builder_base(layer_builder_impl* layer) :
                 m_layer(layer),
@@ -88,43 +95,11 @@ namespace vtzero {
                 return m_layer->knots();
             }
 
-            void set_integer_id_impl(const uint64_t id) {
-                m_feature_writer.add_uint64(detail::pbf_feature::id, id);
-            }
-
-            void set_string_id_impl(const data_view& id) {
-                m_feature_writer.add_string(detail::pbf_feature::string_id, id);
-            }
-
-            /**
-             * Helper function to make sure we have everything before adding
-             * a vt2 attribute.
-             */
-            void prepare_to_add_vt2_attribute() {
-                vtzero_assert(m_stage == stage::attributes);
-                if (!m_pbf_tags.valid()) {
-                    m_pbf_tags = {m_feature_writer, detail::pbf_feature::tags};
-                }
-            }
-
-            /**
-             * Helper function to make sure we have everything before adding
-             * a vt3 attribute.
-             */
-            void prepare_to_add_vt3_attribute() {
-                vtzero_assert(m_stage == stage::attributes || m_stage == stage::geom_attributes);
-                if (!m_pbf_attributes.valid()) {
-                    m_pbf_attributes = {m_feature_writer, detail::pbf_feature::attributes};
-                }
-            }
-
             void add_key_internal(index_value idx) {
                 vtzero_assert(idx.valid());
                 if (version() < 3) {
-                    prepare_to_add_vt2_attribute();
                     m_pbf_tags.add_element(idx.value());
                 } else {
-                    prepare_to_add_vt3_attribute();
                     m_pbf_attributes.add_element(idx.value());
                 }
             }
@@ -209,40 +184,33 @@ namespace vtzero {
             }
 
             void add_value_internal_vt3(const std::string& text) {
-                vtzero_assert(m_stage == stage::attributes || m_stage == stage::geom_attributes);
+                vtzero_assert(m_stage == stage::want_attrs || m_stage == stage::want_geom_attrs);
                 data_view value{text};
                 const auto idx = m_layer->add_string_value(value);
                 add_complex_value(detail::complex_value_type::cvt_string, idx.value());
             }
 
             void add_property_impl_vt2(const property& property) {
-                vtzero_assert(m_stage == stage::attributes);
+                vtzero_assert(m_stage == stage::want_tags);
                 add_key_internal(property.key());
                 add_value_internal_vt2(property.value());
             }
 
             void add_property_impl_vt2(const index_value_pair idxs) {
-                vtzero_assert(m_stage == stage::attributes);
+                vtzero_assert(m_stage == stage::want_tags);
                 add_key_internal(idxs.key());
                 add_value_internal_vt2(idxs.value());
             }
 
             template <typename TKey, typename TValue>
             void add_property_impl_vt2(TKey&& key, TValue&& value) {
-                vtzero_assert(m_stage == stage::attributes);
+                vtzero_assert(m_stage == stage::want_tags);
                 add_key_internal(std::forward<TKey>(key));
                 add_value_internal_vt2(std::forward<TValue>(value));
             }
 
-            template <typename TKey, typename TValue>
-            void add_property_impl_vt3(TKey&& key, TValue&& value) {
-                vtzero_assert(m_stage == stage::attributes || m_stage == stage::geom_attributes);
-                add_key_internal(std::forward<TKey>(key));
-                add_value_internal_vt3(std::forward<TValue>(value));
-            }
-
             void do_commit() {
-                vtzero_assert(m_stage == stage::geometry || m_stage == stage::attributes || m_stage == stage::geom_attributes);
+                vtzero_assert(m_stage == stage::want_geometry || m_stage == stage::has_geometry || m_stage == stage::want_tags || m_stage == stage::want_attrs || m_stage == stage::want_geom_attrs);
                 if (m_pbf_tags.valid()) {
                     m_pbf_tags.commit();
                 }
@@ -277,7 +245,7 @@ namespace vtzero {
              * @param id The ID.
              */
             void set_integer_id(const uint64_t id) {
-                vtzero_assert(m_stage == stage::id);
+                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to set id");
                 set_integer_id_impl(id);
                 m_stage = stage::has_id;
             }
@@ -292,7 +260,7 @@ namespace vtzero {
              */
             void set_string_id(const data_view& id) {
                 vtzero_assert(version() == 3 && "string_id is only allowed in version 3");
-                vtzero_assert(m_stage == stage::id);
+                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to set id");
                 set_string_id_impl(id);
                 m_stage = stage::has_id;
             }
@@ -310,7 +278,7 @@ namespace vtzero {
              * @param feature The feature to copy the ID from.
              */
             void copy_id(const feature& feature) {
-                vtzero_assert(m_stage == stage::id);
+                vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to set id");
                 if (feature.has_integer_id()) {
                     set_integer_id_impl(feature.id());
                 } else if (version() == 3 && feature.has_string_id()) {
