@@ -60,6 +60,8 @@ namespace vtzero {
 
     public:
 
+        /// @cond usual iterator functions not documented
+
         using iterator_category = std::forward_iterator_tag;
         using value_type        = layer;
         using difference_type   = std::ptrdiff_t;
@@ -108,6 +110,8 @@ namespace vtzero {
         friend bool operator!=(layer_iterator lhs, layer_iterator rhs) noexcept {
             return !(lhs == rhs);
         }
+
+        /// @endcond
 
     }; // class layer_iterator
 

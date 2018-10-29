@@ -66,6 +66,8 @@ namespace vtzero {
 
     public:
 
+        /// @cond usual iterator functions not documented
+
         using iterator_category = std::forward_iterator_tag;
         using value_type        = feature;
         using difference_type   = std::ptrdiff_t;
@@ -115,6 +117,8 @@ namespace vtzero {
         friend bool operator!=(feature_iterator lhs, feature_iterator rhs) noexcept {
             return !(lhs == rhs);
         }
+
+        /// @endcond
 
     }; // class feature_iterator
 
