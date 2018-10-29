@@ -781,19 +781,19 @@ namespace vtzero {
             const uint64_t complex_value = *it++;
 
             const auto vt = complex_value & 0x0fu;
-            if (vt > static_cast<std::size_t>(detail::complex_value_type::max)) {
+            if (vt > static_cast<std::size_t>(complex_value_type::max)) {
                 throw format_exception{"unknown complex value type: " + std::to_string(vt)};
             }
 
-            const auto cvt = static_cast<detail::complex_value_type>(vt);
+            const auto cvt = static_cast<complex_value_type>(vt);
 
-            if (cvt == detail::complex_value_type::cvt_list) {
+            if (cvt == complex_value_type::cvt_list) {
                 auto vp = complex_value >> 4u;
                 while (vp > 0) {
                     --vp;
                     skip_complex_value(depth + 1, it, end);
                 }
-            } else if (cvt == detail::complex_value_type::cvt_map) {
+            } else if (cvt == complex_value_type::cvt_map) {
                 auto vp = complex_value >> 4u;
                 while (vp > 0) {
                     --vp;
@@ -903,36 +903,36 @@ namespace vtzero {
             const uint64_t complex_value = *it++;
 
             const auto vt = complex_value & 0x0fu;
-            if (vt > static_cast<std::size_t>(detail::complex_value_type::max)) {
+            if (vt > static_cast<std::size_t>(complex_value_type::max)) {
                 throw format_exception{"unknown complex value type: " + std::to_string(vt)};
             }
 
             auto vp = complex_value >> 4u;
-            switch (static_cast<detail::complex_value_type>(vt)) {
-                case detail::complex_value_type::cvt_inline_sint:
-                    if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), protozero::decode_zigzag64(vp), depth)) {
+            switch (static_cast<complex_value_type>(vt)) {
+                case complex_value_type::cvt_inline_sint:
+                    if (!call_attribute_value<THandler>(std::forward<THandler>(handler), protozero::decode_zigzag64(vp), depth)) {
                         return false;
                     }
                     break;
-                case detail::complex_value_type::cvt_inline_uint:
-                    if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), vp, depth)) {
+                case complex_value_type::cvt_inline_uint:
+                    if (!call_attribute_value<THandler>(std::forward<THandler>(handler), vp, depth)) {
                         return false;
                     }
                     break;
-                case detail::complex_value_type::cvt_bool:
+                case complex_value_type::cvt_bool:
                     switch (vp) {
                         case 0:
-                            if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), false, depth)) {
+                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), false, depth)) {
                                 return false;
                             }
                             break;
                         case 1:
-                            if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), true, depth)) {
+                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), true, depth)) {
                                 return false;
                             }
                             break;
                         case 2:
-                            if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), null_type{}, depth)) {
+                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), null_type{}, depth)) {
                                 return false;
                             }
                             break;
@@ -940,78 +940,78 @@ namespace vtzero {
                             throw format_exception{"invalid value for bool/null value: " + std::to_string(vp)};
                     }
                     break;
-                case detail::complex_value_type::cvt_double:
+                case complex_value_type::cvt_double:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
                         // don't care which index it points to
                         const index_value idx{static_cast<uint32_t>(vp)};
-                        if (!detail::call_double_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
+                        if (!call_double_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value_double<THandler>(std::forward<THandler>(handler), lookup::double_index, layer, idx, depth)) {
+                        if (!call_attribute_value_double<THandler>(std::forward<THandler>(handler), lookup::double_index, layer, idx, depth)) {
                             return false;
                         }
                     }
                     break;
-                case detail::complex_value_type::cvt_float:
+                case complex_value_type::cvt_float:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
                         // don't care which index it points to
                         const index_value idx{static_cast<uint32_t>(vp)};
-                        if (!detail::call_float_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
+                        if (!call_float_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value_float<THandler>(std::forward<THandler>(handler), lookup::float_index, layer, idx, depth)) {
+                        if (!call_attribute_value_float<THandler>(std::forward<THandler>(handler), lookup::float_index, layer, idx, depth)) {
                             return false;
                         }
                     }
                     break;
-                case detail::complex_value_type::cvt_string:
+                case complex_value_type::cvt_string:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
                         // don't care which index it points to
                         const index_value idx{static_cast<uint32_t>(vp)};
-                        if (!detail::call_string_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
+                        if (!call_string_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), lookup::string_index, layer, idx, depth)) {
+                        if (!call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), lookup::string_index, layer, idx, depth)) {
                             return false;
                         }
                     }
                     break;
-                case detail::complex_value_type::cvt_sint:
+                case complex_value_type::cvt_sint:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
                         // don't care which index it points to
                         const index_value idx{static_cast<uint32_t>(vp)};
-                        if (!detail::call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
+                        if (!call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), lookup::int_index, layer, idx, depth)) {
+                        if (!call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), lookup::int_index, layer, idx, depth)) {
                             return false;
                         }
                     }
                     break;
-                case detail::complex_value_type::cvt_uint:
+                case complex_value_type::cvt_uint:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
                         // don't care which index it points to
                         const index_value idx{static_cast<uint32_t>(vp)};
-                        if (!detail::call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
+                        if (!call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), lookup::uint_index, layer, idx, depth)) {
+                        if (!call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), lookup::uint_index, layer, idx, depth)) {
                             return false;
                         }
                     }
                     break;
-                case detail::complex_value_type::cvt_list:
-                    if (!detail::call_start_list_attribute<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), depth)) {
+                case complex_value_type::cvt_list:
+                    if (!call_start_list_attribute<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), depth)) {
                         return false;
                     }
                     while (vp > 0) {
@@ -1020,12 +1020,12 @@ namespace vtzero {
                             return false;
                         }
                     }
-                    if (!detail::call_end_list_attribute<THandler>(std::forward<THandler>(handler), depth)) {
+                    if (!call_end_list_attribute<THandler>(std::forward<THandler>(handler), depth)) {
                         return false;
                     }
                     break;
-                case detail::complex_value_type::cvt_map:
-                    if (!detail::call_start_map_attribute<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), depth)) {
+                case complex_value_type::cvt_map:
+                    if (!call_start_map_attribute<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), depth)) {
                         return false;
                     }
                     while (vp > 0) {
@@ -1034,16 +1034,16 @@ namespace vtzero {
                             return false;
                         }
                     }
-                    if (!detail::call_end_map_attribute<THandler>(std::forward<THandler>(handler), depth)) {
+                    if (!call_end_map_attribute<THandler>(std::forward<THandler>(handler), depth)) {
                         return false;
                     }
                     break;
-                case detail::complex_value_type::cvt_number_list: {
+                case complex_value_type::cvt_number_list: {
                     index_value index{static_cast<uint32_t>(*it++)};
                     if (it == end) {
                         throw format_exception{"Attributes list is missing value"};
                     }
-                    if (!detail::call_start_number_list<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), index, depth)) {
+                    if (!call_start_number_list<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), index, depth)) {
                         return false;
                     }
                     int64_t value = 0;
@@ -1054,17 +1054,17 @@ namespace vtzero {
                         --vp;
                         const auto encoded_value = *it++;
                         if (encoded_value == 0) { // null
-                            if (!detail::call_number_list_null_value<THandler>(std::forward<THandler>(handler), depth)) {
+                            if (!call_number_list_null_value<THandler>(std::forward<THandler>(handler), depth)) {
                                 return false;
                             }
                         } else {
                             value += protozero::decode_zigzag64(encoded_value - 1);
-                            if (!detail::call_number_list_value<THandler>(std::forward<THandler>(handler), value, depth)) {
+                            if (!call_number_list_value<THandler>(std::forward<THandler>(handler), value, depth)) {
                                 return false;
                             }
                         }
                     }
-                    if (!detail::call_end_number_list<THandler>(std::forward<THandler>(handler), depth)) {
+                    if (!call_end_number_list<THandler>(std::forward<THandler>(handler), depth)) {
                         return false;
                     }
                     break;
@@ -1081,12 +1081,12 @@ namespace vtzero {
                 throw out_of_range_exception{ki};
             }
 
-            if (!detail::call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, depth)) {
+            if (!call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, depth)) {
                 skip_complex_value(depth, it, end);
                 return true;
             }
 
-            if (!detail::call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), lookup::key_index, layer, index_value{ki}, depth)) {
+            if (!call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), lookup::key_index, layer, index_value{ki}, depth)) {
                 skip_complex_value(depth, it, end);
                 return true;
             }
