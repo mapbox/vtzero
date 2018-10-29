@@ -147,13 +147,15 @@ namespace vtzero {
 #undef DEF_CALL_WRAPPER3
 // @endcond
 
-        // This overload matches only when the handler has the value() member function of type TValue.
+        // No macro for this one, because it is templated on TValue:
+
+        // This overload matches only when the handler has the attribute_value() member function of type TValue.
         template <typename THandler, typename TValue, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().attribute_value(std::declval<TValue>(), std::declval<std::size_t>()))>::value, int>::type = 0>
         bool call_attribute_value(THandler&& handler, TValue value, std::size_t depth) {
             return std::forward<THandler>(handler).attribute_value(value, depth);
         }
 
-        // This overload matches only when the handler has the value() member function of type TValue.
+        // This overload matches only when the handler has the attribute_value() member function of type TValue.
         template <typename THandler, typename TValue, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().attribute_value(std::declval<TValue>(), std::declval<std::size_t>()))>::value, int>::type = 0>
         bool call_attribute_value(THandler&& handler, TValue value, std::size_t depth) {
             std::forward<THandler>(handler).attribute_value(value, depth);
