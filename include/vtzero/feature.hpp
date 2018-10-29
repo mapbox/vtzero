@@ -119,6 +119,9 @@ namespace vtzero {
         }
 
         template <typename THandler>
+        void decode_tags_impl(THandler&& handler) const;
+
+        template <typename THandler>
         bool decode_attributes_impl(THandler&& handler) const;
 
         template <typename THandler>

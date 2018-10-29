@@ -1097,6 +1097,72 @@ namespace vtzero {
     } // namespace detail
 
     template <typename THandler>
+    void feature::decode_tags_impl(THandler&& handler) const {
+        for (auto it = tags_begin(); it != tags_end();) {
+            const uint32_t ki = *it++;
+            if (!index_value{ki}.valid()) {
+                throw out_of_range_exception{ki};
+            }
+
+            if (it == tags_end()) {
+                throw format_exception{"unpaired attributes key/value indexes (spec 4.4)"};
+            }
+            const uint32_t vi = *it++;
+            if (!index_value{vi}.valid()) {
+                throw out_of_range_exception{vi};
+            }
+
+            if (!detail::call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, static_cast<std::size_t>(0))) {
+                continue;
+            }
+            if (!detail::call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::key_index, *m_layer, index_value{ki}, static_cast<std::size_t>(0))) {
+                continue;
+            }
+            if (!detail::call_value_index<THandler>(std::forward<THandler>(handler), index_value{vi}, static_cast<std::size_t>(0))) {
+                return;
+            }
+
+            switch (m_layer->value(vi).type()) {
+                case property_value_type::string_value:
+                    if (!detail::call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_string, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                        return;
+                    }
+                    break;
+                case property_value_type::float_value:
+                    if (!detail::call_attribute_value_float<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_float, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                        return;
+                    }
+                    break;
+                case property_value_type::double_value:
+                    if (!detail::call_attribute_value_double<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_double, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                        return;
+                    }
+                    break;
+                case property_value_type::int_value:
+                    if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_int, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                        return;
+                    }
+                    break;
+                case property_value_type::uint_value:
+                    if (!detail::call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_uint, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                        return;
+                    }
+                    break;
+                case property_value_type::sint_value:
+                    if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_sint, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                        return;
+                    }
+                    break;
+                case property_value_type::bool_value:
+                    if (!detail::call_attribute_value_bool<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_bool, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                        return;
+                    }
+                    break;
+            }
+        }
+    }
+
+    template <typename THandler>
     bool feature::decode_attributes_impl(THandler&& handler) const {
         const auto end = attributes_end();
         for (auto it = attributes_begin(); it != end;) {
@@ -1112,62 +1178,13 @@ namespace vtzero {
         vtzero_assert(valid());
         vtzero_assert(m_layer != nullptr);
 
-        // vt2 tags
-        for (auto it = tags_begin(); it != tags_end();) {
-            const uint32_t ki = *it++;
-            if (!index_value{ki}.valid()) {
-                throw out_of_range_exception{ki};
-            }
-
-            if (it == tags_end()) {
-                throw format_exception{"unpaired property key/value indexes (spec 4.4)"};
-            }
-            const uint32_t vi = *it++;
-            if (!index_value{vi}.valid()) {
-                throw out_of_range_exception{vi};
-            }
-
-            if (!detail::call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, static_cast<std::size_t>(0))) {
-                continue;
-            }
-            if (!detail::call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::key_index, *m_layer, index_value{ki}, static_cast<std::size_t>(0))) {
-                continue;
-            }
-            if (!detail::call_value_index<THandler>(std::forward<THandler>(handler), index_value{vi}, static_cast<std::size_t>(0))) {
-                break;
-            }
-
-            bool keep_going = false;
-            switch (m_layer->value(vi).type()) {
-                case property_value_type::string_value:
-                    keep_going = detail::call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_string, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
-                    break;
-                case property_value_type::float_value:
-                    keep_going = detail::call_attribute_value_float<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_float, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
-                    break;
-                case property_value_type::double_value:
-                    keep_going = detail::call_attribute_value_double<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_double, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
-                    break;
-                case property_value_type::int_value:
-                    keep_going = detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_int, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
-                    break;
-                case property_value_type::uint_value:
-                    keep_going = detail::call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_uint, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
-                    break;
-                case property_value_type::sint_value:
-                    keep_going = detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_sint, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
-                    break;
-                case property_value_type::bool_value:
-                    keep_going = detail::call_attribute_value_bool<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_bool, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
-                    break;
-            }
-            if (!keep_going) {
-                break;
-            }
+        if (!tags_data().empty()) {
+            decode_tags_impl(std::forward<THandler>(handler));
         }
 
-        // vt3 attributes
-        decode_attributes_impl(std::forward<THandler>(handler));
+        if (!attributes_data().empty()) {
+            decode_attributes_impl(std::forward<THandler>(handler));
+        }
 
         return detail::get_result<THandler>::of(std::forward<THandler>(handler));
     }
