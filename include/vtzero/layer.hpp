@@ -806,6 +806,94 @@ namespace vtzero {
             }
         }
 
+        namespace lookup {
+
+            // These functions are used to look up a value in one of the
+            // tables in the layers.
+
+            inline data_view key_index(const layer& layer, index_value idx) {
+                return layer.key(idx);
+            }
+
+            inline data_view value_index_string(const layer& layer, index_value idx) {
+                return layer.value(idx).string_value();
+            }
+
+            inline float value_index_float(const layer& layer, index_value idx) {
+                return layer.value(idx).float_value();
+            }
+
+            inline double value_index_double(const layer& layer, index_value idx) {
+                return layer.value(idx).double_value();
+            }
+
+            inline int64_t value_index_int(const layer& layer, index_value idx) {
+                return layer.value(idx).int_value();
+            }
+
+            inline uint64_t value_index_uint(const layer& layer, index_value idx) {
+                return layer.value(idx).uint_value();
+            }
+
+            inline int64_t value_index_sint(const layer& layer, index_value idx) {
+                return layer.value(idx).sint_value();
+            }
+
+            inline bool value_index_bool(const layer& layer, index_value idx) {
+                return layer.value(idx).bool_value();
+            }
+
+            inline data_view string_index(const layer& layer, index_value idx) {
+                return layer.string_table().at(idx.value());
+            }
+
+            inline float float_index(const layer& layer, index_value idx) {
+                return layer.float_table().at(idx);
+            }
+
+            inline double double_index(const layer& layer, index_value idx) {
+                return layer.double_table().at(idx);
+            }
+
+            inline int64_t int_index(const layer& layer, index_value idx) {
+                return protozero::decode_zigzag64(layer.int_table().at(idx));
+            }
+
+            inline uint64_t uint_index(const layer& layer, index_value idx) {
+                return layer.int_table().at(idx);
+            }
+
+        } // namespace lookup
+
+        /**
+         * Call a function after doing a lookup on some index in a layer
+         * using the functions from the "lookup" namespace.
+         */
+#define DEF_CALL_WITH_LAYER_WRAPPER(func, ptype) \
+        template <typename THandler, typename TLookupFunc, typename std::enable_if<std::is_same<bool, decltype(std::declval<THandler>().func(std::declval<ptype>(), std::declval<std::size_t>()))>::value, int>::type = 0> \
+        bool call_##func##_##ptype(THandler&& handler, TLookupFunc&& lookup, const layer& layer, index_value idx, std::size_t depth) { \
+            return std::forward<THandler>(handler).func(std::forward<TLookupFunc>(lookup)(layer, idx), depth); \
+        } \
+        template <typename THandler, typename TLookupFunc, typename std::enable_if<std::is_same<void, decltype(std::declval<THandler>().func(std::declval<ptype>(), std::declval<std::size_t>()))>::value, int>::type = 0> \
+        bool call_##func##_##ptype(THandler&& handler, TLookupFunc&& lookup, const layer& layer, index_value idx, std::size_t depth) { \
+            std::forward<THandler>(handler).func(std::forward<TLookupFunc>(lookup)(layer, idx), depth); \
+            return true; \
+        } \
+        template <typename... TArgs> \
+        bool call_##func##_##ptype(TArgs&&... /*unused*/) { \
+            return true; \
+        } \
+
+        DEF_CALL_WITH_LAYER_WRAPPER(attribute_key, data_view)
+        DEF_CALL_WITH_LAYER_WRAPPER(attribute_value, double)
+        DEF_CALL_WITH_LAYER_WRAPPER(attribute_value, float)
+        DEF_CALL_WITH_LAYER_WRAPPER(attribute_value, data_view)
+        DEF_CALL_WITH_LAYER_WRAPPER(attribute_value, int64_t)
+        DEF_CALL_WITH_LAYER_WRAPPER(attribute_value, uint64_t)
+        DEF_CALL_WITH_LAYER_WRAPPER(attribute_value, bool)
+
+#undef DEF_CALL_WITH_LAYER_WRAPPER
+
         template <typename THandler, typename TIterator>
         bool decode_complex_value(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end) {
             if (it == end) {
@@ -861,7 +949,7 @@ namespace vtzero {
                         if (!detail::call_double_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), layer.double_table().at(idx), depth)) {
+                        if (!detail::call_attribute_value_double<THandler>(std::forward<THandler>(handler), lookup::double_index, layer, idx, depth)) {
                             return false;
                         }
                     }
@@ -875,7 +963,7 @@ namespace vtzero {
                         if (!detail::call_float_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), layer.float_table().at(idx), depth)) {
+                        if (!detail::call_attribute_value_float<THandler>(std::forward<THandler>(handler), lookup::float_index, layer, idx, depth)) {
                             return false;
                         }
                     }
@@ -889,7 +977,7 @@ namespace vtzero {
                         if (!detail::call_string_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), layer.string_table().at(vp), depth)) {
+                        if (!detail::call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), lookup::string_index, layer, idx, depth)) {
                             return false;
                         }
                     }
@@ -903,7 +991,7 @@ namespace vtzero {
                         if (!detail::call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), protozero::decode_zigzag64(layer.int_table().at(idx)), depth)) {
+                        if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), lookup::int_index, layer, idx, depth)) {
                             return false;
                         }
                     }
@@ -917,7 +1005,7 @@ namespace vtzero {
                         if (!detail::call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!detail::call_attribute_value<THandler>(std::forward<THandler>(handler), layer.int_table().at(idx), depth)) {
+                        if (!detail::call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), lookup::uint_index, layer, idx, depth)) {
                             return false;
                         }
                     }
@@ -998,7 +1086,7 @@ namespace vtzero {
                 return true;
             }
 
-            if (!detail::call_attribute_key<THandler>(std::forward<THandler>(handler), layer.key(ki), depth)) {
+            if (!detail::call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), lookup::key_index, layer, index_value{ki}, depth)) {
                 skip_complex_value(depth, it, end);
                 return true;
             }
@@ -1042,7 +1130,7 @@ namespace vtzero {
             if (!detail::call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, static_cast<std::size_t>(0))) {
                 continue;
             }
-            if (!detail::call_attribute_key<THandler>(std::forward<THandler>(handler), m_layer->key(ki), static_cast<std::size_t>(0))) {
+            if (!detail::call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::key_index, *m_layer, index_value{ki}, static_cast<std::size_t>(0))) {
                 continue;
             }
             if (!detail::call_value_index<THandler>(std::forward<THandler>(handler), index_value{vi}, static_cast<std::size_t>(0))) {
@@ -1052,25 +1140,25 @@ namespace vtzero {
             bool keep_going = false;
             switch (m_layer->value(vi).type()) {
                 case property_value_type::string_value:
-                    keep_going = detail::call_attribute_value<THandler>(std::forward<THandler>(handler), m_layer->value(vi).string_value(), static_cast<std::size_t>(0));
+                    keep_going = detail::call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_string, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
                     break;
                 case property_value_type::float_value:
-                    keep_going = detail::call_attribute_value<THandler>(std::forward<THandler>(handler), m_layer->value(vi).float_value(), static_cast<std::size_t>(0));
+                    keep_going = detail::call_attribute_value_float<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_float, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
                     break;
                 case property_value_type::double_value:
-                    keep_going = detail::call_attribute_value<THandler>(std::forward<THandler>(handler), m_layer->value(vi).double_value(), static_cast<std::size_t>(0));
+                    keep_going = detail::call_attribute_value_double<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_double, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
                     break;
                 case property_value_type::int_value:
-                    keep_going = detail::call_attribute_value<THandler>(std::forward<THandler>(handler), m_layer->value(vi).int_value(), static_cast<std::size_t>(0));
+                    keep_going = detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_int, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
                     break;
                 case property_value_type::uint_value:
-                    keep_going = detail::call_attribute_value<THandler>(std::forward<THandler>(handler), m_layer->value(vi).uint_value(), static_cast<std::size_t>(0));
+                    keep_going = detail::call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_uint, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
                     break;
                 case property_value_type::sint_value:
-                    keep_going = detail::call_attribute_value<THandler>(std::forward<THandler>(handler), m_layer->value(vi).sint_value(), static_cast<std::size_t>(0));
+                    keep_going = detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_sint, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
                     break;
                 case property_value_type::bool_value:
-                    keep_going = detail::call_attribute_value<THandler>(std::forward<THandler>(handler), m_layer->value(vi).bool_value(), static_cast<std::size_t>(0));
+                    keep_going = detail::call_attribute_value_bool<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_bool, *m_layer, index_value{vi}, static_cast<std::size_t>(0));
                     break;
             }
             if (!keep_going) {

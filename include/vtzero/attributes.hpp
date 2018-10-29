@@ -120,7 +120,6 @@ namespace vtzero {
         }
 
         DEF_CALL_WRAPPER2(key_index, index_value, std::size_t)
-        DEF_CALL_WRAPPER2(attribute_key, data_view, std::size_t)
         DEF_CALL_WRAPPER2(value_index, index_value, std::size_t)
         DEF_CALL_WRAPPER2(double_value_index, index_value, std::size_t)
         DEF_CALL_WRAPPER2(float_value_index, index_value, std::size_t)
