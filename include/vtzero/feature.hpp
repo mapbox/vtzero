@@ -40,6 +40,26 @@ namespace vtzero {
      */
     class feature {
 
+        template <typename T>
+        class typed_data_view : public data_view {
+
+        public:
+
+            using iterator_type = T;
+
+            using data_view::data_view;
+            using data_view::operator=;
+
+            T it_begin() const noexcept {
+                return T{data(), data() + size()};
+            }
+
+            T it_end() const noexcept {
+                return T{data() + size(), data() + size()};
+            }
+
+        }; // class typed_data_view
+
         enum class id_type {
             no_id      = 0,
             integer_id = 1,
@@ -51,72 +71,18 @@ namespace vtzero {
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
 
-        data_view m_geometry{};
-        data_view m_elevations{};
-        data_view m_knots{}; // for splines
-        data_view m_tags{}; // version 2 "tags"
-        data_view m_attributes{}; // version 3 attributes
-        data_view m_geometric_attributes{};
+        typed_data_view<protozero::pbf_reader::const_uint32_iterator> m_geometry{};
+        typed_data_view<protozero::pbf_reader::const_sint32_iterator> m_elevations{};
+        typed_data_view<protozero::pbf_reader::const_uint64_iterator> m_knots{}; // for splines
+        typed_data_view<protozero::pbf_reader::const_uint32_iterator> m_tags{}; // version 2 "tags"
+        typed_data_view<protozero::pbf_reader::const_uint64_iterator> m_attributes{}; // version 3 attributes
+        typed_data_view<protozero::pbf_reader::const_uint64_iterator> m_geometric_attributes{};
 
         uint32_t m_spline_degree = 2;
 
         GeomType m_geometry_type = GeomType::UNKNOWN; // defaults to UNKNOWN, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L41
 
         id_type m_id_type = id_type::no_id;
-
-        using geom_iterator = protozero::pbf_reader::const_uint32_iterator;
-        using elev_iterator = protozero::pbf_reader::const_sint32_iterator;
-        using knot_iterator = protozero::pbf_reader::const_uint64_iterator;
-        using tags_iterator = protozero::pbf_reader::const_uint32_iterator;
-        using attr_iterator = protozero::pbf_reader::const_uint64_iterator;
-
-        geom_iterator geometry_begin() const noexcept {
-            return {m_geometry.data(), m_geometry.data() + m_geometry.size()};
-        }
-
-        geom_iterator geometry_end() const noexcept {
-            return {m_geometry.data() + m_geometry.size(), m_geometry.data() + m_geometry.size()};
-        }
-
-        elev_iterator elevations_begin() const noexcept {
-            return {m_elevations.data(), m_elevations.data() + m_elevations.size()};
-        }
-
-        elev_iterator elevations_end() const noexcept {
-            return {m_elevations.data() + m_elevations.size(), m_elevations.data() + m_elevations.size()};
-        }
-
-        knot_iterator knots_begin() const noexcept {
-            return knot_iterator{m_knots.data(), m_knots.data() + m_knots.size()};
-        }
-
-        knot_iterator knots_end() const noexcept {
-            return knot_iterator{m_knots.data() + m_knots.size(), m_knots.data() + m_knots.size()};
-        }
-
-        tags_iterator tags_begin() const noexcept {
-            return {m_tags.data(), m_tags.data() + m_tags.size()};
-        }
-
-        tags_iterator tags_end() const noexcept {
-            return {m_tags.data() + m_tags.size(), m_tags.data() + m_tags.size()};
-        }
-
-        attr_iterator attributes_begin() const noexcept {
-            return {m_attributes.data(), m_attributes.data() + m_attributes.size()};
-        }
-
-        attr_iterator attributes_end() const noexcept {
-            return {m_attributes.data() + m_attributes.size(), m_attributes.data() + m_attributes.size()};
-        }
-
-        attr_iterator geometric_attributes_begin() const noexcept {
-            return {m_geometric_attributes.data(), m_geometric_attributes.data() + m_geometric_attributes.size()};
-        }
-
-        attr_iterator geometric_attributes_end() const noexcept {
-            return {m_geometric_attributes.data() + m_geometric_attributes.size(), m_geometric_attributes.data() + m_geometric_attributes.size()};
-        }
 
         template <typename THandler>
         void decode_tags_impl(THandler&& handler) const;
@@ -130,10 +96,10 @@ namespace vtzero {
         template <int Dimensions, unsigned int MaxGeometricAttributes>
         using geom_decoder_type = detail::geometry_decoder<Dimensions,
               MaxGeometricAttributes,
-              geom_iterator,
-              elev_iterator,
-              knot_iterator,
-              attr_iterator>;
+              decltype(m_geometry)::iterator_type,
+              decltype(m_elevations)::iterator_type,
+              decltype(m_knots)::iterator_type,
+              decltype(m_geometric_attributes)::iterator_type>;
 
     public:
 
@@ -411,10 +377,10 @@ namespace vtzero {
 
             geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
-                geometry_begin(), geometry_end(),
-                elevations_begin(), elevations_end(),
-                knots_begin(), knots_end(),
-                geometric_attributes_begin(), geometric_attributes_end()};
+                m_geometry.it_begin(), m_geometry.it_end(),
+                m_elevations.it_begin(), m_elevations.it_end(),
+                m_knots.it_begin(), m_knots.it_end(),
+                m_geometric_attributes.it_begin(), m_geometric_attributes.it_end()};
 
             return decoder.decode_point(std::forward<TGeomHandler>(geom_handler));
         }
@@ -438,10 +404,10 @@ namespace vtzero {
 
             geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
-                geometry_begin(), geometry_end(),
-                elevations_begin(), elevations_end(),
-                knots_begin(), knots_end(),
-                geometric_attributes_begin(), geometric_attributes_end()};
+                m_geometry.it_begin(), m_geometry.it_end(),
+                m_elevations.it_begin(), m_elevations.it_end(),
+                m_knots.it_begin(), m_knots.it_end(),
+                m_geometric_attributes.it_begin(), m_geometric_attributes.it_end()};
 
             return decoder.decode_linestring(std::forward<TGeomHandler>(geom_handler));
         }
@@ -465,10 +431,10 @@ namespace vtzero {
 
             geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
-                geometry_begin(), geometry_end(),
-                elevations_begin(), elevations_end(),
-                knots_begin(), knots_end(),
-                geometric_attributes_begin(), geometric_attributes_end()};
+                m_geometry.it_begin(), m_geometry.it_end(),
+                m_elevations.it_begin(), m_elevations.it_end(),
+                m_knots.it_begin(), m_knots.it_end(),
+                m_geometric_attributes.it_begin(), m_geometric_attributes.it_end()};
 
             return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
         }
@@ -492,10 +458,10 @@ namespace vtzero {
 
             geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
-                geometry_begin(), geometry_end(),
-                elevations_begin(), elevations_end(),
-                knots_begin(), knots_end(),
-                geometric_attributes_begin(), geometric_attributes_end()};
+                m_geometry.it_begin(), m_geometry.it_end(),
+                m_elevations.it_begin(), m_elevations.it_end(),
+                m_knots.it_begin(), m_knots.it_end(),
+                m_geometric_attributes.it_begin(), m_geometric_attributes.it_end()};
 
             return decoder.decode_spline(std::forward<TGeomHandler>(geom_handler));
         }
@@ -517,10 +483,10 @@ namespace vtzero {
 
             geom_decoder_type<dimensions, max> decoder{
                 m_geometry.size() / 2,
-                geometry_begin(), geometry_end(),
-                elevations_begin(), elevations_end(),
-                knots_begin(), knots_end(),
-                geometric_attributes_begin(), geometric_attributes_end()};
+                m_geometry.it_begin(), m_geometry.it_end(),
+                m_elevations.it_begin(), m_elevations.it_end(),
+                m_knots.it_begin(), m_knots.it_end(),
+                m_geometric_attributes.it_begin(), m_geometric_attributes.it_end()};
 
             switch (geometry_type()) {
                 case GeomType::POINT:

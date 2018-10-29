@@ -1098,13 +1098,14 @@ namespace vtzero {
 
     template <typename THandler>
     void feature::decode_tags_impl(THandler&& handler) const {
-        for (auto it = tags_begin(); it != tags_end();) {
+        const auto end = m_tags.it_end();
+        for (auto it = m_tags.it_begin(); it != end;) {
             const uint32_t ki = *it++;
             if (!index_value{ki}.valid()) {
                 throw out_of_range_exception{ki};
             }
 
-            if (it == tags_end()) {
+            if (it == end) {
                 throw format_exception{"unpaired attributes key/value indexes (spec 4.4)"};
             }
             const uint32_t vi = *it++;
@@ -1164,8 +1165,8 @@ namespace vtzero {
 
     template <typename THandler>
     bool feature::decode_attributes_impl(THandler&& handler) const {
-        const auto end = attributes_end();
-        for (auto it = attributes_begin(); it != end;) {
+        const auto end = m_attributes.it_end();
+        for (auto it = m_attributes.it_begin(); it != end;) {
             if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
                 return false;
             }
@@ -1191,8 +1192,8 @@ namespace vtzero {
 
     template <typename THandler>
     bool feature::decode_geometric_attributes_impl(THandler&& handler) const {
-        const auto end = geometric_attributes_end();
-        for (auto it = geometric_attributes_begin(); it != end;) {
+        const auto end = m_geometric_attributes.it_end();
+        for (auto it = m_geometric_attributes.it_begin(); it != end;) {
             if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
                 return false;
             }
