@@ -154,11 +154,11 @@ namespace vtzero {
             }
 
             void add_value_internal_vt3(bool value) {
-                add_complex_value(detail::complex_value_type::cvt_bool, value ? 1 : 0);
+                add_complex_value(detail::complex_value_type::cvt_bool, value ? 2 : 1);
             }
 
             void add_value_internal_vt3(null_type /*unused*/) {
-                add_complex_value(detail::complex_value_type::cvt_null, null_type::encoded_value);
+                add_complex_value(detail::complex_value_type::cvt_null, 0);
             }
 
             void add_value_internal_vt3(double value) {

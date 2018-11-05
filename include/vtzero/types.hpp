@@ -134,10 +134,6 @@ namespace vtzero {
 
     /// The "null" value type.
     struct null_type {
-        /// @cond internal
-        // in the vector tile the null value is encoded with this value
-        static const uint64_t encoded_value = 2;
-        /// @endcond
     };
 
     /// property value type holding a reference to a string

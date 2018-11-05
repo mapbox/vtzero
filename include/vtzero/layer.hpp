@@ -926,17 +926,17 @@ namespace vtzero {
                 case complex_value_type::cvt_bool:
                     switch (vp) {
                         case 0:
-                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), false, depth)) {
+                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), null_type{}, depth)) {
                                 return false;
                             }
                             break;
                         case 1:
-                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), true, depth)) {
+                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), false, depth)) {
                                 return false;
                             }
                             break;
                         case 2:
-                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), null_type{}, depth)) {
+                            if (!call_attribute_value<THandler>(std::forward<THandler>(handler), true, depth)) {
                                 return false;
                             }
                             break;
