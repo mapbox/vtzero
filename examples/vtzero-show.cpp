@@ -187,7 +187,7 @@ class print_handler {
 
 public:
 
-    print_handler(const vtzero::layer& layer) :
+    explicit print_handler(const vtzero::layer& layer) :
         m_layer(layer) {
     }
 
