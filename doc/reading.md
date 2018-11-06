@@ -210,7 +210,7 @@ converted into whatever type the value really has.
 
 ```cpp
 auto property = ...;
-std::string pkey = property.key(); // returns a vtzero::data_view which can
+std::string pkey = std::string(property.key()); // returns a vtzero::data_view which can
                                    // be converted to std::string
 property_value pvalue = property.value();
 ```
