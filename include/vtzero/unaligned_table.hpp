@@ -36,7 +36,9 @@ namespace vtzero {
 
             explicit unaligned_table(data_view data) noexcept :
                 m_data(data) {
-                vtzero_assert_in_noexcept_function(m_data.size() % sizeof(T) == 0);
+                if (data.size() % sizeof(T) != 0) {
+                    throw format_exception{"value table in layer has invalid size"};
+                }
             }
 
             bool empty() const noexcept {
