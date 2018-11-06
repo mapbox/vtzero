@@ -21,6 +21,8 @@
 class geom_handler {
 
     std::string m_output{};
+    const vtzero::layer& m_layer;
+    vtzero::index_value m_scaling{};
 
     bool m_is_3d = false;
 
@@ -49,7 +51,8 @@ public:
     constexpr static const int dimensions = 3;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    explicit geom_handler(bool is_3d) :
+    explicit geom_handler(const vtzero::layer& layer, bool is_3d) :
+        m_layer(layer),
         m_is_3d(is_3d) {
     }
 
@@ -123,15 +126,20 @@ public:
         m_output += ',';
     }
 
-    void knots_begin(const uint32_t count) {
+    void knots_begin(const uint32_t count, vtzero::index_value scaling) {
+        m_scaling = scaling;
         m_output += "KNOTS[count=";
         m_output += std::to_string(count);
+        m_output += ",scaling=";
+        m_output += std::to_string(scaling.value());
         m_output += "](";
     }
 
-    void knots_value(const int64_t val) {
-        m_output += std::to_string(val);
-        m_output += ',';
+    void knots_value(const int64_t value) {
+        m_output += std::to_string(value);
+        m_output += '(';
+        m_output.append(std::to_string(m_layer.attribute_scaling(m_scaling).decode(value)));
+        m_output += "),";
     }
 
     void knots_end() {
@@ -161,30 +169,100 @@ struct print_value {
 
 }; // struct print_value
 
-struct print_handler {
+class print_handler {
 
-    void key_index(vtzero::index_value index, std::size_t /*depth*/) const {
+    std::string m_output{};
+    const vtzero::layer& m_layer;
+    vtzero::index_value m_scaling{};
+    int m_nested_list_count = 0;
+
+    void print_nested_value(std::size_t depth) const {
+        if (m_nested_list_count) {
+            std::cout << "      ";
+            for (; depth > 0; --depth) {
+                std::cout << "    ";
+            }
+        }
+    }
+
+public:
+
+    print_handler(const vtzero::layer& layer) :
+        m_layer(layer) {
+    }
+
+    void key_index(vtzero::index_value index, std::size_t depth) const {
+        for (; depth > 0; --depth) {
+            std::cout << "    ";
+        }
         std::cout << "      [" << index.value() << "] ";
     }
 
     void attribute_key(const vtzero::data_view& key, std::size_t /*depth*/) const {
-        std::cout << key << " = ";
+        std::cout << '{' << key << "} = ";
     }
 
     void value_index(vtzero::index_value index, std::size_t /*depth*/) const {
         std::cout << '[' << index.value() << "] ";
     }
 
-    template <typename T>
-    void attribute_value(T value, std::size_t /*depth*/) const {
-        std::cout << value << '\n';
+    void attribute_value(bool value, std::size_t depth) const {
+        print_nested_value(depth);
+        std::cout << (value ? "true\n" : "false\n");
     }
 
-    void attribute_value(const vtzero::data_view& value, std::size_t /*depth*/) const {
+    void attribute_value(const vtzero::data_view& value, std::size_t depth) const {
+        print_nested_value(depth);
         std::cout << '"' << value << '"' << '\n';
     }
 
-}; // struct print_handler
+    template <typename T>
+    void attribute_value(T value, std::size_t depth) const {
+        print_nested_value(depth);
+        std::cout << value << '\n';
+    }
+
+    void start_list_attribute(std::size_t count, std::size_t depth) {
+        print_nested_value(depth);
+        std::cout << "LIST[count=" << count << "]\n";
+        ++m_nested_list_count;
+    }
+
+    void end_list_attribute(std::size_t /*depth*/) {
+        --m_nested_list_count;
+    }
+
+    void start_map_attribute(std::size_t count, std::size_t depth) {
+        print_nested_value(depth);
+        std::cout << "MAP[count=" << count << "]\n";
+    }
+
+    void start_number_list(std::size_t count, vtzero::index_value scaling, std::size_t depth) {
+        print_nested_value(depth);
+        std::cout << "NUMBER-LIST[count=" << count << ",scaling=" << scaling.value() << ",values=";
+        m_scaling = scaling;
+    }
+
+    void number_list_value(int64_t value, std::size_t /*depth*/) {
+        m_output.append(std::to_string(value));
+        m_output += '(';
+        m_output.append(std::to_string(m_layer.attribute_scaling(m_scaling).decode(value)));
+        m_output += "),";
+    }
+
+    void number_list_null_value(std::size_t /*depth*/) {
+        m_output += "null,";
+    }
+
+    void end_number_list(std::size_t /*depth*/) {
+        if (!m_output.empty()) {
+            m_output.back() = ']';
+        }
+        std::cout << m_output << '\n';
+        m_output.clear();
+    }
+
+}; // class print_handler
 
 static void print_scaling(const vtzero::scaling& scaling) {
     std::cout << "offset=" << scaling.offset() << " multiplier=" << scaling.multiplier() << " base=" << scaling.base() << '\n';
@@ -213,7 +291,7 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
     if (layer.num_attribute_scalings() > 0) {
         std::cout << "  attribute scalings:\n";
         for (uint32_t n = 0; n < layer.num_attribute_scalings(); ++n) {
-            std::cout << "    " << n << ": ";
+            std::cout << "    [" << n << "] ";
             print_scaling(layer.attribute_scaling(vtzero::index_value{n}));
         }
     }
@@ -223,7 +301,7 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
             std::cout << "  keys:\n";
             int n = 0;
             for (const auto& key : layer.key_table()) {
-                std::cout << "    [" << n++ << "] " << key << '\n';
+                std::cout << "    [" << n++ << "] {" << key << "}\n";
             }
         }
         if (!layer.value_table().empty()) {
@@ -244,7 +322,7 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
                 std::cout << "  string values:\n";
                 int n = 0;
                 for (const vtzero::data_view& value : layer.string_table()) {
-                    std::cout << "    [" << n++ << "] " << value << '\n';
+                    std::cout << "    [" << n++ << "] \"" << value << "\"\n";
                 }
             }
             if (!layer.float_table().empty()) {
@@ -260,9 +338,10 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
                 }
             }
             if (!layer.int_table().empty()) {
-                std::cout << "  int values:\n";
+                std::cout << "  int values: uint / sint\n";
                 for (std::uint32_t i = 0; i < layer.int_table().size(); ++i) {
-                    std::cout << "    [" << i << "] " << layer.int_table().at(i) << '\n';
+                    const auto value = layer.int_table().at(i);
+                    std::cout << "    [" << i << "] " << value << " / " << protozero::decode_zigzag64(value) << '\n';
                 }
             }
         }
@@ -288,9 +367,9 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
             std::cout << "    spline degrees: " << feature.spline_degree() << "\n";
         }
         std::cout << "    geometry:\n";
-        feature.decode_geometry(geom_handler{feature.has_3d_geometry()});
+        feature.decode_geometry(geom_handler{layer, feature.has_3d_geometry()});
         std::cout << "    attributes:\n";
-        print_handler handler;
+        print_handler handler{layer};
         feature.decode_attributes(handler);
 
         if (layer.version() == 3) {

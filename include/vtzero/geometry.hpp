@@ -610,11 +610,11 @@ namespace vtzero {
                     }
                     std::forward<THandler>(handler).controlpoints_end();
 
-                    // static_cast is okay here, because if the knots_count is
-                    // larger that what will fit into the uint32_t, we'll just
-                    // decode some smaller part of them (in real world data
-                    // this can't happen)
-                    std::forward<THandler>(handler).knots_begin(static_cast<uint32_t>(knots_count));
+                    // static_casts are okay here, because if the knots_count
+                    // or scaling_index is larger than what will fit into the
+                    // uint32_t, we'll just decode some smaller part of them
+                    // (in real world data this can't happen)
+                    std::forward<THandler>(handler).knots_begin(static_cast<uint32_t>(knots_count), index_value{static_cast<uint32_t>(scaling_index)});
 
                     while (knots_count > 0) {
                         if (!knots.get_next_value()) {

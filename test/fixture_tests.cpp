@@ -112,7 +112,7 @@ struct spline_handler {
     void controlpoints_end() const noexcept {
     }
 
-    void knots_begin(const uint32_t count) {
+    void knots_begin(const uint32_t count, const vtzero::index_value /*scaling*/) {
         knots.reserve(count);
     }
 
@@ -183,7 +183,7 @@ struct geom_handler {
     void controlpoints_end() const noexcept {
     }
 
-    void knots_begin(const uint32_t count) {
+    void knots_begin(const uint32_t count, const vtzero::index_value /*scaling*/) {
         knots.reserve(count);
     }
 

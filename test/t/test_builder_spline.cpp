@@ -40,7 +40,7 @@ struct spline_handler_2d {
     void controlpoints_end() const noexcept {
     }
 
-    void knots_begin(const uint32_t count) noexcept {
+    void knots_begin(const uint32_t count, const vtzero::index_value /*scaling*/) noexcept {
         knots.reserve(count);
     }
 

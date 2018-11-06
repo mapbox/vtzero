@@ -191,7 +191,7 @@ public:
         ++m_count;
     }
 
-    void knots_begin(const uint32_t count) {
+    void knots_begin(const uint32_t count, vtzero::index_value /*scaling*/) {
         if (count < 4) {
             print_error("Not enough knots in spline");
         }

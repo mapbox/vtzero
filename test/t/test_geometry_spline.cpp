@@ -31,7 +31,7 @@ public:
         value += 10000;
     }
 
-    void knots_begin(const uint32_t /*count*/) noexcept {
+    void knots_begin(const uint32_t /*count*/, const vtzero::index_value /*scaling*/) noexcept {
         value += 10;
     }
 
