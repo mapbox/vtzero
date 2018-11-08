@@ -127,7 +127,7 @@ static void test_spline_builder(const bool with_id, const bool with_attr) {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     spline_handler_2d handler;
     feature.decode_spline_geometry(handler);
@@ -214,7 +214,7 @@ static void test_multispline_builder(const bool with_id, const bool with_attr) {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     spline_handler_2d handler;
     feature.decode_spline_geometry(handler);
@@ -337,8 +337,8 @@ TEST_CASE("Adding several splines with feature rollback in the middle") {
 
     auto it = layer.begin();
     auto feature = *it++;
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
     feature = *it;
-    REQUIRE(feature.id() == 3);
+    REQUIRE(feature.integer_id() == 3);
 }
 

@@ -123,7 +123,7 @@ TEST_CASE("build feature with scalar attributes and read it again") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     {
         AttributeCountHandler handler;
@@ -177,7 +177,7 @@ TEST_CASE("build feature with list and map attributes and read it again") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     {
         AttributeCountHandler handler;
@@ -223,7 +223,7 @@ TEST_CASE("build feature with number list attributes and read it again") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     {
         AttributeCountHandler handler;
@@ -271,7 +271,7 @@ TEST_CASE("build feature with list property from array and read it again") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     {
         AttributeDumpHandler handler;

@@ -14,10 +14,10 @@ TEST_CASE("default constructed feature") {
 
     REQUIRE_FALSE(feature.valid());
     REQUIRE_FALSE(feature);
-    REQUIRE(feature.id() == 0);
     REQUIRE_FALSE(feature.has_id());
     REQUIRE_FALSE(feature.has_integer_id());
     REQUIRE_FALSE(feature.has_string_id());
+    REQUIRE(feature.integer_id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE_FALSE(feature.has_attributes());
 }
@@ -32,10 +32,10 @@ TEST_CASE("read a feature") {
     const auto feature = *layer.begin();
     REQUIRE(feature.valid());
     REQUIRE(feature);
-    REQUIRE(feature.id() == 0);
     REQUIRE(feature.has_id());
     REQUIRE(feature.has_integer_id());
     REQUIRE_FALSE(feature.has_string_id());
+    REQUIRE(feature.integer_id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
     REQUIRE(feature.has_attributes());
 }

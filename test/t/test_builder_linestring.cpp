@@ -99,7 +99,7 @@ static void test_linestring_builder(const bool with_id, const bool with_attr) {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     linestring_handler_2d handler;
     feature.decode_linestring_geometry(handler);
@@ -175,7 +175,7 @@ static void test_multilinestring_builder(const bool with_id, const bool with_att
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     linestring_handler_2d handler;
     feature.decode_linestring_geometry(handler);
@@ -342,8 +342,8 @@ TEST_CASE("Adding several linestrings with feature rollback in the middle") {
 
     auto it = layer.begin();
     auto feature = *it++;
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
     feature = *it;
-    REQUIRE(feature.id() == 3);
+    REQUIRE(feature.integer_id() == 3);
 }
 

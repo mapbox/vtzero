@@ -147,7 +147,7 @@ namespace vtzero {
          *
          * Always returns 0 for invalid features.
          */
-        uint64_t id() const noexcept {
+        uint64_t integer_id() const noexcept {
             return m_integer_id;
         }
 

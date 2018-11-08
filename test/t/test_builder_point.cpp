@@ -100,7 +100,7 @@ static void test_point_builder(const bool with_id, const bool with_attr) {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     point_handler_2d handler;
     feature.decode_point_geometry(handler);
@@ -171,7 +171,7 @@ static void test_point_builder_vt3(const bool with_id, const bool with_attr) {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
     REQUIRE_FALSE(feature.has_3d_geometry());
 
     point_handler_2d handler;
@@ -222,7 +222,7 @@ TEST_CASE("Point builder with 3d point") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == 17);
+    REQUIRE(feature.integer_id() == 17);
     REQUIRE(feature.has_3d_geometry());
 
     point_handler_3d handler;
@@ -280,7 +280,7 @@ static void test_multipoint_builder(const bool with_id, const bool with_attr) {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     point_handler_2d handler;
     feature.decode_point_geometry(handler);

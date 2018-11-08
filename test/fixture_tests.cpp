@@ -228,7 +228,7 @@ TEST_CASE("MVT test 002: Tile with version 2 layer with single point feature wit
     const auto feature = check_layer(tile);
 
     REQUIRE_FALSE(feature.has_id());
-    REQUIRE(feature.id() == 0);
+    REQUIRE(feature.integer_id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
     point_handler handler;
@@ -243,8 +243,8 @@ TEST_CASE("MVT test 003: Tile with version 2 layer with single point with missin
     const vtzero::vector_tile tile{buffer};
 
     const auto feature = check_layer(tile);
-    REQUIRE(feature.has_id());
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.has_integer_id());
+    REQUIRE(feature.integer_id() == 1);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
 }
 
@@ -313,7 +313,7 @@ TEST_CASE("MVT test 009: Tile layer extent missing") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 }
 
 TEST_CASE("MVT test 010: Tile layer value is encoded as int, but pretends to be string") {
@@ -393,7 +393,7 @@ TEST_CASE("MVT test 017: Version 2 layer with valid point geometry") {
     const auto feature = check_layer(tile);
 
     REQUIRE(feature.has_id());
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
@@ -719,7 +719,7 @@ TEST_CASE("MVT test 039: Default values are actually encoded in the tile") {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == 0);
+    REQUIRE(feature.integer_id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::UNKNOWN);
     REQUIRE_FALSE(feature.has_attributes());
 

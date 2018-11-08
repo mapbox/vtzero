@@ -81,7 +81,7 @@ TEST_CASE("access features in a layer by id") {
     REQUIRE(layer.num_features() == 937);
 
     const auto feature = layer.get_feature_by_id(122);
-    REQUIRE(feature.id() == 122);
+    REQUIRE(feature.integer_id() == 122);
     REQUIRE_FALSE(feature.has_attributes());
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
     REQUIRE_FALSE(feature.geometry_data().empty());
@@ -116,10 +116,10 @@ TEST_CASE("iterate over some features in a layer") {
     uint64_t id_sum = 0;
 
     for (const auto feature : layer) {
-        if (feature.id() == 10) {
+        if (feature.integer_id() == 10) {
             break;
         }
-        id_sum += feature.id();
+        id_sum += feature.integer_id();
     }
 
     const uint64_t expected = (10 - 1) * 10 / 2;
@@ -127,6 +127,6 @@ TEST_CASE("iterate over some features in a layer") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 }
 

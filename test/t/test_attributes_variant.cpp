@@ -165,7 +165,7 @@ TEST_CASE("build feature with attributes explicitly and read it again") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     VariantConverter<variant_type> converter;
     const auto result = feature.decode_attributes(converter);
@@ -303,7 +303,7 @@ TEST_CASE("build feature with attributes from variant and read it again") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     VariantConverter<variant_type> converter;
     const auto result = feature.decode_attributes(converter);

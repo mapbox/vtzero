@@ -191,7 +191,7 @@ TEST_CASE("build feature with list geometric attributes and read it again") {
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     {
         AttributeCountHandler handler;
@@ -258,7 +258,7 @@ TEST_CASE("build feature with number list geometric attributes and read it again
 
     const auto feature = *layer.begin();
     REQUIRE(feature);
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
 
     {
         AttributeCountHandler handler;

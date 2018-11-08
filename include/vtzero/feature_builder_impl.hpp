@@ -272,7 +272,7 @@ namespace vtzero {
             void copy_id(const feature& feature) {
                 vtzero_assert(m_stage == stage::want_id && "Must be in 'want_id' stage to call copy_id()");
                 if (feature.has_integer_id()) {
-                    set_integer_id_impl(feature.id());
+                    set_integer_id_impl(feature.integer_id());
                 } else if (version() == 3 && feature.has_string_id()) {
                     set_string_id_impl(feature.string_id());
                 }

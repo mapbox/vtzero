@@ -74,7 +74,7 @@ static void test_polygon_builder(const bool with_id, const bool with_attr) {
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     polygon_handler handler;
     feature.decode_polygon_geometry(handler);
@@ -165,7 +165,7 @@ static void test_multipolygon_builder(const bool with_id, const bool with_attr) 
     REQUIRE(layer.num_features() == 1);
 
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == (with_id ? 17 : 0));
+    REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
     polygon_handler handler;
     feature.decode_polygon_geometry(handler);

@@ -351,8 +351,8 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
     for (const auto feature : layer) {
         std::cout << "  feature: " << feature_num << '\n'
                   << "    id: ";
-        if (feature.has_id()) {
-            std::cout << feature.id() << '\n';
+        if (feature.has_integer_id()) {
+            std::cout << feature.integer_id() << '\n';
         } else if (feature.has_string_id()) {
             std::cout << feature.string_id() << '\n';
         } else {

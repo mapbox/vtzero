@@ -200,7 +200,7 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
 
     uint64_t n = 1;
     for (const auto feature : layer) {
-        REQUIRE(feature.id() == n++);
+        REQUIRE(feature.integer_id() == n++);
     }
 
     REQUIRE(n == 4);
@@ -334,11 +334,11 @@ TEST_CASE("Rollback feature") {
     auto feature = *it++;
     REQUIRE(feature.has_integer_id());
     REQUIRE_FALSE(feature.has_string_id());
-    REQUIRE(feature.id() == 1);
+    REQUIRE(feature.integer_id() == 1);
     feature = *it++;
     REQUIRE(feature.has_integer_id());
     REQUIRE_FALSE(feature.has_string_id());
-    REQUIRE(feature.id() == 8);
+    REQUIRE(feature.integer_id() == 8);
 
     REQUIRE(it == layer.end());
 }
@@ -384,7 +384,7 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
             const auto f2 = *it2;
             if (!f1 ||
                 !f2 ||
-                f1.id() != f2.id() ||
+                f1.integer_id() != f2.integer_id() ||
                 f1.string_id() != f2.string_id() ||
                 f1.geometry_type() != f2.geometry_type() ||
                 f1.geometry_data() != f2.geometry_data() ||
@@ -459,7 +459,7 @@ TEST_CASE("Copy only point geometries using geometry_feature_builder<2>") {
         vtzero::layer_builder lbuilder{tbuilder, layer};
         for (const auto feature : layer) {
             vtzero::feature_builder<2> fbuilder{lbuilder};
-            fbuilder.set_integer_id(feature.id());
+            fbuilder.set_integer_id(feature.integer_id());
             if (feature.geometry_type() == vtzero::GeomType::POINT) {
                 fbuilder.copy_geometry(feature);
                 fbuilder.copy_attributes(feature);

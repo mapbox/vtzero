@@ -291,7 +291,7 @@ TEST_CASE("add features using a key index") {
     const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == 7);
+    REQUIRE(feature.integer_id() == 7);
 
     const std::string expected{"some_key=sint(12)\n"};
     AttributeDumpHandler handler;
@@ -338,7 +338,7 @@ TEST_CASE("add features using a value index") {
     const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 1);
     const auto feature = *layer.begin();
-    REQUIRE(feature.id() == 17);
+    REQUIRE(feature.integer_id() == 17);
 
     const std::string expected{"some_key=sint(12)\n"};
     AttributeDumpHandler handler;
