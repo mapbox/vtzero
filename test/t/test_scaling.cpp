@@ -12,10 +12,10 @@ TEST_CASE("Default scaling") {
 }
 
 TEST_CASE("Some scaling") {
-    const vtzero::scaling s{2, 0.1, 3.5};
+    const vtzero::scaling s{2, 0.0000001, 3.5};
 
-    REQUIRE(s.encode32(5.0) == 13);
-    REQUIRE(s.encode64(5.0) == 13);
-    REQUIRE(s.decode(13) == Approx(5.0));
+    REQUIRE(s.encode32(5.0) == 14999998);
+    REQUIRE(s.encode64(5.0) == 14999998);
+    REQUIRE(s.decode(14999998) == Approx(5.0));
 }
 
