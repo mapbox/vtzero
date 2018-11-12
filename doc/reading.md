@@ -30,49 +30,26 @@ in this tutorial for accessing parts of the vector tile. The data is **not**
 copied by vtzero when accessing vector tiles.
 
 You can think of the `vector_tile` class as a "proxy" class giving you access
-to the decoded data, similarly the classes `layer`, `feature`, and
-`property` described in the next chapters are "proxy" classes, too.
+to the decoded data, similarly the `layer` and `feature` classes described in
+the next chapters are "proxy" classes, too.
 
 ## Accessing layers
 
 Vector tiles consist of a list of layers. The list of layers can be empty
 in which case `tile.empty()` will return true.
 
-The simplest and fasted way to access the layers is through the `next_layer()`
-function:
+The simplest and fasted way to access the layers is through an iterator
+you get from the tile using the usual `begin()` and `end()` functions.
+You can use it in a range-based for like this:
 
 ```cpp
-while (auto layer = tile.next_layer()) {
+for (auto layer : tile) {
     ...
 }
 ```
 
 Note that this creates new layer objects on the fly referencing the layer you
-are currently looking at. Once you have iterated over all the layers,
-`next_layer()` will return the "invalid" (default constructed) layer object
-which converts to false in an boolean context.
-
-You can reset the layer iterator to the beginning again if you need to go
-over the layers again:
-
-```cpp
-tile.reset_layer();
-```
-
-Instead of using this external iterator, you can use a different function with
-an internal iterator that calls a function defined by you for each layer. Your
-function must take a `layer&&` as parameter and return `true` if the iteration
-should continue and `false` otherwise:
-
-```cpp
-tile.for_each_layer([&](layer&& l) {
-    // do something with layer
-    return true;
-});
-```
-
-Both the external and internal iteration do basically the same and have the
-same performance characteristics.
+are currently looking at.
 
 You can also access layers through their index or name:
 
@@ -89,10 +66,9 @@ tile.get_layer_by_name("foobar");
 you'll get the layer with the specified name. Both will return the invalid
 layer if that layer doesn't exist.
 
-Note that accessing layers by index or name is less efficient than iterating
-over them using `next_layer()` if you are accessing several layers. So usually
-you should only use those function if you want to access one specific layer
-only.
+Note that if you are interested in several layers, accessing them by index or
+name is less efficient than iterating over them. So usually you should only use
+those function if you want to access one specific layer only.
 
 If you need the number of layers, you can call `tile.count_layers()`. This
 function still has to iterate over the layers internally decoding some of the
@@ -103,10 +79,14 @@ data, so it is not cheap.
 Once you have a layer as described in the previous chapter you can access the
 metadata of this layer easily:
 
-* The version is available with `layer.version()`. Only version 1 and 2 are
+* The version is available with `layer.version()`. Only version 1 to 3 are
   currently supported by this library.
 * The extent of the tile is available through `layer.extent()`. This is usually
   4096.
+* Version 3 tiles can optionally containt the tile x/y/zoom. You can access
+  this with `layer.get_tile()` which returns a `tile` object (not to be
+  confused with a `vector_tile`) containing the x and y coordinates and the
+  zoom.
 * The function `layer.name()` returns the name of the layer as `data_view`.
   This does **not** include a final 0-byte!
 * The number of features is returned by the `layer.num_features()` function.
@@ -114,91 +94,46 @@ metadata of this layer easily:
   (Different then the `vector_tile::count_layers()`, the `layer::num_features()`
   function is `O(1)`).
 
-To access the features call the `next_feature()` function until it returns
-the invalid (default constructed) feature:
+To access the features use an iterator you get from the layer using the usual
+`begin()` and `end()` functions. You can use it in a range-based for like this:
 
 ```cpp
-while (auto feature = layer.next_feature()) {
+for (auto feature : layer) {
     ...
 }
 ```
 
-Use `reset_feature()` to restart the feature iterator from the beginning.
-
-Instead of using this external iterator, you can use a different function with
-an internal iterator that calls a function defined by you for each feature.
-Your function must take a `feature&&` as parameter and return `true` if the
-iteration should continue and `false` otherwise:
-
-```cpp
-layer.for_each_feature([&](feature&& f) {
-    // do something with the feature
-    return true;
-});
-```
-
-Both the external and internal iteration do basically the same and have the
-same performance characteristics.
-
-If you know the ID of a feature you can get the feature using
+If you know the integer ID of a feature you can get the feature using
 `get_feature_by_id()`, but note that this will do a linear search through
 all the features in the layer, decoding each one until it finds the right ID.
 This is almost always **not** what you want.
 
-Note that the feature returned by `next_feature()` or `get_feature_by_id()`
-will internally contain a pointer to the layer it came from. The layer has to
-stay valid as long as the feature is used.
+Note that the features returned by these functions will internally contain a
+pointer to the layer it came from. So the layer has to stay valid as long as
+the feature is used.
 
 ## The feature
 
 You get features from the layer as described in the previous chapter. The
-`feature` class gives you access to the ID, the geometry and the properties
-of the feature. Access the ID using the `id()` method which will return 0
-if no ID is set. You can ask for the existence of the ID using `has_id()`:
+`feature` class gives you access to the ID, the geometry and the attributes
+of the feature.
+
+Layers can optionally have an integer ID or a string ID (version 3 only).
+Access the ID using the `integer_id()` or `string_id()` methods. You can ask
+for the existence of the ID using `has_id()`, `has_integer_id()`, and
+`has_string_id()`. String IDs are returned as `data_view` objects:
 
 ```cpp
-auto feature = layer...;
-if (feature.has_id()) {
-    cout << feature.id() << '\n';
+const auto feature = *layer.begin();
+if (feature.has_integer_id()) {
+    cout << feature.integer_id() << '\n';
+} else if (feature.has_string_id()) {
+    cout << std::string(feature.string_id()) << '\n';
 }
 ```
 
-The `geometry()` method returns an object of the `geometry` class. It contains
-the geometry type and a reference to the (un-decoded) geometry data. See a
-later chapter on the details of decoding this geometry. You can also directly
-add this geometry to a new feature you are writing.
+## Attributes
 
-The number of properties in the feature is returned by the
-`feature::num_properties()` function. If the feature doesn't contain any
-properties `feature.empty()` will return true. (Different then the
-`vector_tile::count_layers()`, the `feature::num_properties()` function is
-`O(1)`).
-
-To access the properties call the `next_property()` function until it returns
-the invalid (default constructed) property:
-
-```cpp
-while (auto property = feature.next_property()) {
-    ...
-}
-```
-
-Use `reset_property()` to restart the property iterator from the beginning.
-
-Instead of using this external iterator, you can use a different function with
-an internal iterator that calls a function defined by you for each property.
-Your function must take a `property&&` as parameter and return `true` if the
-iteration should continue and `false` otherwise:
-
-```cpp
-feature.for_each_property([&](property&& p) {
-    ...
-    return true;
-});
-```
-
-Both the external and internal iteration do basically the same and have the
-same performance characteristics.
 
 ## The property
 
@@ -330,24 +265,21 @@ should also work with any other map type that has an `emplace()` method.
 
 ## Geometries
 
-Features must contain a geometry of type UNKNOWN, POINT, LINESTRING, or
-POLYGON. The UNKNOWN type is not further specified by the vector tile spec,
+Features must contain a geometry of type UNKNOWN, POINT, LINESTRING, POLYGON,
+or SPLINE. The UNKNOWN type is not further specified by the vector tile spec,
 this library doesn't allow you to do anything with this type. Note that
-multipoint, multilinestring, and multipolygon geometries are also possible,
-they don't have special types.
+multipoint, multilinestring, multipolygon, and multispline geometries are also
+possible, they don't have special types. You can get the geometry type with
+`feature.geometry_type()`.
 
-You can get the geometry type with `feature.geometry_type()`, but usually
-you'll get the geometry with `feature.geometry()`. This will return an object
-of type `vtzero::geometry` which contains the geometry type and a view of
-the raw geometry data. To decode the data you have to call one of the decoder
-free functions `decode_geometry()`, `decode_point_geometry()`,
-`decode_linestring_geometry()`, or `decode_polygon_geometry()`. The first of
-these functions can decode any point, linestring, or polygon geometry. The
-others must be called with a geometry of the specified type and will only
-decode that type.
+To decode the data you have to call one of the decoder functions on the
+`feature` object: `decode_geometry()`, `decode_point_geometry()`,
+`decode_linestring_geometry()`, `decode_polygon_geometry()`, or
+`decode_spline_geometry()`. The first of these functions can decode any type of
+geometry. The others must be called with a geometry of the specified type and
+will only decode that type.
 
-For all the decoder functions the first parameter is the geometry (as returned
-by `feature.geometry()`), the second parameter is a *handler* object that you
+For all the decoder functions the only parameter is a *handler* object that you
 must implement. The decoder function will call certain callbacks on this object
 that give you part of the geometry data which allows you to use this data in
 any way you like.
@@ -429,20 +361,24 @@ keep this in mind.
 
 ## Accessing the key/value lookup tables in a layer
 
-Vector tile layers contain two tables with all the property keys and all
-property values used in the features in that layer. Vtzero usually handles
-those table lookups internally without you noticing. But sometimes it might
-be necessary to access this data directly.
+Vector tile layers can contain several tables with attribute keys and values
+used in the features in that layer. Vtzero can handle lookups in those tables
+internally without you noticing or you can do it yourself.
 
-From the layer object you can get references to the tables:
+From the layer object you can get references to the tables. Depending on
+the version of the layer only some of these tables are available:
 
 ```cpp
 vtzero::layer layer = ...;
-const auto& kt = layer.key_table();
-const auto& vt = layer.value_table();
+const auto& kt = layer.key_table(); // version 1/2 and 3
+const auto& vt = layer.value_table(); // version 1/2 attributes
+const auto& st = layer.string_table(); // version 3 string attributes
+const auto& dt = layer.double_table(); // version 3 double attributes
+const auto& ft = layer.float_table(); // version 3 float attributes
+const auto& it = layer.int_table(); // version 3 int/uint attributes
 ```
 
-Instead you can also lookup keys and values using methods on the layer object:
+You can also lookup keys and values directly using methods on the layer object:
 ```cpp
 vtzero::layer layer = ...;
 const vtzero::data_view k = layer.key(17);

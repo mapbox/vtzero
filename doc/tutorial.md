@@ -26,9 +26,9 @@ copies of the data.
 ## Basic types
 
 Vtzero contains several basic small (value) types such as `GeomType`,
-`property_value_type`, `index_value`, `index_value_pair`, and `point` which
+`property_value_type`, `index_value`, and `point<>` which
 hold basic values in a type-safe way. Most of them are defined in `types.hpp`
-(`point` is in `geometry.hpp`).
+(`point<>` is in `point.hpp`).
 
 Sometimes it is useful to be able to print the values of those types, for
 instance when debugging. For this overloads of `operator<<` on `basic_ostream`
@@ -72,7 +72,7 @@ All the exceptions thrown directly by the vtzero library are derived from
 * A `type_exception` is thrown when a property value is accessed using the
   wrong type.
 * A `version_exception` is thrown when an unknown version number is found in
-  the layer. Currently vtzero only supports version 1 and 2.
+  the layer. Currently vtzero only supports version 1 to 3.
 * An `out_of_range_exception` is thrown when an index into the key or value
   table in a layer is out of range. This can only happen if the tile data is
   invalid.
@@ -83,6 +83,7 @@ Usually you only directly include the following files:
 
 * When reading: `<vtzero/vector_tile.hpp>`
 * When writing: `<vtzero/builder.hpp>`
+* Some occasionally useful helper functions when builing tiles are in `<vtzero/builder_helper.hpp>`
 * If you need any of the special indexes: `<vtzero/index.hpp>`
 * If you want overloads of `operator<<` for basic types: `<vtzero/output.hpp>`
 * If you need the version: `<vtzero/version.hpp>`
