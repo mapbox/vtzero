@@ -5,6 +5,10 @@
 #include <vtzero/vector_tile.hpp>
 
 #include <cstddef>
+#include <type_traits>
+
+static_assert(std::is_nothrow_move_constructible<vtzero::layer>::value, "layer is not nothrow move constructible");
+static_assert(std::is_nothrow_move_assignable<vtzero::layer>::value, "layer is not nothrow move assignable");
 
 TEST_CASE("default constructed layer") {
     vtzero::layer layer{};

@@ -161,10 +161,10 @@ namespace vtzero {
 
         mutable std::vector<data_view> m_key_table;
         mutable std::vector<property_value> m_value_table;
+        mutable std::vector<data_view> m_string_table;
+
         mutable std::size_t m_key_table_size = 0;
         mutable std::size_t m_value_table_size = 0;
-
-        mutable std::vector<data_view> m_string_table;
         mutable std::size_t m_string_table_size = 0;
 
         detail::unaligned_table<double> m_double_table;
@@ -211,7 +211,8 @@ namespace vtzero {
 
         /**
          * Construct a layer object. This is usually not something done in
-         * user code, because layers are created by the tile_iterator.
+         * user code, because layers are created by the layer_iterator or
+         * the get_layer_* functions of the vector_tile class.
          *
          * @throws format_exception if the layer data is ill-formed.
          * @throws version_exception if the layer contains an unsupported version
@@ -454,7 +455,6 @@ namespace vtzero {
          *             it needs to be created.
          *
          * @pre @code valid() @endcode
-         * @pre @code version() < 3 @endcode
          */
         const std::vector<property_value>& value_table() const {
             vtzero_assert(valid());

@@ -54,7 +54,9 @@ namespace vtzero {
     public:
 
         /// The zoom level in a tile must be smaller than this.
-        constexpr static const uint32_t max_zoom = 32;
+        enum : uint32_t {
+            max_zoom = 32
+        };
 
         tile() noexcept = default;
 

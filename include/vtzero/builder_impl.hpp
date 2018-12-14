@@ -61,7 +61,9 @@ namespace vtzero {
             // key/value tables. This number is based on some initial
             // benchmarking but probably needs some tuning.
             // See also https://github.com/mapbox/vtzero/issues/30
-            static constexpr const uint32_t max_entries_flat = 20;
+            enum : uint32_t {
+                max_entries_flat = 20u
+            };
 
             // Buffer containing the encoded table
             std::string m_data{};

@@ -310,7 +310,9 @@ namespace vtzero {
      */
     class index_value {
 
-        static const uint32_t invalid_value = std::numeric_limits<uint32_t>::max();
+        enum : uint32_t {
+            invalid_value = std::numeric_limits<uint32_t>::max()
+        };
 
         uint32_t m_value = invalid_value;
 
