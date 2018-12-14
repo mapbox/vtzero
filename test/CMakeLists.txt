@@ -50,9 +50,18 @@ add_executable(unit-tests test_main.cpp ${_test_sources})
 
 add_executable(fixture-tests test_main.cpp fixture_tests.cpp)
 
+add_executable(base-tests test_main.cpp base_tests.cpp)
+
 add_test(NAME unit-tests
          COMMAND unit-tests
          WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_test(NAME base-tests
+         COMMAND base-tests
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+set_tests_properties(base-tests PROPERTIES
+                     ENVIRONMENT "BASE_DIR=data/vector-tile-base")
 
 set(_fixtures ${MVT_FIXTURES}/fixtures)
 if(EXISTS ${_fixtures})
