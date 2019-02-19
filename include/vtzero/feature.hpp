@@ -136,6 +136,17 @@ namespace vtzero {
         }
 
         /**
+         * Return the layer this feature belongs to.
+         *
+         * Complexity: Constant.
+         *
+         * @pre @code valid() @endcode
+         */
+        const layer& layer() const noexcept {
+            return *m_layer;
+        }
+
+        /**
          * The integer ID of this feature.
          *
          * Returns 0 if it isn't set.
