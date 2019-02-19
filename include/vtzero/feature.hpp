@@ -142,7 +142,7 @@ namespace vtzero {
          *
          * @pre @code valid() @endcode
          */
-        const layer& layer() const noexcept {
+        const layer& get_layer() const noexcept {
             return *m_layer;
         }
 
