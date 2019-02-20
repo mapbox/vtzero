@@ -94,8 +94,9 @@ to them. This is done through the following feature builder classes:
   got from reading a vector tile.
 
 In all cases you need to instantiate the feature builder class, optionally
-add the feature ID using the `set_id()` method, add the geometry and then
-add all the properties of this feature. You have to keep to this order!
+add the feature ID using the `set_integer_id()` or `set_string_id()` method,
+add the geometry and then add all the properties of this feature. You have to
+keep to this order!
 
 ```cpp
 ...
@@ -103,9 +104,9 @@ vtzero::layer_builder lbuilder{...};
 {
     vtzero::point_feature_builder fbuilder{lbuilder};
     // optionally set the ID
-    fbuilder.set_id(23);
+    fbuilder.set_integer_id(23);
     // add the geometry (exact calls are different for different feature builders)
-    fbuilder.add_point(99, 33);
+    fbuilder.add_point({99, 33});
     // add the properties
     fbuilder.add_property("amenity", "restaurant");
     // call commit() when you are done
@@ -130,29 +131,17 @@ the geometry type.
 
 ### Adding a point geometry
 
-Simply call `add_point()` to set the point geometry. There are three different
-overloads for this function. One takes a `vtzero::point`, one takes two
-`uint32_t`s with the x and y coordinates and one takes any type `T` that can
-be converted to a `vtzero::point` using the `create_vtzero_point` function.
-This templated function works on any type that has `x` and `y` members and
-you can create your own overload of this function. See the
-[advanced.md](advanced topics documentation).
+Simply call `add_point()` to set the point geometry.
 
 ### Adding a multipoint geometry
 
-Call `add_points()` with the number of points in the geometry as the only argument.
-After that call `set_point()` for each of those points. `set_point()` has
-multiple overloads just like the `add_point()` method described above.
-
-There is also the `add_points_from_container()` function which copies the
-point from any container type supporting the `size()` function and which
-iterator yields a `vtzero::point` or something convertible to it.
+Call `add_points()` with the number of points in the geometry as the only
+argument. After that call `set_point()` for each of those points.
 
 ### Adding a linestring geometry
 
 Call `add_linestring()` with the number of points in the linestring as only
-argument. After that call `set_point()` for each of those points. `set_point()`
-has multiple overloads just like the `add_point()` method described above.
+argument. After that call `set_point()` for each of those points.
 
 ```cpp
 ...
@@ -160,11 +149,11 @@ vtzero::layer_builder lbuilder{...};
 try {
     vtzero::linestring_feature_builder fbuilder{lbuilder};
     // optionally set the ID
-    fbuilder.set_id(23);
+    fbuilder.set_integer_id(23);
     // add the geometry
     fbuilder.add_linestring(2);
-    fbuilder.set_point(1, 2);
-    fbuilder.set_point(3, 4);
+    fbuilder.set_point({1, 2});
+    fbuilder.set_point({3, 4});
     // add the properties
     fbuilder.add_property("highway", "primary");
     fbuilder.add_property("maxspeed", 80);
@@ -179,14 +168,6 @@ Note that we have wrapped the feature builder in a try-catch-block here. This
 will ignore all geometry errors (which can happen if two consective points
 are the same creating a zero-length segment).
 
-There are two other versions of the `add_linestring()` function. They take two
-iterators defining a range to get the points from. Dereferencing those
-iterators must yield a `vtzero::point` or something convertible to it. One of
-these functions takes a third argument, the number of points the iterator will
-yield. If this is not available `std::distance(begin, end)` is called which
-internally by the `add_linestring()` function which might be slow depending on
-your iterator type.
-
 ### Adding a multilinestring geometry
 
 Adding a multilinestring works just like adding a linestring, just do the
@@ -198,10 +179,9 @@ A polygon consists of one outer ring and zero or more inner rings. You have
 to first add the outer ring and then the inner rings, if any.
 
 Call `add_ring()` with the number of points in the ring as only argument. After
-that call `set_point()` for each of those points. `set_point()` has multiple
-overloads just like the `add_point()` method described above. The minimum
-number of points is 4 and the last point must be the same as the first point
-(or call `close_ring()` instead of the last `set_point()`).
+that call `set_point()` for each of those points. The minimum number of points
+is 4 and the last point must be the same as the first point (or call
+`close_ring()` instead of the last `set_point()`).
 
 ```cpp
 ...
@@ -209,14 +189,14 @@ vtzero::layer_builder lbuilder{...};
 try {
     vtzero::polygon_feature_builder fbuilder{lbuilder};
     // optionally set the ID
-    fbuilder.set_id(23);
+    fbuilder.set_integer_id(23);
     // add the geometry
     fbuilder.add_ring(5);
-    fbuilder.set_point(1, 1);
-    fbuilder.set_point(1, 2);
-    fbuilder.set_point(2, 2);
-    fbuilder.set_point(2, 1);
-    fbuilder.set_point(1, 1); // or call fbuilder.close_ring() instead
+    fbuilder.set_point({1, 1});
+    fbuilder.set_point({1, 2});
+    fbuilder.set_point({2, 2});
+    fbuilder.set_point({2, 1});
+    fbuilder.set_point({1, 1}); // or call fbuilder.close_ring() instead
     // add the properties
     fbuilder.add_property("landuse", "forest");
     // call commit() when you are done
@@ -230,14 +210,6 @@ Note that we have wrapped the feature builder in a try-catch-block here. This
 will ignore all geometry errors (which can happen if two consective points
 are the same creating a zero-length segment or if the last point is not the
 same as the first point).
-
-There are two other versions of the `add_ring()` function. They take two
-iterators defining a range to get the points from. Dereferencing those
-iterators must yield a `vtzero::point` or something convertible to it. One of
-these functions takes a third argument, the number of points the iterator will
-yield. If this is not available `std::distance(begin, end)` is called which
-internally by the `add_ring()` function which might be slow depending on your
-iterator type.
 
 ### Adding a multipolygon geometry
 
@@ -258,7 +230,7 @@ auto geom = ... // get geometry from a feature you are reading
 vtzero::tile_builder tb;
 vtzero::layer_builder lb{tb};
 vtzero::geometry_feature_builder fb{lb};
-fb.set_id(123); // optionally set ID
+fb.set_integer_id(123); // optionally set ID
 fb.add_geometry(geom) // add geometry
 fb.add_property("foo", "bar"); // add properties
 fb.commit();
@@ -508,7 +480,7 @@ public:
     restaurant_feature_builder(restaurant_layer_builder& layer, uint64_t id) :
         vtzero::point_feature_builder(layer), // always a point geometry
         m_layer(layer) {
-        set_id(id); // we always have an ID in this case
+        set_integer_id(id); // we always have an ID in this case
     }
 
     void add_location(mylocation& loc) { // restaurant location is stored in your own type
