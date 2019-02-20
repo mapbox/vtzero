@@ -76,7 +76,7 @@ namespace vtzero {
 
         feature_iterator() noexcept = default;
 
-        feature_iterator(data_view data, const layer* layer) noexcept :
+        feature_iterator(data_view data, const layer* layer) :
             m_data(data),
             m_layer(layer) {
             skip_non_features();

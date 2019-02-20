@@ -70,7 +70,7 @@ namespace vtzero {
 
         layer_iterator() noexcept = default;
 
-        explicit layer_iterator(data_view data) noexcept :
+        explicit layer_iterator(data_view data) :
             m_data(data) {
             skip_non_layers();
         }

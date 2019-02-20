@@ -138,7 +138,7 @@ namespace vtzero {
                 return m_scaling_index;
             }
 
-            bool get_next_value() noexcept {
+            bool get_next_value() {
                 if (m_count == 0) {
                     return false;
                 }

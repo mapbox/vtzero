@@ -70,7 +70,7 @@ struct AttributeCountHandler {
         return true;
     }
 
-    bool start_number_list(std::size_t count, vtzero::index_value index, std::size_t /*depth*/) noexcept {
+    bool start_number_list(std::size_t count, vtzero::index_value index, std::size_t /*depth*/) {
         REQUIRE(index.value() == 0);
         count_number_list += count;
         return true;
