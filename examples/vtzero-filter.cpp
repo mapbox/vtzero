@@ -63,40 +63,45 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    const auto data = read_file(filename);
-    vtzero::vector_tile tile{data};
+    try {
+        const auto data = read_file(filename);
+        vtzero::vector_tile tile{data};
 
-    auto layer = get_layer(tile, layer_num_or_name);
-    std::cerr << "Found layer: " << std::string(layer.name()) << "\n";
+        auto layer = get_layer(tile, layer_num_or_name);
+        std::cerr << "Found layer: " << std::string(layer.name()) << "\n";
 
-    vtzero::tile_builder tb;
+        vtzero::tile_builder tb;
 
-    if (idstr.empty()) {
-        tb.add_existing_layer(layer);
-    } else {
-        char* str_end = nullptr;
-        const int64_t id = std::strtoll(idstr.c_str(), &str_end, 10);
-        if (str_end != idstr.c_str() + idstr.size()) {
-            std::cerr << "Feature ID must be numeric.\n";
-            return 1;
+        if (idstr.empty()) {
+            tb.add_existing_layer(layer);
+        } else {
+            char* str_end = nullptr;
+            const int64_t id = std::strtoll(idstr.c_str(), &str_end, 10);
+            if (str_end != idstr.c_str() + idstr.size()) {
+                std::cerr << "Feature ID must be numeric.\n";
+                return 1;
+            }
+            if (id < 0) {
+                std::cerr << "Feature ID must be >= 0.\n";
+                return 1;
+            }
+
+            const auto feature = layer.get_feature_by_id(static_cast<uint64_t>(id));
+            if (!feature.valid()) {
+                std::cerr << "No feature with that id: " << id << '\n';
+                return 1;
+            }
+
+            vtzero::layer_builder layer_builder{tb, layer};
+            vtzero::copy_feature(feature, layer_builder);
         }
-        if (id < 0) {
-            std::cerr << "Feature ID must be >= 0.\n";
-            return 1;
-        }
 
-        const auto feature = layer.get_feature_by_id(static_cast<uint64_t>(id));
-        if (!feature.valid()) {
-            std::cerr << "No feature with that id: " << id << '\n';
-            return 1;
-        }
+        std::string output = tb.serialize();
 
-        vtzero::layer_builder layer_builder{tb, layer};
-        vtzero::copy_feature(feature, layer_builder);
+        write_data_to_file(output, output_file);
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        std::exit(1);
     }
-
-    std::string output = tb.serialize();
-
-    write_data_to_file(output, output_file);
 }
 
