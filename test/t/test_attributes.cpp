@@ -11,7 +11,7 @@
 #include <utility>
 
 static const std::string types[] = { // NOLINT(cert-err58-cpp)
-    "data_view", "uint", "sint", "double", "float", "true", "false", "null", "cstring", "string"
+    "data_view", "uint", "sint", "double", "float", "true", "false", "null", "cstring", "string", "uint", "sint"
 };
 
 struct AttributeCheckHandler {
@@ -20,7 +20,7 @@ struct AttributeCheckHandler {
     std::size_t count_value = 0;
 
     bool attribute_key(vtzero::data_view key, std::size_t /*depth*/) {
-        REQUIRE(count < sizeof(types));
+        REQUIRE(count < sizeof(types) / sizeof(types[0]));
         REQUIRE(types[count] == std::string(key)); // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
         ++count;
         return true;
@@ -42,15 +42,25 @@ struct AttributeCheckHandler {
 
     bool attribute_value(uint64_t value, std::size_t /*depth*/) {
         ++count_value;
-        REQUIRE(count == 2);
-        REQUIRE(value == 17u);
+        if (count == 2) {
+            REQUIRE(value == 17u);
+        } else if (count == 11) {
+            REQUIRE(value == std::numeric_limits<uint64_t>::max());
+        } else {
+            REQUIRE(false);;
+        }
         return true;
     }
 
     bool attribute_value(int64_t value, std::size_t /*depth*/) {
         ++count_value;
-        REQUIRE(count == 3);
-        REQUIRE(value == -22);
+        if (count == 3) {
+            REQUIRE(value == -22);
+        } else if (count == 12) {
+            REQUIRE(value == std::numeric_limits<int64_t>::min());
+        } else {
+            REQUIRE(false);;
+        }
         return true;
     }
 
@@ -117,6 +127,8 @@ void test_scalar_attrs(uint32_t version) {
         fbuilder.add_scalar_attribute("null", vtzero::null_type{}); // 8
         fbuilder.add_scalar_attribute("cstring", "bar"); // 9
         fbuilder.add_scalar_attribute("string", std::string{"baz"}); // 10
+        fbuilder.add_scalar_attribute("uint", std::numeric_limits<uint64_t>::max()); // 11
+        fbuilder.add_scalar_attribute("sint", std::numeric_limits<int64_t>::min()); // 12
         fbuilder.commit();
     }
 
@@ -138,12 +150,12 @@ void test_scalar_attrs(uint32_t version) {
     {
         AttributeCountHandler handler;
         const auto result = feature.decode_attributes(handler);
-        REQUIRE(result.first == 10);
-        REQUIRE(result.second == 10);
+        REQUIRE(result.first == 12);
+        REQUIRE(result.second == 12);
     }
     {
         AttributeCheckHandler handler;
-        REQUIRE(feature.decode_attributes(handler) == 10);
+        REQUIRE(feature.decode_attributes(handler) == 12);
     }
 }
 
