@@ -17,6 +17,7 @@ static const std::string types[] = { // NOLINT(cert-err58-cpp)
 struct AttributeCheckHandler {
 
     std::size_t count = 0;
+    std::size_t count_value = 0;
 
     bool attribute_key(vtzero::data_view key, std::size_t /*depth*/) {
         REQUIRE(count < sizeof(types));
@@ -26,6 +27,7 @@ struct AttributeCheckHandler {
     }
 
     bool attribute_value(vtzero::data_view value, std::size_t /*depth*/) {
+        ++count_value;
         if (count == 1) {
             REQUIRE(std::string{"foo"} == value);
         } else if (count == 9) {
@@ -39,33 +41,38 @@ struct AttributeCheckHandler {
     }
 
     bool attribute_value(uint64_t value, std::size_t /*depth*/) {
+        ++count_value;
         REQUIRE(count == 2);
         REQUIRE(value == 17u);
         return true;
     }
 
     bool attribute_value(int64_t value, std::size_t /*depth*/) {
+        ++count_value;
         REQUIRE(count == 3);
         REQUIRE(value == -22);
         return true;
     }
 
     bool attribute_value(double value, std::size_t /*depth*/) {
+        ++count_value;
         REQUIRE(count == 4);
         REQUIRE(value == Approx(17.22));
         return true;
     }
 
     bool attribute_value(float value, std::size_t /*depth*/) {
+        ++count_value;
         REQUIRE(count == 5);
         REQUIRE(value == Approx(-5.3f));
         return true;
     }
 
     bool attribute_value(bool value, std::size_t /*depth*/) {
+        ++count_value;
         if (count == 6) {
             REQUIRE(value);
-        } else if (count == 7) {
+        } else if (count == 7 || count == 8) { // count == 8 is only for the case where layer version == 2, because there is no "null" type in version 2
             REQUIRE_FALSE(value);
         } else {
             REQUIRE(false);
@@ -74,25 +81,28 @@ struct AttributeCheckHandler {
     }
 
     bool attribute_value(vtzero::null_type /*value*/, std::size_t /*depth*/) {
+        ++count_value;
         REQUIRE(count == 8);
         return true;
     }
 
     template <typename T>
     bool attribute_value(T /*value*/, std::size_t /*depth*/) {
+        ++count_value;
         REQUIRE(false);
         return false;
     }
 
     std::size_t result() const noexcept {
+        REQUIRE(count == count_value);
         return count;
     }
 
 }; // class AttributeCheckHandler
 
-TEST_CASE("build feature with scalar attributes and read it again") {
+void test_scalar_attrs(uint32_t version) {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+    vtzero::layer_builder lbuilder{tbuilder, "test", version};
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
@@ -117,7 +127,7 @@ TEST_CASE("build feature with scalar attributes and read it again") {
     const auto layer = *tile.begin();
     REQUIRE(layer);
     REQUIRE(layer.name() == "test");
-    REQUIRE(layer.version() == 3);
+    REQUIRE(layer.version() == version);
     REQUIRE(layer.extent() == 4096);
     REQUIRE(layer.num_features() == 1);
 
@@ -135,6 +145,11 @@ TEST_CASE("build feature with scalar attributes and read it again") {
         AttributeCheckHandler handler;
         REQUIRE(feature.decode_attributes(handler) == 10);
     }
+}
+
+TEST_CASE("build feature with scalar attributes and read it again") {
+    test_scalar_attrs(2);
+    test_scalar_attrs(3);
 }
 
 TEST_CASE("build feature with list and map attributes and read it again") {
