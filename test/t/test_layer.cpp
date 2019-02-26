@@ -36,8 +36,8 @@ TEST_CASE("default constructed layer") {
 }
 
 TEST_CASE("read a layer") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     auto layer = tile.get_layer_by_name("bridge");
     REQUIRE(layer.valid());
@@ -76,8 +76,8 @@ TEST_CASE("read a layer") {
 }
 
 TEST_CASE("access features in a layer by id") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     auto layer = tile.get_layer_by_name("building");
     REQUIRE(layer);
@@ -95,8 +95,8 @@ TEST_CASE("access features in a layer by id") {
 }
 
 TEST_CASE("iterate over all features in a layer") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     auto layer = tile.get_layer_by_name("building");
     REQUIRE(layer);
@@ -111,8 +111,8 @@ TEST_CASE("iterate over all features in a layer") {
 }
 
 TEST_CASE("iterate over some features in a layer") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     const auto layer = tile.get_layer_by_name("building");
     REQUIRE(layer);

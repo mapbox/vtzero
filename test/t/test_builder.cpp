@@ -35,7 +35,7 @@ static_assert(movable_not_copyable<vtzero::polygon_feature_builder<2>>::value, "
 static_assert(movable_not_copyable<vtzero::polygon_feature_builder<3>>::value, "polygon_feature_builder<3> should be nothrow movable, but not copyable");
 
 TEST_CASE("Create tile from existing layers") {
-    const auto buffer = load_test_tile();
+    const std::string buffer{load_test_tile()};
     const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
@@ -58,7 +58,7 @@ TEST_CASE("Create tile from existing layers") {
 }
 
 TEST_CASE("Create layer based on existing layer") {
-    const auto buffer = load_test_tile();
+    const std::string buffer{load_test_tile()};
     const vtzero::vector_tile tile{buffer};
     const auto layer = tile.get_layer_by_name("place_label");
     REQUIRE(layer.extent() == 4096);
@@ -403,7 +403,7 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
 TEST_CASE("vector_tile_equal") {
     REQUIRE(vector_tile_equal("", ""));
 
-    const auto buffer = load_test_tile();
+    const std::string buffer{load_test_tile()};
     REQUIRE(buffer.size() == 269388);
     REQUIRE(vector_tile_equal(buffer, buffer));
 
@@ -411,7 +411,7 @@ TEST_CASE("vector_tile_equal") {
 }
 
 TEST_CASE("Copy tile") {
-    const auto buffer = load_test_tile();
+    const std::string buffer{load_test_tile()};
     const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
@@ -428,7 +428,7 @@ TEST_CASE("Copy tile") {
 }
 
 TEST_CASE("Copy tile using geometry_feature_builder<2>") {
-    const auto buffer = load_test_tile();
+    const std::string buffer{load_test_tile()};
     const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
@@ -449,7 +449,7 @@ TEST_CASE("Copy tile using geometry_feature_builder<2>") {
 }
 
 TEST_CASE("Copy only point geometries using geometry_feature_builder<2>") {
-    const auto buffer = load_test_tile();
+    const std::string buffer{load_test_tile()};
     const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;
@@ -512,7 +512,7 @@ struct points_to_vector {
 }; // struct points_to_vector
 
 TEST_CASE("Copy only point geometries using point_feature_builder<2>") {
-    const auto buffer = load_test_tile();
+    const std::string buffer{load_test_tile()};
     const vtzero::vector_tile tile{buffer};
 
     vtzero::tile_builder tbuilder;

@@ -7,17 +7,17 @@
 #include <vector>
 
 TEST_CASE("open a vector tile with string") {
-    const auto data = load_test_tile();
-    REQUIRE(vtzero::is_vector_tile(data));
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    REQUIRE(vtzero::is_vector_tile(buffer));
+    const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 12);
 }
 
 TEST_CASE("open a vector tile with data_view") {
-    const auto data = load_test_tile();
-    const vtzero::data_view dv{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::data_view dv{buffer};
     const vtzero::vector_tile tile{dv};
 
     REQUIRE_FALSE(tile.empty());
@@ -25,16 +25,16 @@ TEST_CASE("open a vector tile with data_view") {
 }
 
 TEST_CASE("open a vector tile with pointer and size") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data.data(), data.size()};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer.data(), buffer.size()};
 
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 12);
 }
 
 TEST_CASE("get layer by index") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     auto layer = tile.get_layer(0);
     REQUIRE(layer);
@@ -53,8 +53,8 @@ TEST_CASE("get layer by index") {
 }
 
 TEST_CASE("get layer by name") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     auto layer = tile.get_layer_by_name("landuse");
     REQUIRE(layer);
@@ -74,8 +74,8 @@ TEST_CASE("get layer by name") {
 }
 
 TEST_CASE("iterate over layers") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     std::vector<std::string> names;
 
@@ -101,8 +101,8 @@ TEST_CASE("iterate over layers") {
 }
 
 TEST_CASE("iterate over some of the layers") {
-    const auto data = load_test_tile();
-    const vtzero::vector_tile tile{data};
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
 
     int num_layers = 0;
 
