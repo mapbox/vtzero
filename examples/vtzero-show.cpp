@@ -297,14 +297,14 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
     }
 
     if (print_tables) {
-        if (!layer.key_table().empty()) {
+        if (layer.key_table_size() > 0) {
             std::cout << "  keys:\n";
             int n = 0;
             for (const auto& key : layer.key_table()) {
                 std::cout << "    [" << n++ << "] {" << key << "}\n";
             }
         }
-        if (!layer.value_table().empty()) {
+        if (layer.value_table_size() > 0) {
             std::cout << "  values:\n";
             int n = 0;
             for (const vtzero::property_value& value : layer.value_table()) {
