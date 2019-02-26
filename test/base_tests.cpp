@@ -35,7 +35,7 @@ static std::string open_tile(const std::string& path) {
 // ---------------------------------------------------------------------------
 
 TEST_CASE("valid/all_attribute_types_v3.mvt") {
-    std::string buffer{open_tile("valid/all_attribute_types_v3.mvt")};
+    const std::string buffer{open_tile("valid/all_attribute_types_v3.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -58,7 +58,7 @@ TEST_CASE("valid/all_attribute_types_v3.mvt") {
 // ---------------------------------------------------------------------------
 
 TEST_CASE("valid/single_layer_v2_linestring.mvt") {
-    std::string buffer{open_tile("valid/single_layer_v2_linestring.mvt")};
+    const std::string buffer{open_tile("valid/single_layer_v2_linestring.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -76,7 +76,7 @@ TEST_CASE("valid/single_layer_v2_linestring.mvt") {
 }
 
 TEST_CASE("valid/single_layer_v2_points.mvt") {
-    std::string buffer{open_tile("valid/single_layer_v2_points.mvt")};
+    const std::string buffer{open_tile("valid/single_layer_v2_points.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -89,7 +89,7 @@ TEST_CASE("valid/single_layer_v2_points.mvt") {
 }
 
 TEST_CASE("valid/single_layer_v2_polygon.mvt") {
-    std::string buffer{open_tile("valid/single_layer_v2_polygon.mvt")};
+    const std::string buffer{open_tile("valid/single_layer_v2_polygon.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -107,7 +107,7 @@ TEST_CASE("valid/single_layer_v2_polygon.mvt") {
 }
 
 TEST_CASE("valid/single_layer_v3_linestring_3d.mvt") {
-    std::string buffer{open_tile("valid/single_layer_v3_linestring_3d.mvt")};
+    const std::string buffer{open_tile("valid/single_layer_v3_linestring_3d.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -125,7 +125,7 @@ TEST_CASE("valid/single_layer_v3_linestring_3d.mvt") {
 }
 
 TEST_CASE("valid/single_layer_v3_points_3d.mvt") {
-    std::string buffer{open_tile("valid/single_layer_v3_points_3d.mvt")};
+    const std::string buffer{open_tile("valid/single_layer_v3_points_3d.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -138,7 +138,7 @@ TEST_CASE("valid/single_layer_v3_points_3d.mvt") {
 }
 
 TEST_CASE("valid/single_layer_v3_spline_3d.mvt") {
-    std::string buffer{open_tile("valid/single_layer_v3_spline_3d.mvt")};
+    const std::string buffer{open_tile("valid/single_layer_v3_spline_3d.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -156,7 +156,7 @@ TEST_CASE("valid/single_layer_v3_spline_3d.mvt") {
 }
 
 TEST_CASE("valid/single_layer_v3_spline.mvt") {
-    std::string buffer{open_tile("valid/single_layer_v3_spline.mvt")};
+    const std::string buffer{open_tile("valid/single_layer_v3_spline.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
@@ -176,7 +176,7 @@ TEST_CASE("valid/single_layer_v3_spline.mvt") {
 // ---------------------------------------------------------------------------
 
 TEST_CASE("invalid/single_layer_v3_polygon_3d.mvt") {
-    std::string buffer{open_tile("invalid/single_layer_v3_polygon_3d.mvt")};
+    const std::string buffer{open_tile("invalid/single_layer_v3_polygon_3d.mvt")};
     const vtzero::vector_tile tile{buffer};
 
     REQUIRE_FALSE(tile.empty());
