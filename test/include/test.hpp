@@ -23,6 +23,7 @@ extern bool got_an_assert;
 #include <vtzero/output.hpp>
 
 std::string load_test_tile();
+std::string load_fixture_tile(const char* env, const std::string& path);
 
 struct AttributeCountHandler {
 

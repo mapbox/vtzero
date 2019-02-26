@@ -13,23 +13,7 @@
 #include <string>
 
 static std::string open_tile(const std::string& path) {
-    const auto fixtures_dir = std::getenv("BASE_DIR");
-    if (fixtures_dir == nullptr) {
-        std::cerr << "Set BASE_DIR environment variable to the directory where the mvt fixtures are!\n";
-        std::exit(2);
-    }
-
-    std::ifstream stream{std::string{fixtures_dir} + "/" + path,
-                         std::ios_base::in|std::ios_base::binary};
-    if (!stream.is_open()) {
-        throw std::runtime_error{"could not open: '" + path + "'"};
-    }
-
-    const std::string message{std::istreambuf_iterator<char>(stream.rdbuf()),
-                              std::istreambuf_iterator<char>()};
-
-    stream.close();
-    return message;
+    return load_fixture_tile("BASE_DIR", path);
 }
 
 // ---------------------------------------------------------------------------
