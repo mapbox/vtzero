@@ -51,11 +51,15 @@ TEST_CASE("read a layer") {
     REQUIRE_FALSE(layer.empty());
     REQUIRE(layer.num_features() == 2);
 
+    REQUIRE(layer.key_table_size() == 4);
     const auto& kt = layer.key_table();
+    REQUIRE(layer.key_table_size() == 4);
     REQUIRE(kt.size() == 4);
     REQUIRE(kt[0] == "class");
 
+    REQUIRE(layer.value_table_size() == 4);
     const auto& vt = layer.value_table();
+    REQUIRE(layer.value_table_size() == 4);
     REQUIRE(vt.size() == 4);
     REQUIRE(vt[0].type() == vtzero::property_value_type::string_value);
     REQUIRE(vt[0].string_value() == "main");
