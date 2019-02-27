@@ -255,19 +255,19 @@ namespace vtzero {
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::double_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_double_table.empty()) {
-                            throw format_exception{"more than one double_table in the layer"};
+                            throw format_exception{"More than one double table in layer"};
                         }
                         m_double_table = detail::unaligned_table<double>{reader.get_view()};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::float_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_float_table.empty()) {
-                            throw format_exception{"more than one float_table in the layer"};
+                            throw format_exception{"More than one float table in layer"};
                         }
                         m_float_table = detail::unaligned_table<float>{reader.get_view()};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::int_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_int_table.empty()) {
-                            throw format_exception{"more than one int_table in the layer"};
+                            throw format_exception{"More than one int table in layer"};
                         }
                         m_int_table = detail::unaligned_table<uint64_t>{reader.get_view()};
                         break;
@@ -288,12 +288,12 @@ namespace vtzero {
                     case protozero::tag_and_type(detail::pbf_layer::tile_zoom, protozero::pbf_wire_type::varint):
                         zoom = reader.get_uint32();
                         if (zoom >= tile::max_zoom) {
-                            throw format_exception{"zoom level too large"};
+                            throw format_exception{"Zoom level in layer > " + std::to_string(tile::max_zoom) + " (spec 4.1)"};
                         }
                         has_x_y_zoom = true;
                         break;
                     default:
-                        throw format_exception{"unknown field in layer (tag=" +
+                        throw format_exception{"Unknown field in layer (tag=" +
                                                std::to_string(static_cast<uint32_t>(reader.tag())) +
                                                ", type=" +
                                                std::to_string(static_cast<uint32_t>(reader.wire_type())) +
@@ -309,37 +309,37 @@ namespace vtzero {
             // Check for vt3 components in vt2 layers.
             if (m_version <= 2) {
                 if (m_string_table_size > 0) {
-                    throw format_exception{"found entry in string table in layer with version <= 2"};
+                    throw format_exception{"String table in layer with version <= 2"};
                 }
                 if (!m_double_table.empty()) {
-                    throw format_exception{"found entry in double table in layer with version <= 2"};
+                    throw format_exception{"Double table in layer with version <= 2"};
                 }
                 if (!m_float_table.empty()) {
-                    throw format_exception{"found entry in float table in layer with version <= 2"};
+                    throw format_exception{"Float table in layer with version <= 2"};
                 }
                 if (!m_int_table.empty()) {
-                    throw format_exception{"found entry in int table in layer with version <= 2"};
+                    throw format_exception{"Int table in layer with version <= 2"};
                 }
                 if (m_elevation_scaling != scaling{}) {
-                    throw format_exception{"found elevation scaling message in layer with version <= 2"};
+                    throw format_exception{"Elevation scaling message in layer with version <= 2"};
                 }
                 if (!m_attribute_scalings.empty()) {
-                    throw format_exception{"found attribute scaling message in layer with version <= 2"};
+                    throw format_exception{"Attribute scaling message in layer with version <= 2"};
                 }
             }
 
             // 4.1 "A layer MUST contain a name field."
-            if (m_name.data() == nullptr) {
-                throw format_exception{"missing name field in layer (spec 4.1)"};
+            if (m_name.size() == 0) {
+                throw format_exception{"Missing name in layer (spec 4.1)"};
             }
 
             if (has_x_y_zoom) {
                 if (x >= detail::num_tiles_in_zoom(zoom)) {
-                    throw format_exception{"tile x value out of range"};
+                    throw format_exception{"Tile x value in layer out of range (0 - " + std::to_string(detail::num_tiles_in_zoom(zoom) - 1) + ") (spec 4.1)"};
                 }
 
                 if (y >= detail::num_tiles_in_zoom(zoom)) {
-                    throw format_exception{"tile y value out of range"};
+                    throw format_exception{"Tile y value in layer out of range (0 - " + std::to_string(detail::num_tiles_in_zoom(zoom) - 1) + ") (spec 4.1)"};
                 }
 
                 m_tile = {x, y, zoom, m_extent};
@@ -679,7 +679,7 @@ namespace vtzero {
             switch (reader.tag_and_type()) {
                 case protozero::tag_and_type(detail::pbf_feature::id, protozero::pbf_wire_type::varint):
                     if (m_id_type != id_type::no_id) {
-                        throw format_exception{"Feature has more than one id/string_id field"};
+                        throw format_exception{"Feature has more than one id/string_id"};
                     }
                     m_integer_id = reader.get_uint64();
                     m_id_type = id_type::integer_id;
@@ -689,19 +689,19 @@ namespace vtzero {
                         throw format_exception{"Feature has more than one tags field"};
                     }
                     if (!m_attributes.empty()) {
-                        throw format_exception{"Feature has both tags and attributes field"};
+                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)"};
                     }
                     m_tags = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"Found attributes field in layer with version <= 2"};
+                        throw format_exception{"Attributes in feature in layer with version <= 2"};
                     }
                     if (!m_attributes.empty()) {
                         throw format_exception{"Feature has more than one attributes field"};
                     }
                     if (!m_tags.empty()) {
-                        throw format_exception{"Feature has both tags and attributes field"};
+                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)"};
                     }
                     m_attributes = reader.get_view();
                     break;
@@ -709,20 +709,20 @@ namespace vtzero {
                         const int32_t type = reader.get_enum();
                         // spec 4.3.4 "Geometry Types"
                         if (type < 0 || type > static_cast<int32_t>(GeomType::max)) {
-                            throw format_exception{"Unknown geometry type (spec 4.3.4)"};
+                            throw format_exception{"Unknown geometry type in feature (spec 4.3.5)"};
                         }
                         m_geometry_type = static_cast<GeomType>(type);
                     }
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
                     if (!m_geometry.empty()) {
-                        throw format_exception{"Feature has more than one geometry field"};
+                        throw format_exception{"Feature has more than one geometry"};
                     }
                     m_geometry = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::elevations, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"Found elevation in layer with version <= 2"};
+                        throw format_exception{"Elevation in feature in layer with version <= 2"};
                     }
                     if (!m_elevations.empty()) {
                         throw format_exception{"Feature has more than one elevations field"};
@@ -731,33 +731,33 @@ namespace vtzero {
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::geometric_attributes, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"Found geometric attribute in layer with version <= 2"};
+                        throw format_exception{"Geometric attribute in feature in layer with version <= 2"};
                     }
                     if (!m_geometric_attributes.empty()) {
-                        throw format_exception{"Feature has more than one geometric_attributes field"};
+                        throw format_exception{"Feature has more than one geometric attributes field"};
                     }
                     m_geometric_attributes = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::string_id, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"Found String ID in layer with version <= 2"};
+                        throw format_exception{"String id in feature in layer with version <= 2"};
                     }
                     if (m_id_type != id_type::no_id) {
-                        throw format_exception{"Feature has more than one id/string_id field"};
+                        throw format_exception{"Feature has more than one id/string_id"};
                     }
                     m_string_id = reader.get_view();
                     m_id_type = id_type::string_id;
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::spline_knots, protozero::pbf_wire_type::length_delimited):
                     if (!m_knots.empty()) {
-                        throw format_exception{"Feature has more than one spline_knots field"};
+                        throw format_exception{"Feature has more than one spline knots field"};
                     }
                     m_knots = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::spline_degree, protozero::pbf_wire_type::varint):
                     m_spline_degree = reader.get_uint32();
                     if (m_spline_degree < 2 || m_spline_degree > 3) {
-                        throw format_exception{"Spline degree must be 2 or 3"};
+                        throw format_exception{"Spline degree in feature must be 2 or 3"};
                     }
                     break;
                 default:
@@ -767,7 +767,7 @@ namespace vtzero {
 
         // spec 4.2 "A feature MUST contain a geometry field."
         if (m_geometry.empty()) {
-            throw format_exception{"Missing geometry field in feature (spec 4.2)"};
+            throw format_exception{"Missing geometry field in feature (spec 4.3)"};
         }
     }
 

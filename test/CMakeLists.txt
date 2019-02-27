@@ -46,11 +46,22 @@ set(TEST_SOURCES attributes
 
 string(REGEX REPLACE "([^;]+)" "t/test_\\1.cpp" _test_sources "${TEST_SOURCES}")
 
+add_executable(generate-formatting-tests generate-formatting-tests.cpp)
+
+add_executable(formatting-tests test_main.cpp formatting_tests.cpp)
+
 add_executable(unit-tests test_main.cpp ${_test_sources})
 
 add_executable(fixture-tests test_main.cpp fixture_tests.cpp)
 
 add_executable(base-tests test_main.cpp base_tests.cpp)
+
+add_test(NAME formatting-tests
+         COMMAND formatting-tests
+         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+set_tests_properties(formatting-tests PROPERTIES
+                     ENVIRONMENT "BASE_DIR=data/formatting-tests")
 
 add_test(NAME unit-tests
          COMMAND unit-tests

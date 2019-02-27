@@ -106,8 +106,8 @@ namespace vtzero {
 
         /// Constructor
         explicit version_exception(const uint32_t version) :
-            exception(std::string{"unknown vector tile version: "} +
-                      std::to_string(version)) {
+            exception(std::string{"Layer with unknown version "} +
+                      std::to_string(version) + " (spec 4.1)") {
         }
 
     }; // version_exception
@@ -123,7 +123,7 @@ namespace vtzero {
 
         /// Constructor
         explicit out_of_range_exception(const uint32_t index) :
-            exception(std::string{"index out of range: "} +
+            exception(std::string{"Index out of range: "} +
                       std::to_string(index)) {
         }
 

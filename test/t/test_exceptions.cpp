@@ -32,11 +32,11 @@ TEST_CASE("construct type_exception") {
 
 TEST_CASE("construct version_exception") {
     vtzero::version_exception e{42};
-    REQUIRE(std::string{e.what()} == "unknown vector tile version: 42");
+    REQUIRE(std::string{e.what()} == "Layer with unknown version 42 (spec 4.1)");
 }
 
 TEST_CASE("construct out_of_range_exception") {
     vtzero::out_of_range_exception e{99};
-    REQUIRE(std::string{e.what()} == "index out of range: 99");
+    REQUIRE(std::string{e.what()} == "Index out of range: 99");
 }
 
