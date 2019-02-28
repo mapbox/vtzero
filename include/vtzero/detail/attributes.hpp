@@ -1,5 +1,5 @@
-#ifndef VTZERO_ATTRIBUTES_HPP
-#define VTZERO_ATTRIBUTES_HPP
+#ifndef VTZERO_DETAIL_ATTRIBUTES_HPP
+#define VTZERO_DETAIL_ATTRIBUTES_HPP
 
 /*****************************************************************************
 
@@ -16,8 +16,8 @@ documentation.
  * @brief Contains types and functions related to attributes.
  */
 
-#include "point.hpp"
-#include "types.hpp"
+#include "../point.hpp"
+#include "../types.hpp"
 
 #include <cstdint>
 #include <type_traits>
@@ -171,4 +171,4 @@ namespace vtzero {
 
 } // namespace vtzero
 
-#endif // VTZERO_ATTRIBUTES_HPP
+#endif // VTZERO_DETAIL_ATTRIBUTES_HPP

@@ -1,5 +1,5 @@
-#ifndef VTZERO_BUILDER_IMPL_HPP
-#define VTZERO_BUILDER_IMPL_HPP
+#ifndef VTZERO_DETAIL_BUILDER_IMPL_HPP
+#define VTZERO_DETAIL_BUILDER_IMPL_HPP
 
 /*****************************************************************************
 
@@ -16,11 +16,11 @@ documentation.
  * @brief Contains classes internal to the builder.
  */
 
-#include "encoded_property_value.hpp"
-#include "property_value.hpp"
-#include "scaling.hpp"
-#include "tile.hpp"
-#include "types.hpp"
+#include "../encoded_property_value.hpp"
+#include "../property_value.hpp"
+#include "../scaling.hpp"
+#include "../tile.hpp"
+#include "../types.hpp"
 
 #include <protozero/pbf_builder.hpp>
 #include <protozero/pbf_message.hpp>
@@ -452,4 +452,4 @@ namespace vtzero {
 
 } // namespace vtzero
 
-#endif // VTZERO_BUILDER_IMPL_HPP
+#endif // VTZERO_DETAIL_BUILDER_IMPL_HPP

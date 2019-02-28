@@ -1,5 +1,5 @@
-#ifndef VTZERO_FEATURE_BUILDER_IMPL_HPP
-#define VTZERO_FEATURE_BUILDER_IMPL_HPP
+#ifndef VTZERO_DETAIL_FEATURE_BUILDER_IMPL_HPP
+#define VTZERO_DETAIL_FEATURE_BUILDER_IMPL_HPP
 
 /*****************************************************************************
 
@@ -16,13 +16,13 @@ documentation.
  * @brief Contains classes internal to the builder.
  */
 
+#include "../encoded_property_value.hpp"
+#include "../feature.hpp"
+#include "../geometry.hpp"
+#include "../property.hpp"
+#include "../property_value.hpp"
 #include "attributes.hpp"
 #include "builder_impl.hpp"
-#include "encoded_property_value.hpp"
-#include "feature.hpp"
-#include "geometry.hpp"
-#include "property.hpp"
-#include "property_value.hpp"
 
 #include <type_traits>
 #include <utility>
@@ -285,4 +285,4 @@ namespace vtzero {
 
 } // namespace vtzero
 
-#endif // VTZERO_FEATURE_BUILDER_IMPL_HPP
+#endif // VTZERO_DETAIL_FEATURE_BUILDER_IMPL_HPP

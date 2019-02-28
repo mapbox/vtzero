@@ -1,5 +1,5 @@
-#ifndef VTZERO_UTIL_HPP
-#define VTZERO_UTIL_HPP
+#ifndef VTZERO_DETAIL_UTIL_HPP
+#define VTZERO_DETAIL_UTIL_HPP
 
 /*****************************************************************************
 
@@ -53,4 +53,4 @@ namespace vtzero {
 
 } // namespace vtzero
 
-#endif // VTZERO_UTIL_HPP
+#endif // VTZERO_DETAIL_UTIL_HPP

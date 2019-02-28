@@ -16,7 +16,8 @@ documentation.
  * @brief Contains the layer class.
  */
 
-#include "attributes.hpp"
+#include "detail/attributes.hpp"
+#include "detail/util.hpp"
 #include "exception.hpp"
 #include "feature.hpp"
 #include "geometry.hpp"

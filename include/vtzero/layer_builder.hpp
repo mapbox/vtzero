@@ -16,7 +16,7 @@ documentation.
  * @brief Contains the layer_builder class.
  */
 
-#include "builder_impl.hpp"
+#include "detail/builder_impl.hpp"
 #include "scaling.hpp"
 #include "tile_builder.hpp"
 #include "types.hpp"

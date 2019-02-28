@@ -16,7 +16,7 @@ documentation.
  * @brief Contains the tile_builder class.
  */
 
-#include "builder_impl.hpp"
+#include "detail/builder_impl.hpp"
 #include "layer.hpp"
 
 #include <cstdlib>

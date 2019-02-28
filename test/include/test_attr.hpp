@@ -1,7 +1,7 @@
 #ifndef TEST_ATTR_HPP
 #define TEST_ATTR_HPP
 
-#include <vtzero/attributes.hpp>
+#include <vtzero/detail/attributes.hpp>
 
 #include <cstdint>
 

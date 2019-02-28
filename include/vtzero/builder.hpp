@@ -16,8 +16,8 @@ documentation.
  * @brief Contains the classes and functions to build vector tiles.
  */
 
-#include "builder_impl.hpp"
-#include "feature_builder_impl.hpp"
+#include "detail/builder_impl.hpp"
+#include "detail/feature_builder_impl.hpp"
 #include "geometry.hpp"
 #include "layer_builder.hpp"
 #include "tile_builder.hpp"
