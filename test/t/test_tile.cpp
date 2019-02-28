@@ -3,6 +3,9 @@
 
 #include <vtzero/tile.hpp>
 
+static_assert(std::is_nothrow_move_constructible<vtzero::tile>::value, "tile is not nothrow move constructible");
+static_assert(std::is_nothrow_move_assignable<vtzero::tile>::value, "tile is not nothrow move assignable");
+
 static_assert(vtzero::detail::num_tiles_in_zoom( 0) ==       1, "wrong number of tiles");
 static_assert(vtzero::detail::num_tiles_in_zoom( 1) ==       2, "wrong number of tiles");
 static_assert(vtzero::detail::num_tiles_in_zoom( 2) ==       4, "wrong number of tiles");

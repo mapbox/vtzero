@@ -9,6 +9,9 @@
 #include <string>
 #include <utility>
 
+static_assert(std::is_nothrow_move_constructible<vtzero::feature>::value, "feature is not nothrow move constructible");
+static_assert(std::is_nothrow_move_assignable<vtzero::feature>::value, "feature is not nothrow move assignable");
+
 TEST_CASE("default constructed feature") {
     vtzero::feature feature{};
 

@@ -3,6 +3,9 @@
 
 #include <vtzero/scaling.hpp>
 
+static_assert(std::is_nothrow_move_constructible<vtzero::scaling>::value, "scaling is not nothrow move constructible");
+static_assert(std::is_nothrow_move_assignable<vtzero::scaling>::value, "scaling is not nothrow move assignable");
+
 TEST_CASE("Default scaling") {
     const vtzero::scaling s{};
 
