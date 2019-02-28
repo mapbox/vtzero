@@ -10,6 +10,9 @@
 static_assert(std::is_nothrow_move_constructible<vtzero::layer>::value, "layer is not nothrow move constructible");
 static_assert(std::is_nothrow_move_assignable<vtzero::layer>::value, "layer is not nothrow move assignable");
 
+static_assert(std::is_nothrow_move_constructible<vtzero::feature_iterator>::value, "feature_iterator is not nothrow move constructible");
+static_assert(std::is_nothrow_move_assignable<vtzero::feature_iterator>::value, "feature_iterator is not nothrow move assignable");
+
 TEST_CASE("default constructed layer") {
     vtzero::layer layer{};
     REQUIRE_FALSE(layer.valid());

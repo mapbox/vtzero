@@ -9,6 +9,9 @@
 static_assert(std::is_nothrow_move_constructible<vtzero::vector_tile>::value, "vector_tile is not nothrow move constructible");
 static_assert(std::is_nothrow_move_assignable<vtzero::vector_tile>::value, "vector_tile is not nothrow move assignable");
 
+static_assert(std::is_nothrow_move_constructible<vtzero::layer_iterator>::value, "layer_iterator is not nothrow move constructible");
+static_assert(std::is_nothrow_move_assignable<vtzero::layer_iterator>::value, "layer_iterator is not nothrow move assignable");
+
 TEST_CASE("open a vector tile with string") {
     const std::string buffer{load_test_tile()};
     REQUIRE(vtzero::is_vector_tile(buffer));
