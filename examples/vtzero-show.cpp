@@ -270,15 +270,15 @@ static void print_scaling(const vtzero::scaling& scaling) {
 
 static void print_layer(const vtzero::layer& layer, bool print_tables, bool print_value_types) {
     std::cout << "=============================================================\n"
-              << "layer: " << layer.layer_num() << '\n'
-              << "  name: " << std::string(layer.name()) << '\n'
-              << "  version: " << layer.version() << '\n'
-              << "  extent: " << layer.extent() << '\n';
+              << "layer: "     << layer.layer_num() << '\n'
+              << "  name: "    << layer.name()      << '\n'
+              << "  version: " << layer.version()   << '\n'
+              << "  extent: "  << layer.extent()    << '\n';
 
     const auto tile = layer.get_tile();
     if (tile.valid()) {
-        std::cout << "  x: " << tile.x() << '\n';
-        std::cout << "  y: " << tile.y() << '\n';
+        std::cout << "  x: "    << tile.x()    << '\n';
+        std::cout << "  y: "    << tile.y()    << '\n';
         std::cout << "  zoom: " << tile.zoom() << '\n';
     }
 
