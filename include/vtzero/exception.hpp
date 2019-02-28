@@ -17,6 +17,7 @@ documentation.
  */
 
 #include <cstdint>
+#include <limits>
 #include <stdexcept>
 #include <string>
 
@@ -27,16 +28,49 @@ namespace vtzero {
      */
     class exception : public std::runtime_error {
 
+        std::size_t m_layer_num;
+        std::size_t m_feature_num;
+
     public:
 
         /// Constructor
-        explicit exception(const char* message) :
-            std::runtime_error(message) {
+        explicit exception(const char* message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
+            std::runtime_error(message),
+            m_layer_num(layer_num),
+            m_feature_num(feature_num) {
         }
 
         /// Constructor
-        explicit exception(const std::string& message) :
-            std::runtime_error(message) {
+        explicit exception(const std::string& message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
+            std::runtime_error(message),
+            m_layer_num(layer_num),
+            m_feature_num(feature_num) {
+        }
+
+        /**
+         * Return the (zero-based) layer index in the vector tile that
+         * triggered this exception.
+         */
+        std::size_t layer_num() const noexcept {
+            return m_layer_num;
+        }
+
+        /**
+         * Return the (zero-based) feature index in the layer that
+         * triggered this exception.
+         *
+         * @pre Check with has_feature_num() whether there is actually
+         *      a feature index stored in the exception.
+         */
+        std::size_t feature_num() const noexcept {
+            return m_feature_num;
+        }
+
+        /**
+         * Does this exception contain a feature number?
+         */
+        bool has_feature_num() const noexcept {
+            return m_feature_num != std::numeric_limits<std::size_t>::max();
         }
 
     }; // class exception
@@ -50,13 +84,13 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit format_exception(const char* message) :
-            exception(message) {
+        explicit format_exception(const char* message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
+            exception(message, layer_num, feature_num) {
         }
 
         /// Constructor
-        explicit format_exception(const std::string& message) :
-            exception(message) {
+        explicit format_exception(const std::string& message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
+            exception(message, layer_num, feature_num) {
         }
 
     }; // class format_exception
@@ -70,13 +104,13 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit geometry_exception(const char* message) :
-            format_exception(message) {
+        explicit geometry_exception(const char* message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
+            format_exception(message, layer_num, feature_num) {
         }
 
         /// Constructor
-        explicit geometry_exception(const std::string& message) :
-            format_exception(message) {
+        explicit geometry_exception(const std::string& message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
+            format_exception(message, layer_num, feature_num) {
         }
 
     }; // class geometry_exception
@@ -105,9 +139,10 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit version_exception(const uint32_t version) :
+        explicit version_exception(const uint32_t version, std::size_t layer_num = 0) :
             exception(std::string{"Layer with unknown version "} +
-                      std::to_string(version) + " (spec 4.1)") {
+                      std::to_string(version) + " (spec 4.1)",
+                      layer_num) {
         }
 
     }; // version_exception
@@ -122,9 +157,10 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit out_of_range_exception(const uint32_t index) :
+        explicit out_of_range_exception(const uint32_t index, std::size_t layer_num = 0) :
             exception(std::string{"Index out of range: "} +
-                      std::to_string(index)) {
+                      std::to_string(index),
+                      layer_num) {
         }
 
     }; // out_of_range_exception

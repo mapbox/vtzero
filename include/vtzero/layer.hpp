@@ -49,6 +49,7 @@ namespace vtzero {
 
         data_view m_data{};
         const layer* m_layer = nullptr;
+        std::size_t m_num_feature = 0;
 
         void skip_non_features() {
             protozero::pbf_message<detail::pbf_layer> reader{m_data};
@@ -86,7 +87,7 @@ namespace vtzero {
             protozero::pbf_message<detail::pbf_layer> reader{m_data};
             if (reader.next(detail::pbf_layer::features,
                             protozero::pbf_wire_type::length_delimited)) {
-                return {m_layer, reader.get_view()};
+                return {m_layer, reader.get_view(), m_num_feature};
             }
             throw format_exception{"expected feature"};
         }
@@ -98,6 +99,7 @@ namespace vtzero {
                                 protozero::pbf_wire_type::length_delimited)) {
                     reader.skip();
                     m_data = reader.data();
+                    ++m_num_feature;
                     skip_non_features();
                 }
             }
@@ -149,6 +151,7 @@ namespace vtzero {
 
         data_view m_data{};
         tile m_tile{};
+        std::size_t m_layer_num = 0;
         std::size_t m_num_features = 0;
         data_view m_name{};
         protozero::pbf_message<detail::pbf_layer> m_layer_reader{m_data};
@@ -219,8 +222,9 @@ namespace vtzero {
          *                           number (only version 1 to 3 are supported)
          * @throws any protozero exception if the protobuf encoding is invalid.
          */
-        explicit layer(const data_view data) :
-            m_data(data) {
+        explicit layer(const data_view data, std::size_t layer_num) :
+            m_data(data),
+            m_layer_num(layer_num) {
             protozero::pbf_message<detail::pbf_layer> reader{data};
             uint32_t x = 0;
             uint32_t y = 0;
@@ -255,19 +259,19 @@ namespace vtzero {
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::double_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_double_table.empty()) {
-                            throw format_exception{"More than one double table in layer"};
+                            throw format_exception{"More than one double table in layer", m_layer_num};
                         }
                         m_double_table = detail::unaligned_table<double>{reader.get_view()};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::float_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_float_table.empty()) {
-                            throw format_exception{"More than one float table in layer"};
+                            throw format_exception{"More than one float table in layer", m_layer_num};
                         }
                         m_float_table = detail::unaligned_table<float>{reader.get_view()};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::int_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_int_table.empty()) {
-                            throw format_exception{"More than one int table in layer"};
+                            throw format_exception{"More than one int table in layer", m_layer_num};
                         }
                         m_int_table = detail::unaligned_table<uint64_t>{reader.get_view()};
                         break;
@@ -288,7 +292,7 @@ namespace vtzero {
                     case protozero::tag_and_type(detail::pbf_layer::tile_zoom, protozero::pbf_wire_type::varint):
                         zoom = reader.get_uint32();
                         if (zoom >= tile::max_zoom) {
-                            throw format_exception{"Zoom level in layer > " + std::to_string(tile::max_zoom) + " (spec 4.1)"};
+                            throw format_exception{"Zoom level in layer > " + std::to_string(tile::max_zoom) + " (spec 4.1)", m_layer_num};
                         }
                         has_x_y_zoom = true;
                         break;
@@ -297,49 +301,49 @@ namespace vtzero {
                                                std::to_string(static_cast<uint32_t>(reader.tag())) +
                                                ", type=" +
                                                std::to_string(static_cast<uint32_t>(reader.wire_type())) +
-                                               ")"};
+                                               ")", m_layer_num};
                 }
             }
 
             // This library can only handle version 1 to 3.
             if (m_version < 1 || m_version > 3) {
-                throw version_exception{m_version};
+                throw version_exception{m_version, m_layer_num};
             }
 
             // Check for vt3 components in vt2 layers.
             if (m_version <= 2) {
                 if (m_string_table_size > 0) {
-                    throw format_exception{"String table in layer with version <= 2"};
+                    throw format_exception{"String table in layer with version <= 2", m_layer_num};
                 }
                 if (!m_double_table.empty()) {
-                    throw format_exception{"Double table in layer with version <= 2"};
+                    throw format_exception{"Double table in layer with version <= 2", m_layer_num};
                 }
                 if (!m_float_table.empty()) {
-                    throw format_exception{"Float table in layer with version <= 2"};
+                    throw format_exception{"Float table in layer with version <= 2", m_layer_num};
                 }
                 if (!m_int_table.empty()) {
-                    throw format_exception{"Int table in layer with version <= 2"};
+                    throw format_exception{"Int table in layer with version <= 2", m_layer_num};
                 }
                 if (m_elevation_scaling != scaling{}) {
-                    throw format_exception{"Elevation scaling message in layer with version <= 2"};
+                    throw format_exception{"Elevation scaling message in layer with version <= 2", m_layer_num};
                 }
                 if (!m_attribute_scalings.empty()) {
-                    throw format_exception{"Attribute scaling message in layer with version <= 2"};
+                    throw format_exception{"Attribute scaling message in layer with version <= 2", m_layer_num};
                 }
             }
 
             // 4.1 "A layer MUST contain a name field."
             if (m_name.empty()) {
-                throw format_exception{"Missing name in layer (spec 4.1)"};
+                throw format_exception{"Missing name in layer (spec 4.1)", m_layer_num};
             }
 
             if (has_x_y_zoom) {
                 if (x >= detail::num_tiles_in_zoom(zoom)) {
-                    throw format_exception{"Tile x value in layer out of range (0 - " + std::to_string(detail::num_tiles_in_zoom(zoom) - 1) + ") (spec 4.1)"};
+                    throw format_exception{"Tile x value in layer out of range (0 - " + std::to_string(detail::num_tiles_in_zoom(zoom) - 1) + ") (spec 4.1)", m_layer_num};
                 }
 
                 if (y >= detail::num_tiles_in_zoom(zoom)) {
-                    throw format_exception{"Tile y value in layer out of range (0 - " + std::to_string(detail::num_tiles_in_zoom(zoom) - 1) + ") (spec 4.1)"};
+                    throw format_exception{"Tile y value in layer out of range (0 - " + std::to_string(detail::num_tiles_in_zoom(zoom) - 1) + ") (spec 4.1)", m_layer_num};
                 }
 
                 m_tile = {x, y, zoom, m_extent};
@@ -367,6 +371,13 @@ namespace vtzero {
          */
         data_view data() const noexcept {
             return m_data;
+        }
+
+        /**
+         * Return the (zero-based) index of this layer in the vector tile.
+         */
+        std::size_t layer_num() const noexcept {
+            return m_layer_num;
         }
 
         /**
@@ -567,7 +578,7 @@ namespace vtzero {
 
             const auto& table = key_table();
             if (index.value() >= table.size()) {
-                throw out_of_range_exception{index.value()};
+                throw out_of_range_exception{index.value(), m_layer_num};
             }
 
             return table[index.value()];
@@ -589,7 +600,7 @@ namespace vtzero {
 
             const auto& table = value_table();
             if (index.value() >= table.size()) {
-                throw out_of_range_exception{index.value()};
+                throw out_of_range_exception{index.value(), m_layer_num};
             }
 
             return table[index.value()];
@@ -615,15 +626,17 @@ namespace vtzero {
         feature get_feature_by_id(uint64_t id) const {
             vtzero_assert(valid());
 
+            std::size_t feature_num = 0;
             protozero::pbf_message<detail::pbf_layer> layer_reader{m_data};
             while (layer_reader.next(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited)) {
                 const auto feature_data = layer_reader.get_view();
                 protozero::pbf_message<detail::pbf_feature> feature_reader{feature_data};
                 if (feature_reader.next(detail::pbf_feature::id, protozero::pbf_wire_type::varint)) {
                     if (feature_reader.get_uint64() == id) {
-                        return feature{this, feature_data};
+                        return feature{this, feature_data, feature_num};
                     }
                 }
+                ++feature_num;
             }
 
             return feature{};
@@ -668,8 +681,13 @@ namespace vtzero {
 
     }; // class layer
 
-    inline feature::feature(const layer* layer, const data_view data) :
-        m_layer(layer) {
+    inline std::size_t feature::layer_num() const noexcept {
+        return m_layer->layer_num();
+    }
+
+    inline feature::feature(const layer* layer, const data_view data, std::size_t feature_num) :
+        m_layer(layer),
+        m_feature_num(feature_num) {
         vtzero_assert(layer);
         vtzero_assert(data.data());
 
@@ -679,29 +697,29 @@ namespace vtzero {
             switch (reader.tag_and_type()) {
                 case protozero::tag_and_type(detail::pbf_feature::id, protozero::pbf_wire_type::varint):
                     if (m_id_type != id_type::no_id) {
-                        throw format_exception{"Feature has more than one id/string_id"};
+                        throw format_exception{"Feature has more than one id/string_id", layer_num(), m_feature_num};
                     }
                     m_integer_id = reader.get_uint64();
                     m_id_type = id_type::integer_id;
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
                     if (!m_tags.empty()) {
-                        throw format_exception{"Feature has more than one tags field"};
+                        throw format_exception{"Feature has more than one tags field", layer_num(), m_feature_num};
                     }
                     if (!m_attributes.empty()) {
-                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)"};
+                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)", layer_num(), m_feature_num};
                     }
                     m_tags = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"Attributes in feature in layer with version <= 2"};
+                        throw format_exception{"Attributes in feature in layer with version <= 2", layer_num(), m_feature_num};
                     }
                     if (!m_attributes.empty()) {
-                        throw format_exception{"Feature has more than one attributes field"};
+                        throw format_exception{"Feature has more than one attributes field", layer_num(), m_feature_num};
                     }
                     if (!m_tags.empty()) {
-                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)"};
+                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)", layer_num(), m_feature_num};
                     }
                     m_attributes = reader.get_view();
                     break;
@@ -709,55 +727,55 @@ namespace vtzero {
                         const int32_t type = reader.get_enum();
                         // spec 4.3.4 "Geometry Types"
                         if (type < 0 || type > static_cast<int32_t>(GeomType::max)) {
-                            throw format_exception{"Unknown geometry type in feature (spec 4.3.5)"};
+                            throw format_exception{"Unknown geometry type in feature (spec 4.3.5)", layer_num(), m_feature_num};
                         }
                         m_geometry_type = static_cast<GeomType>(type);
                     }
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
                     if (!m_geometry.empty()) {
-                        throw format_exception{"Feature has more than one geometry"};
+                        throw format_exception{"Feature has more than one geometry", layer_num(), m_feature_num};
                     }
                     m_geometry = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::elevations, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"Elevation in feature in layer with version <= 2"};
+                        throw format_exception{"Elevation in feature in layer with version <= 2", layer_num(), m_feature_num};
                     }
                     if (!m_elevations.empty()) {
-                        throw format_exception{"Feature has more than one elevations field"};
+                        throw format_exception{"Feature has more than one elevations field", layer_num(), m_feature_num};
                     }
                     m_elevations = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::geometric_attributes, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"Geometric attribute in feature in layer with version <= 2"};
+                        throw format_exception{"Geometric attribute in feature in layer with version <= 2", layer_num(), m_feature_num};
                     }
                     if (!m_geometric_attributes.empty()) {
-                        throw format_exception{"Feature has more than one geometric attributes field"};
+                        throw format_exception{"Feature has more than one geometric attributes field", layer_num(), m_feature_num};
                     }
                     m_geometric_attributes = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::string_id, protozero::pbf_wire_type::length_delimited):
                     if (layer->version() <= 2) {
-                        throw format_exception{"String id in feature in layer with version <= 2"};
+                        throw format_exception{"String id in feature in layer with version <= 2", layer_num(), m_feature_num};
                     }
                     if (m_id_type != id_type::no_id) {
-                        throw format_exception{"Feature has more than one id/string_id"};
+                        throw format_exception{"Feature has more than one id/string_id", layer_num(), m_feature_num};
                     }
                     m_string_id = reader.get_view();
                     m_id_type = id_type::string_id;
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::spline_knots, protozero::pbf_wire_type::length_delimited):
                     if (!m_knots.empty()) {
-                        throw format_exception{"Feature has more than one spline knots field"};
+                        throw format_exception{"Feature has more than one spline knots field", layer_num(), m_feature_num};
                     }
                     m_knots = reader.get_view();
                     break;
                 case protozero::tag_and_type(detail::pbf_feature::spline_degree, protozero::pbf_wire_type::varint):
                     m_spline_degree = reader.get_uint32();
                     if (m_spline_degree < 2 || m_spline_degree > 3) {
-                        throw format_exception{"Spline degree in feature must be 2 or 3"};
+                        throw format_exception{"Spline degree in feature must be 2 or 3", layer_num(), m_feature_num};
                     }
                     break;
                 default:
@@ -767,7 +785,7 @@ namespace vtzero {
 
         // spec 4.2 "A feature MUST contain a geometry field."
         if (m_geometry.empty()) {
-            throw format_exception{"Missing geometry field in feature (spec 4.3)"};
+            throw format_exception{"Missing geometry field in feature (spec 4.3)", layer_num(), m_feature_num};
         }
     }
 
@@ -1082,7 +1100,7 @@ namespace vtzero {
         bool decode_attribute(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end) {
             const auto ki = static_cast<uint32_t>(*it++);
             if (!index_value{ki}.valid()) {
-                throw out_of_range_exception{ki};
+                throw out_of_range_exception{ki, layer.layer_num()};
             }
 
             if (!call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, depth)) {
@@ -1106,15 +1124,15 @@ namespace vtzero {
         for (auto it = m_tags.it_begin(); it != end;) {
             const uint32_t ki = *it++;
             if (!index_value{ki}.valid()) {
-                throw out_of_range_exception{ki};
+                throw out_of_range_exception{ki, layer_num()};
             }
 
             if (it == end) {
-                throw format_exception{"unpaired attributes key/value indexes (spec 4.4)"};
+                throw format_exception{"Unpaired attributes key/value indexes (spec 4.4)", layer_num(), m_feature_num};
             }
             const uint32_t vi = *it++;
             if (!index_value{vi}.valid()) {
-                throw out_of_range_exception{vi};
+                throw out_of_range_exception{vi, layer_num()};
             }
 
             if (!detail::call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, static_cast<std::size_t>(0))) {

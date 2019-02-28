@@ -268,9 +268,9 @@ static void print_scaling(const vtzero::scaling& scaling) {
     std::cout << "offset=" << scaling.offset() << " multiplier=" << scaling.multiplier() << " base=" << scaling.base() << '\n';
 }
 
-static void print_layer(const vtzero::layer& layer, bool print_tables, bool print_value_types, int& layer_num, int& feature_num) {
+static void print_layer(const vtzero::layer& layer, bool print_tables, bool print_value_types) {
     std::cout << "=============================================================\n"
-              << "layer: " << layer_num << '\n'
+              << "layer: " << layer.layer_num() << '\n'
               << "  name: " << std::string(layer.name()) << '\n'
               << "  version: " << layer.version() << '\n'
               << "  extent: " << layer.extent() << '\n';
@@ -347,9 +347,8 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
         }
     }
 
-    feature_num = 0;
     for (const auto feature : layer) {
-        std::cout << "  feature: " << feature_num << '\n'
+        std::cout << "  feature: " << feature.feature_num() << '\n'
                   << "    id: ";
         if (feature.has_integer_id()) {
             std::cout << feature.integer_id() << '\n';
@@ -376,8 +375,6 @@ static void print_layer(const vtzero::layer& layer, bool print_tables, bool prin
             std::cout << "    geometric attributes:\n";
             feature.decode_geometric_attributes(handler);
         }
-
-        ++feature_num;
     }
 }
 
@@ -426,8 +423,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int layer_num = 0;
-    int feature_num = 0;
     try {
         const auto data = read_file(filename);
 
@@ -438,20 +433,26 @@ int main(int argc, char* argv[]) {
                 if (layer_overview) {
                     print_layer_overview(layer);
                 } else {
-                    print_layer(layer, print_tables, print_value_types, layer_num, feature_num);
+                    print_layer(layer, print_tables, print_value_types);
                 }
-                ++layer_num;
             }
         } else {
             const auto layer = get_layer(tile, layer_num_or_name);
             if (layer_overview) {
                 print_layer_overview(layer);
             } else {
-                print_layer(layer, print_tables, print_value_types, layer_num, feature_num);
+                print_layer(layer, print_tables, print_value_types);
             }
         }
+    } catch (const vtzero::exception& e) {
+        std::cerr << "Error in layer " << e.layer_num();
+        if (e.has_feature_num()) {
+            std::cerr << " (feature " << e.feature_num() << ')';
+        }
+        std::cerr << ": " << e.what() << ".\n";
+        return 1;
     } catch (const std::exception& e) {
-        std::cerr << "Error in layer " << layer_num << " (feature " << feature_num << "): " << e.what() << '\n';
+        std::cerr << "Error: " << e.what() << ".\n";
         return 1;
     }
 

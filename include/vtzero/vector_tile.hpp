@@ -43,6 +43,7 @@ namespace vtzero {
     class layer_iterator {
 
         data_view m_data{};
+        std::size_t m_layer_num = 0;
 
         void skip_non_layers() {
             protozero::pbf_message<detail::pbf_tile> reader{m_data};
@@ -79,7 +80,7 @@ namespace vtzero {
             protozero::pbf_message<detail::pbf_tile> reader{m_data};
             if (reader.next(detail::pbf_tile::layers,
                             protozero::pbf_wire_type::length_delimited)) {
-                return layer{reader.get_view()};
+                return layer{reader.get_view(), m_layer_num};
             }
             throw format_exception{"expected layer"};
         }
@@ -93,6 +94,7 @@ namespace vtzero {
                     m_data = reader.data();
                     skip_non_layers();
                 }
+                ++m_layer_num;
             }
             return *this;
         }
@@ -216,10 +218,11 @@ namespace vtzero {
         layer get_layer(std::size_t index) const {
             protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
 
+            const std::size_t layer_num = index;
             while (tile_reader.next(detail::pbf_tile::layers,
                                     protozero::pbf_wire_type::length_delimited)) {
                 if (index == 0) {
-                    return layer{tile_reader.get_view()};
+                    return layer{tile_reader.get_view(), layer_num};
                 }
                 tile_reader.skip();
                 --index;
@@ -246,6 +249,7 @@ namespace vtzero {
         layer get_layer_by_name(const data_view name) const {
             protozero::pbf_message<detail::pbf_tile> tile_reader{m_data};
 
+            std::size_t layer_num = 0;
             while (tile_reader.next(detail::pbf_tile::layers,
                                     protozero::pbf_wire_type::length_delimited)) {
                 const auto layer_data = tile_reader.get_view();
@@ -253,12 +257,13 @@ namespace vtzero {
                 if (layer_reader.next(detail::pbf_layer::name,
                                       protozero::pbf_wire_type::length_delimited)) {
                     if (layer_reader.get_view() == name) {
-                        return layer{layer_data};
+                        return layer{layer_data, layer_num};
                     }
                 } else {
                     // 4.1 "A layer MUST contain a name field."
-                    throw format_exception{"missing name in layer (spec 4.1)"};
+                    throw format_exception{"Missing name in layer (spec 4.1)"};
                 }
+                ++layer_num;
             }
 
             return layer{};

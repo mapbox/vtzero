@@ -70,6 +70,7 @@ namespace vtzero {
 
         uint64_t m_integer_id = 0; // defaults to 0, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L32
         data_view m_string_id{};
+        std::size_t m_feature_num = 0;
 
         typed_data_view<protozero::pbf_reader::const_uint32_iterator> m_geometry{};
         typed_data_view<protozero::pbf_reader::const_sint32_iterator> m_elevations{};
@@ -113,7 +114,7 @@ namespace vtzero {
          *
          * @throws format_exception if the layer data is ill-formed.
          */
-        feature(const layer* layer, const data_view data);
+        feature(const layer* layer, const data_view data, std::size_t feature_num);
 
         /**
          * Is this a valid feature? Valid features are those not created from
@@ -144,6 +145,27 @@ namespace vtzero {
          */
         const layer& get_layer() const noexcept {
             return *m_layer;
+        }
+
+        /**
+         * Return the index of the layer in the vector tile this feature
+         * belongs to.
+         *
+         * Complexity: Constant.
+         *
+         * @pre @code valid() @endcode
+         */
+        std::size_t layer_num() const noexcept;
+
+        /**
+         * Return the index of the feature in the vector tile layer.
+         *
+         * Complexity: Constant.
+         *
+         * @pre @code valid() @endcode
+         */
+        std::size_t feature_num() const noexcept {
+            return m_feature_num;
         }
 
         /**
@@ -512,7 +534,7 @@ namespace vtzero {
                     break;
             }
 
-            throw geometry_exception{"unknown geometry type"};
+            throw geometry_exception{"Unknown geometry type in feature (spec 4.3.5)", layer_num(), m_feature_num};
         }
 
     }; // class feature
