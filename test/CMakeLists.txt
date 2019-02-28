@@ -36,6 +36,7 @@ set(TEST_SOURCES attributes
                  geometry_spline
                  index
                  layer
+                 layer_table
                  output
                  point
                  property_value

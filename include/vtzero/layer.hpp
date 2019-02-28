@@ -20,11 +20,11 @@ documentation.
 #include "exception.hpp"
 #include "feature.hpp"
 #include "geometry.hpp"
+#include "layer_table.hpp"
 #include "property_value.hpp"
 #include "scaling.hpp"
 #include "tile.hpp"
 #include "types.hpp"
-#include "unaligned_table.hpp"
 
 #include <protozero/pbf_message.hpp>
 
@@ -163,9 +163,9 @@ namespace vtzero {
         mutable std::size_t m_value_table_size = 0;
         mutable std::size_t m_string_table_size = 0;
 
-        detail::unaligned_table<double> m_double_table;
-        detail::unaligned_table<float> m_float_table;
-        detail::unaligned_table<uint64_t> m_int_table;
+        layer_table<double> m_double_table;
+        layer_table<float> m_float_table;
+        layer_table<uint64_t> m_int_table;
 
         uint32_t m_version = 1; // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
         uint32_t m_extent = 4096; // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
@@ -254,19 +254,19 @@ namespace vtzero {
                         if (!m_double_table.empty()) {
                             throw format_exception{"More than one double table in layer", m_layer_num};
                         }
-                        m_double_table = detail::unaligned_table<double>{reader.get_view(), m_layer_num};
+                        m_double_table = layer_table<double>{reader.get_view(), m_layer_num};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::float_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_float_table.empty()) {
                             throw format_exception{"More than one float table in layer", m_layer_num};
                         }
-                        m_float_table = detail::unaligned_table<float>{reader.get_view(), m_layer_num};
+                        m_float_table = layer_table<float>{reader.get_view(), m_layer_num};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::int_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_int_table.empty()) {
                             throw format_exception{"More than one int table in layer", m_layer_num};
                         }
-                        m_int_table = detail::unaligned_table<uint64_t>{reader.get_view(), m_layer_num};
+                        m_int_table = layer_table<uint64_t>{reader.get_view(), m_layer_num};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::elevation_scaling, protozero::pbf_wire_type::length_delimited):
                         m_elevation_scaling = scaling{reader.get_view()};
@@ -496,7 +496,7 @@ namespace vtzero {
          * @pre @code valid() @endcode
          * @pre @code version() == 3 @endcode
          */
-        const detail::unaligned_table<double>& double_table() const noexcept {
+        const layer_table<double>& double_table() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
             vtzero_assert_in_noexcept_function(version() == 3);
             return m_double_table;
@@ -510,7 +510,7 @@ namespace vtzero {
          * @pre @code valid() @endcode
          * @pre @code version() == 3 @endcode
          */
-        const detail::unaligned_table<float>& float_table() const noexcept {
+        const layer_table<float>& float_table() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
             vtzero_assert_in_noexcept_function(version() == 3);
             return m_float_table;
@@ -524,7 +524,7 @@ namespace vtzero {
          * @pre @code valid() @endcode
          * @pre @code version() == 3 @endcode
          */
-        const detail::unaligned_table<uint64_t>& int_table() const noexcept {
+        const layer_table<uint64_t>& int_table() const noexcept {
             vtzero_assert_in_noexcept_function(valid());
             vtzero_assert_in_noexcept_function(version() == 3);
             return m_int_table;
