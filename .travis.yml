@@ -189,6 +189,8 @@ script:
       ./codecov -Z -c -X gcov -F unit_tests
       ${COVERAGE} -p $(find test -name 'fixture_tests.cpp.o')
       ./codecov -Z -c -X gcov -F fixture_tests
+      ${COVERAGE} -p $(find test -name 'formatting_tests.cpp.o')
+      ./codecov -Z -c -X gcov -F formatting_tests
     fi
 
 
