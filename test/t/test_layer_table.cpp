@@ -34,7 +34,7 @@ TEST_CASE("empty layer_table") {
 TEST_CASE("layer_table with content") {
     std::array<int, 4> data{{10, 20, 30, 40}};
 
-    std::array<char, 1 + sizeof(int) * data.size()> buffer{};
+    std::array<char, 1 + sizeof(int) * data.size()> buffer{{0}};
     std::memcpy(buffer.data() + 1, data.data(), sizeof(int) * data.size());
 
     vtzero::layer_table<int> t{vtzero::data_view{&buffer[1], sizeof(int) * data.size()}, 3};
