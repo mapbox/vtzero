@@ -3,6 +3,8 @@
 
 #include <vtzero/point.hpp>
 
+#include <type_traits>
+
 static_assert(std::is_nothrow_move_constructible<vtzero::point_2d>::value, "point_2d is not nothrow move constructible");
 static_assert(std::is_nothrow_move_assignable<vtzero::point_2d>::value, "point_2d is not nothrow move assignable");
 

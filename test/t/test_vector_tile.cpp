@@ -4,6 +4,7 @@
 #include <vtzero/vector_tile.hpp>
 
 #include <string>
+#include <type_traits>
 #include <vector>
 
 static_assert(std::is_nothrow_move_constructible<vtzero::vector_tile>::value, "vector_tile is not nothrow move constructible");

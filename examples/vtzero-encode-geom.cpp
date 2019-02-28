@@ -8,11 +8,12 @@
 
 *****************************************************************************/
 
-#include "utils.hpp"
-
 #include <vtzero/geometry.hpp>
 
+#include <protozero/varint.hpp>
+
 #include <cctype>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>

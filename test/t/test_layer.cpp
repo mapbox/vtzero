@@ -5,6 +5,7 @@
 #include <vtzero/vector_tile.hpp>
 
 #include <cstddef>
+#include <string>
 #include <type_traits>
 
 static_assert(std::is_nothrow_move_constructible<vtzero::layer>::value, "layer is not nothrow move constructible");

@@ -7,6 +7,9 @@
 #include <vtzero/types.hpp>
 #include <vtzero/vector_tile.hpp>
 
+#include <array>
+#include <cstdlib>
+#include <limits>
 #include <string>
 #include <utility>
 

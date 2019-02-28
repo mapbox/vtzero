@@ -4,6 +4,9 @@
 #include <vtzero/layer_table.hpp>
 
 #include <array>
+#include <cstring>
+#include <string>
+#include <type_traits>
 
 static_assert(std::is_nothrow_move_constructible<vtzero::layer_table<int>>::value, "layer_table is not nothrow move constructible");
 static_assert(std::is_nothrow_move_assignable<vtzero::layer_table<int>>::value, "layer_table is not nothrow move assignable");

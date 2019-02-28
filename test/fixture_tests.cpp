@@ -6,11 +6,9 @@
 #include <vtzero/vector_tile.hpp>
 
 #include <cstdint>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
+#include <limits>
 #include <string>
+#include <vector>
 
 static std::string open_tile(const std::string& path) {
     return load_fixture_tile("FIXTURES_DIR", path);

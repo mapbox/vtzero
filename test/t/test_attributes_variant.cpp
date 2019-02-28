@@ -11,10 +11,12 @@
 
 #include <boost/variant.hpp>
 
+#include <cstdlib>
 #include <map>
 #include <stack>
 #include <string>
 #include <utility>
+#include <vector>
 
 using variant_type = boost::make_recursive_variant<
         std::string,

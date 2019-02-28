@@ -8,9 +8,12 @@
 #include <vtzero/output.hpp>
 
 #include <cstdint>
+#include <cstdlib>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 template <typename T>
 struct movable_not_copyable {

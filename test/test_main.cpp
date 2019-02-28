@@ -3,7 +3,10 @@
 
 #include <test.hpp>
 
+#include <cstdlib>
 #include <fstream>
+#include <ios>
+#include <iostream>
 #include <stdexcept>
 #include <string>
 

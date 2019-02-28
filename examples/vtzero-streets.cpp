@@ -13,6 +13,8 @@
 #include <vtzero/output.hpp>
 #include <vtzero/vector_tile.hpp>
 
+#include <cstddef>
+#include <exception>
 #include <iostream>
 #include <string>
 

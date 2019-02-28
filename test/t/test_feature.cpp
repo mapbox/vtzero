@@ -5,8 +5,10 @@
 #include <vtzero/layer.hpp>
 #include <vtzero/vector_tile.hpp>
 
+#include <cstdlib>
 #include <map>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 static_assert(std::is_nothrow_move_constructible<vtzero::feature>::value, "feature is not nothrow move constructible");

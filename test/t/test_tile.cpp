@@ -3,6 +3,8 @@
 
 #include <vtzero/tile.hpp>
 
+#include <type_traits>
+
 static_assert(std::is_nothrow_move_constructible<vtzero::tile>::value, "tile is not nothrow move constructible");
 static_assert(std::is_nothrow_move_assignable<vtzero::tile>::value, "tile is not nothrow move assignable");
 

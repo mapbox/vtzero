@@ -3,7 +3,6 @@
 #include <test_geometry.hpp>
 
 #include <cstdint>
-#include <vector>
 
 using geom_decoder = vtzero::detail::geometry_decoder<2, 0, geom_iterator>;
 

@@ -5,11 +5,6 @@
 #include <vtzero/geometry.hpp>
 #include <vtzero/vector_tile.hpp>
 
-#include <cstdint>
-#include <cstdlib>
-#include <fstream>
-#include <iostream>
-#include <stdexcept>
 #include <string>
 
 static std::string open_tile(const std::string& path) {

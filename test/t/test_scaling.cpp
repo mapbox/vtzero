@@ -3,6 +3,8 @@
 
 #include <vtzero/scaling.hpp>
 
+#include <type_traits>
+
 static_assert(std::is_nothrow_move_constructible<vtzero::scaling>::value, "scaling is not nothrow move constructible");
 static_assert(std::is_nothrow_move_assignable<vtzero::scaling>::value, "scaling is not nothrow move assignable");
 

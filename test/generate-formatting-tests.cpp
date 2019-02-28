@@ -6,12 +6,16 @@
 
 *****************************************************************************/
 
-#include <protozero/pbf_builder.hpp>
-
 #include <vtzero/types.hpp>
 
+#include <protozero/pbf_builder.hpp>
+#include <protozero/pbf_writer.hpp>
+
 #include <array>
+#include <cstdint>
+#include <cstdlib>
 #include <fstream>
+#include <ios>
 #include <iostream>
 #include <string>
 

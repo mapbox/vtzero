@@ -12,6 +12,7 @@
 #include <vtzero/vector_tile.hpp>
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 using elev_container = std::vector<int32_t>;

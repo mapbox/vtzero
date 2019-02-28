@@ -9,7 +9,6 @@
 
 #include <cstdint>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 using ls2d_type = std::vector<std::vector<test_point_2d>>;
