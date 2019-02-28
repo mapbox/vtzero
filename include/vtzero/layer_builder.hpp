@@ -27,6 +27,8 @@ documentation.
 namespace vtzero {
 
     /**
+     * @brief Builder class for vector tile layers
+     *
      * The layer_builder is used to add a new layer to a vector tile that is
      * being built.
      */

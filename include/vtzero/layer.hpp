@@ -36,7 +36,7 @@ documentation.
 namespace vtzero {
 
     /**
-     * For iterating over all features in a vector tile layer.
+     * @brief For iterating over all features in a vector tile layer.
      *
      * Usage:
      * @code
@@ -119,6 +119,8 @@ namespace vtzero {
     }; // class feature_iterator
 
     /**
+     * @brief A vector tile layer
+     *
      * A layer according to spec 4.1. It contains a version, the extent,
      * and a name. For the most efficient way to access the features in this
      * layer use a range-for loop:

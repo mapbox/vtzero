@@ -23,9 +23,7 @@ documentation.
 
 namespace vtzero {
 
-    /**
-     * Base class for all exceptions directly thrown by the vtzero library.
-     */
+    /// Base class for all exceptions directly thrown by the vtzero library.
     class exception : public std::runtime_error {
 
         std::size_t m_layer_num;
@@ -76,6 +74,8 @@ namespace vtzero {
     }; // class exception
 
     /**
+     * @brief Error in vector tile format
+     *
      * This exception is thrown when vector tile encoding isn't valid according
      * to the vector tile specification.
      */
@@ -96,6 +96,8 @@ namespace vtzero {
     }; // class format_exception
 
     /**
+     * @brief Error in vector tile geometry
+     *
      * This exception is thrown when a geometry encoding isn't valid according
      * to the vector tile specification.
      */
@@ -131,6 +133,8 @@ namespace vtzero {
     }; // class type_exception
 
     /**
+     * @brief Unknown version error
+     *
      * This exception is thrown when an unknown version number is found in the
      * layer.
      */
@@ -148,9 +152,11 @@ namespace vtzero {
     }; // version_exception
 
     /**
-     * This exception is thrown when an index into the key or value table
-     * in a layer is out of range. This can only happen if the tile data is
-     * invalid.
+     * @brief Invalid index into layer table
+     *
+     * This exception is thrown when an index into the key or one of the value
+     * tables in a layer is out of range. This can only happen if the tile data
+     * is invalid.
      */
     class out_of_range_exception : public exception {
 

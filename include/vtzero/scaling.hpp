@@ -28,7 +28,9 @@ documentation.
 namespace vtzero {
 
     /**
-     * A scaling according to spec 4.4.2.5
+     * @brief Scaling parameters
+     *
+     * A scaling according to spec 4.4.2.5.
      */
     class scaling {
 

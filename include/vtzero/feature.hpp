@@ -33,6 +33,8 @@ namespace vtzero {
     class layer;
 
     /**
+     * @brief A feature in a vector tile layer.
+     *
      * A feature according to spec 4.2.
      *
      * Note that a feature will internally contain a pointer to the layer it

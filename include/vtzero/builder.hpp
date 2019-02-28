@@ -83,6 +83,8 @@ namespace vtzero {
 
 
     /**
+     * @brief Builder class for writing features
+     *
      * Parent class for the point_feature_builder, linestring_feature_builder
      * and polygon_feature_builder classes. Usually you do not instantiate this
      * class directly, but use it through its derived classes.
@@ -723,6 +725,8 @@ namespace vtzero {
     }; // class feature_builder
 
     /**
+     * @brief Builder class for point features
+     *
      * Used for adding a feature with a point geometry to a layer. After
      * creating an object of this class you can add data to the feature in a
      * specific order:
@@ -835,6 +839,8 @@ namespace vtzero {
     }; // class point_feature_builder
 
     /**
+     * @brief Builder class for linestring features
+     *
      * Used for adding a feature with a (multi)linestring geometry to a layer.
      * After creating an object of this class you can add data to the
      * feature in a specific order:
@@ -932,6 +938,8 @@ namespace vtzero {
     }; // class linestring_feature_builder
 
     /**
+     * @brief Builder class for polygon features
+     *
      * Used for adding a feature with a (multi)polygon geometry to a layer.
      * After creating an object of this class you can add data to the
      * feature in a specific order:
@@ -1058,6 +1066,8 @@ namespace vtzero {
     }; // class polygon_feature_builder
 
     /**
+     * @brief Builder class for spline features
+     *
      * Used for adding a feature with a (multi)spline geometry to a layer.
      * After creating an object of this class you can add data to the
      * feature in a specific order:

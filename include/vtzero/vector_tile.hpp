@@ -30,7 +30,7 @@ documentation.
 namespace vtzero {
 
     /**
-     * For iterating over all layers in a vector tile.
+     * @brief For iterating over all layers in a vector tile.
      *
      * Usage:
      * @code
@@ -118,6 +118,8 @@ namespace vtzero {
     }; // class layer_iterator
 
     /**
+     * @brief Vector tile
+     *
      * A vector tile is basically nothing more than an ordered collection
      * of named layers. For the most efficient way to access the layers
      * iterate over them using a range-for:

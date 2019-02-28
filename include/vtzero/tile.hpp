@@ -39,6 +39,8 @@ namespace vtzero {
     } // namespace detail
 
     /**
+     * @brief Tile (x, y, zoom, extent)
+     *
      * This class repesents a tile, it doesn't contain any data, just the
      * zoom level, x and y coordinates and the extent. The class is used to
      * convert tile coordinates into web mercator coordinates.

@@ -28,6 +28,8 @@ documentation.
 namespace vtzero {
 
     /**
+     * @brief Builder class for vector tiles
+     *
      * Used to build vector tiles. Whenever you are building a new vector
      * tile, start with an object of this class and add layers. After all
      * the data is added, call serialize().

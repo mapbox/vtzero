@@ -24,7 +24,7 @@ documentation.
 namespace vtzero {
 
     /**
-     * Lookup table in layers.
+     * @brief Lookup table in layers
      *
      * These are returned by the layer::double_table(), layer::float_table(),
      * and layer::int_table() functions.
