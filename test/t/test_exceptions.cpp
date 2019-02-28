@@ -36,7 +36,7 @@ TEST_CASE("construct version_exception") {
 }
 
 TEST_CASE("construct out_of_range_exception") {
-    vtzero::out_of_range_exception e{99};
+    vtzero::out_of_range_exception e{99, 2};
     REQUIRE(std::string{e.what()} == "Index out of range: 99");
 }
 

@@ -29,13 +29,15 @@ namespace vtzero {
         class unaligned_table {
 
             data_view m_data{};
+            std::size_t m_layer_num;
 
         public:
 
             unaligned_table() noexcept = default;
 
             explicit unaligned_table(data_view data, std::size_t layer_num) :
-                m_data(data) {
+                m_data(data),
+                m_layer_num(layer_num) {
                 if (data.size() % sizeof(T) != 0) {
                     throw format_exception{"Value table in layer has invalid size", layer_num};
                 }
@@ -51,7 +53,7 @@ namespace vtzero {
 
             T at(index_value index) const {
                 if (index.value() >= size()) {
-                    throw out_of_range_exception{index.value()};
+                    throw out_of_range_exception{index.value(), m_layer_num};
                 }
                 T result;
                 std::memcpy(&result, m_data.data() + index.value() * sizeof(T), sizeof(T));

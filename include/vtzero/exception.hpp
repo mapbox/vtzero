@@ -157,7 +157,7 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit out_of_range_exception(const uint32_t index, std::size_t layer_num = 0) :
+        explicit out_of_range_exception(const uint32_t index, std::size_t layer_num) :
             exception(std::string{"Index out of range: "} +
                       std::to_string(index),
                       layer_num) {
