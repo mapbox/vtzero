@@ -51,7 +51,8 @@ TEST_CASE("3d geometry_decoder with point") {
     }
 
     SECTION("trying to get ClosePath command") {
-        REQUIRE_THROWS_WITH(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH), "expected command 7 but got 1");
+        REQUIRE_THROWS_WITH(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH),
+                            "Expected command 7 but got 1");
     }
 
     SECTION("trying to get MoveTo command") {
@@ -328,7 +329,8 @@ TEST_CASE("3d geometry_decoder with polygon with wrong ClosePath count 2") {
     REQUIRE(decoder.next_point() == vtzero::point_3d(8, 12, 0));
     REQUIRE(decoder.next_point() == vtzero::point_3d(20, 34, 1));
     REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH), const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH), "ClosePath command count is not 1");
+    REQUIRE_THROWS_WITH(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH),
+                        "ClosePath command count is not 1");
 }
 
 TEST_CASE("3d geometry_decoder with polygon with wrong ClosePath count 0") {
@@ -349,7 +351,8 @@ TEST_CASE("3d geometry_decoder with polygon with wrong ClosePath count 0") {
     REQUIRE(decoder.next_point() == vtzero::point_3d(8, 12));
     REQUIRE(decoder.next_point() == vtzero::point_3d(20, 34));
     REQUIRE_THROWS_AS(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH), const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH), "ClosePath command count is not 1");
+    REQUIRE_THROWS_WITH(decoder.next_command(vtzero::detail::CommandId::CLOSE_PATH),
+                        "ClosePath command count is not 1");
 }
 
 TEST_CASE("3d geometry_decoder with multipolygon") {

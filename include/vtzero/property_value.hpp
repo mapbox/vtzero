@@ -136,11 +136,11 @@ namespace vtzero {
             if (value_message.next()) {
                 const auto tag_val = static_cast<protozero::pbf_tag_type>(value_message.tag());
                 if (!check_tag_and_type(tag_val, value_message.wire_type())) {
-                    throw format_exception{"illegal property value type"};
+                    throw format_exception{"Illegal property value type"};
                 }
                 return value_message.tag();
             }
-            throw format_exception{"missing tag value"};
+            throw format_exception{"Missing tag value"};
         }
 
         /**

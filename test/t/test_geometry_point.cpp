@@ -42,7 +42,7 @@ TEST_CASE("Calling decode_point() with empty input") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
-                            "expected MoveTo command (spec 4.3.4.2)");
+                            "Expected MoveTo command (spec 4.3.4.2)");
     }
 }
 
@@ -76,7 +76,7 @@ TEST_CASE("Calling decode_point() with a linestring geometry fails") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
-                            "additional data after end of geometry (spec 4.3.4.2)");
+                            "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
 
@@ -93,7 +93,7 @@ TEST_CASE("Calling decode_point() with a polygon geometry fails") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
-                            "additional data after end of geometry (spec 4.3.4.2)");
+                            "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
 
@@ -108,7 +108,7 @@ TEST_CASE("Calling decode_point() with something other than MoveTo command") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
-                            "expected command 1 but got 2");
+                            "Expected command 1 but got 2");
     }
 }
 
@@ -138,7 +138,7 @@ TEST_CASE("Calling decode_point() with more data then expected") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
-                            "additional data after end of geometry (spec 4.3.4.2)");
+                            "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
 

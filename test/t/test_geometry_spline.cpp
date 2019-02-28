@@ -94,7 +94,7 @@ TEST_CASE("Calling decode_spline_geometry() with a point geometry fails") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}),
-                            "expected LineTo command (spec 4.3.4.3)");
+                            "Expected LineTo command (spec 4.3.4.3)");
     }
 }
 
@@ -116,7 +116,7 @@ TEST_CASE("Calling decode_spline_geometry() with a polygon geometry fails") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}),
-                            "expected command 1 but got 7");
+                            "Expected command 1 but got 7");
     }
 }
 
@@ -136,7 +136,7 @@ TEST_CASE("Calling decode_spline_geometry() with something other than MoveTo com
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}),
-                            "expected command 1 but got 2");
+                            "Expected command 1 but got 2");
     }
 }
 
@@ -197,7 +197,7 @@ TEST_CASE("Calling decode_spline_geometry() with 2nd command not a LineTo") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}),
-                            "expected command 2 but got 1");
+                            "Expected command 2 but got 1");
     }
 }
 

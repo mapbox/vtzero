@@ -88,7 +88,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a point geometry fails") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "expected LineTo command (spec 4.3.4.4)");
+                            "Expected LineTo command (spec 4.3.4.4)");
     }
 }
 
@@ -104,7 +104,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a linestring geometry fails") 
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "expected ClosePath command (4.3.4.4)");
+                            "Expected ClosePath command (4.3.4.4)");
     }
 }
 
@@ -119,7 +119,7 @@ TEST_CASE("Calling decode_polygon_geometry() with something other than MoveTo co
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "expected command 1 but got 2");
+                            "Expected command 1 but got 2");
     }
 }
 
@@ -165,7 +165,7 @@ TEST_CASE("Calling decode_polygon_geometry() with 2nd command not a LineTo") {
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "expected command 2 but got 1");
+                            "Expected command 2 but got 1");
     }
 }
 
@@ -202,7 +202,7 @@ TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") 
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "expected command 7 but got 2");
+                            "Expected command 7 but got 2");
     }
 }
 

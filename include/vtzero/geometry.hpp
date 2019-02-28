@@ -201,16 +201,16 @@ namespace vtzero {
                 while (it != end && m_size < MaxGeometricAttributes) {
                     const auto key_index = *it++;
                     if (it == end) {
-                        throw format_exception{"geometric attributes end too soon"};
+                        throw format_exception{"Geometric attributes end too soon"};
                     }
                     const uint64_t complex_value = *it++;
                     if ((complex_value & 0xfu) == static_cast<uint64_t>(complex_value_type::cvt_number_list)) {
                         if (it == end) {
-                            throw format_exception{"geometric attributes end too soon"};
+                            throw format_exception{"Geometric attributes end too soon"};
                         }
                         const uint64_t scaling = *it++;
                         if (it == end) {
-                            throw format_exception{"geometric attributes end too soon"};
+                            throw format_exception{"Geometric attributes end too soon"};
                         }
 
                         auto attr_count = complex_value >>4u;
@@ -221,13 +221,13 @@ namespace vtzero {
                             --attr_count;
                             ++it;
                             if (attr_count != 0 && it == end) {
-                                throw format_exception{"geometric attributes end too soon"};
+                                throw format_exception{"Geometric attributes end too soon"};
                             }
                         }
                     } else if ((complex_value & 0xfu) == static_cast<uint64_t>(complex_value_type::cvt_list)) {
-                        throw format_exception{"geometric attributes of type 'list' not implemented yet"}; // XXX
+                        throw format_exception{"Geometric attributes of type 'list' not implemented yet"}; // XXX
                     } else {
-                        throw format_exception{"geometric attributes must be of type 'list' or 'number list'"};
+                        throw format_exception{"Geometric attributes must be of type 'list' or 'number list'"};
                     }
                 }
             }
@@ -360,7 +360,7 @@ namespace vtzero {
 
                 const auto command_id = get_command_id(*m_geom_it);
                 if (command_id != static_cast<uint32_t>(expected_command_id)) {
-                    throw geometry_exception{std::string{"expected command "} +
+                    throw geometry_exception{std::string{"Expected command "} +
                                              std::to_string(static_cast<uint32_t>(expected_command_id)) +
                                              " but got " +
                                              std::to_string(command_id)};
@@ -374,7 +374,7 @@ namespace vtzero {
                 } else {
                     m_count = get_command_count(*m_geom_it);
                     if (m_count > m_max_count) {
-                        throw geometry_exception{"count too large"};
+                        throw geometry_exception{"Count too large"};
                     }
                 }
 
@@ -387,7 +387,7 @@ namespace vtzero {
                 vtzero_assert(m_count > 0);
 
                 if (m_geom_it == m_geom_end || std::next(m_geom_it) == m_geom_end) {
-                    throw geometry_exception{"too few points in geometry"};
+                    throw geometry_exception{"Too few points in geometry"};
                 }
 
                 // spec 4.3.2 "A ParameterInteger is zigzag encoded"
@@ -419,7 +419,7 @@ namespace vtzero {
             get_result_t<THandler> decode_point(THandler&& handler) {
                 // spec 4.3.4.2 "MUST consist of a single MoveTo command"
                 if (!next_command(CommandId::MOVE_TO)) {
-                    throw geometry_exception{"expected MoveTo command (spec 4.3.4.2)"};
+                    throw geometry_exception{"Expected MoveTo command (spec 4.3.4.2)"};
                 }
 
                 // spec 4.3.4.2 "command count greater than 0"
@@ -443,7 +443,7 @@ namespace vtzero {
 
                 // spec 4.3.4.2 "MUST consist of a single ... command"
                 if (!done()) {
-                    throw geometry_exception{"additional data after end of geometry (spec 4.3.4.2)"};
+                    throw geometry_exception{"Additional data after end of geometry (spec 4.3.4.2)"};
                 }
 
                 std::forward<THandler>(handler).points_end();
@@ -466,7 +466,7 @@ namespace vtzero {
 
                     // spec 4.3.4.3 "2. A LineTo command"
                     if (!next_command(CommandId::LINE_TO)) {
-                        throw geometry_exception{"expected LineTo command (spec 4.3.4.3)"};
+                        throw geometry_exception{"Expected LineTo command (spec 4.3.4.3)"};
                     }
 
                     // spec 4.3.4.3 "with a command count greater than 0"
@@ -514,7 +514,7 @@ namespace vtzero {
 
                     // spec 4.3.4.4 "2. A LineTo command"
                     if (!next_command(CommandId::LINE_TO)) {
-                        throw geometry_exception{"expected LineTo command (spec 4.3.4.4)"};
+                        throw geometry_exception{"Expected LineTo command (spec 4.3.4.4)"};
                     }
 
                     std::forward<THandler>(handler).ring_begin(count() + 2);
@@ -540,7 +540,7 @@ namespace vtzero {
 
                     // spec 4.3.4.4 "3. A ClosePath command"
                     if (!next_command(CommandId::CLOSE_PATH)) {
-                        throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
+                        throw geometry_exception{"Expected ClosePath command (4.3.4.4)"};
                     }
 
                     sum += det(point, start_point);
@@ -574,7 +574,7 @@ namespace vtzero {
 
                     // spec 4.3.4.3 "2. A LineTo command"
                     if (!next_command(CommandId::LINE_TO)) {
-                        throw geometry_exception{"expected LineTo command (spec 4.3.4.3)"};
+                        throw geometry_exception{"Expected LineTo command (spec 4.3.4.3)"};
                     }
 
                     // spec 4.3.4.3 "with a command count greater than 0"
@@ -630,7 +630,7 @@ namespace vtzero {
                 }
 
                 if (!done()) {
-                    throw geometry_exception{"additional data after end of geometry (spec 4.3.4.2)"};
+                    throw geometry_exception{"Additional data after end of geometry (spec 4.3.4.2)"};
                 }
 
                 return get_result<THandler>::of(std::forward<THandler>(handler));

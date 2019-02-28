@@ -802,7 +802,7 @@ TEST_CASE("MVT test 045: Invalid point geometry that includes a MoveTo command a
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "too few points in geometry");
+    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "Too few points in geometry");
 }
 
 TEST_CASE("MVT test 046: Invalid linestring geometry that includes two points in the same position, which is not OGC valid") {
@@ -901,7 +901,7 @@ TEST_CASE("MVT test 051: multipoint with a huge count value, useful for ensuring
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "count too large");
+    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "Count too large");
 }
 
 TEST_CASE("MVT test 052: multipoint with not enough points") {
@@ -1002,7 +1002,7 @@ TEST_CASE("MVT test 057: A point fixture with a gigantic MoveTo command. Can be 
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "count too large");
+    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "Count too large");
 }
 
 TEST_CASE("MVT test 058: A linestring fixture with a gigantic LineTo command") {
@@ -1017,6 +1017,6 @@ TEST_CASE("MVT test 058: A linestring fixture with a gigantic LineTo command") {
     REQUIRE(feature);
 
     REQUIRE_THROWS_AS(feature.decode_geometry(geom_handler{}), const vtzero::geometry_exception&);
-    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "count too large");
+    REQUIRE_THROWS_WITH(feature.decode_geometry(geom_handler{}), "Count too large");
 }
 
