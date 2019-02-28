@@ -99,18 +99,18 @@ namespace vtzero {
      * This exception is thrown when a geometry encoding isn't valid according
      * to the vector tile specification.
      */
-    class geometry_exception : public format_exception {
+    class geometry_exception : public exception {
 
     public:
 
         /// Constructor
         explicit geometry_exception(const char* message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
-            format_exception(message, layer_num, feature_num) {
+            exception(message, layer_num, feature_num) {
         }
 
         /// Constructor
         explicit geometry_exception(const std::string& message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
-            format_exception(message, layer_num, feature_num) {
+            exception(message, layer_num, feature_num) {
         }
 
     }; // class geometry_exception
