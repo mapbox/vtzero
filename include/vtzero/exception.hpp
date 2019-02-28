@@ -84,7 +84,7 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit format_exception(const char* message, std::size_t layer_num = 0, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
+        explicit format_exception(const char* message, std::size_t layer_num, std::size_t feature_num = std::numeric_limits<std::size_t>::max()) :
             exception(message, layer_num, feature_num) {
         }
 

@@ -34,10 +34,10 @@ namespace vtzero {
 
             unaligned_table() noexcept = default;
 
-            explicit unaligned_table(data_view data) :
+            explicit unaligned_table(data_view data, std::size_t layer_num) :
                 m_data(data) {
                 if (data.size() % sizeof(T) != 0) {
-                    throw format_exception{"Value table in layer has invalid size"};
+                    throw format_exception{"Value table in layer has invalid size", layer_num};
                 }
             }
 

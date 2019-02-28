@@ -83,14 +83,7 @@ namespace vtzero {
             skip_non_features();
         }
 
-        value_type operator*() const {
-            protozero::pbf_message<detail::pbf_layer> reader{m_data};
-            if (reader.next(detail::pbf_layer::features,
-                            protozero::pbf_wire_type::length_delimited)) {
-                return {m_layer, reader.get_view(), m_num_feature};
-            }
-            throw format_exception{"expected feature"};
-        }
+        feature operator*() const;
 
         feature_iterator& operator++() {
             if (!m_data.empty()) {
@@ -261,19 +254,19 @@ namespace vtzero {
                         if (!m_double_table.empty()) {
                             throw format_exception{"More than one double table in layer", m_layer_num};
                         }
-                        m_double_table = detail::unaligned_table<double>{reader.get_view()};
+                        m_double_table = detail::unaligned_table<double>{reader.get_view(), m_layer_num};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::float_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_float_table.empty()) {
                             throw format_exception{"More than one float table in layer", m_layer_num};
                         }
-                        m_float_table = detail::unaligned_table<float>{reader.get_view()};
+                        m_float_table = detail::unaligned_table<float>{reader.get_view(), m_layer_num};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::int_values, protozero::pbf_wire_type::length_delimited):
                         if (!m_int_table.empty()) {
                             throw format_exception{"More than one int table in layer", m_layer_num};
                         }
-                        m_int_table = detail::unaligned_table<uint64_t>{reader.get_view()};
+                        m_int_table = detail::unaligned_table<uint64_t>{reader.get_view(), m_layer_num};
                         break;
                     case protozero::tag_and_type(detail::pbf_layer::elevation_scaling, protozero::pbf_wire_type::length_delimited):
                         m_elevation_scaling = scaling{reader.get_view()};
@@ -685,6 +678,15 @@ namespace vtzero {
         return m_layer->layer_num();
     }
 
+    inline feature feature_iterator::operator*() const {
+        protozero::pbf_message<detail::pbf_layer> reader{m_data};
+        if (reader.next(detail::pbf_layer::features,
+                        protozero::pbf_wire_type::length_delimited)) {
+            return {m_layer, reader.get_view(), m_num_feature};
+        }
+        throw format_exception{"Expected feature", m_layer->layer_num(), m_num_feature};
+    }
+
     inline feature::feature(const layer* layer, const data_view data, std::size_t feature_num) :
         m_layer(layer),
         m_feature_num(feature_num) {
@@ -792,19 +794,19 @@ namespace vtzero {
     namespace detail {
 
         template <typename THandler, typename TIterator>
-        bool decode_attribute(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end);
+        bool decode_attribute(THandler&& handler, const feature& feature, std::size_t depth, TIterator& it, TIterator end);
 
         template <typename TIterator>
-        void skip_complex_value(std::size_t depth, TIterator& it, TIterator end) {
+        void skip_complex_value(const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
             if (it == end) {
-                throw format_exception{"Attributes list is missing value"};
+                throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
             }
 
             const uint64_t complex_value = *it++;
 
             const auto vt = complex_value & 0x0fu;
             if (vt > static_cast<std::size_t>(complex_value_type::max)) {
-                throw format_exception{"unknown complex value type: " + std::to_string(vt)};
+                throw format_exception{"Unknown complex value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
             }
 
             const auto cvt = static_cast<complex_value_type>(vt);
@@ -813,7 +815,7 @@ namespace vtzero {
                 auto vp = complex_value >> 4u;
                 while (vp > 0) {
                     --vp;
-                    skip_complex_value(depth + 1, it, end);
+                    skip_complex_value(feature, depth + 1, it, end);
                 }
             } else if (cvt == complex_value_type::cvt_map) {
                 auto vp = complex_value >> 4u;
@@ -821,9 +823,9 @@ namespace vtzero {
                     --vp;
                     ++it; // skip key
                     if (it == end) {
-                        throw format_exception{"Attributes map is missing value"};
+                        throw format_exception{"Attributes map is missing value", feature.layer_num(), feature.feature_num()};
                     }
-                    skip_complex_value(depth + 1, it, end);
+                    skip_complex_value(feature, depth + 1, it, end);
                 }
             }
         }
@@ -917,16 +919,16 @@ namespace vtzero {
 #undef DEF_CALL_WITH_LAYER_WRAPPER
 
         template <typename THandler, typename TIterator>
-        bool decode_complex_value(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end) {
+        bool decode_complex_value(THandler&& handler, const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
             if (it == end) {
-                throw format_exception{"Attributes list is missing value"};
+                throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
             }
 
             const uint64_t complex_value = *it++;
 
             const auto vt = complex_value & 0x0fu;
             if (vt > static_cast<std::size_t>(complex_value_type::max)) {
-                throw format_exception{"unknown complex value type: " + std::to_string(vt)};
+                throw format_exception{"Unknown complex value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
             }
 
             auto vp = complex_value >> 4u;
@@ -959,7 +961,7 @@ namespace vtzero {
                             }
                             break;
                         default:
-                            throw format_exception{"invalid value for bool/null value: " + std::to_string(vp)};
+                            throw format_exception{"Invalid value for bool/null complex value: " + std::to_string(vp), feature.layer_num(), feature.feature_num()};
                     }
                     break;
                 case complex_value_type::cvt_double:
@@ -971,7 +973,7 @@ namespace vtzero {
                         if (!call_double_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!call_attribute_value_double<THandler>(std::forward<THandler>(handler), lookup::double_index, layer, idx, depth)) {
+                        if (!call_attribute_value_double<THandler>(std::forward<THandler>(handler), lookup::double_index, feature.get_layer(), idx, depth)) {
                             return false;
                         }
                     }
@@ -985,7 +987,7 @@ namespace vtzero {
                         if (!call_float_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!call_attribute_value_float<THandler>(std::forward<THandler>(handler), lookup::float_index, layer, idx, depth)) {
+                        if (!call_attribute_value_float<THandler>(std::forward<THandler>(handler), lookup::float_index, feature.get_layer(), idx, depth)) {
                             return false;
                         }
                     }
@@ -999,7 +1001,7 @@ namespace vtzero {
                         if (!call_string_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), lookup::string_index, layer, idx, depth)) {
+                        if (!call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), lookup::string_index, feature.get_layer(), idx, depth)) {
                             return false;
                         }
                     }
@@ -1013,7 +1015,7 @@ namespace vtzero {
                         if (!call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), lookup::int_index, layer, idx, depth)) {
+                        if (!call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), lookup::int_index, feature.get_layer(), idx, depth)) {
                             return false;
                         }
                     }
@@ -1027,7 +1029,7 @@ namespace vtzero {
                         if (!call_int_value_index<THandler>(std::forward<THandler>(handler), idx, depth)) {
                             return false;
                         }
-                        if (!call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), lookup::uint_index, layer, idx, depth)) {
+                        if (!call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), lookup::uint_index, feature.get_layer(), idx, depth)) {
                             return false;
                         }
                     }
@@ -1038,7 +1040,7 @@ namespace vtzero {
                     }
                     while (vp > 0) {
                         --vp;
-                        if (!decode_complex_value(handler, layer, depth + 1, it, end)) {
+                        if (!decode_complex_value(handler, feature, depth + 1, it, end)) {
                             return false;
                         }
                     }
@@ -1052,7 +1054,7 @@ namespace vtzero {
                     }
                     while (vp > 0) {
                         --vp;
-                        if (!decode_attribute(handler, layer, depth + 1, it, end)) {
+                        if (!decode_attribute(handler, feature, depth + 1, it, end)) {
                             return false;
                         }
                     }
@@ -1063,7 +1065,7 @@ namespace vtzero {
                 case complex_value_type::cvt_number_list: {
                     index_value index{static_cast<uint32_t>(*it++)};
                     if (it == end) {
-                        throw format_exception{"Attributes list is missing value"};
+                        throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
                     }
                     if (!call_start_number_list<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), index, depth)) {
                         return false;
@@ -1071,7 +1073,7 @@ namespace vtzero {
                     int64_t value = 0;
                     while (vp > 0) {
                         if (it == end) {
-                            throw format_exception{"Attributes list is missing value"};
+                            throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
                         }
                         --vp;
                         const auto encoded_value = *it++;
@@ -1097,23 +1099,23 @@ namespace vtzero {
         }
 
         template <typename THandler, typename TIterator>
-        bool decode_attribute(THandler&& handler, const layer& layer, std::size_t depth, TIterator& it, TIterator end) {
+        bool decode_attribute(THandler&& handler, const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
             const auto ki = static_cast<uint32_t>(*it++);
             if (!index_value{ki}.valid()) {
-                throw out_of_range_exception{ki, layer.layer_num()};
+                throw out_of_range_exception{ki, feature.layer_num()};
             }
 
             if (!call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, depth)) {
-                skip_complex_value(depth, it, end);
+                skip_complex_value(feature, depth, it, end);
                 return true;
             }
 
-            if (!call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), lookup::key_index, layer, index_value{ki}, depth)) {
-                skip_complex_value(depth, it, end);
+            if (!call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), lookup::key_index, feature.get_layer(), index_value{ki}, depth)) {
+                skip_complex_value(feature, depth, it, end);
                 return true;
             }
 
-            return decode_complex_value(handler, layer, depth, it, end);
+            return decode_complex_value(handler, feature, depth, it, end);
         }
 
     } // namespace detail
@@ -1189,7 +1191,7 @@ namespace vtzero {
     bool feature::decode_attributes_impl(THandler&& handler) const {
         const auto end = m_attributes.it_end();
         for (auto it = m_attributes.it_begin(); it != end;) {
-            if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
+            if (!detail::decode_attribute(std::forward<THandler>(handler), *this, 0, it, end)) {
                 return false;
             }
         }
@@ -1216,7 +1218,7 @@ namespace vtzero {
     bool feature::decode_geometric_attributes_impl(THandler&& handler) const {
         const auto end = m_geometric_attributes.it_end();
         for (auto it = m_geometric_attributes.it_begin(); it != end;) {
-            if (!detail::decode_attribute(std::forward<THandler>(handler), *m_layer, 0, it, end)) {
+            if (!detail::decode_attribute(std::forward<THandler>(handler), *this, 0, it, end)) {
                 return false;
             }
         }

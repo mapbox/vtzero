@@ -82,7 +82,7 @@ namespace vtzero {
                             protozero::pbf_wire_type::length_delimited)) {
                 return layer{reader.get_view(), m_layer_num};
             }
-            throw format_exception{"expected layer"};
+            throw format_exception{"Expected layer", m_layer_num};
         }
 
         layer_iterator& operator++() {
@@ -261,7 +261,7 @@ namespace vtzero {
                     }
                 } else {
                     // 4.1 "A layer MUST contain a name field."
-                    throw format_exception{"Missing name in layer (spec 4.1)"};
+                    throw format_exception{"Missing name in layer (spec 4.1)", layer_num};
                 }
                 ++layer_num;
             }
