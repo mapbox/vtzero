@@ -31,7 +31,7 @@ TEST_CASE("construct type_exception") {
 }
 
 TEST_CASE("construct version_exception") {
-    vtzero::version_exception e{42};
+    vtzero::version_exception e{42, 1};
     REQUIRE(std::string{e.what()} == "Layer with unknown version 42 (spec 4.1)");
 }
 

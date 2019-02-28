@@ -139,7 +139,7 @@ namespace vtzero {
     public:
 
         /// Constructor
-        explicit version_exception(const uint32_t version, std::size_t layer_num = 0) :
+        explicit version_exception(const uint32_t version, std::size_t layer_num) :
             exception(std::string{"Layer with unknown version "} +
                       std::to_string(version) + " (spec 4.1)",
                       layer_num) {
