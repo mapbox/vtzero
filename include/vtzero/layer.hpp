@@ -329,7 +329,7 @@ namespace vtzero {
             }
 
             // 4.1 "A layer MUST contain a name field."
-            if (m_name.size() == 0) {
+            if (m_name.empty()) {
                 throw format_exception{"Missing name in layer (spec 4.1)"};
             }
 
