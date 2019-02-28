@@ -3,19 +3,21 @@
 
 #include <vtzero/layer_table.hpp>
 
+#include <array>
+
 static_assert(std::is_nothrow_move_constructible<vtzero::layer_table<int>>::value, "layer_table is not nothrow move constructible");
 static_assert(std::is_nothrow_move_assignable<vtzero::layer_table<int>>::value, "layer_table is not nothrow move assignable");
 
 TEST_CASE("default constructed layer_table") {
     vtzero::layer_table<int> t;
     REQUIRE(t.empty());
-    REQUIRE(t.size() == 0);
+    REQUIRE(t.size() == 0); // NOLINT(readability-container-size-empty)
 }
 
 TEST_CASE("empty layer_table") {
     vtzero::layer_table<int> t{vtzero::data_view{}, 3};
     REQUIRE(t.empty());
-    REQUIRE(t.size() == 0);
+    REQUIRE(t.size() == 0); // NOLINT(readability-container-size-empty)
     REQUIRE_THROWS_AS(t.at(0), const vtzero::out_of_range_exception&);
     try {
         t.at(2);
@@ -29,8 +31,7 @@ TEST_CASE("empty layer_table") {
 TEST_CASE("layer_table with content") {
     std::array<int, 4> data{{10, 20, 30, 40}};
 
-    std::array<char, 1 + sizeof(int) * data.size()> buffer;
-    buffer[0] = 42;
+    std::array<char, 1 + sizeof(int) * data.size()> buffer{};
     std::memcpy(buffer.data() + 1, data.data(), sizeof(int) * data.size());
 
     vtzero::layer_table<int> t{vtzero::data_view{&buffer[1], sizeof(int) * data.size()}, 3};
