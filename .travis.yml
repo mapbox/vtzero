@@ -102,8 +102,6 @@ matrix:
     - os: linux
       compiler: "gcc-4.9"
       env: BUILD='Debug' CC=gcc-4.9 CXX=g++-4.9
-           COVERAGE=gcov-4.9
-           CXXFLAGS="--coverage" LDFLAGS="--coverage"
       addons: *gcc49
       dist: trusty
 
@@ -129,6 +127,8 @@ matrix:
     - os: linux
       compiler: "gcc-7"
       env: BUILD='Debug' CC=gcc-7 CXX=g++-7
+           COVERAGE=gcov-7
+           CXXFLAGS="--coverage" LDFLAGS="--coverage"
       addons: *gcc7
 
     - os: linux
