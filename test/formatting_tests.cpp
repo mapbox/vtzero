@@ -73,51 +73,51 @@ TEST_CASE("unknown fields in tile should be ignored even if there is no layer") 
     REQUIRE(tile.begin() == tile.end());
 }
 
-TEST_CASE("layer_with_version_0") {
+TEST_CASE("layer with version 0 is not understood") {
     test_layer<vtzero::version_exception>("layer_with_version_0", "Layer with unknown version 0 (spec 4.1)");
 }
 
-TEST_CASE("layer_with_version_4") {
+TEST_CASE("layer with version 4 is not understood") {
     test_layer<vtzero::version_exception>("layer_with_version_4", "Layer with unknown version 4 (spec 4.1)");
 }
 
-TEST_CASE("layer_with_two_double_tables") {
+TEST_CASE("layer with two double tables is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_two_double_tables", "More than one double table in layer");
 }
 
-TEST_CASE("layer_with_two_float_tables") {
+TEST_CASE("layer with two float tables is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_two_float_tables", "More than one float table in layer");
 }
 
-TEST_CASE("layer_with_two_int_tables") {
+TEST_CASE("layer with two int tables is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_two_int_tables", "More than one int table in layer");
 }
 
-TEST_CASE("layer_with_version_2_string_table") {
+TEST_CASE("layer with version 2 string table is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_version_2_string_table", "String table in layer with version <= 2");
 }
 
-TEST_CASE("layer_with_version_2_double_table") {
+TEST_CASE("layer with version 2 double table is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_version_2_double_table", "Double table in layer with version <= 2");
 }
 
-TEST_CASE("layer_with_version_2_float_table") {
+TEST_CASE("layer with version 2 float table is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_version_2_float_table", "Float table in layer with version <= 2");
 }
 
-TEST_CASE("layer_with_version_2_int_table") {
+TEST_CASE("layer with version 2 int table is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_version_2_int_table", "Int table in layer with version <= 2");
 }
 
-TEST_CASE("layer_with_version_2_elevation_scaling") {
+TEST_CASE("layer with version 2 elevation_scaling is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_version_2_elevation_scaling", "Elevation scaling message in layer with version <= 2");
 }
 
-TEST_CASE("layer_with_version_2_attribute_scaling") {
+TEST_CASE("layer with version 2 attribute_scaling is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_version_2_attribute_scaling", "Attribute scaling message in layer with version <= 2");
 }
 
-TEST_CASE("layer_without_name") {
+TEST_CASE("layer without name is not allowed") {
     test_layer<vtzero::format_exception>("layer_without_name", "Missing name in layer (spec 4.1)");
 
     const std::string buffer{open_tile("layer_without_name.mvt")};
@@ -125,7 +125,7 @@ TEST_CASE("layer_without_name") {
     REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), const vtzero::format_exception&);
 }
 
-TEST_CASE("layer_with_empty_name") {
+TEST_CASE("layer with empty name is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_empty_name", "Missing name in layer (spec 4.1)");
 
     const std::string buffer{open_tile("layer_without_name.mvt")};
@@ -133,99 +133,99 @@ TEST_CASE("layer_with_empty_name") {
     REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), const vtzero::format_exception&);
 }
 
-TEST_CASE("layer_with_zoom_level_100") {
+TEST_CASE("layer with zoom level 100 is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_zoom_level_100", "Zoom level in layer > 32 (spec 4.1)");
 }
 
-TEST_CASE("layer_with_tile_x_too_large") {
+TEST_CASE("layer with tile_x too large is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_tile_x_too_large", "Tile x value in layer out of range (0 - 7) (spec 4.1)");
 }
 
-TEST_CASE("layer_with_tile_y_too_large") {
+TEST_CASE("layer with tile_y too large is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_tile_y_too_large", "Tile y value in layer out of range (0 - 7) (spec 4.1)");
 }
 
-TEST_CASE("layer_with_unknown_field") {
+TEST_CASE("unknown field in layer should be ignored") {
     test_layer<vtzero::format_exception>("layer_with_unknown_field", "Missing name in layer (spec 4.1)");
 }
 
 
-TEST_CASE("feature_with_version_2_attributes_field") {
+TEST_CASE("feature with version 2 attributes field is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_version_2_attributes_field", "Attributes in feature in layer with version <= 2");
 }
 
-TEST_CASE("feature_with_version_2_elevations_field") {
+TEST_CASE("feature with version 2 elevations field is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_version_2_elevations_field", "Elevation in feature in layer with version <= 2");
 }
 
-TEST_CASE("feature_with_version_2_geom_attributes_field") {
+TEST_CASE("feature with version 2 geom_attributes field is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_version_2_geom_attributes_field", "Geometric attribute in feature in layer with version <= 2");
 }
 
-TEST_CASE("feature_with_version_2_string_id_field") {
+TEST_CASE("feature with version 2 string_id field is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_version_2_string_id_field", "String id in feature in layer with version <= 2");
 }
 
 
-TEST_CASE("feature_with_multiple_ids_int_int") {
+TEST_CASE("feature with multiple ids (int, int) is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_ids_int_int", "Feature has more than one id/string_id");
 }
 
-TEST_CASE("feature_with_multiple_ids_int_string") {
+TEST_CASE("feature with multiple ids (int, string) is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_ids_int_string", "Feature has more than one id/string_id");
 }
 
-TEST_CASE("feature_with_multiple_ids_string_string") {
+TEST_CASE("feature with multiple ids (string, string) is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_ids_string_string", "Feature has more than one id/string_id");
 }
 
 
-TEST_CASE("feature_with_multiple_tags") {
+TEST_CASE("feature with multiple tags is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_tags", "Feature has more than one tags field");
 }
 
-TEST_CASE("feature_with_multiple_attributes") {
+TEST_CASE("feature with multiple attributes is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_attributes", "Feature has more than one attributes field");
 }
 
-TEST_CASE("feature_with_multiple_geometric_attributes") {
+TEST_CASE("feature with multiple geometric_attributes is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_geometric_attributes", "Feature has more than one geometric attributes field");
 }
 
-TEST_CASE("feature_with_multiple_geometries") {
+TEST_CASE("feature with multiple geometries is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_geometries", "Feature has more than one geometry");
 }
 
-TEST_CASE("feature_with_multiple_elevations") {
+TEST_CASE("feature with multiple elevations is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_elevations", "Feature has more than one elevations field");
 }
 
-TEST_CASE("feature_with_multiple_spline_knots") {
+TEST_CASE("feature with multiple spline_knots is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_multiple_spline_knots", "Feature has more than one spline knots field");
 }
 
-TEST_CASE("feature_with_spline_degree_0") {
+TEST_CASE("feature with spline degree 0 is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_spline_degree_0", "Spline degree in feature must be 2 or 3");
 }
 
-TEST_CASE("feature_with_spline_degree_1") {
+TEST_CASE("feature with spline degree 1 is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_spline_degree_1", "Spline degree in feature must be 2 or 3");
 }
 
-TEST_CASE("feature_with_spline_degree_4") {
+TEST_CASE("feature with spline degree 4 is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_spline_degree_4", "Spline degree in feature must be 2 or 3");
 }
 
 
-TEST_CASE("feature_with_tags_and_attributes") {
+TEST_CASE("feature with tags and attributes is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_tags_and_attributes", "Feature has both tags and attributes field (spec 4.4)");
 }
 
-TEST_CASE("feature_without_geometry") {
+TEST_CASE("feature without geometry is not allowed") {
     test_feature<vtzero::format_exception>("feature_without_geometry", "Missing geometry field in feature (spec 4.3)");
 }
 
-TEST_CASE("feature_with_unknown_geometry_type") {
+TEST_CASE("feature with unknown geometry type is not allowed") {
     test_feature<vtzero::format_exception>("feature_with_unknown_geometry_type", "Unknown geometry type in feature (spec 4.3.5)");
 }
 
