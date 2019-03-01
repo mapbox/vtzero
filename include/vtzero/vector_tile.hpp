@@ -23,6 +23,7 @@ documentation.
 #include <protozero/pbf_message.hpp>
 
 #include <cstddef>
+#include <cstdlib>
 #include <cstring>
 #include <iterator>
 #include <string>
@@ -84,8 +85,8 @@ namespace vtzero {
                 return layer{reader.get_view(), m_layer_num};
             }
 
-            vtzero_assert(false);
-            return layer{};
+            // abort if caller tried to dereference an invalid iterator
+            std::abort();
         }
 
         layer_iterator& operator++() {

@@ -30,6 +30,7 @@ documentation.
 #include <protozero/pbf_message.hpp>
 
 #include <cstdint>
+#include <cstdlib>
 #include <iterator>
 #include <vector>
 
@@ -729,8 +730,8 @@ namespace vtzero {
             return {m_layer, reader.get_view(), m_feature_num};
         }
 
-        vtzero_assert(false);
-        return feature{};
+        // abort if caller tried to dereference an invalid iterator
+        std::abort();
     }
 
     inline feature::feature(const layer* layer, const data_view data, std::size_t feature_num) :
