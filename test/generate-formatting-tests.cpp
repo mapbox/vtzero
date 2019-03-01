@@ -21,11 +21,7 @@
 
 static std::string dir;
 
-static void write_layer(const std::string& name, const std::string& data) {
-    std::string tile_data;
-    protozero::pbf_builder<vtzero::detail::pbf_tile> tile_builder{tile_data};
-    tile_builder.add_bytes(vtzero::detail::pbf_tile::layers, data);
-
+static void write_layer_file(const std::string& name, const std::string& tile_data) {
     std::string filename{dir + "/" + name + ".mvt"};
     std::ofstream file{filename, std::ios::out | std::ios::binary | std::ios::trunc};
 
@@ -38,6 +34,13 @@ static void write_layer(const std::string& name, const std::string& data) {
     }
 }
 
+static void write_layer(const std::string& name, const std::string& data) {
+    std::string tile_data;
+    protozero::pbf_builder<vtzero::detail::pbf_tile> tile_builder{tile_data};
+    tile_builder.add_bytes(vtzero::detail::pbf_tile::layers, data);
+    write_layer_file(name, tile_data);
+}
+
 static std::string wrap_in_layer(uint32_t version, const std::string& feature_data) {
     std::string data;
 
@@ -47,6 +50,32 @@ static std::string wrap_in_layer(uint32_t version, const std::string& feature_da
     layer_builder.add_message(vtzero::detail::pbf_layer::features, feature_data);
 
     return data;
+}
+
+/****************************************************************************/
+
+static void unknown_fields_in_tile() {
+    std::string layer_data_1;
+    {
+        protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{layer_data_1};
+        layer_builder.add_string(vtzero::detail::pbf_layer::name, "foo");
+    }
+    std::string layer_data_2;
+    {
+        protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{layer_data_2};
+        layer_builder.add_string(vtzero::detail::pbf_layer::name, "bar");
+    }
+
+    std::string tile_data;
+    protozero::pbf_writer tile_builder{tile_data};
+    tile_builder.add_uint32(345, 17);
+    tile_builder.add_string(346, "x");
+    tile_builder.add_bytes(static_cast<protozero::pbf_tag_type>(vtzero::detail::pbf_tile::layers), layer_data_1);
+    tile_builder.add_uint32(345, 31);
+    tile_builder.add_bytes(static_cast<protozero::pbf_tag_type>(vtzero::detail::pbf_tile::layers), layer_data_2);
+    tile_builder.add_uint32(345, 13);
+
+    write_layer_file("unknown_fields_in_tile", tile_data);
 }
 
 /****************************************************************************/
@@ -487,6 +516,8 @@ int main(int argc, char *argv[]) {
     } else {
         dir = ".";
     }
+
+    unknown_fields_in_tile();
 
     layer_with_version(0);
     layer_with_version(4);

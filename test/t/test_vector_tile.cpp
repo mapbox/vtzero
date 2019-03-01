@@ -46,14 +46,17 @@ TEST_CASE("get layer by index") {
     auto layer = tile.get_layer(0);
     REQUIRE(layer);
     REQUIRE(layer.name() == "landuse");
+    REQUIRE(layer.layer_num() == 0);
 
     layer = tile.get_layer(1);
     REQUIRE(layer);
     REQUIRE(layer.name() == "waterway");
+    REQUIRE(layer.layer_num() == 1);
 
     layer = tile.get_layer(11);
     REQUIRE(layer);
     REQUIRE(layer.name() == "waterway_label");
+    REQUIRE(layer.layer_num() == 11);
 
     layer = tile.get_layer(12);
     REQUIRE_FALSE(layer);
@@ -66,15 +69,18 @@ TEST_CASE("get layer by name") {
     auto layer = tile.get_layer_by_name("landuse");
     REQUIRE(layer);
     REQUIRE(layer.name() == "landuse");
+    REQUIRE(layer.layer_num() == 0);
 
     layer = tile.get_layer_by_name(std::string{"road"});
     REQUIRE(layer);
     REQUIRE(layer.name() == "road");
+    REQUIRE(layer.layer_num() == 5);
 
     const vtzero::data_view name{"poi_label"};
     layer = tile.get_layer_by_name(name);
     REQUIRE(layer);
     REQUIRE(layer.name() == "poi_label");
+    REQUIRE(layer.layer_num() == 9);
 
     layer = tile.get_layer_by_name("unknown");
     REQUIRE_FALSE(layer);

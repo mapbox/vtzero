@@ -39,6 +39,29 @@ void test_feature(const std::string& name, const char* msg) {
     REQUIRE_THROWS_WITH(*layer.begin(), msg);
 }
 
+TEST_CASE("unknown fields in tile should be ignored") {
+    const std::string buffer{open_tile("unknown_fields_in_tile.mvt")};
+    const vtzero::vector_tile tile{buffer};
+
+    REQUIRE_FALSE(tile.empty());
+    REQUIRE(tile.count_layers() == 2);
+
+    auto it = tile.begin();
+    {
+        const auto layer = *it;
+        REQUIRE(layer.name() == "foo");
+        REQUIRE(layer.layer_num() == 0);
+    }
+    ++it;
+    {
+        const auto layer = *it;
+        REQUIRE(layer.name() == "bar");
+        REQUIRE(layer.layer_num() == 1);
+    }
+    ++it;
+    REQUIRE(it == tile.end());
+}
+
 TEST_CASE("layer_with_version_0") {
     test_layer<vtzero::version_exception>("layer_with_version_0", "Layer with unknown version 0 (spec 4.1)");
 }
@@ -85,10 +108,18 @@ TEST_CASE("layer_with_version_2_attribute_scaling") {
 
 TEST_CASE("layer_without_name") {
     test_layer<vtzero::format_exception>("layer_without_name", "Missing name in layer (spec 4.1)");
+
+    const std::string buffer{open_tile("layer_without_name.mvt")};
+    const vtzero::vector_tile tile{buffer};
+    REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), const vtzero::format_exception&);
 }
 
 TEST_CASE("layer_with_empty_name") {
     test_layer<vtzero::format_exception>("layer_with_empty_name", "Missing name in layer (spec 4.1)");
+
+    const std::string buffer{open_tile("layer_without_name.mvt")};
+    const vtzero::vector_tile tile{buffer};
+    REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), const vtzero::format_exception&);
 }
 
 TEST_CASE("layer_with_zoom_level_100") {
