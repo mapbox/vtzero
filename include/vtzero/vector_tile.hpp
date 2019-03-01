@@ -319,12 +319,12 @@ namespace vtzero {
         }
 
         /// Get a (const) iterator to the first layer in this vector tile.
-        layer_iterator begin() const noexcept {
+        layer_iterator begin() const {
             return layer_iterator{m_data};
         }
 
         /// Get a (const) iterator one past the end layer in this vector tile.
-        layer_iterator end() const noexcept {
+        layer_iterator end() const {
             return layer_iterator{data_view{m_data.data() + m_data.size(), 0}};
         }
 

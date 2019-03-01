@@ -87,6 +87,14 @@ static void only_unknown_fields_in_tile() {
     write_layer_file("only_unknown_fields_in_tile", tile_data);
 }
 
+static void layer_with_invalid_protobuf_type() {
+    std::string tile_data;
+    protozero::pbf_builder<vtzero::detail::pbf_tile> tile_builder{tile_data};
+    tile_builder.add_uint32(vtzero::detail::pbf_tile::layers, 123); // wrong protobuf type
+
+    write_layer_file("layer_with_invalid_protobuf_type", tile_data);
+}
+
 /****************************************************************************/
 
 static void layer_with_version(const uint32_t version) {
@@ -538,6 +546,8 @@ int main(int argc, char *argv[]) {
 
     unknown_fields_in_tile();
     only_unknown_fields_in_tile();
+
+    layer_with_invalid_protobuf_type();
 
     layer_with_version(0);
     layer_with_version(4);
