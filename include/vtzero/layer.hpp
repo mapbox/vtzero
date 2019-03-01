@@ -227,65 +227,110 @@ namespace vtzero {
             uint32_t zoom = 0;
             bool has_x_y_zoom = false;
             while (reader.next()) {
-                switch (reader.tag_and_type()) {
-                    case protozero::tag_and_type(detail::pbf_layer::version, protozero::pbf_wire_type::varint):
+                switch (reader.tag()) {
+                    case detail::pbf_layer::version:
+                        if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                            throw format_exception{"Layer version has wrong protobuf type", m_layer_num};
+                        }
                         m_version = reader.get_uint32();
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::name, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::name:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer name has wrong protobuf type", m_layer_num};
+                        }
                         m_name = reader.get_view();
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::features, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::features:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer features have wrong protobuf type", m_layer_num};
+                        }
                         reader.skip(); // ignore features for now
                         ++m_num_features;
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::keys, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::keys:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer keys have wrong protobuf type", m_layer_num};
+                        }
                         reader.skip();
                         ++m_key_table_size;
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::values, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::values:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer values have wrong protobuf type", m_layer_num};
+                        }
                         reader.skip();
                         ++m_value_table_size;
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
+                    case detail::pbf_layer::extent:
+                        if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                            throw format_exception{"Layer extent has wrong protobuf type", m_layer_num};
+                        }
                         m_extent = reader.get_uint32();
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::string_values, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::string_values:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer string_values have wrong protobuf type", m_layer_num};
+                        }
                         reader.skip();
                         ++m_string_table_size;
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::double_values, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::double_values:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer double_values have wrong protobuf type", m_layer_num};
+                        }
                         if (!m_double_table.empty()) {
                             throw format_exception{"More than one double table in layer", m_layer_num};
                         }
                         m_double_table = layer_table<double>{reader.get_view(), m_layer_num};
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::float_values, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::float_values:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer float_values have wrong protobuf type", m_layer_num};
+                        }
                         if (!m_float_table.empty()) {
                             throw format_exception{"More than one float table in layer", m_layer_num};
                         }
                         m_float_table = layer_table<float>{reader.get_view(), m_layer_num};
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::int_values, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::int_values:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer int_values have wrong protobuf type", m_layer_num};
+                        }
                         if (!m_int_table.empty()) {
                             throw format_exception{"More than one int table in layer", m_layer_num};
                         }
                         m_int_table = layer_table<uint64_t>{reader.get_view(), m_layer_num};
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::elevation_scaling, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::elevation_scaling:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer elevation_scaling has wrong protobuf type", m_layer_num};
+                        }
                         m_elevation_scaling = scaling{reader.get_view()};
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::attribute_scalings, protozero::pbf_wire_type::length_delimited):
+                    case detail::pbf_layer::attribute_scalings:
+                        if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                            throw format_exception{"Layer attribute_scalings have wrong protobuf type", m_layer_num};
+                        }
                         m_attribute_scalings.emplace_back(reader.get_view());
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::tile_x, protozero::pbf_wire_type::varint):
+                    case detail::pbf_layer::tile_x:
+                        if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                            throw format_exception{"Layer tile_x has wrong protobuf type", m_layer_num};
+                        }
                         x = reader.get_uint32();
                         has_x_y_zoom = true;
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::tile_y, protozero::pbf_wire_type::varint):
+                    case detail::pbf_layer::tile_y:
+                        if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                            throw format_exception{"Layer tile_y has wrong protobuf type", m_layer_num};
+                        }
                         y = reader.get_uint32();
                         has_x_y_zoom = true;
                         break;
-                    case protozero::tag_and_type(detail::pbf_layer::tile_zoom, protozero::pbf_wire_type::varint):
+                    case detail::pbf_layer::tile_zoom:
+                        if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                            throw format_exception{"Layer tile_zoom has wrong protobuf type", m_layer_num};
+                        }
                         zoom = reader.get_uint32();
                         if (zoom >= tile::max_zoom) {
                             throw format_exception{"Zoom level in layer > " + std::to_string(tile::max_zoom) + " (spec 4.1)", m_layer_num};
@@ -293,11 +338,7 @@ namespace vtzero {
                         has_x_y_zoom = true;
                         break;
                     default:
-                        throw format_exception{"Unknown field in layer (tag=" +
-                                               std::to_string(static_cast<uint32_t>(reader.tag())) +
-                                               ", type=" +
-                                               std::to_string(static_cast<uint32_t>(reader.wire_type())) +
-                                               ")", m_layer_num};
+                        reader.skip();
                 }
             }
 
@@ -701,88 +742,118 @@ namespace vtzero {
         protozero::pbf_message<detail::pbf_feature> reader{data};
 
         while (reader.next()) {
-            switch (reader.tag_and_type()) {
-                case protozero::tag_and_type(detail::pbf_feature::id, protozero::pbf_wire_type::varint):
+            switch (reader.tag()) {
+                case detail::pbf_feature::id:
+                    if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                        throw format_exception{"Feature id has wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (m_id_type != id_type::no_id) {
-                        throw format_exception{"Feature has more than one id/string_id", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one id/string_id", layer_num(), feature_num};
                     }
                     m_integer_id = reader.get_uint64();
                     m_id_type = id_type::integer_id;
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::tags, protozero::pbf_wire_type::length_delimited):
+                case detail::pbf_feature::tags:
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Feature tags have wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (!m_tags.empty()) {
-                        throw format_exception{"Feature has more than one tags field", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one tags field", layer_num(), feature_num};
                     }
                     if (!m_attributes.empty()) {
-                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)", layer_num(), feature_num};
                     }
                     m_tags = reader.get_view();
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::attributes, protozero::pbf_wire_type::length_delimited):
+                case detail::pbf_feature::attributes:
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Feature attributes have wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (layer->version() <= 2) {
-                        throw format_exception{"Attributes in feature in layer with version <= 2", layer_num(), m_feature_num};
+                        throw format_exception{"Attributes in feature in layer with version <= 2", layer_num(), feature_num};
                     }
                     if (!m_attributes.empty()) {
-                        throw format_exception{"Feature has more than one attributes field", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one attributes field", layer_num(), feature_num};
                     }
                     if (!m_tags.empty()) {
-                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has both tags and attributes field (spec 4.4)", layer_num(), feature_num};
                     }
                     m_attributes = reader.get_view();
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::type, protozero::pbf_wire_type::varint): {
+                case detail::pbf_feature::type: {
+                        if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                            throw format_exception{"Feature type has wrong protobuf type", layer_num(), feature_num};
+                        }
                         const int32_t type = reader.get_enum();
                         // spec 4.3.4 "Geometry Types"
                         if (type < 0 || type > static_cast<int32_t>(GeomType::max)) {
-                            throw format_exception{"Unknown geometry type in feature (spec 4.3.5)", layer_num(), m_feature_num};
+                            throw format_exception{"Unknown geometry type in feature (spec 4.3.5)", layer_num(), feature_num};
                         }
                         m_geometry_type = static_cast<GeomType>(type);
                     }
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::geometry, protozero::pbf_wire_type::length_delimited):
+                case detail::pbf_feature::geometry:
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Feature geometry has wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (!m_geometry.empty()) {
-                        throw format_exception{"Feature has more than one geometry", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one geometry", layer_num(), feature_num};
                     }
                     m_geometry = reader.get_view();
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::elevations, protozero::pbf_wire_type::length_delimited):
+                case detail::pbf_feature::elevations:
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Feature elevations have wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (layer->version() <= 2) {
-                        throw format_exception{"Elevation in feature in layer with version <= 2", layer_num(), m_feature_num};
+                        throw format_exception{"Elevation in feature in layer with version <= 2", layer_num(), feature_num};
                     }
                     if (!m_elevations.empty()) {
-                        throw format_exception{"Feature has more than one elevations field", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one elevations field", layer_num(), feature_num};
                     }
                     m_elevations = reader.get_view();
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::geometric_attributes, protozero::pbf_wire_type::length_delimited):
+                case detail::pbf_feature::geometric_attributes:
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Feature geometric_attributes wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (layer->version() <= 2) {
-                        throw format_exception{"Geometric attribute in feature in layer with version <= 2", layer_num(), m_feature_num};
+                        throw format_exception{"Geometric attribute in feature in layer with version <= 2", layer_num(), feature_num};
                     }
                     if (!m_geometric_attributes.empty()) {
-                        throw format_exception{"Feature has more than one geometric attributes field", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one geometric attributes field", layer_num(), feature_num};
                     }
                     m_geometric_attributes = reader.get_view();
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::string_id, protozero::pbf_wire_type::length_delimited):
+                case detail::pbf_feature::string_id:
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Feature string_id has wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (layer->version() <= 2) {
-                        throw format_exception{"String id in feature in layer with version <= 2", layer_num(), m_feature_num};
+                        throw format_exception{"String id in feature in layer with version <= 2", layer_num(), feature_num};
                     }
                     if (m_id_type != id_type::no_id) {
-                        throw format_exception{"Feature has more than one id/string_id", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one id/string_id", layer_num(), feature_num};
                     }
                     m_string_id = reader.get_view();
                     m_id_type = id_type::string_id;
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::spline_knots, protozero::pbf_wire_type::length_delimited):
+                case detail::pbf_feature::spline_knots:
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Feature spline_knots have wrong protobuf type", layer_num(), feature_num};
+                    }
                     if (!m_knots.empty()) {
-                        throw format_exception{"Feature has more than one spline knots field", layer_num(), m_feature_num};
+                        throw format_exception{"Feature has more than one spline knots field", layer_num(), feature_num};
                     }
                     m_knots = reader.get_view();
                     break;
-                case protozero::tag_and_type(detail::pbf_feature::spline_degree, protozero::pbf_wire_type::varint):
+                case detail::pbf_feature::spline_degree:
+                    if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                        throw format_exception{"Feature spline_degree has wrong protobuf type", layer_num(), feature_num};
+                    }
                     m_spline_degree = reader.get_uint32();
                     if (m_spline_degree < 2 || m_spline_degree > 3) {
-                        throw format_exception{"Spline degree in feature must be 2 or 3", layer_num(), m_feature_num};
+                        throw format_exception{"Spline degree in feature must be 2 or 3", layer_num(), feature_num};
                     }
                     break;
                 default:
@@ -792,7 +863,7 @@ namespace vtzero {
 
         // spec 4.2 "A feature MUST contain a geometry field."
         if (m_geometry.empty()) {
-            throw format_exception{"Missing geometry field in feature (spec 4.3)", layer_num(), m_feature_num};
+            throw format_exception{"Missing geometry field in feature (spec 4.3)", layer_num(), feature_num};
         }
     }
 

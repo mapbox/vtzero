@@ -56,14 +56,23 @@ namespace vtzero {
         explicit scaling(data_view message) {
             protozero::pbf_message<detail::pbf_scaling> reader{message};
             while (reader.next()) {
-                switch (reader.tag_and_type()) {
-                    case protozero::tag_and_type(detail::pbf_scaling::offset, protozero::pbf_wire_type::varint):
+                switch (reader.tag()) {
+                    case detail::pbf_scaling::offset:
+                        if (reader.wire_type() != protozero::pbf_wire_type::varint) {
+                            throw format_exception{"Scaling offset has wrong protobuf type"};
+                        }
                         m_offset = reader.get_sint64();
                         break;
-                    case protozero::tag_and_type(detail::pbf_scaling::multiplier, protozero::pbf_wire_type::fixed64):
+                    case detail::pbf_scaling::multiplier:
+                        if (reader.wire_type() != protozero::pbf_wire_type::fixed64) {
+                            throw format_exception{"Scaling multiplier has wrong protobuf type"};
+                        }
                         m_multiplier = reader.get_double();
                         break;
-                    case protozero::tag_and_type(detail::pbf_scaling::base, protozero::pbf_wire_type::fixed64):
+                    case detail::pbf_scaling::base:
+                        if (reader.wire_type() != protozero::pbf_wire_type::fixed64) {
+                            throw format_exception{"Scaling bas has wrong protobuf type"};
+                        }
                         m_base = reader.get_double();
                         break;
                     default:

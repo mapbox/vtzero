@@ -144,7 +144,7 @@ TEST_CASE("layer_with_tile_y_too_large") {
 }
 
 TEST_CASE("layer_with_unknown_field") {
-    test_layer<vtzero::format_exception>("layer_with_unknown_field", "Unknown field in layer (tag=123, type=0)");
+    test_layer<vtzero::format_exception>("layer_with_unknown_field", "Missing name in layer (spec 4.1)");
 }
 
 

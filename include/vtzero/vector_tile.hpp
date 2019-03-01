@@ -48,9 +48,10 @@ namespace vtzero {
         void skip_non_layers() {
             protozero::pbf_message<detail::pbf_tile> reader{m_data};
             while (reader.next()) {
-                if (reader.tag_and_type() ==
-                        protozero::tag_and_type(detail::pbf_tile::layers,
-                                                protozero::pbf_wire_type::length_delimited)) {
+                if (reader.tag() == detail::pbf_tile::layers) {
+                    if (reader.wire_type() != protozero::pbf_wire_type::length_delimited) {
+                        throw format_exception{"Layer message has wrong protobuf type", m_layer_num};
+                    }
                     return;
                 }
                 reader.skip();
