@@ -1125,6 +1125,7 @@ namespace vtzero {
 
     template <typename THandler>
     void feature::decode_tags_impl(THandler&& handler) const {
+        const std::size_t depth = 0;
         const auto end = m_tags.it_end();
         for (auto it = m_tags.it_begin(); it != end;) {
             const uint32_t ki = *it++;
@@ -1140,49 +1141,49 @@ namespace vtzero {
                 throw out_of_range_exception{vi, layer_num()};
             }
 
-            if (!detail::call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, static_cast<std::size_t>(0))) {
+            if (!detail::call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, depth)) {
                 continue;
             }
-            if (!detail::call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::key_index, *m_layer, index_value{ki}, static_cast<std::size_t>(0))) {
+            if (!detail::call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::key_index, *m_layer, index_value{ki}, depth)) {
                 continue;
             }
-            if (!detail::call_value_index<THandler>(std::forward<THandler>(handler), index_value{vi}, static_cast<std::size_t>(0))) {
+            if (!detail::call_value_index<THandler>(std::forward<THandler>(handler), index_value{vi}, depth)) {
                 return;
             }
 
             switch (m_layer->value(vi).type()) {
                 case property_value_type::string_value:
-                    if (!detail::call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_string, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                    if (!detail::call_attribute_value_data_view<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_string, *m_layer, index_value{vi}, depth)) {
                         return;
                     }
                     break;
                 case property_value_type::float_value:
-                    if (!detail::call_attribute_value_float<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_float, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                    if (!detail::call_attribute_value_float<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_float, *m_layer, index_value{vi}, depth)) {
                         return;
                     }
                     break;
                 case property_value_type::double_value:
-                    if (!detail::call_attribute_value_double<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_double, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                    if (!detail::call_attribute_value_double<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_double, *m_layer, index_value{vi}, depth)) {
                         return;
                     }
                     break;
                 case property_value_type::int_value:
-                    if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_int, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                    if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_int, *m_layer, index_value{vi}, depth)) {
                         return;
                     }
                     break;
                 case property_value_type::uint_value:
-                    if (!detail::call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_uint, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                    if (!detail::call_attribute_value_uint64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_uint, *m_layer, index_value{vi}, depth)) {
                         return;
                     }
                     break;
                 case property_value_type::sint_value:
-                    if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_sint, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                    if (!detail::call_attribute_value_int64_t<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_sint, *m_layer, index_value{vi}, depth)) {
                         return;
                     }
                     break;
                 case property_value_type::bool_value:
-                    if (!detail::call_attribute_value_bool<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_bool, *m_layer, index_value{vi}, static_cast<std::size_t>(0))) {
+                    if (!detail::call_attribute_value_bool<THandler>(std::forward<THandler>(handler), detail::lookup::value_index_bool, *m_layer, index_value{vi}, depth)) {
                         return;
                     }
                     break;
