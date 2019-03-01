@@ -62,7 +62,7 @@ struct point_handler_3d {
 static void test_point_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
-
+    REQUIRE(lbuilder.estimated_size() == 25);
     {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
 

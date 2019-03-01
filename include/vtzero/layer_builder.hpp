@@ -88,6 +88,11 @@ namespace vtzero {
             m_layer(tile_builder.add_layer(std::forward<TString>(name), version, tile)) {
         }
 
+        /// Get the estiamted size of the layer
+        std::size_t estimated_size() const noexcept {
+            return m_layer->estimated_size();
+        }
+
         /// Get the version of the layer we are building.
         uint32_t version() const noexcept {
             return m_layer->version();
