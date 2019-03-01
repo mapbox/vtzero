@@ -62,6 +62,15 @@ TEST_CASE("unknown fields in tile should be ignored") {
     REQUIRE(it == tile.end());
 }
 
+TEST_CASE("unknown fields in tile should be ignored even if there is no layer") {
+    const std::string buffer{open_tile("only_unknown_fields_in_tile.mvt")};
+    const vtzero::vector_tile tile{buffer};
+
+    REQUIRE_FALSE(tile.empty());
+    REQUIRE(tile.count_layers() == 0);
+    REQUIRE(tile.begin() == tile.end());
+}
+
 TEST_CASE("layer_with_version_0") {
     test_layer<vtzero::version_exception>("layer_with_version_0", "Layer with unknown version 0 (spec 4.1)");
 }

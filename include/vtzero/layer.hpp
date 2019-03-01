@@ -50,7 +50,7 @@ namespace vtzero {
 
         data_view m_data{};
         const layer* m_layer = nullptr;
-        std::size_t m_num_feature = 0;
+        std::size_t m_feature_num = 0;
 
         void skip_non_features() {
             protozero::pbf_message<detail::pbf_layer> reader{m_data};
@@ -93,7 +93,7 @@ namespace vtzero {
                                 protozero::pbf_wire_type::length_delimited)) {
                     reader.skip();
                     m_data = reader.data();
-                    ++m_num_feature;
+                    ++m_feature_num;
                     skip_non_features();
                 }
             }
@@ -106,11 +106,11 @@ namespace vtzero {
             return tmp;
         }
 
-        friend bool operator==(feature_iterator lhs, feature_iterator rhs) noexcept {
+        friend bool operator==(const feature_iterator& lhs, const feature_iterator& rhs) noexcept {
             return lhs.m_data == rhs.m_data;
         }
 
-        friend bool operator!=(feature_iterator lhs, feature_iterator rhs) noexcept {
+        friend bool operator!=(const feature_iterator& lhs, const feature_iterator& rhs) noexcept {
             return !(lhs == rhs);
         }
 
@@ -685,9 +685,11 @@ namespace vtzero {
         protozero::pbf_message<detail::pbf_layer> reader{m_data};
         if (reader.next(detail::pbf_layer::features,
                         protozero::pbf_wire_type::length_delimited)) {
-            return {m_layer, reader.get_view(), m_num_feature};
+            return {m_layer, reader.get_view(), m_feature_num};
         }
-        throw format_exception{"Expected feature", m_layer->layer_num(), m_num_feature};
+
+        vtzero_assert(false);
+        return feature{};
     }
 
     inline feature::feature(const layer* layer, const data_view data, std::size_t feature_num) :

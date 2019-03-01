@@ -76,13 +76,15 @@ namespace vtzero {
             skip_non_layers();
         }
 
-        value_type operator*() const {
+        layer operator*() const {
             protozero::pbf_message<detail::pbf_tile> reader{m_data};
             if (reader.next(detail::pbf_tile::layers,
                             protozero::pbf_wire_type::length_delimited)) {
                 return layer{reader.get_view(), m_layer_num};
             }
-            throw format_exception{"Expected layer", m_layer_num};
+
+            vtzero_assert(false);
+            return layer{};
         }
 
         layer_iterator& operator++() {
@@ -134,12 +136,12 @@ namespace vtzero {
      *
      * If you know the index of the layer, you can get it directly with
      * @code
-     *   tile.get_layer(4);
+     *   auto layer = tile.get_layer(4);
      * @endcode
      *
      * You can also access the layer by name:
      * @code
-     *   tile.get_layer_by_name("foobar");
+     *   auto layer = tile.get_layer_by_name("foobar");
      * @endcode
      */
     class vector_tile {
@@ -178,7 +180,12 @@ namespace vtzero {
         /**
          * Is this vector tile empty?
          *
-         * @returns true if there are no layers in this vector tile, false
+         * Note that this can return false even if there are no layers in
+         * the tile if there is some other data in the tile. Usually there
+         * should be no other data, but it is possible to store extended
+         * data there that the spec doesn't know about.
+         *
+         * @returns true if there are is no data in this vector tile, false
          *          otherwise
          * Complexity: Constant.
          */
