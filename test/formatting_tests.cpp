@@ -39,6 +39,8 @@ void test_feature(const std::string& name, const char* msg) {
     REQUIRE_THROWS_WITH(*layer.begin(), msg);
 }
 
+// ---------------------------------------------------------------------------
+
 TEST_CASE("unknown fields in tile should be ignored") {
     const std::string buffer{open_tile("unknown_fields_in_tile.mvt")};
     const vtzero::vector_tile tile{buffer};
@@ -225,5 +227,9 @@ TEST_CASE("feature_without_geometry") {
 
 TEST_CASE("feature_with_unknown_geometry_type") {
     test_feature<vtzero::format_exception>("feature_with_unknown_geometry_type", "Unknown geometry type in feature (spec 4.3.5)");
+}
+
+TEST_CASE("unknown field in feature should be ignored") {
+    test_feature<vtzero::format_exception>("feature_with_unknown_field", "Missing geometry field in feature (spec 4.3)");
 }
 

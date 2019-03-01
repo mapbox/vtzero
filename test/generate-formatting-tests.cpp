@@ -516,6 +516,16 @@ static void feature_with_unknown_geometry_type() {
     write_layer("feature_with_unknown_geometry_type", data);
 }
 
+static void feature_with_unknown_field() {
+    std::string feature_data;
+    {
+        protozero::pbf_writer feature_builder{feature_data};
+        feature_builder.add_int32(111, 17);
+    }
+    std::string data{wrap_in_layer(3, feature_data)};
+
+    write_layer("feature_with_unknown_field", data);
+}
 
 /****************************************************************************/
 
@@ -575,6 +585,7 @@ int main(int argc, char *argv[]) {
     feature_with_tags_and_attributes();
     feature_without_geometry();
     feature_with_unknown_geometry_type();
+    feature_with_unknown_field();
 }
 
 /****************************************************************************/
