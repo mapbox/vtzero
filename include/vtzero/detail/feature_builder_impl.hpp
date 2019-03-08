@@ -108,8 +108,8 @@ namespace vtzero {
                 add_key_internal(m_layer->add_key(data_view{std::forward<T>(key)}));
             }
 
-            void add_complex_value(complex_value_type type, uint64_t param) {
-                m_pbf_attributes.add_element(create_complex_value(type, param));
+            void add_structured_value(structured_value_type type, uint64_t param) {
+                m_pbf_attributes.add_element(create_structured_value(type, param));
             }
 
             void add_direct_value(uint64_t value) {
@@ -135,10 +135,10 @@ namespace vtzero {
             void add_value_internal_vt3(T value) {
                 const auto raw_value = static_cast<uint64_t>(value);
                 if (raw_value < (1ull << 60u)) {
-                    add_complex_value(detail::complex_value_type::cvt_inline_uint, raw_value);
+                    add_structured_value(detail::structured_value_type::cvt_inline_uint, raw_value);
                 } else {
                     const auto idx = m_layer->add_int_value(raw_value);
-                    add_complex_value(detail::complex_value_type::cvt_uint, idx.value());
+                    add_structured_value(detail::structured_value_type::cvt_uint, idx.value());
                 }
             }
 
@@ -146,47 +146,47 @@ namespace vtzero {
             void add_value_internal_vt3(T value) {
                 const auto raw_value = protozero::encode_zigzag64(static_cast<int64_t>(value));
                 if (raw_value < (1ull << 60u)) {
-                    add_complex_value(detail::complex_value_type::cvt_inline_sint, raw_value);
+                    add_structured_value(detail::structured_value_type::cvt_inline_sint, raw_value);
                 } else {
                     const auto idx = m_layer->add_int_value(raw_value);
-                    add_complex_value(detail::complex_value_type::cvt_sint, idx.value());
+                    add_structured_value(detail::structured_value_type::cvt_sint, idx.value());
                 }
             }
 
             void add_value_internal_vt3(bool value) {
-                add_complex_value(detail::complex_value_type::cvt_bool, value ? 2 : 1);
+                add_structured_value(detail::structured_value_type::cvt_bool, value ? 2 : 1);
             }
 
             void add_value_internal_vt3(null_type /*unused*/) {
-                add_complex_value(detail::complex_value_type::cvt_null, 0);
+                add_structured_value(detail::structured_value_type::cvt_null, 0);
             }
 
             void add_value_internal_vt3(double value) {
                 const auto idx = m_layer->add_double_value(value);
-                add_complex_value(detail::complex_value_type::cvt_double, idx.value());
+                add_structured_value(detail::structured_value_type::cvt_double, idx.value());
             }
 
             void add_value_internal_vt3(float value) {
                 const auto idx = m_layer->add_float_value(value);
-                add_complex_value(detail::complex_value_type::cvt_float, idx.value());
+                add_structured_value(detail::structured_value_type::cvt_float, idx.value());
             }
 
             void add_value_internal_vt3(const data_view& value) {
                 const auto idx = m_layer->add_string_value(value);
-                add_complex_value(detail::complex_value_type::cvt_string, idx.value());
+                add_structured_value(detail::structured_value_type::cvt_string, idx.value());
             }
 
             void add_value_internal_vt3(const char* text) {
                 data_view value{text};
                 const auto idx = m_layer->add_string_value(value);
-                add_complex_value(detail::complex_value_type::cvt_string, idx.value());
+                add_structured_value(detail::structured_value_type::cvt_string, idx.value());
             }
 
             void add_value_internal_vt3(const std::string& text) {
                 vtzero_assert(m_stage == stage::want_attrs || m_stage == stage::want_geom_attrs);
                 data_view value{text};
                 const auto idx = m_layer->add_string_value(value);
-                add_complex_value(detail::complex_value_type::cvt_string, idx.value());
+                add_structured_value(detail::structured_value_type::cvt_string, idx.value());
             }
 
             void add_property_impl_vt2(const property& property) {

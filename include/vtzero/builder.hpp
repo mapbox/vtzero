@@ -453,7 +453,7 @@ namespace vtzero {
             vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
                           "Must call attribute_key() before start_list_attribute().");
 
-            add_complex_value(detail::complex_value_type::cvt_list, size);
+            add_structured_value(detail::structured_value_type::cvt_list, size);
         }
 
         /**
@@ -477,7 +477,7 @@ namespace vtzero {
             vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
                           "Must call attribute_key() before start_number_list().");
 
-            add_complex_value(detail::complex_value_type::cvt_number_list, size);
+            add_structured_value(detail::structured_value_type::cvt_number_list, size);
             add_direct_value(index.value());
         }
 
@@ -505,7 +505,7 @@ namespace vtzero {
 
             this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
-            add_complex_value(detail::complex_value_type::cvt_number_list, size);
+            add_structured_value(detail::structured_value_type::cvt_number_list, size);
             add_direct_value(index.value());
             m_value = 0;
         }
@@ -564,7 +564,7 @@ namespace vtzero {
 
             this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
-            add_complex_value(detail::complex_value_type::cvt_list, size);
+            add_structured_value(detail::structured_value_type::cvt_list, size);
         }
 
         /**
@@ -587,7 +587,7 @@ namespace vtzero {
             vtzero_assert((m_stage == detail::stage::want_attrs || m_stage == detail::stage::want_geom_attrs) &&
                           "Must call attribute_key() before start_map_attribute().");
 
-            add_complex_value(detail::complex_value_type::cvt_map, size);
+            add_structured_value(detail::structured_value_type::cvt_map, size);
         }
 
         /**
@@ -613,7 +613,7 @@ namespace vtzero {
 
             this->enter_stage_attributes();
             add_key_internal(std::forward<TKey>(key));
-            add_complex_value(detail::complex_value_type::cvt_map, size);
+            add_structured_value(detail::structured_value_type::cvt_map, size);
         }
 
         /**
@@ -1143,7 +1143,7 @@ namespace vtzero {
             this->m_num_points.set(count);
             this->m_num_knots.set(count + m_spline_degree + 1);
             this->knots().reserve(this->knots().size() + this->m_num_knots.value());
-            this->knots().push_back(create_complex_value(detail::complex_value_type::cvt_number_list, this->m_num_knots.value()));
+            this->knots().push_back(create_structured_value(detail::structured_value_type::cvt_number_list, this->m_num_knots.value()));
             this->knots().push_back(knots_index.value());
             m_start_line = true;
             m_knots_old_value = 0;

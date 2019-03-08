@@ -28,7 +28,7 @@ namespace vtzero {
     namespace detail {
 
         // attribute value types
-        enum class complex_value_type {
+        enum class structured_value_type {
             cvt_string      =  0,
             cvt_float       =  1,
             cvt_double      =  2,
@@ -44,7 +44,7 @@ namespace vtzero {
             max             = 10
         };
 
-        inline uint64_t create_complex_value(const vtzero::detail::complex_value_type type, const uint64_t param) noexcept {
+        inline uint64_t create_structured_value(const vtzero::detail::structured_value_type type, const uint64_t param) noexcept {
             vtzero_assert_in_noexcept_function((param & 0xf0000000u) == 0u);
             return static_cast<uint64_t>(type) | (param << 4u);
         }

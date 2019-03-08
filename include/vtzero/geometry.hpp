@@ -203,8 +203,8 @@ namespace vtzero {
                     if (it == end) {
                         throw format_exception{"Geometric attributes end too soon"};
                     }
-                    const uint64_t complex_value = *it++;
-                    if ((complex_value & 0xfu) == static_cast<uint64_t>(complex_value_type::cvt_number_list)) {
+                    const uint64_t structured_value = *it++;
+                    if ((structured_value & 0xfu) == static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
                         if (it == end) {
                             throw format_exception{"Geometric attributes end too soon"};
                         }
@@ -213,7 +213,7 @@ namespace vtzero {
                             throw format_exception{"Geometric attributes end too soon"};
                         }
 
-                        auto attr_count = complex_value >>4u;
+                        auto attr_count = structured_value >>4u;
                         m_attrs[m_size] = geometric_attribute<TIterator>{it, key_index, scaling, attr_count};
                         ++m_size;
 
@@ -224,7 +224,7 @@ namespace vtzero {
                                 throw format_exception{"Geometric attributes end too soon"};
                             }
                         }
-                    } else if ((complex_value & 0xfu) == static_cast<uint64_t>(complex_value_type::cvt_list)) {
+                    } else if ((structured_value & 0xfu) == static_cast<uint64_t>(structured_value_type::cvt_list)) {
                         throw format_exception{"Geometric attributes of type 'list' not implemented yet"}; // XXX
                     } else {
                         throw format_exception{"Geometric attributes must be of type 'list' or 'number list'"};
@@ -582,15 +582,15 @@ namespace vtzero {
                         throw geometry_exception{"LineTo command count is zero (spec 4.3.4.3)"};
                     }
 
-                    const uint64_t complex_value = *m_knot_it++;
-                    if ((complex_value & 0xfu) != static_cast<uint64_t>(complex_value_type::cvt_number_list)) {
+                    const uint64_t structured_value = *m_knot_it++;
+                    if ((structured_value & 0xfu) != static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
                         throw geometry_exception{"Knots must be of type number list"};
                     }
                     if (m_knot_it == m_knot_end) {
                         throw format_exception{"Knots end too soon"};
                     }
 
-                    uint64_t knots_count = complex_value >> 4u;
+                    uint64_t knots_count = structured_value >> 4u;
                     if (knots_count < count() + 1 + 2 /*degree*/ + 1) { // XXX better check?
                         throw format_exception{"Wrong number of knots: " + std::to_string(knots_count)};
                     }

@@ -874,35 +874,35 @@ namespace vtzero {
         bool decode_attribute(THandler&& handler, const feature& feature, std::size_t depth, TIterator& it, TIterator end);
 
         template <typename TIterator>
-        void skip_complex_value(const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
+        void skip_structured_value(const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
             if (it == end) {
                 throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
             }
 
-            const uint64_t complex_value = *it++;
+            const uint64_t structured_value = *it++;
 
-            const auto vt = complex_value & 0x0fu;
-            if (vt > static_cast<std::size_t>(complex_value_type::max)) {
-                throw format_exception{"Unknown complex value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
+            const auto vt = structured_value & 0x0fu;
+            if (vt > static_cast<std::size_t>(structured_value_type::max)) {
+                throw format_exception{"Unknown structured value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
             }
 
-            const auto cvt = static_cast<complex_value_type>(vt);
+            const auto cvt = static_cast<structured_value_type>(vt);
 
-            if (cvt == complex_value_type::cvt_list) {
-                auto vp = complex_value >> 4u;
+            if (cvt == structured_value_type::cvt_list) {
+                auto vp = structured_value >> 4u;
                 while (vp > 0) {
                     --vp;
-                    skip_complex_value(feature, depth + 1, it, end);
+                    skip_structured_value(feature, depth + 1, it, end);
                 }
-            } else if (cvt == complex_value_type::cvt_map) {
-                auto vp = complex_value >> 4u;
+            } else if (cvt == structured_value_type::cvt_map) {
+                auto vp = structured_value >> 4u;
                 while (vp > 0) {
                     --vp;
                     ++it; // skip key
                     if (it == end) {
                         throw format_exception{"Attributes map is missing value", feature.layer_num(), feature.feature_num()};
                     }
-                    skip_complex_value(feature, depth + 1, it, end);
+                    skip_structured_value(feature, depth + 1, it, end);
                 }
             }
         }
@@ -996,31 +996,31 @@ namespace vtzero {
 #undef DEF_CALL_WITH_LAYER_WRAPPER
 
         template <typename THandler, typename TIterator>
-        bool decode_complex_value(THandler&& handler, const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
+        bool decode_structured_value(THandler&& handler, const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
             if (it == end) {
                 throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
             }
 
-            const uint64_t complex_value = *it++;
+            const uint64_t structured_value = *it++;
 
-            const auto vt = complex_value & 0x0fu;
-            if (vt > static_cast<std::size_t>(complex_value_type::max)) {
-                throw format_exception{"Unknown complex value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
+            const auto vt = structured_value & 0x0fu;
+            if (vt > static_cast<std::size_t>(structured_value_type::max)) {
+                throw format_exception{"Unknown structured value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
             }
 
-            auto vp = complex_value >> 4u;
-            switch (static_cast<complex_value_type>(vt)) {
-                case complex_value_type::cvt_inline_sint:
+            auto vp = structured_value >> 4u;
+            switch (static_cast<structured_value_type>(vt)) {
+                case structured_value_type::cvt_inline_sint:
                     if (!call_attribute_value<THandler>(std::forward<THandler>(handler), protozero::decode_zigzag64(vp), depth)) {
                         return false;
                     }
                     break;
-                case complex_value_type::cvt_inline_uint:
+                case structured_value_type::cvt_inline_uint:
                     if (!call_attribute_value<THandler>(std::forward<THandler>(handler), vp, depth)) {
                         return false;
                     }
                     break;
-                case complex_value_type::cvt_bool:
+                case structured_value_type::cvt_bool:
                     switch (vp) {
                         case 0:
                             if (!call_attribute_value<THandler>(std::forward<THandler>(handler), null_type{}, depth)) {
@@ -1038,10 +1038,10 @@ namespace vtzero {
                             }
                             break;
                         default:
-                            throw format_exception{"Invalid value for bool/null complex value: " + std::to_string(vp), feature.layer_num(), feature.feature_num()};
+                            throw format_exception{"Invalid value for bool/null structured value: " + std::to_string(vp), feature.layer_num(), feature.feature_num()};
                     }
                     break;
-                case complex_value_type::cvt_double:
+                case structured_value_type::cvt_double:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
@@ -1055,7 +1055,7 @@ namespace vtzero {
                         }
                     }
                     break;
-                case complex_value_type::cvt_float:
+                case structured_value_type::cvt_float:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
@@ -1069,7 +1069,7 @@ namespace vtzero {
                         }
                     }
                     break;
-                case complex_value_type::cvt_string:
+                case structured_value_type::cvt_string:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
@@ -1083,7 +1083,7 @@ namespace vtzero {
                         }
                     }
                     break;
-                case complex_value_type::cvt_sint:
+                case structured_value_type::cvt_sint:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
@@ -1097,7 +1097,7 @@ namespace vtzero {
                         }
                     }
                     break;
-                case complex_value_type::cvt_uint:
+                case structured_value_type::cvt_uint:
                     {
                         // if the value of vp is so large that the static_cast
                         // will change it, the data is invalid anyway and we
@@ -1111,13 +1111,13 @@ namespace vtzero {
                         }
                     }
                     break;
-                case complex_value_type::cvt_list:
+                case structured_value_type::cvt_list:
                     if (!call_start_list_attribute<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), depth)) {
                         return false;
                     }
                     while (vp > 0) {
                         --vp;
-                        if (!decode_complex_value(handler, feature, depth + 1, it, end)) {
+                        if (!decode_structured_value(handler, feature, depth + 1, it, end)) {
                             return false;
                         }
                     }
@@ -1125,7 +1125,7 @@ namespace vtzero {
                         return false;
                     }
                     break;
-                case complex_value_type::cvt_map:
+                case structured_value_type::cvt_map:
                     if (!call_start_map_attribute<THandler>(std::forward<THandler>(handler), static_cast<std::size_t>(vp), depth)) {
                         return false;
                     }
@@ -1139,7 +1139,7 @@ namespace vtzero {
                         return false;
                     }
                     break;
-                case complex_value_type::cvt_number_list: {
+                case structured_value_type::cvt_number_list: {
                     index_value index{static_cast<uint32_t>(*it++)};
                     if (it == end) {
                         throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
@@ -1183,16 +1183,16 @@ namespace vtzero {
             }
 
             if (!call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, depth)) {
-                skip_complex_value(feature, depth, it, end);
+                skip_structured_value(feature, depth, it, end);
                 return true;
             }
 
             if (!call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), lookup::key_index, feature.get_layer(), index_value{ki}, depth)) {
-                skip_complex_value(feature, depth, it, end);
+                skip_structured_value(feature, depth, it, end);
                 return true;
             }
 
-            return decode_complex_value(handler, feature, depth, it, end);
+            return decode_structured_value(handler, feature, depth, it, end);
         }
 
     } // namespace detail
