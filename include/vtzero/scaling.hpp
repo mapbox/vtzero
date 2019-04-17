@@ -150,7 +150,7 @@ namespace vtzero {
                    m_base == other.m_base;
         }
 
-        /// Scalings are the different if they are not the same.
+        /// Scalings are different if they are not the same.
         constexpr bool operator!=(const scaling& other) const noexcept {
             return !(*this == other);
         }
