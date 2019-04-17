@@ -122,25 +122,22 @@ namespace vtzero {
             return m_offset == 0 && m_multiplier == 1.0 && m_base == 0.0;
         }
 
-        /// Serialize scaling into pbf message.
-        void serialize(detail::pbf_layer pbf_type, std::string& layer_data) const {
+        /// Serialize scaling into protobuf message.
+        std::string serialize() const {
             std::string data;
-            {
-                protozero::pbf_builder<detail::pbf_scaling> pbf_scaling{data};
+            protozero::pbf_builder<detail::pbf_scaling> pbf_scaling{data};
 
-                if (m_offset != 0) {
-                    pbf_scaling.add_sint64(detail::pbf_scaling::offset, m_offset);
-                }
-                if (m_multiplier != 1.0) {
-                    pbf_scaling.add_double(detail::pbf_scaling::multiplier, m_multiplier);
-                }
-                if (m_base != 0.0) {
-                    pbf_scaling.add_double(detail::pbf_scaling::base, m_base);
-                }
+            if (m_offset != 0) {
+                pbf_scaling.add_sint64(detail::pbf_scaling::offset, m_offset);
+            }
+            if (m_multiplier != 1.0) {
+                pbf_scaling.add_double(detail::pbf_scaling::multiplier, m_multiplier);
+            }
+            if (m_base != 0.0) {
+                pbf_scaling.add_double(detail::pbf_scaling::base, m_base);
             }
 
-            protozero::pbf_builder<detail::pbf_layer> pbf_layer{layer_data};
-            pbf_layer.add_message(pbf_type, data);
+            return data;
         }
 
         /// Scalings are the same if all values are the same.

@@ -29,5 +29,16 @@ TEST_CASE("Some scaling") {
     REQUIRE(s.encode32(5.0) == 14999998);
     REQUIRE(s.encode64(5.0) == 14999998);
     REQUIRE(s.decode(14999998) == Approx(5.0));
+
+    std::string message = s.serialize();
+    REQUIRE_FALSE(message.empty());
+
+    const vtzero::scaling s2{message};
+    REQUIRE_FALSE(s2.is_default());
+    REQUIRE(s2.offset() == 2);
+    REQUIRE(s2.multiplier() == Approx(0.0000001));
+    REQUIRE(s2.base() == Approx(3.5));
+    REQUIRE(s == s2);
+    REQUIRE_FALSE(s != s2);
 }
 

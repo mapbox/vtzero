@@ -402,17 +402,18 @@ namespace vtzero {
                         m_int_values_table.serialize(detail::pbf_layer::int_values, values_tables_data);
 
                         if (m_version == 3) {
+                            protozero::pbf_builder<detail::pbf_layer> pbf_layer{values_tables_data};
                             // The elevation scaling is only written out if it
                             // doesn't have the default values (which will also
                             // be the case if no elevations are set at all).
                             if (!m_elevation_scaling.is_default()) {
-                                m_elevation_scaling.serialize(detail::pbf_layer::elevation_scaling, values_tables_data);
+                                pbf_layer.add_message(detail::pbf_layer::elevation_scaling, m_elevation_scaling.serialize());
                             }
                             // The attribute scalings have to be written all out
                             // even if they have the default values, because
                             // otherwise the indexes pointing to them are wrong.
                             for (const auto& scaling : m_attribute_scalings) {
-                                scaling.serialize(detail::pbf_layer::attribute_scalings, values_tables_data);
+                                pbf_layer.add_message(detail::pbf_layer::attribute_scalings, scaling.serialize());
                             }
                         }
 
