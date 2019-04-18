@@ -457,7 +457,7 @@ namespace vtzero {
         }
 
         /**
-         * Start to add a number list attribute to this feature. Can only be
+         * Start to add a number-list attribute to this feature. Can only be
          * called after all the methods manipulating the geometry.
          *
          * This function works with layers of version 3 only.
@@ -482,7 +482,7 @@ namespace vtzero {
         }
 
         /**
-         * Start to add a number list attribute to this feature. Can only be called
+         * Start to add a number-list attribute to this feature. Can only be called
          * after all the methods manipulating the geometry.
          *
          * This function works with layers of version 3 only.
@@ -511,7 +511,7 @@ namespace vtzero {
         }
 
         /**
-         * Add a value to a number list.
+         * Add a value to a number-list.
          *
          * @param value The value.
          *
@@ -528,7 +528,7 @@ namespace vtzero {
         }
 
         /**
-         * Add a null value to a number list.
+         * Add a null value to a number-list.
          *
          * @pre layer version is 3
          */

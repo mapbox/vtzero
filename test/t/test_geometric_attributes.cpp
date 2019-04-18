@@ -242,7 +242,7 @@ TEST_CASE("build feature with list geometric attributes and read it again") {
     }
 }
 
-TEST_CASE("build feature with number list geometric attributes and read it again") {
+TEST_CASE("build feature with number-list geometric attributes and read it again") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     const auto index = lbuilder.add_attribute_scaling(vtzero::scaling{0, 2.0, 0.0});

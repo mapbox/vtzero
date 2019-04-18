@@ -232,7 +232,7 @@ namespace vtzero {
                     } else if ((structured_value & 0xfu) == static_cast<uint64_t>(structured_value_type::cvt_list)) {
                         throw format_exception{"Geometric attributes of type 'list' not implemented yet"}; // XXX
                     } else {
-                        throw format_exception{"Geometric attributes must be of type 'list' or 'number list'"};
+                        throw format_exception{"Geometric attributes must be of type 'list' or 'number-list'"};
                     }
                 }
             }
@@ -589,7 +589,7 @@ namespace vtzero {
 
                     const uint64_t structured_value = *m_knot_it++;
                     if ((structured_value & 0xfu) != static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
-                        throw geometry_exception{"Knots must be of type number list"};
+                        throw geometry_exception{"Knots must be of type number-list"};
                     }
                     if (m_knot_it == m_knot_end) {
                         throw format_exception{"Knots end too soon"};
