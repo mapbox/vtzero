@@ -333,6 +333,141 @@ static void layer_with_tile_y_too_large() {
 
 /****************************************************************************/
 
+static void layer_with_wrong_version_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_fixed32(vtzero::detail::pbf_layer::version, 42);
+
+    write_layer("layer_with_wrong_version_type", data);
+}
+
+static void layer_with_wrong_name_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::name, 42);
+
+    write_layer("layer_with_wrong_name_type", data);
+}
+
+static void layer_with_wrong_features_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::features, 42);
+
+    write_layer("layer_with_wrong_features_type", data);
+}
+
+static void layer_with_wrong_keys_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::keys, 42);
+
+    write_layer("layer_with_wrong_keys_type", data);
+}
+
+static void layer_with_wrong_values_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::values, 42);
+
+    write_layer("layer_with_wrong_values_type", data);
+}
+
+static void layer_with_wrong_extent_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_fixed32(vtzero::detail::pbf_layer::extent, 42);
+
+    write_layer("layer_with_wrong_extent_type", data);
+}
+
+static void layer_with_wrong_string_values_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::string_values, 42);
+
+    write_layer("layer_with_wrong_string_values_type", data);
+}
+
+static void layer_with_wrong_double_values_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::double_values, 42);
+
+    write_layer("layer_with_wrong_double_values_type", data);
+}
+
+static void layer_with_wrong_float_values_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::float_values, 42);
+
+    write_layer("layer_with_wrong_float_values_type", data);
+}
+
+static void layer_with_wrong_int_values_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::int_values, 42);
+
+    write_layer("layer_with_wrong_int_values_type", data);
+}
+
+static void layer_with_wrong_elevation_scaling_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::elevation_scaling, 42);
+
+    write_layer("layer_with_wrong_elevation_scaling_type", data);
+}
+
+static void layer_with_wrong_attribute_scalings_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::attribute_scalings, 42);
+
+    write_layer("layer_with_wrong_attribute_scalings_type", data);
+}
+
+static void layer_with_wrong_tile_x_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_double(vtzero::detail::pbf_layer::tile_x, 0.1);
+
+    write_layer("layer_with_wrong_tile_x_type", data);
+}
+
+static void layer_with_wrong_tile_y_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_double(vtzero::detail::pbf_layer::tile_y, 0.2);
+
+    write_layer("layer_with_wrong_tile_y_type", data);
+}
+
+static void layer_with_wrong_tile_zoom_type() {
+    std::string data;
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+
+    layer_builder.add_double(vtzero::detail::pbf_layer::tile_zoom, 0.3);
+
+    write_layer("layer_with_wrong_tile_zoom_type", data);
+}
+
 static void layer_with_unknown_field() {
     std::string data;
     protozero::pbf_writer layer_builder{data};
@@ -628,6 +763,21 @@ int main(int argc, char *argv[]) {
     layer_with_tile_x_too_large();
     layer_with_tile_y_too_large();
 
+    layer_with_wrong_version_type();
+    layer_with_wrong_name_type();
+    layer_with_wrong_features_type();
+    layer_with_wrong_keys_type();
+    layer_with_wrong_values_type();
+    layer_with_wrong_extent_type();
+    layer_with_wrong_string_values_type();
+    layer_with_wrong_double_values_type();
+    layer_with_wrong_float_values_type();
+    layer_with_wrong_int_values_type();
+    layer_with_wrong_elevation_scaling_type();
+    layer_with_wrong_attribute_scalings_type();
+    layer_with_wrong_tile_x_type();
+    layer_with_wrong_tile_y_type();
+    layer_with_wrong_tile_zoom_type();
     layer_with_unknown_field();
 
     feature_with_version_2_attributes_field();

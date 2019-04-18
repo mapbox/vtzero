@@ -176,6 +176,67 @@ TEST_CASE("layer with tile_y too large is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_tile_y_too_large", "Tile y value in layer out of range (0 - 7) (spec 4.1)");
 }
 
+
+TEST_CASE("layer with wrong version type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_version_type", "Layer version has wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong name type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_name_type", "Layer name has wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong features type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_features_type", "Layer features have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong keys type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_keys_type", "Layer keys have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong values type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_values_type", "Layer values have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong extent type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_extent_type", "Layer extent has wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong string_values type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_string_values_type", "Layer string_values have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong double_values type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_double_values_type", "Layer double_values have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong float_values type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_float_values_type", "Layer float_values have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong int_values type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_int_values_type", "Layer int_values have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong elevation_scaling type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_elevation_scaling_type", "Layer elevation_scaling has wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong attribute_scalings type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_attribute_scalings_type", "Layer attribute_scalings have wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong tile_x type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_tile_x_type", "Layer tile_x has wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong tile_y type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_tile_y_type", "Layer tile_y has wrong protobuf type");
+}
+
+TEST_CASE("layer with wrong tile_zoom type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_wrong_tile_zoom_type", "Layer tile_zoom has wrong protobuf type");
+}
+
 TEST_CASE("unknown field in layer should be ignored") {
     test_layer<vtzero::format_exception>("layer_with_unknown_field", "Missing name in layer (spec 4.1)");
 }
