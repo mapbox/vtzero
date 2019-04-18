@@ -53,7 +53,7 @@ namespace vtzero {
         const layer* m_layer = nullptr;
         std::size_t m_feature_num = 0;
 
-        void skip_non_features() noexcept {
+        void skip_non_features() {
             protozero::pbf_message<detail::pbf_layer> reader{m_data};
             while (reader.next()) {
                 if (reader.tag_and_type() ==
@@ -79,7 +79,7 @@ namespace vtzero {
 
         feature_iterator() noexcept = default;
 
-        feature_iterator(data_view data, const layer* layer) noexcept :
+        feature_iterator(data_view data, const layer* layer) :
             m_data(data),
             m_layer(layer) {
             skip_non_features();
@@ -87,7 +87,7 @@ namespace vtzero {
 
         feature operator*() const;
 
-        feature_iterator& operator++() noexcept {
+        feature_iterator& operator++() {
             if (!m_data.empty()) {
                 protozero::pbf_message<detail::pbf_layer> reader{m_data};
                 if (reader.next(detail::pbf_layer::features,
@@ -101,7 +101,7 @@ namespace vtzero {
             return *this;
         }
 
-        feature_iterator operator++(int) noexcept {
+        feature_iterator operator++(int) {
             const feature_iterator tmp{*this};
             ++(*this);
             return tmp;
