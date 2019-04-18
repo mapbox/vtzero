@@ -16,6 +16,7 @@ documentation.
  * @brief Contains types and functions related to attributes.
  */
 
+#include "../exception.hpp"
 #include "../point.hpp"
 #include "../types.hpp"
 
@@ -165,6 +166,50 @@ namespace vtzero {
         template <typename... TArgs>
         bool call_attribute_value(TArgs&&... /*unused*/) {
             return true;
+        }
+
+        template <typename TFeaturePtr>
+        void throw_format_exception(const std::string& message, const TFeaturePtr feature) {
+            throw format_exception{message, feature->layer_num(), feature->feature_num()};
+        }
+
+        template <>
+        inline void throw_format_exception<std::nullptr_t>(const std::string& message, std::nullptr_t) {
+            throw format_exception{message};
+        }
+
+        template <typename TFeaturePtr, typename TIterator>
+        void skip_structured_value(const TFeaturePtr feature, std::size_t depth, TIterator& it, TIterator end) {
+            if (it == end) {
+                throw_format_exception<TFeaturePtr>("Attributes list is missing value", feature);
+            }
+
+            const uint64_t structured_value = *it++;
+
+            const auto vt = structured_value & 0x0fu;
+            if (vt > static_cast<std::size_t>(structured_value_type::max)) {
+                throw_format_exception<TFeaturePtr>("Unknown structured value type: " + std::to_string(vt), feature);
+            }
+
+            const auto cvt = static_cast<structured_value_type>(vt);
+
+            if (cvt == structured_value_type::cvt_list) {
+                auto vp = structured_value >> 4u;
+                while (vp > 0) {
+                    --vp;
+                    skip_structured_value(feature, depth + 1, it, end);
+                }
+            } else if (cvt == structured_value_type::cvt_map) {
+                auto vp = structured_value >> 4u;
+                while (vp > 0) {
+                    --vp;
+                    ++it; // skip key
+                    if (it == end) {
+                        throw_format_exception<TFeaturePtr>("Attributes map is missing value", feature);
+                    }
+                    skip_structured_value(feature, depth + 1, it, end);
+                }
+            }
         }
 
     } // namespace detail

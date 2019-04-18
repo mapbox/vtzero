@@ -208,8 +208,9 @@ namespace vtzero {
                     if (it == end) {
                         throw format_exception{"Geometric attributes end too soon"};
                     }
-                    const uint64_t structured_value = *it++;
+                    const uint64_t structured_value = *it;
                     if ((structured_value & 0xfu) == static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
+                        ++it;
                         if (it == end) {
                             throw format_exception{"Geometric attributes end too soon"};
                         }
@@ -230,7 +231,7 @@ namespace vtzero {
                             }
                         }
                     } else if ((structured_value & 0xfu) == static_cast<uint64_t>(structured_value_type::cvt_list)) {
-                        throw format_exception{"Geometric attributes of type 'list' not implemented yet"}; // XXX
+                        skip_structured_value(nullptr, 0, it, end);
                     } else {
                         throw format_exception{"Geometric attributes must be of type 'list' or 'number-list'"};
                     }

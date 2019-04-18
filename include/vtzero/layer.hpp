@@ -873,40 +873,6 @@ namespace vtzero {
         template <typename THandler, typename TIterator>
         bool decode_attribute(THandler&& handler, const feature& feature, std::size_t depth, TIterator& it, TIterator end);
 
-        template <typename TIterator>
-        void skip_structured_value(const feature& feature, std::size_t depth, TIterator& it, TIterator end) {
-            if (it == end) {
-                throw format_exception{"Attributes list is missing value", feature.layer_num(), feature.feature_num()};
-            }
-
-            const uint64_t structured_value = *it++;
-
-            const auto vt = structured_value & 0x0fu;
-            if (vt > static_cast<std::size_t>(structured_value_type::max)) {
-                throw format_exception{"Unknown structured value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
-            }
-
-            const auto cvt = static_cast<structured_value_type>(vt);
-
-            if (cvt == structured_value_type::cvt_list) {
-                auto vp = structured_value >> 4u;
-                while (vp > 0) {
-                    --vp;
-                    skip_structured_value(feature, depth + 1, it, end);
-                }
-            } else if (cvt == structured_value_type::cvt_map) {
-                auto vp = structured_value >> 4u;
-                while (vp > 0) {
-                    --vp;
-                    ++it; // skip key
-                    if (it == end) {
-                        throw format_exception{"Attributes map is missing value", feature.layer_num(), feature.feature_num()};
-                    }
-                    skip_structured_value(feature, depth + 1, it, end);
-                }
-            }
-        }
-
         namespace lookup {
 
             // These functions are used to look up a value in one of the
@@ -1183,12 +1149,12 @@ namespace vtzero {
             }
 
             if (!call_key_index<THandler>(std::forward<THandler>(handler), index_value{ki}, depth)) {
-                skip_structured_value(feature, depth, it, end);
+                skip_structured_value(&feature, depth, it, end);
                 return true;
             }
 
             if (!call_attribute_key_data_view<THandler>(std::forward<THandler>(handler), lookup::key_index, feature.get_layer(), index_value{ki}, depth)) {
-                skip_structured_value(feature, depth, it, end);
+                skip_structured_value(&feature, depth, it, end);
                 return true;
             }
 

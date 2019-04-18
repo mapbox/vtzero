@@ -78,11 +78,15 @@ TEST_CASE("Geometric attributes with null values") {
     REQUIRE_FALSE(ga2.get_next_value());
 }
 
+template <unsigned int GeomAttr = 0>
 class geom_with_attr_handler {
 
     std::vector<test_point_attr> m_points;
 
 public:
+
+    constexpr static const int dimensions = 3;
+    constexpr static const unsigned int max_geometric_attributes = GeomAttr;
 
     static test_point_attr convert(const vtzero::point_3d& p) noexcept {
         return {p.x, p.y, p.z};
@@ -140,7 +144,7 @@ TEST_CASE("Calling decode_point() decoding valid multipoint with geometric attri
         knot_iterator{}, knot_iterator{},
         attr.cbegin(), attr.cend()};
 
-    geom_with_attr_handler handler;
+    geom_with_attr_handler<> handler;
     const auto result = decoder.decode_point(handler);
 
     REQUIRE(result.size() == 2);
@@ -162,7 +166,7 @@ TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric 
         knot_iterator{}, knot_iterator{},
         attr.cbegin(), attr.cend()};
 
-    geom_with_attr_handler handler;
+    geom_with_attr_handler<> handler;
     const auto result = decoder.decode_linestring(handler);
 
     REQUIRE(result.size() == 3);
@@ -171,7 +175,7 @@ TEST_CASE("Calling decode_linestring() decoding valid linestring with geometric 
     REQUIRE(result[2] == test_point_attr(10, 10, 29, 0, 0));
 }
 
-TEST_CASE("build feature with list geometric attributes and read it again") {
+std::string build_tile() {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     {
@@ -191,8 +195,11 @@ TEST_CASE("build feature with list geometric attributes and read it again") {
         fbuilder.attribute_value(std::string{"baz"}); // 8
         fbuilder.commit();
     }
+    return tbuilder.serialize();
+}
 
-    const std::string data = tbuilder.serialize();
+TEST_CASE("build feature with list geometric attributes and read it again") {
+    const std::string data = build_tile();
 
     const vtzero::vector_tile tile{data};
 
@@ -306,6 +313,28 @@ TEST_CASE("build feature with number-list geometric attributes and read it again
         const std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_all_attributes(handler) == expected);
+    }
+}
+
+TEST_CASE("build feature with list geometric attributes and read it again using decoder interface") {
+    const std::string data = build_tile();
+
+    const vtzero::vector_tile tile{data};
+
+    const auto layer = *tile.begin();
+    const auto feature = *layer.begin();
+
+    {
+        geom_with_attr_handler<0> handler;
+        const auto result = feature.decode_point_geometry(handler);
+        REQUIRE(result.size() == 1);
+        REQUIRE(result[0] == test_point_attr(10, 20, 0, 0, 0));
+    }
+    {
+        geom_with_attr_handler<2> handler;
+        const auto result = feature.decode_point_geometry(handler);
+        REQUIRE(result.size() == 1);
+        REQUIRE(result[0] == test_point_attr(10, 20, 0, 0, 0));
     }
 }
 
