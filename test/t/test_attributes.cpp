@@ -364,7 +364,8 @@ TEST_CASE("build version 3 feature with many double attributes and read it again
         feature.decode_attributes(handler);
         REQUIRE(handler.count == 25);
         REQUIRE(handler.keys == "abcdefghijklmnopqrstuvwxy");
-        REQUIRE(handler.value_sum == Approx(1.2 * 25 + (25 * 24 / 2)));
+        const int sum_n = 25 * 24 / 2;
+        REQUIRE(handler.value_sum == Approx(1.2 * 25 + sum_n));
     }
 }
 
