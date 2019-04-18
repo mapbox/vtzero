@@ -562,7 +562,7 @@ namespace vtzero {
             }
 
             template <typename THandler>
-            typename get_result<THandler>::type decode_spline(THandler&& handler) {
+            typename get_result<THandler>::type decode_spline(THandler&& handler, const uint32_t spline_degree) {
                 // spec 4.3.4.3 "1. A MoveTo command"
                 while (next_command(CommandId::MOVE_TO)) {
                     // spec 4.3.4.3 "with a command count of 1"
@@ -591,8 +591,13 @@ namespace vtzero {
                     }
 
                     uint64_t knots_count = structured_value >> 4u;
-                    if (knots_count < count() + 1 + 2 /*degree*/ + 1) { // XXX better check?
-                        throw format_exception{"Wrong number of knots: " + std::to_string(knots_count)};
+                    const auto expected_knot_count = count() + 1 + spline_degree + 1;
+                    if (knots_count != expected_knot_count) {
+                        throw format_exception{"Wrong number of knots: " +
+                                               std::to_string(knots_count) +
+                                               " (expected " +
+                                               std::to_string(expected_knot_count) +
+                                               ")"};
                     }
 
                     const uint64_t scaling_index = *m_knot_it++;

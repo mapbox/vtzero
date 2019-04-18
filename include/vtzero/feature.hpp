@@ -498,7 +498,7 @@ namespace vtzero {
                 m_knots.it_begin(), m_knots.it_end(),
                 m_geometric_attributes.it_begin(), m_geometric_attributes.it_end()};
 
-            return decoder.decode_spline(std::forward<TGeomHandler>(geom_handler));
+            return decoder.decode_spline(std::forward<TGeomHandler>(geom_handler), spline_degree());
         }
 
         /**
@@ -531,7 +531,7 @@ namespace vtzero {
                 case GeomType::POLYGON:
                     return decoder.decode_polygon(std::forward<TGeomHandler>(geom_handler));
                 case GeomType::SPLINE:
-                    return decoder.decode_spline(std::forward<TGeomHandler>(geom_handler));
+                    return decoder.decode_spline(std::forward<TGeomHandler>(geom_handler), spline_degree());
                 default:
                     break;
             }
