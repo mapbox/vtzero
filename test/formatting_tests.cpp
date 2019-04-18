@@ -128,6 +128,26 @@ TEST_CASE("layer with version 2 attribute_scaling is not allowed") {
     test_layer<vtzero::format_exception>("layer_with_version_2_attribute_scaling", "Attribute scaling message in layer with version <= 2");
 }
 
+TEST_CASE("layer with attribute_scaling with wrong offset type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_attribute_scaling_with_wrong_offset_type", "Scaling offset has wrong protobuf type");
+}
+
+TEST_CASE("layer with attribute_scaling with wrong multiplier type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_attribute_scaling_with_wrong_multiplier_type", "Scaling multiplier has wrong protobuf type");
+}
+
+TEST_CASE("layer with attribute_scaling with wrong base type is not allowed") {
+    test_layer<vtzero::format_exception>("layer_with_attribute_scaling_with_wrong_base_type", "Scaling base has wrong protobuf type");
+}
+
+TEST_CASE("layer with attribute_scaling with unknown field") {
+    const std::string buffer{open_tile("layer_with_attribute_scaling_with_unknown_field.mvt")};
+    const vtzero::vector_tile tile{buffer};
+    const auto layer = tile.get_layer_by_name("testname");
+    const auto scaling = layer.attribute_scaling(0);
+    REQUIRE(scaling.offset() == 22);
+}
+
 TEST_CASE("layer without name is not allowed") {
     test_layer<vtzero::format_exception>("layer_without_name", "Missing name in layer (spec 4.1)");
 

@@ -71,7 +71,7 @@ namespace vtzero {
                         break;
                     case detail::pbf_scaling::base:
                         if (reader.wire_type() != protozero::pbf_wire_type::fixed64) {
-                            throw format_exception{"Scaling bas has wrong protobuf type"};
+                            throw format_exception{"Scaling base has wrong protobuf type"};
                         }
                         m_base = reader.get_double();
                         break;

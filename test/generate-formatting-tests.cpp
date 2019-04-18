@@ -211,11 +211,64 @@ static void layer_with_version_2_attribute_scaling() {
 
     std::string data;
     protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
-
     layer_builder.add_uint32(vtzero::detail::pbf_layer::version, 2);
     layer_builder.add_message(vtzero::detail::pbf_layer::attribute_scalings, scaling_data);
 
     write_layer("layer_with_version_2_attribute_scaling", data);
+}
+
+/****************************************************************************/
+
+static std::string create_scaling(const std::string& scaling_data, uint32_t version = 3) {
+    std::string data;
+
+    protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
+    layer_builder.add_uint32(vtzero::detail::pbf_layer::version, version);
+    layer_builder.add_string(vtzero::detail::pbf_layer::name, "testname");
+    layer_builder.add_message(vtzero::detail::pbf_layer::attribute_scalings, scaling_data);
+
+    return data;
+}
+
+static void layer_with_attribute_scaling_with_wrong_offset_type() {
+    std::string scaling_data;
+    {
+        protozero::pbf_builder<vtzero::detail::pbf_scaling> scaling_builder{scaling_data};
+        scaling_builder.add_double(vtzero::detail::pbf_scaling::offset, 3.141);
+    }
+
+    write_layer("layer_with_attribute_scaling_with_wrong_offset_type", create_scaling(scaling_data));
+}
+
+static void layer_with_attribute_scaling_with_wrong_multiplier_type() {
+    std::string scaling_data;
+    {
+        protozero::pbf_builder<vtzero::detail::pbf_scaling> scaling_builder{scaling_data};
+        scaling_builder.add_uint32(vtzero::detail::pbf_scaling::multiplier, 17);
+    }
+
+    write_layer("layer_with_attribute_scaling_with_wrong_multiplier_type", create_scaling(scaling_data));
+}
+
+static void layer_with_attribute_scaling_with_wrong_base_type() {
+    std::string scaling_data;
+    {
+        protozero::pbf_builder<vtzero::detail::pbf_scaling> scaling_builder{scaling_data};
+        scaling_builder.add_uint32(vtzero::detail::pbf_scaling::base, 17);
+    }
+
+    write_layer("layer_with_attribute_scaling_with_wrong_base_type", create_scaling(scaling_data));
+}
+
+static void layer_with_attribute_scaling_with_unknown_field() {
+    std::string scaling_data;
+    {
+        protozero::pbf_writer scaling_builder{scaling_data};
+        scaling_builder.add_sint64(protozero::pbf_tag_type(vtzero::detail::pbf_scaling::offset), 22);
+        scaling_builder.add_uint32(123, 33);
+    }
+
+    write_layer("layer_with_attribute_scaling_with_unknown_field", create_scaling(scaling_data));
 }
 
 /****************************************************************************/
@@ -562,6 +615,11 @@ int main(int argc, char *argv[]) {
     layer_with_version_2_int_table();
     layer_with_version_2_elevation_scaling();
     layer_with_version_2_attribute_scaling();
+
+    layer_with_attribute_scaling_with_wrong_offset_type();
+    layer_with_attribute_scaling_with_wrong_multiplier_type();
+    layer_with_attribute_scaling_with_wrong_base_type();
+    layer_with_attribute_scaling_with_unknown_field();
 
     layer_without_name();
     layer_with_empty_name();
