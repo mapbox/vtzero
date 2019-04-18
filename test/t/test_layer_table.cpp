@@ -45,3 +45,14 @@ TEST_CASE("layer_table with content") {
     REQUIRE_THROWS_WITH(t.at(5), "Index out of range: 5");
 }
 
+TEST_CASE("layer_table with invalid size") {
+    std::array<int, 4> data{{10, 20, 30, 40}};
+
+    std::array<char, 1 + sizeof(int) * data.size()> buffer{{0}};
+    std::memcpy(buffer.data() + 1, data.data(), sizeof(int) * data.size());
+
+    vtzero::data_view dv{&buffer[1], sizeof(int) * data.size() - 1}; // the -1 makes the size illegal
+    REQUIRE_THROWS_AS(vtzero::layer_table<int>(dv, 7), const vtzero::format_exception&);
+    REQUIRE_THROWS_WITH(vtzero::layer_table<int>(dv, 7), "Value table in layer has invalid size");
+}
+
