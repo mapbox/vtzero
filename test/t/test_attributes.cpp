@@ -267,7 +267,7 @@ TEST_CASE("build feature with number list attributes and read it again") {
     }
 }
 
-TEST_CASE("build feature with list property from array and read it again") {
+TEST_CASE("build feature with list attribute from array and read it again") {
     const std::array<int, 8> pi = {{3, 1, 4, 1, 5, 9, 2, 6}};
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
@@ -306,6 +306,65 @@ TEST_CASE("build feature with list property from array and read it again") {
     {
         AttributeDumpHandler handler;
         REQUIRE(feature.decode_attributes(handler) == "pi=list(8)[\nsint(3)\nsint(1)\nsint(4)\nsint(1)\nsint(5)\nsint(9)\nsint(2)\nsint(6)\n]\n");
+    }
+}
+
+struct AttributeValuesTableCheckHandler {
+
+    std::size_t count = 0;
+    double value_sum = 0;
+    std::string keys;
+
+    bool attribute_key(vtzero::data_view key, std::size_t /*depth*/) {
+        ++count;
+        REQUIRE(key.size() == 1);
+        keys += key.data()[0];
+        return true;
+    }
+
+    bool attribute_value(double value, std::size_t /*depth*/) {
+        value_sum += value;
+        return true;
+    }
+
+    template <typename T>
+    bool attribute_value(T /*value*/, std::size_t /*depth*/) {
+        REQUIRE(false);
+        return false;
+    }
+
+}; // class AttributeValuesTableCheckHandler
+
+TEST_CASE("build version 3 feature with many double attributes and read it again") {
+    vtzero::tile_builder tbuilder;
+    vtzero::layer_builder lbuilder{tbuilder, "test", 3};
+    {
+        vtzero::point_feature_builder<2> fbuilder{lbuilder};
+        fbuilder.set_integer_id(1);
+        fbuilder.add_point(vtzero::point_2d{10, 20});
+        int n = 0;
+        char key[2] = "_";
+        for (*key = 'a'; *key != 'z'; ++(*key), ++n) {
+            fbuilder.add_scalar_attribute(key, 1.2 + n);
+        }
+        fbuilder.commit();
+    }
+
+    const std::string data = tbuilder.serialize();
+
+    const vtzero::vector_tile tile{data};
+
+    const auto layer = *tile.begin();
+    const auto feature = *layer.begin();
+    REQUIRE(feature);
+    REQUIRE(feature.integer_id() == 1);
+
+    {
+        AttributeValuesTableCheckHandler handler;
+        feature.decode_attributes(handler);
+        REQUIRE(handler.count == 25);
+        REQUIRE(handler.keys == "abcdefghijklmnopqrstuvwxy");
+        REQUIRE(handler.value_sum == Approx(1.2 * 25 + (25 * 24 / 2)));
     }
 }
 

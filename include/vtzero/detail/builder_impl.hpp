@@ -55,15 +55,15 @@ namespace vtzero {
 
         }; // class layer_builder_base
 
-        class string_table {
+        // Below this value, no index will be used to find entries in the
+        // key/value tables. This number is based on some initial
+        // benchmarking but probably needs some tuning.
+        // See also https://github.com/mapbox/vtzero/issues/30
+        enum : uint32_t {
+            max_entries_flat = 20u
+        };
 
-            // Below this value, no index will be used to find entries in the
-            // key/value tables. This number is based on some initial
-            // benchmarking but probably needs some tuning.
-            // See also https://github.com/mapbox/vtzero/issues/30
-            enum : uint32_t {
-                max_entries_flat = 20u
-            };
+        class string_table {
 
             // Buffer containing the encoded table
             std::string m_data{};
@@ -153,10 +153,17 @@ namespace vtzero {
         template <typename T>
         class fixed_value_size_table {
 
-            // TODO(joto): Like the string_table, this should also use an
-            // unordered_map when the table becomes large.
-
             std::vector<T> m_values;
+
+            std::unordered_map<T, uint32_t> m_map;
+
+            void populate_map() {
+                uint32_t n = 0;
+                for (auto value : m_values) {
+                    m_map[value] = n;
+                    ++n;
+                }
+            }
 
         public:
 
@@ -169,14 +176,28 @@ namespace vtzero {
             }
 
             index_value add_without_dup_check(T value) {
+                const auto idx = static_cast<uint32_t>(m_values.size());
                 m_values.push_back(value);
-                return index_value{static_cast<uint32_t>(m_values.size() - 1)};
+                if (idx == max_entries_flat) {
+                    populate_map();
+                } else if (idx > max_entries_flat) {
+                    m_map[value] = idx;
+                }
+                assert(m_map.empty() || m_map.size() == m_values.size());
+                return index_value{idx};
             }
 
             index_value add(T value) {
-                const auto it = std::find(m_values.cbegin(), m_values.cend(), value);
-                if (it != m_values.cend()) {
-                    return index_value{static_cast<uint32_t>(std::distance(m_values.cbegin(), it))};
+                if (m_map.empty()) {
+                    const auto it = std::find(m_values.cbegin(), m_values.cend(), value);
+                    if (it != m_values.cend()) {
+                        return index_value{static_cast<uint32_t>(std::distance(m_values.cbegin(), it))};
+                    }
+                } else {
+                    const auto it = m_map.find(value);
+                    if (it != m_map.end()) {
+                        return index_value{it->second};
+                    }
                 }
                 return add_without_dup_check(value);
             }
