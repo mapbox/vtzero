@@ -114,6 +114,7 @@ namespace vtzero {
         class geometric_attribute {
 
             TIterator m_it{};
+            TIterator m_end{};
             index_value m_key_index{};
             index_value m_scaling_index{};
             uint64_t m_count = 0;
@@ -123,8 +124,9 @@ namespace vtzero {
 
             geometric_attribute() = default;
 
-            geometric_attribute(TIterator it, uint64_t key_index, uint64_t scaling_index, uint64_t count) :
+            geometric_attribute(TIterator it, TIterator end, uint64_t key_index, uint64_t scaling_index, uint64_t count) :
                 m_it(it),
+                m_end(end),
                 m_key_index(static_cast<uint32_t>(key_index)),
                 m_scaling_index(static_cast<uint32_t>(scaling_index)),
                 m_count(count) {
@@ -142,7 +144,10 @@ namespace vtzero {
                 if (m_count == 0) {
                     return false;
                 }
-                const uint64_t raw_value = *m_it++; // XXX test against end it?
+                if (m_it == m_end) {
+                    throw format_exception{"Count in geometric attribute is wrong"};
+                }
+                const uint64_t raw_value = *m_it++;
                 --m_count;
                 if (raw_value == 0) {
                     return false;
@@ -213,8 +218,8 @@ namespace vtzero {
                             throw format_exception{"Geometric attributes end too soon"};
                         }
 
-                        auto attr_count = structured_value >>4u;
-                        m_attrs[m_size] = geometric_attribute<TIterator>{it, key_index, scaling, attr_count};
+                        auto attr_count = structured_value >> 4u;
+                        m_attrs[m_size] = geometric_attribute<TIterator>{it, end, key_index, scaling, attr_count};
                         ++m_size;
 
                         while (attr_count > 0) {
@@ -605,7 +610,7 @@ namespace vtzero {
                         throw format_exception{"Knots end too soon"};
                     }
 
-                    geometric_attribute<TKnotIterator> knots{m_knot_it, 0, scaling_index, knots_count};
+                    geometric_attribute<TKnotIterator> knots{m_knot_it, m_knot_end, 0, scaling_index, knots_count};
 
                     std::forward<THandler>(handler).controlpoints_begin(count() + 1);
 

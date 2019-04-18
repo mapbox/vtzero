@@ -27,8 +27,8 @@ TEST_CASE("Geometric attributes") {
     const attr_container attr = {0, number_list(2), 0, 9, 7,
                                  1, number_list(2), 0, 7, 4};
 
-    vtzero::detail::geometric_attribute<attr_iterator> ga1{attr.begin() + 3, 0, 0, 2};
-    vtzero::detail::geometric_attribute<attr_iterator> ga2{attr.begin() + 8, 0, 0, 2};
+    vtzero::detail::geometric_attribute<attr_iterator> ga1{attr.begin() + 3, attr.end(), 0, 0, 2};
+    vtzero::detail::geometric_attribute<attr_iterator> ga2{attr.begin() + 8, attr.end(), 0, 0, 2};
 
     REQUIRE(ga1.get_next_value());
     REQUIRE(ga1.value() == 4);
@@ -42,12 +42,25 @@ TEST_CASE("Geometric attributes") {
     REQUIRE_FALSE(ga2.get_next_value());
 }
 
+TEST_CASE("Geometric attribute that lies about the number of elements") {
+    // this list claims to have 3 elements, but only has 2
+    const attr_container attr = {0, number_list(3), 0, 9, 7};
+
+    vtzero::detail::geometric_attribute<attr_iterator> ga{attr.begin() + 3, attr.end(), 0, 0, 3};
+
+    REQUIRE(ga.get_next_value());
+    REQUIRE(ga.value() == 4);
+    REQUIRE(ga.get_next_value());
+    REQUIRE(ga.value() == 7);
+    REQUIRE_THROWS_AS(ga.get_next_value(), const vtzero::format_exception&);
+}
+
 TEST_CASE("Geometric attributes with null values") {
     const attr_container attr = {0, number_list(3), 0, 9, 0, 7,
                                  1, number_list(4), 0, 0, 7, 0, 4};
 
-    vtzero::detail::geometric_attribute<attr_iterator> ga1{attr.begin() + 0 + 3, 0, 0, 3};
-    vtzero::detail::geometric_attribute<attr_iterator> ga2{attr.begin() + 6 + 3, 0, 0, 4};
+    vtzero::detail::geometric_attribute<attr_iterator> ga1{attr.begin() + 0 + 3, attr.end(), 0, 0, 3};
+    vtzero::detail::geometric_attribute<attr_iterator> ga2{attr.begin() + 6 + 3, attr.end(), 0, 0, 4};
 
     REQUIRE(ga1.get_next_value());
     REQUIRE(ga1.value() == 4);
