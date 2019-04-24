@@ -65,6 +65,7 @@ namespace vtzero {
         mutable std::vector<property_value> m_value_table;
         mutable std::size_t m_key_table_size = 0;
         mutable std::size_t m_value_table_size = 0;
+        std::vector<std::pair<uint32_t, data_view>> m_extensions;
 
         void initialize_tables() const {
             m_key_table.reserve(m_key_table_size);
@@ -131,6 +132,10 @@ namespace vtzero {
                         m_extent = reader.get_uint32();
                         break;
                     default:
+                        if (uint32_t(reader.tag()) >= 16) {
+                            m_extensions.emplace_back(uint32_t(reader.tag()), reader.get_view());
+                            break;
+                        }
                         throw format_exception{"unknown field in layer (tag=" +
                                                std::to_string(static_cast<uint32_t>(reader.tag())) +
                                                ", type=" +
@@ -171,6 +176,10 @@ namespace vtzero {
          */
         data_view data() const noexcept {
             return m_data;
+        }
+
+        const auto& extensions() const noexcept {
+            return m_extensions;
         }
 
         /**

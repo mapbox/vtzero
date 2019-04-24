@@ -78,10 +78,6 @@ namespace vtzero {
 
             feature_builder_base& operator=(feature_builder_base&&) noexcept = default;
 
-            uint32_t version() const noexcept {
-                return m_layer->version();
-            }
-
             void set_id_impl(uint64_t id) {
                 m_feature_writer.add_uint64(detail::pbf_feature::id, id);
             }

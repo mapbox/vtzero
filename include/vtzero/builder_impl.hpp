@@ -67,11 +67,11 @@ namespace vtzero {
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys;
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_values;
 
+            std::string m_extensions_data;
+            protozero::pbf_writer m_pbf_message_extensions;
+
             // The number of features in the layer
             std::size_t m_num_features = 0;
-
-            // Vector tile spec version
-            uint32_t m_version = 0;
 
             // The number of keys in the keys table
             uint32_t m_num_keys = 0;
@@ -168,7 +168,7 @@ namespace vtzero {
                 m_pbf_message_layer(m_data),
                 m_pbf_message_keys(m_keys_data),
                 m_pbf_message_values(m_values_data),
-                m_version(version) {
+                m_pbf_message_extensions(m_extensions_data){
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::version, version);
                 m_pbf_message_layer.add_string(detail::pbf_layer::name, std::forward<TString>(name));
                 m_pbf_message_layer.add_uint32(detail::pbf_layer::extent, extent);
@@ -181,10 +181,6 @@ namespace vtzero {
 
             layer_builder_impl(layer_builder_impl&&) = default;
             layer_builder_impl& operator=(layer_builder_impl&&) = default;
-
-            uint32_t version() const noexcept {
-                return m_version;
-            }
 
             index_value add_key_without_dup_check(const data_view text) {
                 m_pbf_message_keys.add_string(detail::pbf_layer::keys, text);
@@ -227,8 +223,20 @@ namespace vtzero {
                 return m_values_data;
             }
 
+            const std::string& extensions_data() const noexcept {
+                return m_extensions_data;
+            }
+
             protozero::pbf_builder<detail::pbf_layer>& message() noexcept {
                 return m_pbf_message_layer;
+            }
+
+            bool add_extension(uint32_t id, const data_view& message) {
+                if (id < 16) {
+                    return false;
+                }
+                m_pbf_message_extensions.add_bytes(id, message);
+                return true;
             }
 
             void increment_feature_count() noexcept {
@@ -240,6 +248,7 @@ namespace vtzero {
                 return data().size() +
                        keys_data().size() +
                        values_data().size() +
+                       extensions_data().size() +
                        estimated_overhead_for_pbf_encoding;
             }
 
@@ -248,7 +257,8 @@ namespace vtzero {
                     pbf_tile_builder.add_bytes_vectored(detail::pbf_tile::layers,
                                                         data(),
                                                         keys_data(),
-                                                        values_data());
+                                                        values_data(),
+                                                        extensions_data());
                 }
             }
 

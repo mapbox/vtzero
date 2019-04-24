@@ -173,7 +173,7 @@ namespace vtzero {
      * being built.
      */
     class layer_builder {
-
+    protected:
         vtzero::detail::layer_builder_impl* m_layer;
 
         friend class geometry_feature_builder;
@@ -181,14 +181,15 @@ namespace vtzero {
         friend class linestring_feature_builder;
         friend class polygon_feature_builder;
 
-        vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {
-            return *m_layer;
-        }
 
         template <typename T>
         using is_layer = std::is_same<typename std::remove_cv<typename std::remove_reference<T>::type>::type, layer>;
 
     public:
+
+        vtzero::detail::layer_builder_impl& get_layer_impl() noexcept {
+            return *m_layer;
+        }
 
         /**
          * Construct a layer_builder to build a new layer with the same name,
@@ -297,6 +298,10 @@ namespace vtzero {
          * geometry and all its properties.
          */
         void add_feature(const feature& feature);
+
+        void add_extension(uint32_t id, const data_view& message) {
+            m_layer->add_extension(id, message);
+        }
 
     }; // class layer_builder
 
