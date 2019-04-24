@@ -29,6 +29,7 @@ TEST_CASE("valid/all_attribute_types_v3.mvt") {
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.name() == "example");
     REQUIRE(layer.num_features() == 1);
+    REQUIRE(layer.num_attribute_scalings() == 1);
     REQUIRE(layer.attribute_scaling(0).offset() == 0);
     REQUIRE(layer.attribute_scaling(0).multiplier() == Approx(7.45058e-09));
     REQUIRE(layer.attribute_scaling(0).base() == Approx(0.0));
@@ -132,6 +133,10 @@ TEST_CASE("valid/single_layer_v3_spline_3d.mvt") {
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.name() == "splines_3d");
     REQUIRE(layer.num_features() == 1);
+    REQUIRE(layer.num_attribute_scalings() == 1);
+    REQUIRE(layer.attribute_scaling(0).offset() == 0);
+    REQUIRE(layer.attribute_scaling(0).multiplier() == Approx(7.45058e-09));
+    REQUIRE(layer.attribute_scaling(0).base() == Approx(0.0));
 
     const auto feature = *layer.begin();
     REQUIRE(feature.geometry_type() == vtzero::GeomType::SPLINE);
@@ -150,6 +155,10 @@ TEST_CASE("valid/single_layer_v3_spline.mvt") {
     REQUIRE(layer.version() == 3);
     REQUIRE(layer.name() == "splines");
     REQUIRE(layer.num_features() == 1);
+    REQUIRE(layer.num_attribute_scalings() == 1);
+    REQUIRE(layer.attribute_scaling(0).offset() == 0);
+    REQUIRE(layer.attribute_scaling(0).multiplier() == Approx(7.45058e-09));
+    REQUIRE(layer.attribute_scaling(0).base() == Approx(0.0));
 
     const auto feature = *layer.begin();
     REQUIRE(feature.geometry_type() == vtzero::GeomType::SPLINE);
