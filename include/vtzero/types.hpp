@@ -64,6 +64,16 @@ namespace vtzero {
         return names[static_cast<int>(type)]; // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
     }
 
+    /**
+     * Type of a polygon ring. This can either be "outer", "inner", or
+     * "invalid". Invalid is used when the area of the ring is 0.
+     */
+    enum class ring_type {
+        outer   = 0,
+        inner   = 1,
+        invalid = 2
+    }; // enum class ring_type
+
     /// The property value type as specified in the vector tile spec
     enum class property_value_type : protozero::pbf_tag_type {
         string_value = 1,

@@ -30,16 +30,6 @@ documentation.
 
 namespace vtzero {
 
-    /**
-     * Type of a polygon ring. This can either be "outer", "inner", or
-     * "invalid". Invalid is used when the area of the ring is 0.
-     */
-    enum class ring_type {
-        outer   = 0,
-        inner   = 1,
-        invalid = 2
-    }; // enum class ring_type
-
     namespace detail {
 
         /// The command id type as specified in the vector tile spec
