@@ -594,11 +594,8 @@ namespace vtzero {
          * Complexity: Constant.
          *
          * @returns Size of the value table.
-         *
-         * @pre @code version() < 3 @endcode
          */
         std::size_t value_table_size() const noexcept {
-            vtzero_assert_in_noexcept_function(version() < 3);
             return m_value_table_size > 0 ? m_value_table_size : m_value_table.size();
         }
 
@@ -630,11 +627,9 @@ namespace vtzero {
          *
          * @throws out_of_range_exception if the index is out of range.
          * @pre @code valid() @endcode
-         * @pre @code version() < 3 @endcode
          */
         property_value value(index_value index) const {
             vtzero_assert(valid());
-            vtzero_assert(version() < 3);
 
             const auto& table = value_table();
             if (index.value() >= table.size()) {
