@@ -4,7 +4,7 @@
 
 #include <vtzero/builder.hpp>
 #include <vtzero/builder_helper.hpp>
-#include <vtzero/geometry.hpp>
+#include <vtzero/detail/geometry.hpp>
 #include <vtzero/index.hpp>
 
 #include <cstdint>

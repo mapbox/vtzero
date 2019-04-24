@@ -1,7 +1,7 @@
 #ifndef TEST_GEOMETRY_HPP
 #define TEST_GEOMETRY_HPP
 
-#include <vtzero/geometry.hpp>
+#include <vtzero/detail/geometry.hpp>
 
 #include <cstdint>
 #include <vector>

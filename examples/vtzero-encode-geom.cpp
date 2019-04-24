@@ -8,7 +8,7 @@
 
 *****************************************************************************/
 
-#include <vtzero/geometry.hpp>
+#include <vtzero/detail/geometry.hpp>
 
 #include <protozero/varint.hpp>
 

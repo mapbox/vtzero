@@ -7,7 +7,7 @@
  * @brief Contains various point classes used in testing.
  */
 
-#include <vtzero/geometry.hpp>
+#include <vtzero/detail/geometry.hpp>
 
 #include <cstdint>
 #include <ostream>

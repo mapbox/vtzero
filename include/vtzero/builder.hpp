@@ -18,7 +18,7 @@ documentation.
 
 #include "detail/builder_impl.hpp"
 #include "detail/feature_builder_impl.hpp"
-#include "geometry.hpp"
+#include "detail/geometry.hpp"
 #include "layer_builder.hpp"
 #include "tile_builder.hpp"
 #include "types.hpp"

@@ -17,10 +17,10 @@ documentation.
  */
 
 #include "detail/attributes.hpp"
+#include "detail/geometry.hpp"
 #include "detail/util.hpp"
 #include "exception.hpp"
 #include "feature.hpp"
-#include "geometry.hpp"
 #include "layer_table.hpp"
 #include "property_value.hpp"
 #include "scaling.hpp"

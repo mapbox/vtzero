@@ -18,11 +18,11 @@ documentation.
 
 #include "../encoded_property_value.hpp"
 #include "../feature.hpp"
-#include "../geometry.hpp"
 #include "../property.hpp"
 #include "../property_value.hpp"
 #include "attributes.hpp"
 #include "builder_impl.hpp"
+#include "geometry.hpp"
 
 #include <type_traits>
 #include <utility>

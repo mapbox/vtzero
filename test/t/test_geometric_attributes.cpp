@@ -5,8 +5,8 @@
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
+#include <vtzero/detail/geometry.hpp>
 #include <vtzero/feature.hpp>
-#include <vtzero/geometry.hpp>
 #include <vtzero/layer.hpp>
 #include <vtzero/types.hpp>
 #include <vtzero/vector_tile.hpp>

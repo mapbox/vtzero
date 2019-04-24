@@ -2,7 +2,7 @@
 #include <test.hpp>
 
 #include <vtzero/builder.hpp>
-#include <vtzero/geometry.hpp>
+#include <vtzero/detail/geometry.hpp>
 #include <vtzero/vector_tile.hpp>
 
 #include <cstdint>

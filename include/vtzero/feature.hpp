@@ -16,9 +16,9 @@ documentation.
  * @brief Contains the feature class.
  */
 
+#include "detail/geometry.hpp"
 #include "detail/util.hpp"
 #include "exception.hpp"
-#include "geometry.hpp"
 #include "types.hpp"
 
 #include <protozero/pbf_message.hpp>

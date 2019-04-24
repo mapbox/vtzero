@@ -1,5 +1,5 @@
-#ifndef VTZERO_GEOMETRY_HPP
-#define VTZERO_GEOMETRY_HPP
+#ifndef VTZERO_DETAIL_GEOMETRY_HPP
+#define VTZERO_DETAIL_GEOMETRY_HPP
 
 /*****************************************************************************
 
@@ -16,11 +16,11 @@ documentation.
  * @brief Contains classes and functions related to geometry handling.
  */
 
-#include "detail/attributes.hpp"
-#include "detail/util.hpp"
-#include "exception.hpp"
-#include "point.hpp"
-#include "types.hpp"
+#include "attributes.hpp"
+#include "util.hpp"
+#include "../exception.hpp"
+#include "../point.hpp"
+#include "../types.hpp"
 
 #include <protozero/pbf_reader.hpp>
 
@@ -643,4 +643,4 @@ namespace vtzero {
 
 } // namespace vtzero
 
-#endif // VTZERO_GEOMETRY_HPP
+#endif // VTZERO_DETAIL_GEOMETRY_HPP

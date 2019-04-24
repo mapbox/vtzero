@@ -2,7 +2,7 @@
 #include <test.hpp>
 #include <test_point.hpp>
 
-#include <vtzero/geometry.hpp>
+#include <vtzero/detail/geometry.hpp>
 
 #include <cstdint>
 #include <vector>

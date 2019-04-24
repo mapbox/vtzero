@@ -1,7 +1,7 @@
 
 #include <test.hpp>
 
-#include <vtzero/geometry.hpp>
+#include <vtzero/detail/geometry.hpp>
 
 #include <cstdint>
 #include <limits>

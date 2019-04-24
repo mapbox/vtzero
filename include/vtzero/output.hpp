@@ -16,8 +16,8 @@ documentation.
  * @brief Contains overloads of operator<< for basic vtzero types.
  */
 
-#include <vtzero/geometry.hpp>
-#include <vtzero/types.hpp>
+#include "detail/geometry.hpp"
+#include "types.hpp"
 
 #include <iosfwd>
 

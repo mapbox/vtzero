@@ -16,7 +16,7 @@ documentation.
  * @brief Contains the tile class used for geometry transformations.
  */
 
-#include <vtzero/geometry.hpp>
+#include "detail/geometry.hpp"
 
 #include <cstdint>
 #include <utility>
