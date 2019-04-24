@@ -152,6 +152,7 @@ add_subdirectory(doc)
 add_subdirectory(examples)
 
 add_subdirectory(test)
+add_subdirectory(test/fuzz)
 
 
 #-----------------------------------------------------------------------------

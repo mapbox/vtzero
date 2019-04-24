@@ -187,8 +187,13 @@ namespace vtzero {
             const uint64_t structured_value = *it++;
 
             const auto vt = structured_value & 0x0fu;
+
+            // "4.4.2.2. Structured Value Encoding" says "Value types 11 through
+            // 15 are reserved for future versions of this specification.
+            // Implementations MUST treat structured values of these types as
+            // opaque values that consume only one integer of storage"
             if (vt > static_cast<std::size_t>(structured_value_type::max)) {
-                throw_format_exception<TFeaturePtr>("Unknown structured value type: " + std::to_string(vt), feature);
+                return;
             }
 
             const auto cvt = static_cast<structured_value_type>(vt);
@@ -203,12 +208,21 @@ namespace vtzero {
                 auto vp = structured_value >> 4u;
                 while (vp > 0) {
                     --vp;
+                    if (it == end) {
+                        throw_format_exception<TFeaturePtr>("Attributes map is missing key", feature);
+                    }
                     ++it; // skip key
                     if (it == end) {
                         throw_format_exception<TFeaturePtr>("Attributes map is missing value", feature);
                     }
                     skip_structured_value(feature, depth + 1, it, end);
                 }
+            } else if (cvt == structured_value_type::cvt_number_list) {
+                const auto vp = structured_value >> 4u;
+                if (std::distance(it, end) < static_cast<typename std::iterator_traits<TIterator>::difference_type>(vp + 1)) {
+                    throw_format_exception<TFeaturePtr>("Attributes number-list is incomplete", feature);
+                }
+                std::advance(it, vp + 1);
             }
         }
 
