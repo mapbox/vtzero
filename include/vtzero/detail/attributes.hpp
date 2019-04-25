@@ -218,11 +218,11 @@ namespace vtzero {
                     skip_structured_value(feature, depth + 1, it, end);
                 }
             } else if (cvt == structured_value_type::cvt_number_list) {
-                const auto vp = structured_value >> 4u;
-                if (std::distance(it, end) < static_cast<typename std::iterator_traits<TIterator>::difference_type>(vp + 1)) {
+                const auto count = static_cast<int64_t>((structured_value >> 4u) + 1);
+                if (std::distance(it, end) < count) {
                     throw_format_exception<TFeaturePtr>("Attributes number-list is incomplete", feature);
                 }
-                std::advance(it, vp + 1);
+                std::advance(it, count);
             }
         }
 
