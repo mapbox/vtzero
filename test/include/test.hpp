@@ -102,7 +102,7 @@ public:
      *             (of type list, number-list, or map). It will not do what
      *             you might expect.
      */
-    dump_attribute_handler(bool sort = false) :
+    explicit dump_attribute_handler(bool sort = false) :
         m_sort(sort) {
     }
 

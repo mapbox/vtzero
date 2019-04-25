@@ -46,7 +46,7 @@ public:
     constexpr static const int dimensions = Dimensions;
     constexpr static const unsigned int max_geometric_attributes = 0;
 
-    geom_handler(const vtzero::layer& layer) :
+    explicit geom_handler(const vtzero::layer& layer) :
         m_layer(layer) {
     }
 
