@@ -17,7 +17,7 @@ static const std::string types[] = { // NOLINT(cert-err58-cpp)
     "data_view", "uint", "sint", "double", "float", "true", "false", "null", "cstring", "string", "uint", "sint"
 };
 
-struct AttributeCheckHandler {
+struct check_attribute_handler {
 
     std::size_t count = 0;
     std::size_t count_value = 0;
@@ -111,7 +111,7 @@ struct AttributeCheckHandler {
         return count;
     }
 
-}; // class AttributeCheckHandler
+}; // struct check_attribute_handler
 
 void test_scalar_attrs(uint32_t version) {
     vtzero::tile_builder tbuilder;
@@ -151,13 +151,13 @@ void test_scalar_attrs(uint32_t version) {
     REQUIRE(feature.integer_id() == 1);
 
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 12);
         REQUIRE(result.second == 12);
     }
     {
-        AttributeCheckHandler handler;
+        check_attribute_handler handler;
         REQUIRE(feature.decode_attributes(handler) == 12);
     }
 }
@@ -210,13 +210,13 @@ TEST_CASE("build feature with list and map attributes and read it again") {
     REQUIRE(feature.integer_id() == 1);
 
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 7);
         REQUIRE(result.second == 15);
     }
     {
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
 }
@@ -256,13 +256,13 @@ TEST_CASE("build feature with number-list attributes and read it again") {
     REQUIRE(feature.integer_id() == 1);
 
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 2);
         REQUIRE(handler.count_number_list == 4);
     }
     {
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
 }
@@ -304,12 +304,12 @@ TEST_CASE("build feature with list attribute from array and read it again") {
     REQUIRE(feature.integer_id() == 1);
 
     {
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_attributes(handler) == "pi=list(8)[\nsint(3)\nsint(1)\nsint(4)\nsint(1)\nsint(5)\nsint(9)\nsint(2)\nsint(6)\n]\n");
     }
 }
 
-struct AttributeValuesTableCheckHandler {
+struct values_table_check_attribute_handler {
 
     std::size_t count = 0;
     double value_sum = 0;
@@ -333,7 +333,7 @@ struct AttributeValuesTableCheckHandler {
         return false;
     }
 
-}; // class AttributeValuesTableCheckHandler
+}; // struct values_table_check_attribute_handler
 
 TEST_CASE("build version 3 feature with many double attributes and read it again") {
     vtzero::tile_builder tbuilder;
@@ -360,7 +360,7 @@ TEST_CASE("build version 3 feature with many double attributes and read it again
     REQUIRE(feature.integer_id() == 1);
 
     {
-        AttributeValuesTableCheckHandler handler;
+        values_table_check_attribute_handler handler;
         feature.decode_attributes(handler);
         REQUIRE(handler.count == 25);
         REQUIRE(handler.keys == "abcdefghijklmnopqrstuvwxy");

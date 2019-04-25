@@ -294,7 +294,7 @@ TEST_CASE("add features using a key index") {
     REQUIRE(feature.integer_id() == 7);
 
     const std::string expected{"some_key=sint(12)\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
@@ -341,7 +341,7 @@ TEST_CASE("add features using a value index") {
     REQUIRE(feature.integer_id() == 17);
 
     const std::string expected{"some_key=sint(12)\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 

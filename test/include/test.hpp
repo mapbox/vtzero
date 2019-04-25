@@ -25,7 +25,7 @@ extern bool got_an_assert;
 std::string load_test_tile();
 std::string load_fixture_tile(const char* env, const std::string& path);
 
-struct AttributeCountHandler {
+struct counter_attribute_handler {
 
     int count_ki = 0;
     int count_k = 0;
@@ -83,9 +83,9 @@ struct AttributeCountHandler {
         return std::make_pair(count_k, count_v);
     }
 
-}; // class AttributeCountHandler
+}; // struct counter_attribute_handler
 
-struct AttributeDumpHandler {
+struct dump_attribute_handler {
 
     std::string out{};
 
@@ -198,6 +198,6 @@ struct AttributeDumpHandler {
         return out;
     }
 
-}; // class AttributeDumpHandler
+}; // struct dump_attribute_handler
 
 #endif // TEST_HPP

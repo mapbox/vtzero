@@ -215,36 +215,36 @@ TEST_CASE("build feature with list geometric attributes and read it again") {
     REQUIRE(feature.integer_id() == 1);
 
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 1);
         REQUIRE(result.second == 1);
     }
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_geometric_attributes(handler);
         REQUIRE(result.first == 1);
         REQUIRE(result.second == 9);
     }
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_all_attributes(handler);
         REQUIRE(result.first == 2);
         REQUIRE(result.second == 10);
     }
     {
         const std::string expected{"some_int=uint(111)\n"};
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
     {
         const std::string expected{"list=list(8)[\nfoo\nuint(17)\nsint(-22)\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_geometric_attributes(handler) == expected);
     }
     {
         const std::string expected{"some_int=uint(111)\nlist=list(8)[\nfoo\nuint(17)\nsint(-22)\ntrue\nfalse\nnull\nbar\nbaz\n]\n"};
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_all_attributes(handler) == expected);
     }
 }
@@ -282,36 +282,36 @@ TEST_CASE("build feature with number-list geometric attributes and read it again
     REQUIRE(feature.integer_id() == 1);
 
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_attributes(handler);
         REQUIRE(result.first == 0);
         REQUIRE(handler.count_number_list == 0);
     }
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_geometric_attributes(handler);
         REQUIRE(result.first == 1);
         REQUIRE(handler.count_number_list == 4);
     }
     {
-        AttributeCountHandler handler;
+        counter_attribute_handler handler;
         const auto result = feature.decode_all_attributes(handler);
         REQUIRE(result.first == 1);
         REQUIRE(handler.count_number_list == 4);
     }
     {
         const std::string expected;
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_attributes(handler) == expected);
     }
     {
         const std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_geometric_attributes(handler) == expected);
     }
     {
         const std::string expected{"nlist=number-list(4,0)[\n10\n20\nnull\n30\n]\n"};
-        AttributeDumpHandler handler;
+        dump_attribute_handler handler;
         REQUIRE(feature.decode_all_attributes(handler) == expected);
     }
 }

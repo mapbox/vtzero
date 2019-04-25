@@ -52,11 +52,11 @@ TEST_CASE("iterate over all attributes of a feature") {
     const auto feature = *layer.begin();
 
     const std::string expected{"class=main\noneway=sint(0)\nosm_id=sint(0)\ntype=primary\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
-struct AttributeHandler {
+struct type_attribute_handler {
 
     int count_ki = 0;
     int count_k = 0;
@@ -88,7 +88,7 @@ struct AttributeHandler {
         }
     }
 
-}; // class AttributeHandler
+}; // struct type_attribute_handler
 
 TEST_CASE("decode attributes of a feature") {
     const std::string buffer{load_test_tile()};
@@ -97,7 +97,7 @@ TEST_CASE("decode attributes of a feature") {
     const auto feature = *layer.begin();
     REQUIRE(feature);
 
-    AttributeHandler handler;
+    type_attribute_handler handler;
     feature.decode_attributes(handler);
     REQUIRE(handler.count_ki == 4);
     REQUIRE(handler.count_k == 4);
@@ -105,7 +105,7 @@ TEST_CASE("decode attributes of a feature") {
     REQUIRE(handler.count_v == 2);
 }
 
-class MapHandler {
+class map_attribute_handler {
 
     std::map<std::string, std::string> m_map;
     vtzero::data_view m_key;
@@ -129,7 +129,7 @@ public:
         return result;
     }
 
-}; // class MapHandler
+}; // class map_attribute_handler
 
 TEST_CASE("decode attributes of a feature into map") {
     const std::string buffer{load_test_tile()};
@@ -138,7 +138,7 @@ TEST_CASE("decode attributes of a feature into map") {
     const auto feature = *layer.begin();
     REQUIRE(feature);
 
-    MapHandler handler;
+    map_attribute_handler handler;
     auto result = feature.decode_attributes(handler);
 
     REQUIRE(result.size() == 2);

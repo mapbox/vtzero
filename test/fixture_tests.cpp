@@ -85,10 +85,10 @@ TEST_CASE("MVT test 005: Tile with version 2 layer with single point with broken
 
     const auto feature = *layer.begin();
 
-    struct NullHandler {
+    struct null_handler {
     };
 
-    NullHandler handler;
+    null_handler handler;
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::format_exception&);
 }
 
@@ -416,7 +416,7 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=i am a string value\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
@@ -432,7 +432,7 @@ TEST_CASE("MVT test 033: Layer with single feature with float property value") {
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=float(3.100000)\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
@@ -448,7 +448,7 @@ TEST_CASE("MVT test 034: Layer with single feature with double property value") 
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=double(1.230000)\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
@@ -464,7 +464,7 @@ TEST_CASE("MVT test 035: Layer with single feature with int property value") {
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=sint(6)\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
@@ -480,7 +480,7 @@ TEST_CASE("MVT test 036: Layer with single feature with uint property value") {
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=uint(87948)\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
@@ -496,7 +496,7 @@ TEST_CASE("MVT test 037: Layer with single feature with sint property value") {
     REQUIRE(feature.has_attributes());
 
     const std::string expected{"key1=sint(87948)\n"};
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE(feature.decode_attributes(handler) == expected);
 }
 
@@ -555,7 +555,7 @@ TEST_CASE("MVT test 040: Feature has tags that point to non-existent Key in the 
     const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
 }
 
@@ -568,7 +568,7 @@ TEST_CASE("MVT test 041: Tags encoded as floats instead of as ints") {
     REQUIRE(layer.num_features() == 1);
     const auto feature = *layer.begin();
 
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
 }
 
@@ -582,7 +582,7 @@ TEST_CASE("MVT test 042: Feature has tags that point to non-existent Value in th
     const auto feature = *layer.begin();
     REQUIRE(feature.has_attributes());
 
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
     REQUIRE_THROWS_AS(feature.decode_attributes(handler), const vtzero::out_of_range_exception&);
 }
 
@@ -594,7 +594,7 @@ TEST_CASE("MVT test 043: A layer with six points that all share the same key but
     const auto layer = *tile.begin();
     REQUIRE(layer.num_features() == 6);
 
-    AttributeDumpHandler handler;
+    dump_attribute_handler handler;
 
     auto it = layer.begin();
     auto feature = *it++;
