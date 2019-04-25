@@ -21,9 +21,9 @@ documentation.
 namespace vtzero {
 
     /// The vtzero point class
-    template <int Dimension>
+    template <int Dimensions>
     struct point {
-        static_assert(Dimension == 2 || Dimension == 3, "point class can only be instantiated with 2 or 3 dimensions");
+        static_assert(Dimensions == 2 || Dimensions == 3, "point class can only be instantiated with 2 or 3 dimensions");
     };
 
     /// Points are not equal if their coordinates aren't.
