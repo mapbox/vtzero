@@ -16,11 +16,11 @@ documentation.
  * @brief Contains classes and functions related to geometry handling.
  */
 
-#include "attributes.hpp"
-#include "util.hpp"
 #include "../exception.hpp"
 #include "../point.hpp"
 #include "../types.hpp"
+#include "attributes.hpp"
+#include "util.hpp"
 
 #include <protozero/pbf_reader.hpp>
 
