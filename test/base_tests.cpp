@@ -189,6 +189,9 @@ TEST_CASE("valid/single_layer_v2_linestring.mvt") {
 
     geom_handler<2> handler{layer};
     REQUIRE(feature.decode_geometry(handler) == "L((10,10)(10,20)(20,20))L((11,11)(12,13))");
+
+    dump_attribute_handler attr_handler{true};
+    REQUIRE(feature.decode_attributes(attr_handler) == "highway=primary\nmaxspeed=sint(50)\n");
 }
 
 TEST_CASE("valid/single_layer_v2_points.mvt") {
@@ -213,6 +216,9 @@ TEST_CASE("valid/single_layer_v2_points.mvt") {
 
         geom_handler<2> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "some=attr\n");
     }
 
     ++it;
@@ -224,6 +230,9 @@ TEST_CASE("valid/single_layer_v2_points.mvt") {
 
         geom_handler<2> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "some=attr\n");
     }
 
     ++it;
@@ -235,6 +244,9 @@ TEST_CASE("valid/single_layer_v2_points.mvt") {
 
         geom_handler<2> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "some=otherattr\n");
     }
 
     ++it;
@@ -246,6 +258,9 @@ TEST_CASE("valid/single_layer_v2_points.mvt") {
 
         geom_handler<2> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "otherkey=attr\n");
     }
 
     REQUIRE(++it == layer.end());
@@ -270,6 +285,9 @@ TEST_CASE("valid/single_layer_v2_polygon.mvt") {
 
     geom_handler<2> handler{layer};
     REQUIRE(feature.decode_geometry(handler) == "R((0,0)(10,0)(10,10)(0,10)(0,0)[outer])R((3,3)(3,5)(5,5)(3,3)[inner])");
+
+    dump_attribute_handler attr_handler;
+    REQUIRE(feature.decode_attributes(attr_handler) == "natural=wood\n");
 }
 
 TEST_CASE("valid/single_layer_v3_linestring_3d.mvt") {
@@ -291,6 +309,9 @@ TEST_CASE("valid/single_layer_v3_linestring_3d.mvt") {
 
     geom_handler<3> handler{layer};
     REQUIRE(feature.decode_geometry(handler) == "L((10,10,10)(10,20,20)(20,20,30))L((11,11,10)(12,13,20))");
+
+    dump_attribute_handler attr_handler{true};
+    REQUIRE(feature.decode_attributes(attr_handler) == "highway=primary\nmaxspeed=sint(50)\n");
 }
 
 TEST_CASE("valid/single_layer_v3_points_3d.mvt") {
@@ -314,6 +335,9 @@ TEST_CASE("valid/single_layer_v3_points_3d.mvt") {
 
         geom_handler<3> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20,10))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "some=attr\n");
     }
 
     ++it;
@@ -325,6 +349,9 @@ TEST_CASE("valid/single_layer_v3_points_3d.mvt") {
 
         geom_handler<3> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20,20))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "some=attr\n");
     }
 
     ++it;
@@ -336,6 +363,9 @@ TEST_CASE("valid/single_layer_v3_points_3d.mvt") {
 
         geom_handler<3> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20,30))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "some=otherattr\n");
     }
 
     ++it;
@@ -347,6 +377,9 @@ TEST_CASE("valid/single_layer_v3_points_3d.mvt") {
 
         geom_handler<3> handler{layer};
         REQUIRE(feature.decode_geometry(handler) == "P((20,20,40))");
+
+        dump_attribute_handler attr_handler;
+        REQUIRE(feature.decode_attributes(attr_handler) == "otherkey=attr\n");
     }
 
     REQUIRE(++it == layer.end());
@@ -375,6 +408,9 @@ TEST_CASE("valid/single_layer_v3_spline_3d.mvt") {
 
     geom_handler<3> handler{layer};
     REQUIRE(feature.decode_geometry(handler) == "C((8,10,10)(9,11,11)(11,9,12)(12,10,13))K([scaling=0](0.000000)(2.000000)(3.000000)(4.000000)(5.875000)(6.000000)(7.000000)(8.000000))");
+
+    dump_attribute_handler attr_handler;
+    REQUIRE(feature.decode_attributes(attr_handler) == "natural=spline\n");
 }
 
 TEST_CASE("valid/single_layer_v3_spline.mvt") {
@@ -400,6 +436,9 @@ TEST_CASE("valid/single_layer_v3_spline.mvt") {
 
     geom_handler<2> handler{layer};
     REQUIRE(feature.decode_geometry(handler) == "C((8,10)(9,11)(11,9)(12,10))K([scaling=0](0.000000)(2.000000)(3.000000)(4.000000)(5.875000)(6.000000)(7.000000)(8.000000))");
+
+    dump_attribute_handler attr_handler;
+    REQUIRE(feature.decode_attributes(attr_handler) == "natural=spline\n");
 }
 
 // ---------------------------------------------------------------------------
@@ -423,5 +462,8 @@ TEST_CASE("invalid/single_layer_v3_polygon_3d.mvt") {
 
     geom_handler<3> handler{layer};
     REQUIRE(feature.decode_geometry(handler) == "R((0,0,10)(10,0,20)(10,10,30)(0,10,20)(0,0,10)[outer])R((3,3,20)(3,5,40)(5,5,30)(3,3,20)[inner])");
+
+    dump_attribute_handler attr_handler;
+    REQUIRE(feature.decode_attributes(attr_handler) == "natural=wood\n");
 }
 
