@@ -369,3 +369,17 @@ TEST_CASE("build version 3 feature with many double attributes and read it again
     }
 }
 
+void test_skip_structured_value(const std::vector<uint64_t>& data) {
+    auto it = data.cbegin();
+    try {
+        vtzero::detail::skip_structured_value(nullptr, 0, it, data.cend());
+    } catch (const vtzero::format_exception& e) {
+    }
+}
+
+TEST_CASE("skip_structured_value") {
+    for (uint64_t i = 0; i != 16 * 10; ++i) {
+        test_skip_structured_value({i});
+    }
+}
+
