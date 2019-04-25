@@ -1,5 +1,7 @@
 
 #include <test.hpp>
+#include <test_geometry.hpp>
+#include <test_geometry_handler.hpp>
 #include <test_point.hpp>
 
 #include <vtzero/detail/geometry.hpp>
@@ -15,37 +17,6 @@ using elev_iterator = elev_container::const_iterator;
 
 using geom_decoder = vtzero::detail::geometry_decoder<3, 0, geom_iterator, elev_iterator>;
 
-class dummy_geom_handler {
-
-    int value = 0;
-
-public:
-
-    constexpr static const int dimensions = 3;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    static vtzero::point_3d convert(const vtzero::point_3d& p) noexcept {
-        return p;
-    }
-
-    void points_begin(const uint32_t /*count*/) noexcept {
-        ++value;
-    }
-
-    void points_point(const vtzero::point_3d /*point*/) noexcept {
-        value += 100;
-    }
-
-    void points_end() noexcept {
-        value += 10000;
-    }
-
-    int result() const noexcept {
-        return value;
-    }
-
-}; // class dummy_geom_handler
-
 TEST_CASE("Extended geometry: Calling decode_point() with empty input") {
     const geom_container geom = {};
     const elev_container elev = {};
@@ -56,17 +27,17 @@ TEST_CASE("Extended geometry: Calling decode_point() with empty input") {
         elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
                             "Expected MoveTo command (spec 4.3.4.2)");
     }
 }
 
 TEST_CASE("Extended geometry: Calling decode_point() with a valid point") {
-    const geom_container geom = {9, 50, 34};
+    const geom_container geom = {command_move_to(1), 50, 34};
     const elev_container elev = {15};
 
     geom_decoder decoder{
@@ -74,13 +45,15 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid point") {
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend()};
 
-    dummy_geom_handler handler;
+    point_handler<3> handler;
     decoder.decode_point(handler);
-    REQUIRE(handler.result() == 10101);
+
+    std::vector<vtzero::point_3d> expected = {{25, 17, 15}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Extended geometry: Calling decode_point() with a valid multipoint") {
-    const geom_container geom = {17, 10, 14, 3, 9};
+    const geom_container geom = {command_move_to(2), 10, 14, 3, 9};
     const elev_container elev = {22, 3};
 
     geom_decoder decoder{
@@ -88,11 +61,16 @@ TEST_CASE("Extended geometry: Calling decode_point() with a valid multipoint") {
         geom.cbegin(), geom.cend(),
         elev.cbegin(), elev.cend()};
 
-    REQUIRE(decoder.decode_point(dummy_geom_handler{}) == 10201);
+    point_handler<3> handler;
+    decoder.decode_point(handler);
+
+    std::vector<vtzero::point_3d> expected = {{5, 7, 22}, {3, 2, 25}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Extended geometry: Calling decode_point() with a linestring geometry fails") {
-    const geom_container geom = {9, 4, 4, 18, 0, 16, 16, 0}; // this is a linestring geometry
+    const geom_container geom = {command_move_to(1), 4, 4,
+                                 command_line_to(2), 0, 16, 16, 0}; // this is a linestring geometry
     const elev_container elev = {};
 
     geom_decoder decoder{
@@ -101,17 +79,19 @@ TEST_CASE("Extended geometry: Calling decode_point() with a linestring geometry 
         elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
                             "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
 
 TEST_CASE("Extended geometry: Calling decode_point() with a polygon geometry fails") {
-    const geom_container geom = {9, 6, 12, 18, 10, 12, 24, 44, 15}; // this is a polygon geometry
+    const geom_container geom = {command_move_to(1), 6, 12,
+                                 command_line_to(2), 10, 12, 24, 44,
+                                 command_close_path()}; // this is a polygon geometry
     const elev_container elev = {};
 
     geom_decoder decoder{
@@ -120,17 +100,17 @@ TEST_CASE("Extended geometry: Calling decode_point() with a polygon geometry fai
         elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
                             "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
 
 TEST_CASE("Extended geometry: Calling decode_point() with something other than MoveTo command") {
-    const geom_container geom = {vtzero::detail::command_line_to(3)};
+    const geom_container geom = {command_line_to(3)};
     const elev_container elev = {};
 
     geom_decoder decoder{
@@ -139,17 +119,17 @@ TEST_CASE("Extended geometry: Calling decode_point() with something other than M
         elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
                             "Expected command 1 but got 2");
     }
 }
 
 TEST_CASE("Extended geometry: Calling decode_point() with a count of 0") {
-    const geom_container geom = {vtzero::detail::command_move_to(0)};
+    const geom_container geom = {command_move_to(0)};
     const elev_container elev = {};
 
     geom_decoder decoder{
@@ -158,17 +138,17 @@ TEST_CASE("Extended geometry: Calling decode_point() with a count of 0") {
         elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
                             "MoveTo command count is zero (spec 4.3.4.2)");
     }
 }
 
 TEST_CASE("Extended geometry: Calling decode_point() with more data then expected") {
-    const geom_container geom = {9, 50, 34, 9};
+    const geom_container geom = {command_move_to(1), 50, 34, 9};
     const elev_container elev = {};
 
     geom_decoder decoder{
@@ -177,11 +157,11 @@ TEST_CASE("Extended geometry: Calling decode_point() with more data then expecte
         elev.cbegin(), elev.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
                             "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
@@ -216,7 +196,7 @@ public:
 }; // class value_geom_handler
 
 TEST_CASE("Extended geometry: Calling decode_point() decoding valid multipoint") {
-    const geom_container geom = {17, 10, 14, 3, 9};
+    const geom_container geom = {command_move_to(2), 10, 14, 3, 9};
     const elev_container elev = {22, 3};
 
     geom_decoder decoder{

@@ -2,6 +2,7 @@
 #include <test.hpp>
 #include <test_attr.hpp>
 #include <test_geometry.hpp>
+#include <test_geometry_handler.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -13,42 +14,6 @@ using knot_iterator = knot_container::const_iterator;
 
 using attr_iterator = vtzero::detail::dummy_attr_iterator;
 
-class counter_handler {
-
-    int value = 0;
-
-public:
-
-    void controlpoints_begin(const uint32_t /*count*/) noexcept {
-        ++value;
-    }
-
-    void controlpoints_point(const vtzero::point_2d /*point*/) noexcept {
-        value += 100;
-    }
-
-    void controlpoints_end() noexcept {
-        value += 10000;
-    }
-
-    void knots_begin(const uint32_t /*count*/, const vtzero::index_value /*scaling*/) noexcept {
-        value += 10;
-    }
-
-    void knots_value(const int64_t /*value*/) noexcept {
-        value += 1000;
-    }
-
-    void knots_end() noexcept {
-        value += 100000;
-    }
-
-    int result() const noexcept {
-        return value;
-    }
-
-}; // class counter_handler
-
 TEST_CASE("Calling decode_spline_geometry() with empty input") {
     const geom_container geom;
     const knot_container knot;
@@ -59,9 +24,13 @@ TEST_CASE("Calling decode_spline_geometry() with empty input") {
         elev_iterator{}, elev_iterator{},
         knot.cbegin(), knot.cend()};
 
-    counter_handler handler;
+    spline_handler<2> handler;
     decoder.decode_spline(handler, 2);
-    REQUIRE(handler.result() == 0);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected_control_points = {};
+    const std::vector<int64_t> expected_knots = {};
+    REQUIRE(handler.control_points == expected_control_points);
+    REQUIRE(handler.knots == expected_knots);
 }
 
 TEST_CASE("Calling decode_spline_geometry() with a valid spline") {
@@ -75,7 +44,13 @@ TEST_CASE("Calling decode_spline_geometry() with a valid spline") {
         elev_iterator{}, elev_iterator{},
         knot.cbegin(), knot.cend()};
 
-    REQUIRE(decoder.decode_spline(counter_handler{}, 2) == 116311);
+    spline_handler<2> handler;
+    decoder.decode_spline(handler, 2);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected_control_points = {{{2, 2}, {2, 10}, {10, 10}}};
+    const std::vector<int64_t> expected_knots = {0, 0, 0, 0, 0, 0};
+    REQUIRE(handler.control_points == expected_control_points);
+    REQUIRE(handler.knots == expected_knots);
 }
 
 TEST_CASE("Calling decode_spline_geometry() with a point geometry fails") {
@@ -89,11 +64,11 @@ TEST_CASE("Calling decode_spline_geometry() with a point geometry fails") {
         knot.cbegin(), knot.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_AS(decoder.decode_spline(spline_handler<2>{}, 2),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_WITH(decoder.decode_spline(spline_handler<2>{}, 2),
                             "Expected LineTo command (spec 4.3.4.3)");
     }
 }
@@ -111,11 +86,11 @@ TEST_CASE("Calling decode_spline_geometry() with a polygon geometry fails") {
         knot.cbegin(), knot.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_AS(decoder.decode_spline(spline_handler<2>{}, 2),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_WITH(decoder.decode_spline(spline_handler<2>{}, 2),
                             "Expected command 1 but got 7");
     }
 }
@@ -131,11 +106,11 @@ TEST_CASE("Calling decode_spline_geometry() with something other than MoveTo com
         knot.cbegin(), knot.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_AS(decoder.decode_spline(spline_handler<2>{}, 2),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_WITH(decoder.decode_spline(spline_handler<2>{}, 2),
                             "Expected command 1 but got 2");
     }
 }
@@ -151,11 +126,11 @@ TEST_CASE("Calling decode_spline_geometry() with a count of 0") {
         knot.cbegin(), knot.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_AS(decoder.decode_spline(spline_handler<2>{}, 2),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_WITH(decoder.decode_spline(spline_handler<2>{}, 2),
                             "MoveTo command count is not 1 (spec 4.3.4.3)");
     }
 }
@@ -171,11 +146,11 @@ TEST_CASE("Calling decode_spline_geometry() with a count of 2") {
         knot.cbegin(), knot.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_AS(decoder.decode_spline(spline_handler<2>{}, 2),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_WITH(decoder.decode_spline(spline_handler<2>{}, 2),
                             "MoveTo command count is not 1 (spec 4.3.4.3)");
     }
 }
@@ -192,11 +167,11 @@ TEST_CASE("Calling decode_spline_geometry() with 2nd command not a LineTo") {
         knot.cbegin(), knot.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_AS(decoder.decode_spline(spline_handler<2>{}, 2),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_WITH(decoder.decode_spline(spline_handler<2>{}, 2),
                             "Expected command 2 but got 1");
     }
 }
@@ -213,11 +188,11 @@ TEST_CASE("Calling decode_spline_geometry() with LineTo and 0 count") {
         knot.cbegin(), knot.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_AS(decoder.decode_spline(spline_handler<2>{}, 2),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_spline(counter_handler{}, 2),
+        REQUIRE_THROWS_WITH(decoder.decode_spline(spline_handler<2>{}, 2),
                             "LineTo command count is zero (spec 4.3.4.3)");
     }
 }

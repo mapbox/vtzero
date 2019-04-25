@@ -1,43 +1,22 @@
 
 #include <test.hpp>
 #include <test_geometry.hpp>
+#include <test_geometry_handler.hpp>
 
 #include <cstdint>
 
 using geom_decoder = vtzero::detail::geometry_decoder<2, 0, geom_iterator>;
-
-class dummy_geom_handler {
-
-    int value = 0;
-
-public:
-
-    void linestring_begin(const uint32_t /*count*/) noexcept {
-        ++value;
-    }
-
-    void linestring_point(const vtzero::point_2d /*point*/) noexcept {
-        value += 100;
-    }
-
-    void linestring_end() noexcept {
-        value += 10000;
-    }
-
-    int result() const noexcept {
-        return value;
-    }
-
-}; // class dummy_geom_handler
 
 TEST_CASE("Calling decode_linestring_geometry() with empty input") {
     const geom_container geom;
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
-    decoder.decode_linestring(dummy_geom_handler{});
-    REQUIRE(handler.result() == 0);
+    linestring_handler<2> handler;
+    decoder.decode_linestring(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a valid linestring") {
@@ -46,7 +25,11 @@ TEST_CASE("Calling decode_linestring_geometry() with a valid linestring") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_linestring(dummy_geom_handler{}) == 10301);
+    linestring_handler<2> handler;
+    decoder.decode_linestring(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{2, 2}, {2, 10}, {10, 10}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a valid multilinestring") {
@@ -57,7 +40,12 @@ TEST_CASE("Calling decode_linestring_geometry() with a valid multilinestring") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_linestring(dummy_geom_handler{}) == 20502);
+    linestring_handler<2> handler;
+    decoder.decode_linestring(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{2, 2}, {2, 10}, {10, 10}},
+                                                                 {{1, 1}, {3, 5}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_linestring_geometry() with a point geometry fails") {
@@ -66,11 +54,11 @@ TEST_CASE("Calling decode_linestring_geometry() with a point geometry fails") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_linestring(linestring_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_linestring(linestring_handler<2>{}),
                             "Expected LineTo command (spec 4.3.4.3)");
     }
 }
@@ -83,11 +71,11 @@ TEST_CASE("Calling decode_linestring_geometry() with a polygon geometry fails") 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_linestring(linestring_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_linestring(linestring_handler<2>{}),
                             "Expected command 1 but got 7");
     }
 }
@@ -98,11 +86,11 @@ TEST_CASE("Calling decode_linestring_geometry() with something other than MoveTo
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_linestring(linestring_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_linestring(linestring_handler<2>{}),
                             "Expected command 1 but got 2");
     }
 }
@@ -113,11 +101,11 @@ TEST_CASE("Calling decode_linestring_geometry() with a count of 0") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_linestring(linestring_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_linestring(linestring_handler<2>{}),
                             "MoveTo command count is not 1 (spec 4.3.4.3)");
     }
 }
@@ -128,11 +116,11 @@ TEST_CASE("Calling decode_linestring_geometry() with a count of 2") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_linestring(linestring_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_linestring(linestring_handler<2>{}),
                             "MoveTo command count is not 1 (spec 4.3.4.3)");
     }
 }
@@ -144,11 +132,11 @@ TEST_CASE("Calling decode_linestring_geometry() with 2nd command not a LineTo") 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_linestring(linestring_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_linestring(linestring_handler<2>{}),
                             "Expected command 2 but got 1");
     }
 }
@@ -160,11 +148,11 @@ TEST_CASE("Calling decode_linestring_geometry() with LineTo and 0 count") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_linestring(linestring_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_linestring(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_linestring(linestring_handler<2>{}),
                             "LineTo command count is zero (spec 4.3.4.3)");
     }
 }

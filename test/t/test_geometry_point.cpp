@@ -1,34 +1,11 @@
 
 #include <test.hpp>
 #include <test_geometry.hpp>
+#include <test_geometry_handler.hpp>
 
 #include <cstdint>
 
 using geom_decoder = vtzero::detail::geometry_decoder<2, 0, geom_iterator>;
-
-class dummy_geom_handler {
-
-    int value = 0;
-
-public:
-
-    void points_begin(const uint32_t /*count*/) noexcept {
-        ++value;
-    }
-
-    void points_point(const vtzero::point_2d /*point*/) noexcept {
-        value += 100;
-    }
-
-    void points_end() noexcept {
-        value += 10000;
-    }
-
-    int result() const noexcept {
-        return value;
-    }
-
-}; // class dummy_geom_handler
 
 TEST_CASE("Calling decode_point() with empty input") {
     const geom_container geom;
@@ -36,11 +13,11 @@ TEST_CASE("Calling decode_point() with empty input") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<2>{}),
                             "Expected MoveTo command (spec 4.3.4.2)");
     }
 }
@@ -50,9 +27,11 @@ TEST_CASE("Calling decode_point() with a valid point") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
+    point_handler<2> handler;
     decoder.decode_point(handler);
-    REQUIRE(handler.result() == 10101);
+
+    const std::vector<vtzero::point_2d> expected = {{25, 17}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_point() with a valid multipoint") {
@@ -60,7 +39,11 @@ TEST_CASE("Calling decode_point() with a valid multipoint") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_point(dummy_geom_handler{}) == 10201);
+    point_handler<2> handler;
+    decoder.decode_point(handler);
+
+    const std::vector<vtzero::point_2d> expected = {{5, 7}, {3, 2}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_point() with a linestring geometry fails") {
@@ -70,11 +53,11 @@ TEST_CASE("Calling decode_point() with a linestring geometry fails") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<2>{}),
                             "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
@@ -87,11 +70,11 @@ TEST_CASE("Calling decode_point() with a polygon geometry fails") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<2>{}),
                             "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }
@@ -102,11 +85,11 @@ TEST_CASE("Calling decode_point() with something other than MoveTo command") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<2>{}),
                             "Expected command 1 but got 2");
     }
 }
@@ -117,11 +100,11 @@ TEST_CASE("Calling decode_point() with a count of 0") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<2>{}),
                             "MoveTo command count is zero (spec 4.3.4.2)");
     }
 }
@@ -132,11 +115,11 @@ TEST_CASE("Calling decode_point() with more data then expected") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_point(point_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_point(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<2>{}),
                             "Additional data after end of geometry (spec 4.3.4.2)");
     }
 }

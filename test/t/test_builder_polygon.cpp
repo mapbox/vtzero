@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_geometry_handler.hpp>
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
@@ -10,33 +11,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-
-using polygon_type = std::vector<std::vector<test_point_2d>>;
-
-struct polygon_handler {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    polygon_type data;
-
-    static test_point_2d convert(const vtzero::point_2d& p) noexcept {
-        return {p.x, p.y};
-    }
-
-    void ring_begin(uint32_t count) {
-        data.emplace_back();
-        data.back().reserve(count);
-    }
-
-    void ring_point(const test_point_2d point) {
-        data.back().push_back(point);
-    }
-
-    void ring_end(vtzero::ring_type /* type */) const noexcept {
-    }
-
-}; // struct polygon_handler
 
 static void test_polygon_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
@@ -75,11 +49,11 @@ static void test_polygon_builder(const bool with_id, const bool with_attr) {
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    polygon_handler handler;
+    polygon_handler<2> handler;
     feature.decode_polygon_geometry(handler);
 
-    const polygon_type result = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
-    REQUIRE(handler.data == result);
+    const polygon_handler<2>::result_type expected = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("polygon builder without id/without attributes") {
@@ -166,12 +140,12 @@ static void test_multipolygon_builder(const bool with_id, const bool with_attr) 
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    polygon_handler handler;
+    polygon_handler<2> handler;
     feature.decode_polygon_geometry(handler);
 
-    const polygon_type result = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}},
-                                 {{1, 1}, {2, 1}, {2, 2}, {1, 2}, {1, 1}}};
-    REQUIRE(handler.data == result);
+    const polygon_handler<2>::result_type expected = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}},
+                                                      {{1, 1}, {2, 1}, {2, 2}, {1, 2}, {1, 1}}};
+    REQUIRE(handler.data == expected);
 }
 
 
@@ -255,7 +229,6 @@ TEST_CASE("Calling polygon_feature_builder<2>::set_point() creating unclosed rin
 }
 
 TEST_CASE("Add polygon from container") {
-    const polygon_type expected = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
     const std::vector<std::vector<vtzero::point_2d>> points = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
 
     vtzero::tile_builder tbuilder;
@@ -278,9 +251,9 @@ TEST_CASE("Add polygon from container") {
 
     const auto feature = *layer.begin();
 
-    polygon_handler handler;
+    polygon_handler<2> handler;
     feature.decode_polygon_geometry(handler);
 
-    REQUIRE(handler.data == expected);
+    REQUIRE(handler.data == points);
 }
 

@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_geometry_handler.hpp>
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
@@ -10,54 +11,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-
-struct point_handler_2d {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    std::vector<test_point_2d> data;
-
-    static test_point_2d convert(const vtzero::point_2d& p) noexcept {
-        return {p.x, p.y};
-    }
-
-    void points_begin(uint32_t count) {
-        data.reserve(count);
-    }
-
-    void points_point(const test_point_2d point) {
-        data.push_back(point);
-    }
-
-    void points_end() const noexcept {
-    }
-
-}; // struct point_handler_2d
-
-struct point_handler_3d {
-
-    constexpr static const int dimensions = 3;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    std::vector<test_point_3d> data;
-
-    static test_point_3d convert(const vtzero::point_3d& p) noexcept {
-        return {p.x, p.y, p.z};
-    }
-
-    void points_begin(uint32_t count) {
-        data.reserve(count);
-    }
-
-    void points_point(const test_point_3d& point) {
-        data.push_back(point);
-    }
-
-    void points_end() const noexcept {
-    }
-
-}; // struct point_handler_3d
 
 static void test_point_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
@@ -102,11 +55,11 @@ static void test_point_builder(const bool with_id, const bool with_attr) {
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    point_handler_2d handler;
+    point_handler<2> handler;
     feature.decode_point_geometry(handler);
 
-    const std::vector<test_point_2d> result = {{10, 20}};
-    REQUIRE(handler.data == result);
+    const point_handler<2>::result_type expected = {{10, 20}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Point builder without id/without attributes") {
@@ -174,11 +127,11 @@ static void test_point_builder_vt3(const bool with_id, const bool with_attr) {
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
     REQUIRE_FALSE(feature.has_3d_geometry());
 
-    point_handler_2d handler;
+    point_handler<2> handler;
     feature.decode_point_geometry(handler);
 
-    const std::vector<test_point_2d> result = {{10, 20}};
-    REQUIRE(handler.data == result);
+    const std::vector<vtzero::point_2d> expected = {{10, 20}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Point builder without id/without attributes (vt3)") {
@@ -225,7 +178,7 @@ TEST_CASE("Point builder with 3d point") {
     REQUIRE(feature.integer_id() == 17);
     REQUIRE(feature.has_3d_geometry());
 
-    point_handler_3d handler;
+    point_handler<3> handler;
     feature.decode_point_geometry(handler);
     REQUIRE(handler.data.size() == 1);
 
@@ -233,7 +186,7 @@ TEST_CASE("Point builder with 3d point") {
     REQUIRE(p.x == 10);
     REQUIRE(p.y == 20);
     REQUIRE(layer.elevation_scaling() == scaling);
-    REQUIRE(layer.elevation_scaling().decode(p.elev) == Approx(30.0));
+    REQUIRE(layer.elevation_scaling().decode(p.z) == Approx(30.0));
 }
 
 TEST_CASE("Calling add_points() with bad values throws assert") {
@@ -282,11 +235,11 @@ static void test_multipoint_builder(const bool with_id, const bool with_attr) {
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    point_handler_2d handler;
+    point_handler<2> handler;
     feature.decode_point_geometry(handler);
 
-    const std::vector<test_point_2d> result = {{10, 20}, {20, 30}, {30, 40}};
-    REQUIRE(handler.data == result);
+    const point_handler<2>::result_type expected = {{10, 20}, {20, 30}, {30, 40}};
+    REQUIRE(handler.data == expected);
 }
 
 
@@ -359,8 +312,7 @@ TEST_CASE("Calling point_feature_builder<2>::set_point() too often throws assert
 }
 
 TEST_CASE("Add points from container") {
-    const std::vector<vtzero::point_2d> points = {{10, 20}, {20, 30}, {30, 40}};
-    const std::vector<test_point_2d> results = {{10, 20}, {20, 30}, {30, 40}};
+    const point_handler<2>::result_type points = {{10, 20}, {20, 30}, {30, 40}};
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
@@ -380,9 +332,9 @@ TEST_CASE("Add points from container") {
 
     const auto feature = *layer.begin();
 
-    point_handler_2d handler;
+    point_handler<2> handler;
     feature.decode_point_geometry(handler);
 
-    REQUIRE(handler.data == results);
+    REQUIRE(handler.data == points);
 }
 

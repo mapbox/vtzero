@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_geometry_handler.hpp>
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
@@ -10,59 +11,6 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-
-using ls2d_type = std::vector<std::vector<test_point_2d>>;
-using ls3d_type = std::vector<std::vector<test_point_3d>>;
-
-struct linestring_handler_2d {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    ls2d_type data;
-
-    static test_point_2d convert(const vtzero::point_2d& p) noexcept {
-        return {p.x, p.y};
-    }
-
-    void linestring_begin(uint32_t count) {
-        data.emplace_back();
-        data.back().reserve(count);
-    }
-
-    void linestring_point(const test_point_2d point) {
-        data.back().push_back(point);
-    }
-
-    void linestring_end() const noexcept {
-    }
-
-}; // struct linestring_handler_2d
-
-struct linestring_handler_3d {
-
-    constexpr static const int dimensions = 3;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    ls3d_type data;
-
-    static test_point_3d convert(const vtzero::point_3d& p) noexcept {
-        return {p.x, p.y, p.z};
-    }
-
-    void linestring_begin(uint32_t count) {
-        data.emplace_back();
-        data.back().reserve(count);
-    }
-
-    void linestring_point(const test_point_3d point) {
-        data.back().push_back(point);
-    }
-
-    void linestring_end() const noexcept {
-    }
-
-}; // struct linestring_handler_3d
 
 static void test_linestring_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
@@ -100,11 +48,11 @@ static void test_linestring_builder(const bool with_id, const bool with_attr) {
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    linestring_handler_2d handler;
+    linestring_handler<2> handler;
     feature.decode_linestring_geometry(handler);
 
-    const ls2d_type result = {{{10, 20}, {20, 30}, {30, 40}}};
-    REQUIRE(handler.data == result);
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{10, 20}, {20, 30}, {30, 40}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("linestring builder without id/without attributes") {
@@ -176,11 +124,12 @@ static void test_multilinestring_builder(const bool with_id, const bool with_att
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    linestring_handler_2d handler;
+    linestring_handler<2> handler;
     feature.decode_linestring_geometry(handler);
 
-    const ls2d_type result = {{{10, 20}, {20, 30}, {30, 40}}, {{1, 2}, {2, 1}}};
-    REQUIRE(handler.data == result);
+    const linestring_handler<2>::result_type expected = {{{10, 20}, {20, 30}, {30, 40}},
+                                                         {{1, 2}, {2, 1}}};
+    REQUIRE(handler.data == expected);
 }
 
 
@@ -239,8 +188,7 @@ TEST_CASE("Calling linestring_feature_builder<2>::set_point() too often throws a
 }
 
 TEST_CASE("Add linestring from container") {
-    const ls2d_type expected = {{{10, 20}, {20, 30}, {30, 40}}};
-    const std::vector<std::vector<vtzero::point_2d>> points = {{{10, 20}, {20, 30}, {30, 40}}};
+    const linestring_handler<2>::result_type points = {{{10, 20}, {20, 30}, {30, 40}}};
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
@@ -262,15 +210,14 @@ TEST_CASE("Add linestring from container") {
 
     const auto feature = *layer.begin();
 
-    linestring_handler_2d handler;
+    linestring_handler<2> handler;
     feature.decode_linestring_geometry(handler);
 
-    REQUIRE(handler.data == expected);
+    REQUIRE(handler.data == points);
 }
 
 TEST_CASE("Add linestring from container (3D)") {
-    const ls3d_type expected = {{{10, 20, 4}, {20, 30, 2}, {30, 40, 5}}};
-    const std::vector<std::vector<vtzero::point_3d>> points = {{{10, 20, 4}, {20, 30, 2}, {30, 40, 5}}};
+    const linestring_handler<3>::result_type points = {{{10, 20, 4}, {20, 30, 2}, {30, 40, 5}}};
 
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
@@ -292,10 +239,10 @@ TEST_CASE("Add linestring from container (3D)") {
 
     const auto feature = *layer.begin();
 
-    linestring_handler_3d handler;
+    linestring_handler<3> handler;
     feature.decode_linestring_geometry(handler);
 
-    REQUIRE(handler.data == expected);
+    REQUIRE(handler.data == points);
 }
 
 TEST_CASE("Adding several linestrings with feature rollback in the middle") {

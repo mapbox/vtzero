@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_geometry_handler.hpp>
 #include <test_point.hpp>
 
 #include <vtzero/builder.hpp>
@@ -11,80 +12,8 @@
 #include <string>
 #include <vector>
 
-using ls2d_type = std::vector<std::vector<test_point_2d>>;
-using ls3d_type = std::vector<std::vector<test_point_3d>>;
+using ls2d_type = std::vector<std::vector<vtzero::point_2d>>;
 using knot_type = std::vector<int64_t>;
-
-struct spline_handler_2d {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    ls2d_type data;
-    knot_type knots;
-
-    static test_point_2d convert(const vtzero::point_2d& p) noexcept {
-        return {p.x, p.y};
-    }
-
-    void controlpoints_begin(uint32_t count) {
-        data.emplace_back();
-        data.back().reserve(count);
-    }
-
-    void controlpoints_point(const test_point_2d point) {
-        data.back().push_back(point);
-    }
-
-    void controlpoints_end() const noexcept {
-    }
-
-    void knots_begin(const uint32_t count, const vtzero::index_value /*scaling*/) noexcept {
-        knots.reserve(count);
-    }
-
-    void knots_value(const int64_t value) noexcept {
-        knots.push_back(value);
-    }
-
-    void knots_end() noexcept {
-    }
-
-}; // struct spline_handler_2d
-
-struct spline_handler_3d {
-
-    constexpr static const int dimensions = 3;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    ls3d_type data;
-
-    static test_point_3d convert(const vtzero::point_3d& p) noexcept {
-        return {p.x, p.y, p.z};
-    }
-
-    void controlpoints_begin(uint32_t count) {
-        data.emplace_back();
-        data.back().reserve(count);
-    }
-
-    void controlpoints_point(const test_point_3d point) {
-        data.back().push_back(point);
-    }
-
-    void controlpoints_end() const noexcept {
-    }
-
-    void knots_begin(const uint32_t /*count*/) noexcept {
-    }
-
-    void knots_value(const int64_t /*value*/) noexcept {
-    }
-
-    void knots_end() noexcept {
-    }
-
-}; // struct spline_handler_3d
 
 static void test_spline_builder(const bool with_id, const bool with_attr) {
     vtzero::tile_builder tbuilder;
@@ -128,11 +57,11 @@ static void test_spline_builder(const bool with_id, const bool with_attr) {
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    spline_handler_2d handler;
+    spline_handler<2> handler;
     feature.decode_spline_geometry(handler);
 
     const ls2d_type result = {{{10, 20}, {20, 30}, {30, 40}}};
-    REQUIRE(handler.data == result);
+    REQUIRE(handler.control_points == result);
 }
 
 TEST_CASE("spline builder without id/without attributes") {
@@ -215,12 +144,12 @@ static void test_multispline_builder(const bool with_id, const bool with_attr) {
     const auto feature = *layer.begin();
     REQUIRE(feature.integer_id() == (with_id ? 17 : 0));
 
-    spline_handler_2d handler;
+    spline_handler<2> handler;
     feature.decode_spline_geometry(handler);
 
     const ls2d_type geom_result = {{{10, 20}, {20, 30}, {30, 40}}, {{1, 2}, {2, 1}}};
     const knot_type knot_result = {1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5};
-    REQUIRE(handler.data == geom_result);
+    REQUIRE(handler.control_points == geom_result);
     REQUIRE(handler.knots == knot_result);
 }
 

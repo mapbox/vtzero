@@ -1,43 +1,22 @@
 
 #include <test.hpp>
 #include <test_geometry.hpp>
+#include <test_geometry_handler.hpp>
 
 #include <cstdint>
 
 using geom_decoder = vtzero::detail::geometry_decoder<2, 0, geom_iterator>;
-
-class dummy_geom_handler {
-
-    int value = 0;
-
-public:
-
-    void ring_begin(const uint32_t /*count*/) noexcept {
-        ++value;
-    }
-
-    void ring_point(const vtzero::point_2d /*point*/) noexcept {
-        value += 100;
-    }
-
-    void ring_end(vtzero::ring_type /*is_outer*/) noexcept {
-        value += 10000;
-    }
-
-    int result() const noexcept {
-        return value;
-    }
-
-}; // class dummy_geom_handler
 
 TEST_CASE("Calling decode_polygon_geometry() with empty input") {
     const geom_container geom;
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    dummy_geom_handler handler;
-    decoder.decode_polygon(dummy_geom_handler{});
-    REQUIRE(handler.result() == 0);
+    polygon_handler<2> handler;
+    decoder.decode_polygon(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a valid polygon") {
@@ -47,7 +26,11 @@ TEST_CASE("Calling decode_polygon_geometry() with a valid polygon") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10401);
+    polygon_handler<2> handler;
+    decoder.decode_polygon(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{3, 6}, {8, 12}, {20, 34}, {3, 6}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a duplicate end point") {
@@ -57,7 +40,11 @@ TEST_CASE("Calling decode_polygon_geometry() with a duplicate end point") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10501);
+    polygon_handler<2> handler;
+    decoder.decode_polygon(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{3, 6}, {8, 12}, {20, 34}, {3, 6}, {3, 6}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a valid multipolygon") {
@@ -73,7 +60,13 @@ TEST_CASE("Calling decode_polygon_geometry() with a valid multipolygon") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 31503);
+    polygon_handler<2> handler;
+    decoder.decode_polygon(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{0, 0}, {10, 0}, {10, 10}, {0, 10}, {0, 0}},
+                                                                 {{11, 11}, {20, 11}, {20, 20}, {11, 20}, {11, 11}},
+                                                                 {{13, 13}, {13, 17}, {17, 17}, {17, 13}, {13, 13}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with a point geometry fails") {
@@ -82,11 +75,11 @@ TEST_CASE("Calling decode_polygon_geometry() with a point geometry fails") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_polygon(polygon_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_polygon(polygon_handler<2>{}),
                             "Expected LineTo command (spec 4.3.4.4)");
     }
 }
@@ -98,11 +91,11 @@ TEST_CASE("Calling decode_polygon_geometry() with a linestring geometry fails") 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_polygon(polygon_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_polygon(polygon_handler<2>{}),
                             "Expected ClosePath command (4.3.4.4)");
     }
 }
@@ -113,11 +106,11 @@ TEST_CASE("Calling decode_polygon_geometry() with something other than MoveTo co
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_polygon(polygon_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_polygon(polygon_handler<2>{}),
                             "Expected command 1 but got 2");
     }
 }
@@ -128,11 +121,11 @@ TEST_CASE("Calling decode_polygon_geometry() with a count of 0") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_polygon(polygon_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_polygon(polygon_handler<2>{}),
                             "MoveTo command count is not 1 (spec 4.3.4.4)");
     }
 }
@@ -143,11 +136,11 @@ TEST_CASE("Calling decode_polygon_geometry() with a count of 2") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_polygon(polygon_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_polygon(polygon_handler<2>{}),
                             "MoveTo command count is not 1 (spec 4.3.4.4)");
     }
 }
@@ -159,11 +152,11 @@ TEST_CASE("Calling decode_polygon_geometry() with 2nd command not a LineTo") {
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_polygon(polygon_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_polygon(polygon_handler<2>{}),
                             "Expected command 2 but got 1");
     }
 }
@@ -175,7 +168,11 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 0 count") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10201);
+    polygon_handler<2> handler;
+    decoder.decode_polygon(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{-2, 2}, {-2, 2}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
@@ -185,7 +182,11 @@ TEST_CASE("Calling decode_polygon_geometry() with LineTo and 1 count") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10301);
+    polygon_handler<2> handler;
+    decoder.decode_polygon(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{-2, 2}, {-5, 5}, {-2, 2}}};
+    REQUIRE(handler.data == expected);
 }
 
 TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") {
@@ -196,11 +197,11 @@ TEST_CASE("Calling decode_polygon_geometry() with 3nd command not a ClosePath") 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
     SECTION("check exception type") {
-        REQUIRE_THROWS_AS(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_AS(decoder.decode_polygon(polygon_handler<2>{}),
                           const vtzero::geometry_exception&);
     }
     SECTION("check exception message") {
-        REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
+        REQUIRE_THROWS_WITH(decoder.decode_polygon(polygon_handler<2>{}),
                             "Expected command 7 but got 2");
     }
 }
@@ -212,6 +213,10 @@ TEST_CASE("Calling decode_polygon_geometry() on polygon with zero area") {
 
     geom_decoder decoder{geom.size() / 2, geom.cbegin(), geom.cend()};
 
-    REQUIRE(decoder.decode_polygon(dummy_geom_handler{}) == 10501);
+    polygon_handler<2> handler;
+    decoder.decode_polygon(handler);
+
+    const std::vector<std::vector<vtzero::point_2d>> expected = {{{0, 0}, {1, 0}, {1, 2}, {2, 2}, {0, 0}}};
+    REQUIRE(handler.data == expected);
 }
 

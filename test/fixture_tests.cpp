@@ -1,5 +1,6 @@
 
 #include <test.hpp>
+#include <test_geometry_handler.hpp>
 
 #include <vtzero/builder.hpp>
 #include <vtzero/detail/geometry.hpp>
@@ -13,170 +14,6 @@
 static std::string open_tile(const std::string& path) {
     return load_fixture_tile("FIXTURES_DIR", path);
 }
-
-// ---------------------------------------------------------------------------
-
-struct point_handler {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    std::vector<vtzero::point_2d> data{};
-
-    void points_begin(uint32_t count) {
-        data.reserve(count);
-    }
-
-    void points_point(const vtzero::point_2d point) {
-        data.push_back(point);
-    }
-
-    void points_end() const noexcept {
-    }
-
-}; // struct point_handler
-
-struct linestring_handler {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    std::vector<std::vector<vtzero::point_2d>> data{};
-
-    void linestring_begin(uint32_t count) {
-        data.emplace_back();
-        data.back().reserve(count);
-    }
-
-    void linestring_point(const vtzero::point_2d point) {
-        data.back().push_back(point);
-    }
-
-    void linestring_end() const noexcept {
-    }
-
-}; // struct linestring_handler
-
-struct polygon_handler {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    std::vector<std::vector<vtzero::point_2d>> data{};
-
-    void ring_begin(uint32_t count) {
-        data.emplace_back();
-        data.back().reserve(count);
-    }
-
-    void ring_point(const vtzero::point_2d point) {
-        data.back().push_back(point);
-    }
-
-    void ring_end(vtzero::ring_type /*dummy*/) const noexcept {
-    }
-
-}; // struct polygon_handler
-
-struct spline_handler {
-
-    std::vector<vtzero::point_2d> control_points{};
-    std::vector<int64_t> knots{};
-
-    void controlpoints_begin(uint32_t count) {
-        control_points.reserve(count);
-    }
-
-    void controlpoints_point(const vtzero::point_2d point) {
-        control_points.push_back(point);
-    }
-
-    void controlpoints_end() const noexcept {
-    }
-
-    void knots_begin(const uint32_t count, const vtzero::index_value /*scaling*/) {
-        knots.reserve(count);
-    }
-
-    void knots_value(const int64_t value) {
-        knots.push_back(value);
-    }
-
-    void knots_end() const noexcept {
-    }
-
-}; // struct spline_handler
-
-// ---------------------------------------------------------------------------
-
-struct geom_handler {
-
-    constexpr static const int dimensions = 2;
-    constexpr static const unsigned int max_geometric_attributes = 0;
-
-    std::vector<vtzero::point_2d> point_data{};
-    std::vector<std::vector<vtzero::point_2d>> line_data{};
-    std::vector<vtzero::point_2d> control_points{};
-    std::vector<int64_t> knots{};
-
-    void points_begin(uint32_t count) {
-        point_data.reserve(count);
-    }
-
-    void points_point(const vtzero::point_2d point) {
-        point_data.push_back(point);
-    }
-
-    void points_end() const noexcept {
-    }
-
-    void linestring_begin(uint32_t count) {
-        line_data.emplace_back();
-        line_data.back().reserve(count);
-    }
-
-    void linestring_point(const vtzero::point_2d point) {
-        line_data.back().push_back(point);
-    }
-
-    void linestring_end() const noexcept {
-    }
-
-    void ring_begin(uint32_t count) {
-        line_data.emplace_back();
-        line_data.back().reserve(count);
-    }
-
-    void ring_point(const vtzero::point_2d point) {
-        line_data.back().push_back(point);
-    }
-
-    void ring_end(vtzero::ring_type /*dummy*/) const noexcept {
-    }
-
-    void controlpoints_begin(uint32_t count) {
-        control_points.reserve(count);
-    }
-
-    void controlpoints_point(const vtzero::point_2d p) {
-        control_points.push_back(p);
-    }
-
-    void controlpoints_end() const noexcept {
-    }
-
-    void knots_begin(const uint32_t count, const vtzero::index_value /*scaling*/) {
-        knots.reserve(count);
-    }
-
-    void knots_value(const int64_t value) {
-        knots.push_back(value);
-    }
-
-    void knots_end() const noexcept {
-    }
-
-}; // struct geom_handler
 
 // ---------------------------------------------------------------------------
 
@@ -213,7 +50,7 @@ TEST_CASE("MVT test 002: Tile with version 2 layer with single point feature wit
     REQUIRE(feature.integer_id() == 0);
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
-    point_handler handler;
+    point_handler<2> handler;
     feature.decode_point_geometry(handler);
 
     std::vector<vtzero::point_2d> expected = {{25, 17}};
@@ -382,14 +219,14 @@ TEST_CASE("MVT test 017: Version 2 layer with valid point geometry") {
     const std::vector<vtzero::point_2d> expected = {{25, 17}};
 
     SECTION("decode_point_geometry") {
-        point_handler handler;
+        point_handler<2> handler;
         feature.decode_point_geometry(handler);
         REQUIRE(handler.data == expected);
     }
 
     SECTION("decode_geometry") {
         geom_handler handler;
-        feature.decode_point_geometry(handler);
+        feature.decode_geometry(handler);
         REQUIRE(handler.point_data == expected);
     }
 }
@@ -405,7 +242,7 @@ TEST_CASE("MVT test 018: Version 2 layer with valid linestring geometry") {
     const std::vector<std::vector<vtzero::point_2d>> expected = {{{2, 2}, {2,10}, {10, 10}}};
 
     SECTION("decode_linestring_geometry") {
-        linestring_handler handler;
+        linestring_handler<2> handler;
         feature.decode_linestring_geometry(handler);
         REQUIRE(handler.data == expected);
     }
@@ -428,7 +265,7 @@ TEST_CASE("MVT test 019: Version 2 layer with valid polygon geometry") {
     const std::vector<std::vector<vtzero::point_2d>> expected = {{{3, 6}, {8,12}, {20, 34}, {3, 6}}};
 
     SECTION("deocode_polygon_geometry") {
-        polygon_handler handler;
+        polygon_handler<2> handler;
         feature.decode_polygon_geometry(handler);
         REQUIRE(handler.data == expected);
     }
@@ -448,7 +285,7 @@ TEST_CASE("MVT test 020: Version 2 layer with valid multipoint geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
 
-    point_handler handler;
+    point_handler<2> handler;
     feature.decode_point_geometry(handler);
 
     const std::vector<vtzero::point_2d> expected = {{5, 7}, {3,2}};
@@ -464,7 +301,7 @@ TEST_CASE("MVT test 021: Version 2 layer with valid multilinestring geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::LINESTRING);
 
-    linestring_handler handler;
+    linestring_handler<2> handler;
     feature.decode_linestring_geometry(handler);
 
     const std::vector<std::vector<vtzero::point_2d>> expected = {{{2, 2}, {2,10}, {10, 10}}, {{1,1}, {3, 5}}};
@@ -480,7 +317,7 @@ TEST_CASE("MVT test 022: Version 2 layer with valid multipolygon geometry") {
 
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POLYGON);
 
-    polygon_handler handler;
+    polygon_handler<2> handler;
     feature.decode_polygon_geometry(handler);
 
     const std::vector<std::vector<vtzero::point_2d>> expected = {
