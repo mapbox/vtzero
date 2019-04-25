@@ -163,6 +163,9 @@ TEST_CASE("valid/all_attribute_types_v3.mvt") {
     REQUIRE(feature.geometry_type() == vtzero::GeomType::POINT);
     REQUIRE_FALSE(feature.has_3d_geometry());
     REQUIRE(feature.integer_id() == 1);
+
+    geom_handler<2> handler{layer};
+    REQUIRE(feature.decode_geometry(handler) == "P((20,20))");
 }
 
 // ---------------------------------------------------------------------------
