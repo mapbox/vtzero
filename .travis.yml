@@ -187,6 +187,8 @@ script:
       chmod +x codecov
       ${COVERAGE} -p $(find test -name 'test_*.o')
       ./codecov -Z -c -X gcov -F unit_tests
+      ${COVERAGE} -p $(find test -name 'base_tests.cpp.o')
+      ./codecov -Z -c -X gcov -F base_tests
       ${COVERAGE} -p $(find test -name 'fixture_tests.cpp.o')
       ./codecov -Z -c -X gcov -F fixture_tests
       ${COVERAGE} -p $(find test -name 'formatting_tests.cpp.o')
