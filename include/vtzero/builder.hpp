@@ -161,7 +161,7 @@ namespace vtzero {
             vtzero_assert(m_num_knots.is_zero());
             m_pbf_geometry.commit();
             if (Dimensions == 3 && !elevations().empty()) {
-                m_feature_writer.add_packed_sint32(detail::pbf_feature::elevations, elevations().cbegin(), elevations().cend());
+                m_feature_writer.add_packed_sint64(detail::pbf_feature::elevations, elevations().cbegin(), elevations().cend());
                 elevations().clear();
             }
             if (!knots().empty()) {
@@ -228,7 +228,7 @@ namespace vtzero {
         void set_point_impl(const point<Dimensions> p) {
             point<Dimensions> q{sub(p.x, m_cursor.x), sub(p.y, m_cursor.y)};
             if (Dimensions == 3) {
-                q.set_z(sub(p.get_z(), m_cursor.get_z()));
+                q.set_z(p.get_z() - m_cursor.get_z());
             }
             add_point_impl(q);
             m_cursor = p;

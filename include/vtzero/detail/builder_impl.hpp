@@ -238,7 +238,7 @@ namespace vtzero {
 
             protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
 
-            std::vector<int32_t> m_elevations;
+            std::vector<int64_t> m_elevations;
             std::vector<uint64_t> m_knots;
 
             // The number of features in the layer
@@ -286,7 +286,7 @@ namespace vtzero {
                 return m_version;
             }
 
-            std::vector<int32_t>& elevations() noexcept {
+            std::vector<int64_t>& elevations() noexcept {
                 return m_elevations;
             }
 

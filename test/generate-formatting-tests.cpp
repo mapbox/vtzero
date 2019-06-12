@@ -496,8 +496,8 @@ static void feature_with_version_2_elevations_field() {
     std::string feature_data;
     {
         protozero::pbf_builder<vtzero::detail::pbf_feature> feature_builder{feature_data};
-        std::array<int32_t, 2> attrs{{1, 2}};
-        feature_builder.add_packed_sint32(vtzero::detail::pbf_feature::elevations, attrs.cbegin(), attrs.cend());
+        std::array<int64_t, 2> attrs{{1, 2}};
+        feature_builder.add_packed_sint64(vtzero::detail::pbf_feature::elevations, attrs.cbegin(), attrs.cend());
     }
 
     std::string data{wrap_in_layer(2, feature_data)};
@@ -633,9 +633,9 @@ static void feature_with_multiple_elevations() {
     std::string feature_data;
     {
         protozero::pbf_builder<vtzero::detail::pbf_feature> feature_builder{feature_data};
-        std::array<int32_t, 2> x{{1, 2}};
-        feature_builder.add_packed_sint32(vtzero::detail::pbf_feature::elevations, x.cbegin(), x.cend());
-        feature_builder.add_packed_sint32(vtzero::detail::pbf_feature::elevations, x.cbegin(), x.cend());
+        std::array<int64_t, 2> x{{1, 2}};
+        feature_builder.add_packed_sint64(vtzero::detail::pbf_feature::elevations, x.cbegin(), x.cend());
+        feature_builder.add_packed_sint64(vtzero::detail::pbf_feature::elevations, x.cbegin(), x.cend());
     }
 
     std::string data{wrap_in_layer(3, feature_data)};

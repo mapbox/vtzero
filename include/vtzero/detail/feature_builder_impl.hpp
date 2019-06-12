@@ -90,7 +90,7 @@ namespace vtzero {
                 return m_layer->version();
             }
 
-            std::vector<int32_t>& elevations() noexcept {
+            std::vector<int64_t>& elevations() noexcept {
                 return m_layer->elevations();
             }
 

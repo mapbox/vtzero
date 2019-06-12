@@ -75,7 +75,7 @@ namespace vtzero {
         std::size_t m_feature_num = 0;
 
         typed_data_view<protozero::pbf_reader::const_uint32_iterator> m_geometry{};
-        typed_data_view<protozero::pbf_reader::const_sint32_iterator> m_elevations{};
+        typed_data_view<protozero::pbf_reader::const_sint64_iterator> m_elevations{};
         typed_data_view<protozero::pbf_reader::const_uint64_iterator> m_knots{}; // for splines
         typed_data_view<protozero::pbf_reader::const_uint32_iterator> m_tags{}; // version 2 "tags"
         typed_data_view<protozero::pbf_reader::const_uint64_iterator> m_attributes{}; // version 3 attributes
