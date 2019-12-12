@@ -3,10 +3,13 @@
 #include "protozero/pbf_builder.hpp"
 #include "protozero/pbf_message.hpp"
 #include "vtzero/builder.hpp"
+#include <cassert>
 
 namespace vtzero {
 
 struct mesh_data {
+    std::vector<int32_t> elevations;
+    // X,Y pairs
     std::vector<int32_t> coordinates;
     std::vector<uint32_t> triangles;
     std::vector<uint8_t> normal_map;
@@ -18,10 +21,14 @@ public:
 
     enum class tag : protozero::pbf_tag_type {
         type = 1,
-        elevation_min = 10,
-        elevation_max = 11,
-        coordinates = 20,
-        triangles = 21,
+        elevation_min = 8,
+        elevation_max = 9,
+        elevations_count = 10,
+        elevations = 11,
+        coordinates_count = 20,
+        coordinates = 21,
+        triangles_count = 30,
+        triangles = 31,
         normal_map = 40,
     };
 
@@ -29,8 +36,19 @@ public:
         std::string data;
         protozero::pbf_builder<tag> builder { data };
 
+        if (!mesh.elevations.empty()) {
+            builder.add_uint32(tag::elevations_count, mesh.elevations.size());
+            builder.add_packed_sint32(tag::elevations, std::begin(mesh.elevations), std::end(mesh.elevations));
+        }
+
+        assert(mesh.coordinates.size() % 2 == 0);
+        builder.add_uint32(tag::coordinates_count, mesh.coordinates.size() / 2);
         builder.add_packed_sint32(tag::coordinates, std::begin(mesh.coordinates), std::end(mesh.coordinates));
+
+        assert(mesh.triangles.size() % 3 == 0);
+        builder.add_uint32(tag::triangles_count, mesh.triangles.size() / 3);
         builder.add_packed_uint32(tag::triangles, std::begin(mesh.triangles), std::end(mesh.triangles));
+
         // if (!mesh.normal_map.empty()) {
         //     builder.add_bytes(tag::normal_map, std::begin(mesh.triangles), std::end(mesh.triangles));
         // }
@@ -46,6 +64,19 @@ public:
                 case protozero::tag_and_type(tag::type, protozero::pbf_wire_type::varint):
                     message.skip();
                     break;
+                case protozero::tag_and_type(tag::elevations_count, protozero::pbf_wire_type::varint):
+                    mesh.elevations.reserve(message.get_uint32());
+                    break;
+                case protozero::tag_and_type(tag::elevations, protozero::pbf_wire_type::length_delimited): {
+                    auto pi = message.get_packed_sint32();
+                    for (auto it = pi.begin(); it != pi.end(); ++it) {
+                        mesh.elevations.push_back(*it);
+                    }
+                    break;
+                }
+                case protozero::tag_and_type(tag::coordinates_count, protozero::pbf_wire_type::varint):
+                    mesh.coordinates.reserve(message.get_uint32() * 2);
+                    break;
                 case protozero::tag_and_type(tag::coordinates, protozero::pbf_wire_type::length_delimited): {
                     auto pi = message.get_packed_sint32();
                     for (auto it = pi.begin(); it != pi.end(); ++it) {
@@ -53,6 +84,9 @@ public:
                     }
                     break;
                 }
+                case protozero::tag_and_type(tag::triangles_count, protozero::pbf_wire_type::varint):
+                    mesh.triangles.reserve(message.get_uint32() * 3);
+                    break;
                 case protozero::tag_and_type(tag::triangles, protozero::pbf_wire_type::length_delimited): {
                     auto pi = message.get_packed_uint32();
                     for (auto it = pi.begin(); it != pi.end(); ++it) {
@@ -71,7 +105,10 @@ public:
 
 class mesh_layer_builder : public vtzero::layer_builder {
 public:
-    mesh_layer_builder(vtzero::tile_builder &tile, const std::string &name, uint32_t version = 2, uint32_t extent = 4096)
+    mesh_layer_builder(vtzero::tile_builder &tile,
+                       const std::string &name,
+                       uint32_t version = 2,
+                       uint32_t extent = 4096)
         : layer_builder(tile, name, version, extent) {
     }
 
@@ -103,4 +140,4 @@ public:
         }
     }
 };
-}
+} // namespace vtzero
