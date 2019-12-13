@@ -8,6 +8,7 @@
 namespace vtzero {
 
 struct mesh_data {
+    int32_t elevation_min = 0, elevation_max = 0;
     std::vector<int32_t> elevations;
     // X,Y pairs
     std::vector<int32_t> coordinates;
@@ -36,6 +37,9 @@ public:
         std::string data;
         protozero::pbf_builder<tag> builder { data };
 
+        builder.add_int32(tag::elevation_min, mesh.elevation_min);
+        builder.add_int32(tag::elevation_max, mesh.elevation_max);
+
         if (!mesh.elevations.empty()) {
             builder.add_uint32(tag::elevations_count, mesh.elevations.size());
             builder.add_packed_sint32(tag::elevations, std::begin(mesh.elevations), std::end(mesh.elevations));
@@ -63,6 +67,12 @@ public:
             switch (message.tag_and_type()) {
                 case protozero::tag_and_type(tag::type, protozero::pbf_wire_type::varint):
                     message.skip();
+                    break;
+                case protozero::tag_and_type(tag::elevation_min, protozero::pbf_wire_type::varint):
+                    mesh.elevation_min = message.get_int32();
+                    break;
+                case protozero::tag_and_type(tag::elevation_max, protozero::pbf_wire_type::varint):
+                    mesh.elevation_max = message.get_int32();
                     break;
                 case protozero::tag_and_type(tag::elevations_count, protozero::pbf_wire_type::varint):
                     mesh.elevations.reserve(message.get_uint32());
