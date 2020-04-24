@@ -131,9 +131,10 @@ namespace vtzero {
                     case protozero::tag_and_type(detail::pbf_layer::extent, protozero::pbf_wire_type::varint):
                         m_extent = reader.get_uint32();
                         break;
-                    default:
-                        if (uint32_t(reader.tag()) >= 16) {
-                            m_extensions.emplace_back(uint32_t(reader.tag()), reader.get_view());
+                default: {
+                        uint32_t ext = static_cast<uint32_t>(reader.tag());
+                        if (ext >= 16) {
+                            m_extensions.emplace_back(ext, reader.get_view());
                             break;
                         }
                         throw format_exception{"unknown field in layer (tag=" +
@@ -141,6 +142,7 @@ namespace vtzero {
                                                ", type=" +
                                                std::to_string(static_cast<uint32_t>(reader.wire_type())) +
                                                ")"};
+                }
                 }
             }
 
