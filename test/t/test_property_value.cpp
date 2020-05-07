@@ -128,7 +128,7 @@ TEST_CASE("string value") {
 }
 
 TEST_CASE("float value") {
-    vtzero::encoded_property_value epv{1.2f};
+    vtzero::encoded_property_value epv{1.2F};
     vtzero::property_value pv{epv.data()};
     REQUIRE(pv.float_value() == Approx(1.2));
 
@@ -318,8 +318,8 @@ TEST_CASE("create encoded property values from different string types") {
 }
 
 TEST_CASE("create encoded property values from different floating point types") {
-    vtzero::encoded_property_value f1{vtzero::float_value_type{3.2f}};
-    vtzero::encoded_property_value f2{3.2f};
+    vtzero::encoded_property_value f1{vtzero::float_value_type{3.2F}};
+    vtzero::encoded_property_value f2{3.2F};
     vtzero::encoded_property_value d1{vtzero::double_value_type{3.2}};
     vtzero::encoded_property_value d2{3.2};
 

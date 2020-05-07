@@ -373,7 +373,7 @@ namespace vtzero {
         /// Helper function to check size isn't too large
         template <typename T>
         uint32_t check_num_points(T size) {
-            if (size >= (1ul << 29u)) {
+            if (size >= (1UL << 29U)) {
                 throw geometry_exception{"Maximum of 2^29 - 1 points allowed in geometry"};
             }
             return static_cast<uint32_t>(size);
@@ -662,7 +662,7 @@ namespace vtzero {
                           "can not call add_points() twice or mix with add_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_points() has to be called before properties are added");
-            vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
+            vtzero_assert(count > 0 && count < (1UL << 29U) && "add_points() must be called with 0 < count < 2^29");
             m_num_points.set(count);
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
             m_pbf_geometry.add_element(detail::command_move_to(count));
@@ -805,7 +805,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_linestring() has to be called before properties are added");
-            vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
+            vtzero_assert(count > 1 && count < (1UL << 29U) && "add_linestring() must be called with 1 < count < 2^29");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -979,7 +979,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_ring() has to be called before properties are added");
-            vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
+            vtzero_assert(count > 3 && count < (1UL << 29U) && "add_ring() must be called with 3 < count < 2^29");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
