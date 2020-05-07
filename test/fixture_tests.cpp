@@ -13,7 +13,7 @@
 #include <string>
 
 static std::string open_tile(const std::string& path) {
-    const auto fixtures_dir = std::getenv("FIXTURES_DIR");
+    const auto* fixtures_dir = std::getenv("FIXTURES_DIR");
     if (fixtures_dir == nullptr) {
         std::cerr << "Set FIXTURES_DIR environment variable to the directory where the mvt fixtures are!\n";
         std::exit(2);

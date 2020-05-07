@@ -26,7 +26,7 @@ public:
     void points_begin(const uint32_t /*count*/) const noexcept {
     }
 
-    void points_point(const vtzero::point point) const {
+    static void points_point(const vtzero::point point) {
         std::cout << "      POINT(" << point.x << ',' << point.y << ")\n";
     }
 

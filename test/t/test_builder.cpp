@@ -416,7 +416,7 @@ struct points_to_vector {
     void points_end() const {
     }
 
-    std::vector<vtzero::point> result() {
+    const std::vector<vtzero::point>& result() const {
         return m_points;
     }
 
@@ -504,15 +504,15 @@ TEST_CASE("Build point feature from container with too many points") {
     // fake container pretending to contain too many points
     struct test_container {
 
-        std::size_t size() const noexcept {
+        static std::size_t size() noexcept {
             return 1UL << 29U;
         }
 
-        vtzero::point* begin() const noexcept {
+        static vtzero::point* begin() noexcept {
             return nullptr;
         }
 
-        vtzero::point* end() const noexcept {
+        static vtzero::point* end() noexcept {
             return nullptr;
         }
 
