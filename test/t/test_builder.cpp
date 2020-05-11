@@ -7,6 +7,9 @@
 #include <vtzero/index.hpp>
 #include <vtzero/output.hpp>
 
+#include <protozero/buffer_vector.hpp>
+
+#include <array>
 #include <cstdint>
 #include <cstdlib>
 #include <numeric>
@@ -68,6 +71,31 @@ TEST_CASE("Create tile from existing layers") {
     REQUIRE(data == buffer);
 }
 
+TEST_CASE("Create tile from existing layers with adaptor") {
+    const std::string buffer{load_test_tile()};
+    const vtzero::vector_tile tile{buffer};
+
+    vtzero::tile_builder tbuilder;
+
+    SECTION("add_existing_layer(layer)") {
+        for (auto layer : tile) {
+            tbuilder.add_existing_layer(layer);
+        }
+    }
+
+    SECTION("add_existing_layer(data_view)") {
+        for (auto layer : tile) {
+            tbuilder.add_existing_layer(layer.data());
+        }
+    }
+
+    std::vector<char> data(buffer.size());
+    protozero::fixed_size_buffer_adaptor adaptor{data};
+    tbuilder.serialize(adaptor);
+
+    REQUIRE(std::equal(buffer.cbegin(), buffer.cend(), data.cbegin()));
+}
+
 TEST_CASE("Create layer based on existing layer") {
     const std::string buffer{load_test_tile()};
     const vtzero::vector_tile tile{buffer};
@@ -81,7 +109,29 @@ TEST_CASE("Create layer based on existing layer") {
     fbuilder.add_point(vtzero::point_2d{10, 20});
     fbuilder.commit();
 
-    const std::string data = tbuilder.serialize();
+    std::string data;
+
+    SECTION("serialize into returned std::string") {
+        data = tbuilder.serialize();
+    }
+
+    SECTION("serialize into std::string") {
+        tbuilder.serialize(data);
+    }
+
+    SECTION("serialize into std::vector<char>") {
+        std::vector<char> buffer;
+        tbuilder.serialize(buffer);
+        std::copy(buffer.cbegin(), buffer.cend(), std::back_inserter(data));
+    }
+
+    SECTION("serialize into fixed size buffer") {
+        std::array<char, 1000> fixed_buffer = {{0}};
+        protozero::fixed_size_buffer_adaptor adaptor{fixed_buffer};
+        tbuilder.serialize(adaptor);
+        std::copy(adaptor.cbegin(), adaptor.cend(), std::back_inserter(data));
+    }
+
     const vtzero::vector_tile new_tile{data};
     const auto new_layer = *new_tile.begin();
     REQUIRE(std::string(new_layer.name()) == "place_label");

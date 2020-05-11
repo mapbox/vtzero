@@ -22,9 +22,11 @@ documentation.
 #include "../tile.hpp"
 #include "../types.hpp"
 
-#include <protozero/pbf_builder.hpp>
+#include <protozero/basic_pbf_builder.hpp>
+#include <protozero/buffer_fixed.hpp>
 #include <protozero/pbf_message.hpp>
 
+#include <array>
 #include <cstdlib>
 #include <string>
 #include <unordered_map>
@@ -399,7 +401,8 @@ namespace vtzero {
                        estimated_overhead_for_pbf_encoding;
             }
 
-            void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const {
+            template <typename TBuffer>
+            void build(protozero::basic_pbf_builder<TBuffer, detail::pbf_tile>& pbf_tile_builder) const {
                 if (m_data_view.data()) {
                     // This is a layer created as copy from an existing layer
                     pbf_tile_builder.add_bytes(detail::pbf_tile::layers, m_data_view);
@@ -434,13 +437,19 @@ namespace vtzero {
                             // doesn't have the default values (which will also
                             // be the case if no elevations are set at all).
                             if (!m_elevation_scaling.is_default()) {
-                                pbf_layer.add_message(detail::pbf_layer::elevation_scaling, m_elevation_scaling.serialize());
+                                std::array<char, scaling::max_message_size()> scaling_buffer = {{0}};
+                                protozero::fixed_size_buffer_adaptor adaptor{scaling_buffer};
+                                m_elevation_scaling.serialize(adaptor);
+                                pbf_layer.add_message(detail::pbf_layer::elevation_scaling, adaptor.data(), adaptor.size());
                             }
                             // The attribute scalings have to be written all out
                             // even if they have the default values, because
                             // otherwise the indexes pointing to them are wrong.
                             for (const auto& scaling : m_attribute_scalings) {
-                                pbf_layer.add_message(detail::pbf_layer::attribute_scalings, scaling.serialize());
+                                std::array<char, scaling::max_message_size()> scaling_buffer = {{0}};
+                                protozero::fixed_size_buffer_adaptor adaptor{scaling_buffer};
+                                scaling.serialize(adaptor);
+                                pbf_layer.add_message(detail::pbf_layer::attribute_scalings, adaptor.data(), adaptor.size());
                             }
                         }
 

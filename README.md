@@ -14,7 +14,7 @@ Specification 3.0](https://github.com/mapbox/vector-tile-spec/tree/v3.0-developm
 
 * C++11 compiler (GCC 4.9 or higher, clang 3.5 or higher, ...)
 * CMake
-* [Protozero](https://github.com/mapbox/protozero) version >= 1.6.4
+* [Protozero](https://github.com/mapbox/protozero) version >= 1.7.0
 
 
 ## Build

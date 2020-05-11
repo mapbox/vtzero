@@ -3,6 +3,9 @@
 
 #include <vtzero/scaling.hpp>
 
+#include <protozero/pbf_writer.hpp>
+
+#include <limits>
 #include <type_traits>
 
 static_assert(std::is_nothrow_move_constructible<vtzero::scaling>::value, "scaling is not nothrow move constructible");
@@ -30,7 +33,8 @@ TEST_CASE("Some scaling") {
     REQUIRE(s.encode64(5.0) == 14999998);
     REQUIRE(s.decode(14999998) == Approx(5.0));
 
-    std::string message = s.serialize();
+    std::string message;
+    s.serialize(message);
     REQUIRE_FALSE(message.empty());
 
     const vtzero::scaling s2{message};
@@ -40,5 +44,13 @@ TEST_CASE("Some scaling") {
     REQUIRE(s2.base() == Approx(3.5));
     REQUIRE(s == s2);
     REQUIRE_FALSE(s != s2);
+}
+
+TEST_CASE("Largest scaling must fit in buffer") {
+    const vtzero::scaling s{std::numeric_limits<int64_t>::max(), 1.2, 3.4};
+
+    std::string message;
+    s.serialize(message);
+    REQUIRE(message.size() == vtzero::scaling::max_message_size());
 }
 

@@ -24,7 +24,7 @@ documentation.
 #include "types.hpp"
 #include "vector_tile.hpp"
 
-#include <protozero/pbf_builder.hpp>
+#include <protozero/basic_pbf_builder.hpp>
 
 #include <cstdlib>
 #include <utility>

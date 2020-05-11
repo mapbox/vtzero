@@ -19,7 +19,7 @@ documentation.
 #include "exception.hpp"
 #include "types.hpp"
 
-#include <protozero/pbf_builder.hpp>
+#include <protozero/basic_pbf_builder.hpp>
 #include <protozero/pbf_message.hpp>
 
 #include <cstdint>
@@ -122,10 +122,21 @@ namespace vtzero {
             return m_offset == 0 && m_multiplier == 1.0 && m_base == 0.0;
         }
 
+        /**
+         * The maximum size a scaling message can have "on the wire". Used to
+         * allocate a buffer of the right size.
+         */
+        constexpr static std::size_t max_message_size() noexcept {
+            return protozero::max_varint_length /* offset (varint) */ +
+                   sizeof(double) /* multiplier (double) */ +
+                   sizeof(double) /* base (double) */ +
+                   3 /* types for offset, multiplier, and base */;
+        }
+
         /// Serialize scaling into protobuf message.
-        std::string serialize() const {
-            std::string data;
-            protozero::pbf_builder<detail::pbf_scaling> pbf_scaling{data};
+        template <typename TBuffer>
+        void serialize(TBuffer& buffer) const {
+            protozero::basic_pbf_builder<TBuffer, detail::pbf_scaling> pbf_scaling{buffer};
 
             if (m_offset != 0) {
                 pbf_scaling.add_sint64(detail::pbf_scaling::offset, m_offset);
@@ -136,8 +147,6 @@ namespace vtzero {
             if (m_base != 0.0) {
                 pbf_scaling.add_double(detail::pbf_scaling::base, m_base);
             }
-
-            return data;
         }
 
         /// Scalings are the same if all values are the same.
