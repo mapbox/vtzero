@@ -48,7 +48,7 @@ namespace vtzero {
 
         friend class layer_builder;
 
-        std::vector<std::unique_ptr<detail::layer_builder_base>> m_layers;
+        std::vector<std::unique_ptr<detail::layer_builder_impl>> m_layers;
 
         /**
          * Add a new layer to the vector tile based on an existing layer. The
@@ -131,7 +131,7 @@ namespace vtzero {
          *        layer.
          */
         void add_existing_layer(data_view&& data) {
-            m_layers.emplace_back(new detail::layer_builder_existing{std::forward<data_view>(data)});
+            m_layers.emplace_back(new detail::layer_builder_impl{std::forward<data_view>(data)});
         }
 
         /**
