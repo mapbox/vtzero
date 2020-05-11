@@ -22,11 +22,12 @@ documentation.
 #include "types.hpp"
 #include "vector_tile.hpp"
 
-#include <protozero/pbf_builder.hpp>
+#include <protozero/basic_pbf_builder.hpp>
 
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -135,17 +136,18 @@ namespace vtzero {
          * The data will be appended to the specified buffer. The buffer
          * doesn't have to be empty.
          *
+         * @tparam TBuffer Type of buffer. Must be std:string or other buffer
+         *         type supported by protozero.
          * @param buffer Buffer to append the encoded vector tile to.
          */
-        void serialize(std::string& buffer) const {
-            std::size_t estimated_size = 0;
-            for (const auto& layer : m_layers) {
-                estimated_size += layer->estimated_size();
-            }
+        template <typename TBuffer>
+        void serialize(TBuffer& buffer) const {
+            const std::size_t estimated_size = std::accumulate(m_layers.cbegin(), m_layers.cend(), 0ULL, [](std::size_t sum, const std::unique_ptr<detail::layer_builder_impl>& layer) {
+                return sum + layer->estimated_size();
+            });
 
-            buffer.reserve(buffer.size() + estimated_size);
-
-            protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{buffer};
+            protozero::basic_pbf_builder<TBuffer, detail::pbf_tile> pbf_tile_builder{buffer};
+            pbf_tile_builder.reserve(estimated_size);
             for (const auto& layer : m_layers) {
                 layer->build(pbf_tile_builder);
             }
@@ -156,7 +158,7 @@ namespace vtzero {
          * and return it.
          *
          * If you want to use an existing buffer instead, use the serialize()
-         * method taking a std::string& as parameter.
+         * member function taking a TBuffer& as parameter.
          *
          * @returns std::string Buffer with encoded vector_tile data.
          */

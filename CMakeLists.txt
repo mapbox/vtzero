@@ -62,7 +62,7 @@ endif()
 #
 #-----------------------------------------------------------------------------
 
-find_package(Protozero 1.6.0 REQUIRED)
+find_package(Protozero 1.7.0 REQUIRED)
 
 include_directories(SYSTEM ${PROTOZERO_INCLUDE_DIR})
 

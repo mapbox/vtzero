@@ -20,7 +20,7 @@ documentation.
 #include "property_value.hpp"
 #include "types.hpp"
 
-#include <protozero/pbf_builder.hpp>
+#include <protozero/basic_pbf_builder.hpp>
 #include <protozero/pbf_message.hpp>
 
 #include <cstdlib>
@@ -241,7 +241,8 @@ namespace vtzero {
                        estimated_overhead_for_pbf_encoding;
             }
 
-            void build(protozero::pbf_builder<detail::pbf_tile>& pbf_tile_builder) const {
+            template <typename TBuffer>
+            void build(protozero::basic_pbf_builder<TBuffer, detail::pbf_tile>& pbf_tile_builder) const {
                 if (m_data_view.data()) {
                     // This is a layer created as copy from an existing layer
                     pbf_tile_builder.add_bytes(detail::pbf_tile::layers, m_data_view);
