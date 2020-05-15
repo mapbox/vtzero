@@ -99,7 +99,7 @@ TEST_CASE("iterate over all features in a layer") {
     std::size_t count = 0;
 
     SECTION("external iterator") {
-        while (auto feature = layer.next_feature()) {
+        while (layer.next_feature()) {
             ++count;
         }
     }
