@@ -393,7 +393,7 @@ TEST_CASE("Copy only point geometries using geometry_feature_builder") {
     n = 0;
     vtzero::vector_tile result_tile{data};
     while (auto layer = result_tile.next_layer()) {
-        while (auto feature = layer.next_feature()) {
+        while (layer.next_feature()) {
             ++n;
         }
     }
@@ -452,7 +452,7 @@ TEST_CASE("Copy only point geometries using point_feature_builder") {
     n = 0;
     vtzero::vector_tile result_tile{data};
     while (auto layer = result_tile.next_layer()) {
-        while (auto feature = layer.next_feature()) {
+        while (layer.next_feature()) {
             ++n;
         }
     }
@@ -491,7 +491,7 @@ TEST_CASE("Copy only point geometries using point_feature_builder using property
     n = 0;
     vtzero::vector_tile result_tile{data};
     while (auto layer = result_tile.next_layer()) {
-        while (auto feature = layer.next_feature()) {
+        while (layer.next_feature()) {
             ++n;
         }
     }
