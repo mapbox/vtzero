@@ -25,8 +25,8 @@ static std::string open_tile(const std::string& path) {
         throw std::runtime_error{"could not open: '" + path + "'"};
     }
 
-    const std::string message{std::istreambuf_iterator<char>(stream.rdbuf()),
-                              std::istreambuf_iterator<char>()};
+    std::string message{std::istreambuf_iterator<char>(stream.rdbuf()),
+                        std::istreambuf_iterator<char>()};
 
     stream.close();
     return message;
