@@ -132,9 +132,9 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
             fbuilder.rollback();
         }
 
-        REQUIRE_THROWS_AS(fbuilder.set_id(10), const assert_error&);
-        REQUIRE_THROWS_AS(fbuilder.add_point(20, 20), const assert_error&);
-        REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.set_id(10), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_point(20, 20), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), assert_error);
     }
 
     const std::string data = tbuilder.serialize();
@@ -156,13 +156,13 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
 
     SECTION("explicit immediate commit") {
         vtzero::point_feature_builder fbuilder{lbuilder};
-        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.commit(), assert_error);
     }
 
     SECTION("explicit commit after setting id") {
         vtzero::point_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(2);
-        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.commit(), assert_error);
     }
 }
 
@@ -525,7 +525,7 @@ TEST_CASE("Build point feature from container with too many points") {
     fbuilder.set_id(1);
 
     test_container tc;
-    REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), vtzero::geometry_exception);
 }
 
 TEST_CASE("Moving a feature builder is allowed") {
