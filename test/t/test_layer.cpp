@@ -28,13 +28,13 @@ TEST_CASE("default constructed layer") {
     REQUIRE(layer.empty());
     REQUIRE(layer.num_features() == 0);
 
-    REQUIRE_THROWS_AS(layer.key_table(), const assert_error&);
-    REQUIRE_THROWS_AS(layer.value_table(), const assert_error&);
+    REQUIRE_THROWS_AS(layer.key_table(), assert_error);
+    REQUIRE_THROWS_AS(layer.value_table(), assert_error);
 
-    REQUIRE_THROWS_AS(layer.key(0), const assert_error&);
-    REQUIRE_THROWS_AS(layer.value(0), const assert_error&);
+    REQUIRE_THROWS_AS(layer.key(0), assert_error);
+    REQUIRE_THROWS_AS(layer.value(0), assert_error);
 
-    REQUIRE_THROWS_AS(layer.get_feature_by_id(0), const assert_error&);
+    REQUIRE_THROWS_AS(layer.get_feature_by_id(0), assert_error);
     REQUIRE_ASSERT(layer.begin());
     REQUIRE_ASSERT(layer.end());
 }
@@ -74,13 +74,13 @@ TEST_CASE("read a layer") {
     REQUIRE(layer.key(1) == "oneway");
     REQUIRE(layer.key(2) == "osm_id");
     REQUIRE(layer.key(3) == "type");
-    REQUIRE_THROWS_AS(layer.key(4), const vtzero::out_of_range_exception&);
+    REQUIRE_THROWS_AS(layer.key(4), vtzero::out_of_range_exception);
 
     REQUIRE(layer.value(0).string_value() == "main");
     REQUIRE(layer.value(1).int_value() == 0);
     REQUIRE(layer.value(2).string_value() == "primary");
     REQUIRE(layer.value(3).string_value() == "tertiary");
-    REQUIRE_THROWS_AS(layer.value(4), const vtzero::out_of_range_exception&);
+    REQUIRE_THROWS_AS(layer.value(4), vtzero::out_of_range_exception);
 }
 
 TEST_CASE("access features in a layer by id") {

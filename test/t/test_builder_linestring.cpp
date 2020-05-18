@@ -77,13 +77,13 @@ TEST_CASE("Calling add_linestring() with bad values throws assert") {
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     SECTION("0") {
-        REQUIRE_THROWS_AS(fbuilder.add_linestring(0), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_linestring(0), assert_error);
     }
     SECTION("1") {
-        REQUIRE_THROWS_AS(fbuilder.add_linestring(1), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_linestring(1), assert_error);
     }
     SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_linestring(1UL << 29U), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_linestring(1UL << 29U), assert_error);
     }
 }
 
@@ -155,7 +155,7 @@ TEST_CASE("Calling add_linestring() twice throws assert") {
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_linestring(3);
-    REQUIRE_THROWS_AS(fbuilder.add_linestring(2), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.add_linestring(2), assert_error);
 }
 
 TEST_CASE("Calling linestring_feature_builder<2>::set_point() throws assert") {
@@ -163,7 +163,7 @@ TEST_CASE("Calling linestring_feature_builder<2>::set_point() throws assert") {
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::linestring_feature_builder<2> fbuilder{lbuilder};
 
-    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), assert_error);
 }
 
 TEST_CASE("Calling linestring_feature_builder<2>::set_point() with same point throws") {
@@ -173,7 +173,7 @@ TEST_CASE("Calling linestring_feature_builder<2>::set_point() with same point th
 
     fbuilder.add_linestring(2);
     fbuilder.set_point(vtzero::point_2d{10, 10});
-    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d(10, 10)), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d(10, 10)), vtzero::geometry_exception);
 }
 
 TEST_CASE("Calling linestring_feature_builder<2>::set_point() too often throws assert") {
@@ -184,7 +184,7 @@ TEST_CASE("Calling linestring_feature_builder<2>::set_point() too often throws a
     fbuilder.add_linestring(2);
     fbuilder.set_point(vtzero::point_2d{10, 20});
     fbuilder.set_point(vtzero::point_2d{20, 20});
-    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), assert_error);
 }
 
 TEST_CASE("Add linestring from container") {

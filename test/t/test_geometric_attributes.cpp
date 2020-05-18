@@ -52,7 +52,7 @@ TEST_CASE("Geometric attribute that lies about the number of elements") {
     REQUIRE(ga.value() == 4);
     REQUIRE(ga.get_next_value());
     REQUIRE(ga.value() == 7);
-    REQUIRE_THROWS_AS(ga.get_next_value(), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(ga.get_next_value(), vtzero::format_exception);
 }
 
 TEST_CASE("Geometric attributes with null values") {

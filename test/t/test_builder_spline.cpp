@@ -86,13 +86,13 @@ TEST_CASE("Calling add_spline() with bad values throws assert") {
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     SECTION("0") {
-        REQUIRE_THROWS_AS(fbuilder.add_spline(0, 0), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_spline(0, 0), assert_error);
     }
     SECTION("1") {
-        REQUIRE_THROWS_AS(fbuilder.add_spline(1, 0), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_spline(1, 0), assert_error);
     }
     SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_spline(1ul << 29u, 0), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_spline(1ul << 29u, 0), assert_error);
     }
 }
 
@@ -175,7 +175,7 @@ TEST_CASE("Calling add_spline() twice throws assert") {
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
     fbuilder.add_spline(3, 0);
-    REQUIRE_THROWS_AS(fbuilder.add_spline(2, 0), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.add_spline(2, 0), assert_error);
 }
 
 TEST_CASE("Calling spline_feature_builder<2>::set_point() throws assert") {
@@ -183,7 +183,7 @@ TEST_CASE("Calling spline_feature_builder<2>::set_point() throws assert") {
     vtzero::layer_builder lbuilder{tbuilder, "test", 3};
     vtzero::spline_feature_builder<2> fbuilder{lbuilder};
 
-    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), assert_error);
 }
 
 TEST_CASE("Calling spline_feature_builder<2>::set_point() with same point throws") {
@@ -193,7 +193,7 @@ TEST_CASE("Calling spline_feature_builder<2>::set_point() with same point throws
 
     fbuilder.add_spline(2, 0);
     fbuilder.set_point(vtzero::point_2d{10, 10});
-    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d(10, 10)), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d(10, 10)), vtzero::geometry_exception);
 }
 
 TEST_CASE("Calling spline_feature_builder<2>::set_point() too often throws assert") {
@@ -204,7 +204,7 @@ TEST_CASE("Calling spline_feature_builder<2>::set_point() too often throws asser
     fbuilder.add_spline(2, 0);
     fbuilder.set_point(vtzero::point_2d{10, 20});
     fbuilder.set_point(vtzero::point_2d{20, 20});
-    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.set_point(vtzero::point_2d{}), assert_error);
 }
 
 TEST_CASE("Adding several splines with feature rollback in the middle") {

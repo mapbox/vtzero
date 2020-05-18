@@ -155,7 +155,7 @@ TEST_CASE("Create layer and add scalings") {
     REQUIRE(layer.attribute_scaling(vtzero::index_value{0}) == scaling0);
     REQUIRE(layer.attribute_scaling(vtzero::index_value{1}) == scaling1);
     REQUIRE(layer.attribute_scaling(vtzero::index_value{2}) == scaling2);
-    REQUIRE_THROWS_AS(layer.attribute_scaling(vtzero::index_value{3}), const std::out_of_range&);
+    REQUIRE_THROWS_AS(layer.attribute_scaling(vtzero::index_value{3}), std::out_of_range);
 }
 
 TEST_CASE("Committing a feature succeeds after a geometry was added") {
@@ -191,9 +191,9 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
             fbuilder.rollback();
         }
 
-        REQUIRE_THROWS_AS(fbuilder.set_integer_id(10), const assert_error&);
-        REQUIRE_THROWS_AS(fbuilder.add_point(vtzero::point_2d{20, 20}), const assert_error&);
-        REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.set_integer_id(10), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_point(vtzero::point_2d{20, 20}), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), assert_error);
     }
 
     const std::string data = tbuilder.serialize();
@@ -215,13 +215,13 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
 
     SECTION("explicit immediate commit") {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
-        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.commit(), assert_error);
     }
 
     SECTION("explicit commit after setting id") {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(2);
-        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.commit(), assert_error);
     }
 }
 
@@ -229,7 +229,7 @@ TEST_CASE("String ids are not allowed in version 2 tiles") {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder<2> fbuilder{lbuilder};
-    REQUIRE_THROWS_AS(fbuilder.set_string_id("foo"), const assert_error&);
+    REQUIRE_THROWS_AS(fbuilder.set_string_id("foo"), assert_error);
 }
 
 TEST_CASE("String ids are okay in version 3 tiles") {
@@ -576,7 +576,7 @@ TEST_CASE("Build point feature from container with too many points") {
     fbuilder.set_integer_id(1);
 
     test_container tc;
-    REQUIRE_THROWS_AS(vtzero::add_points_from_container(tc, fbuilder), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(vtzero::add_points_from_container(tc, fbuilder), vtzero::geometry_exception);
 }
 
 TEST_CASE("Moving a feature builder is allowed") {

@@ -28,7 +28,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with empty input") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
-                          const vtzero::geometry_exception&);
+                          vtzero::geometry_exception);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
@@ -80,7 +80,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a linestring geometry 
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
-                          const vtzero::geometry_exception&);
+                          vtzero::geometry_exception);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
@@ -101,7 +101,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a polygon geometry fai
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
-                          const vtzero::geometry_exception&);
+                          vtzero::geometry_exception);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
@@ -120,7 +120,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with something other than M
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
-                          const vtzero::geometry_exception&);
+                          vtzero::geometry_exception);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
@@ -139,7 +139,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with a count of 0") {
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
-                          const vtzero::geometry_exception&);
+                          vtzero::geometry_exception);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),
@@ -158,7 +158,7 @@ TEST_CASE("Extended geometry: Calling decode_point() with more data then expecte
 
     SECTION("check exception type") {
         REQUIRE_THROWS_AS(decoder.decode_point(point_handler<3>{}),
-                          const vtzero::geometry_exception&);
+                          vtzero::geometry_exception);
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_point(point_handler<3>{}),

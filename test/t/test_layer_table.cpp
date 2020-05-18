@@ -21,7 +21,7 @@ TEST_CASE("empty layer_table") {
     vtzero::layer_table<int> t{vtzero::data_view{}, 3};
     REQUIRE(t.empty());
     REQUIRE(t.size() == 0); // NOLINT(readability-container-size-empty)
-    REQUIRE_THROWS_AS(t.at(0), const vtzero::out_of_range_exception&);
+    REQUIRE_THROWS_AS(t.at(0), vtzero::out_of_range_exception);
     try {
         t.at(2);
     } catch (const vtzero::out_of_range_exception& e) {
@@ -41,7 +41,7 @@ TEST_CASE("layer_table with content") {
     REQUIRE_FALSE(t.empty());
     REQUIRE(t.size() == 4);
     REQUIRE(t.at(1) == 20);
-    REQUIRE_THROWS_AS(t.at(5), const vtzero::out_of_range_exception&);
+    REQUIRE_THROWS_AS(t.at(5), vtzero::out_of_range_exception);
     REQUIRE_THROWS_WITH(t.at(5), "Index out of range: 5");
 }
 
@@ -52,7 +52,7 @@ TEST_CASE("layer_table with invalid size") {
     std::memcpy(buffer.data() + 1, data.data(), sizeof(int) * data.size());
 
     vtzero::data_view dv{&buffer[1], sizeof(int) * data.size() - 1}; // the -1 makes the size illegal
-    REQUIRE_THROWS_AS(vtzero::layer_table<int>(dv, 7), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(vtzero::layer_table<int>(dv, 7), vtzero::format_exception);
     REQUIRE_THROWS_WITH(vtzero::layer_table<int>(dv, 7), "Value table in layer has invalid size");
 }
 

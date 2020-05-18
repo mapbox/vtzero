@@ -21,7 +21,7 @@ void test_layer(const std::string& name, const char* msg) {
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 1);
 
-    REQUIRE_THROWS_AS(*tile.begin(), const E&);
+    REQUIRE_THROWS_AS(*tile.begin(), E);
     REQUIRE_THROWS_WITH(*tile.begin(), msg);
 }
 
@@ -35,7 +35,7 @@ void test_feature(const std::string& name, const char* msg) {
 
     const auto layer = *tile.begin();
 
-    REQUIRE_THROWS_AS(*layer.begin(), const E&);
+    REQUIRE_THROWS_AS(*layer.begin(), E);
     REQUIRE_THROWS_WITH(*layer.begin(), msg);
 }
 
@@ -80,7 +80,7 @@ TEST_CASE("layer field with invalid protobuf type must throw") {
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 0);
 
-    REQUIRE_THROWS_AS(tile.begin(), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(tile.begin(), vtzero::format_exception);
     REQUIRE_THROWS_WITH(tile.begin(), "Layer message has wrong protobuf type");
 }
 
@@ -153,7 +153,7 @@ TEST_CASE("layer without name is not allowed") {
 
     const std::string buffer{open_tile("layer_without_name.mvt")};
     const vtzero::vector_tile tile{buffer};
-    REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), vtzero::format_exception);
 }
 
 TEST_CASE("layer with empty name is not allowed") {
@@ -161,7 +161,7 @@ TEST_CASE("layer with empty name is not allowed") {
 
     const std::string buffer{open_tile("layer_without_name.mvt")};
     const vtzero::vector_tile tile{buffer};
-    REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), const vtzero::format_exception&);
+    REQUIRE_THROWS_AS(tile.get_layer_by_name("bar"), vtzero::format_exception);
 }
 
 TEST_CASE("layer with zoom level 100 is not allowed") {
