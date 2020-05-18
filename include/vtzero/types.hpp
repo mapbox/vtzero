@@ -182,7 +182,7 @@ namespace vtzero {
         /// @endcond
 
         /// value
-        float value = 0.0f;
+        float value = 0.0F;
 
         /// Construct float_value_type with value 0.0
         constexpr float_value_type() noexcept = default;

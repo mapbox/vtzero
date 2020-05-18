@@ -809,7 +809,7 @@ namespace vtzero {
          */
         void add_points(uint32_t count) {
             vtzero_assert(this->m_stage == detail::stage::want_id || this->m_stage == detail::stage::has_id);
-            vtzero_assert(count > 0 && count < (1ul << 29u) &&
+            vtzero_assert(count > 0 && count < (1UL << 29U) &&
                           "add_points() must be called with 0 < count < 2^29");
 
             this->enter_stage_geometry(GeomType::POINT);
@@ -893,7 +893,7 @@ namespace vtzero {
          * @post Feature builder is in stage "want_geometry".
          */
         void add_linestring(const uint32_t count) {
-            vtzero_assert(count > 1 && count < (1ul << 29u) &&
+            vtzero_assert(count > 1 && count < (1UL << 29U) &&
                           "add_linestring() must be called with 1 < count < 2^29");
             vtzero_assert(this->m_num_points.is_zero());
 
@@ -992,7 +992,7 @@ namespace vtzero {
          * @post Feature builder is in stage "want_geometry".
          */
         void add_ring(const uint32_t count) {
-            vtzero_assert(count > 3 && count < (1ul << 29u) &&
+            vtzero_assert(count > 3 && count < (1UL << 29U) &&
                           "add_ring() must be called with 3 < count < 2^29");
             vtzero_assert(this->m_num_points.is_zero());
 
@@ -1132,7 +1132,7 @@ namespace vtzero {
          * @post Feature builder is in stage "want_geometry".
          */
         void add_spline(const uint32_t count, const index_value knots_index) {
-            vtzero_assert(count > 1 && count < (1ul << 29u) &&
+            vtzero_assert(count > 1 && count < (1UL << 29U) &&
                           "add_spline() must be called with 1 < count < 2^29");
             vtzero_assert(this->m_num_points.is_zero() &&
                           "Previously started spline is not complete (missing control points).");

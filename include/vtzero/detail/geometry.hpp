@@ -40,7 +40,7 @@ namespace vtzero {
         };
 
         inline constexpr uint32_t command_integer(CommandId id, const uint32_t count) noexcept {
-            return (static_cast<uint32_t>(id) & 0x7u) | (count << 3u);
+            return (static_cast<uint32_t>(id) & 0x7U) | (count << 3U);
         }
 
         inline constexpr uint32_t command_move_to(const uint32_t count) noexcept {
@@ -56,11 +56,11 @@ namespace vtzero {
         }
 
         inline constexpr uint32_t get_command_id(const uint32_t command_integer) noexcept {
-            return command_integer & 0x7u;
+            return command_integer & 0x7U;
         }
 
         inline constexpr uint32_t get_command_count(const uint32_t command_integer) noexcept {
-            return command_integer >> 3u;
+            return command_integer >> 3U;
         }
 
         // The maximum value for the command count according to the spec.
@@ -199,7 +199,7 @@ namespace vtzero {
                         throw format_exception{"Geometric attributes end too soon"};
                     }
                     const uint64_t structured_value = *it;
-                    if ((structured_value & 0xfu) == static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
+                    if ((structured_value & 0xfU) == static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
                         ++it;
                         if (it == end) {
                             throw format_exception{"Geometric attributes end too soon"};
@@ -220,7 +220,7 @@ namespace vtzero {
                                 throw format_exception{"Geometric attributes end too soon"};
                             }
                         }
-                    } else if ((structured_value & 0xfu) == static_cast<uint64_t>(structured_value_type::cvt_list)) {
+                    } else if ((structured_value & 0xfU) == static_cast<uint64_t>(structured_value_type::cvt_list)) {
                         skip_structured_value(nullptr, 0, it, end);
                     } else {
                         throw format_exception{"Geometric attributes must be of type 'list' or 'number-list'"};
@@ -579,7 +579,7 @@ namespace vtzero {
                     }
 
                     const uint64_t structured_value = *m_knot_it++;
-                    if ((structured_value & 0xfu) != static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
+                    if ((structured_value & 0xfU) != static_cast<uint64_t>(structured_value_type::cvt_number_list)) {
                         throw geometry_exception{"Knots must be of type number-list"};
                     }
                     if (m_knot_it == m_knot_end) {

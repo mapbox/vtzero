@@ -83,7 +83,7 @@ TEST_CASE("Calling add_linestring() with bad values throws assert") {
         REQUIRE_THROWS_AS(fbuilder.add_linestring(1), const assert_error&);
     }
     SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_linestring(1ul << 29u), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.add_linestring(1UL << 29U), const assert_error&);
     }
 }
 

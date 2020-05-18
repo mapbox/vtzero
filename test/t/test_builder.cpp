@@ -556,7 +556,7 @@ TEST_CASE("Build point feature from container with too many points") {
     struct test_container {
 
         std::size_t size() const noexcept {
-            return 1ul << 29u;
+            return 1UL << 29U;
         }
 
         vtzero::point_2d* begin() const noexcept {
