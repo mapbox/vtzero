@@ -139,5 +139,7 @@ int main(int argc, char* argv[]) {
     out.back() = ' ';
 
     std::cout << '\n' << out << "]\n";
+
+    return 0;
 }
 

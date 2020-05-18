@@ -100,7 +100,9 @@ int main(int argc, char* argv[]) {
         write_data_to_file(output, output_file);
     } catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
-        std::exit(1);
+        return 1;
     }
+
+    return 0;
 }
 
