@@ -21,8 +21,8 @@
 #include <vector>
 
 int main(int argc, char* argv[]) {
-    bool help;
-    bool version_2;
+    bool help = false;
+    bool version_2 = false;
 
     const auto cli
         = clara::Opt(version_2)
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    uint32_t version = version_2 ? 2 : 3;
+    const uint32_t version = version_2 ? 2 : 3;
 
     try {
         vtzero::tile_builder tile;

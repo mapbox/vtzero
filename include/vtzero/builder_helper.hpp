@@ -42,7 +42,7 @@ namespace vtzero {
         /// Helper function to check size isn't too large
         template <typename T>
         static uint32_t check_num_points(T size) {
-            if (size >= (1ul << 29u)) {
+            if (size >= (1UL << 29U)) {
                 throw geometry_exception{"Maximum of 2^29 - 1 points allowed in geometry"};
             }
             return static_cast<uint32_t>(size);

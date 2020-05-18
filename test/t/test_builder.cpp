@@ -348,7 +348,7 @@ TEST_CASE("Rollback feature") {
 
 static vtzero::layer next_nonempty_layer(vtzero::layer_iterator& it, const vtzero::layer_iterator end) {
     while (it != end) {
-        const auto layer = *it++;
+        auto layer = *it++;
         if (!layer.empty()) {
             return layer;
         }
@@ -508,7 +508,7 @@ struct points_to_vector {
     void points_end() const {
     }
 
-    std::vector<vtzero::point_2d> result() {
+    const std::vector<vtzero::point_2d>& result() const {
         return m_points;
     }
 
@@ -555,15 +555,15 @@ TEST_CASE("Build point feature from container with too many points") {
     // fake container pretending to contain too many points
     struct test_container {
 
-        std::size_t size() const noexcept {
+        static std::size_t size() noexcept {
             return 1UL << 29U;
         }
 
-        vtzero::point_2d* begin() const noexcept {
+        static vtzero::point_2d* begin() noexcept {
             return nullptr;
         }
 
-        vtzero::point_2d* end() const noexcept {
+        static vtzero::point_2d* end() noexcept {
             return nullptr;
         }
 

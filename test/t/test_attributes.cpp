@@ -46,7 +46,7 @@ struct check_attribute_handler {
     bool attribute_value(uint64_t value, std::size_t /*depth*/) {
         ++count_value;
         if (count == 2) {
-            REQUIRE(value == 17u);
+            REQUIRE(value == 17U);
         } else if (count == 11) {
             REQUIRE(value == std::numeric_limits<uint64_t>::max());
         } else {
@@ -77,7 +77,7 @@ struct check_attribute_handler {
     bool attribute_value(float value, std::size_t /*depth*/) {
         ++count_value;
         REQUIRE(count == 5);
-        REQUIRE(value == Approx(-5.3f));
+        REQUIRE(value == Approx(-5.3F));
         return true;
     }
 
@@ -121,10 +121,10 @@ void test_scalar_attrs(uint32_t version) {
         fbuilder.set_integer_id(1);
         fbuilder.add_point(vtzero::point_2d{10, 20});
         fbuilder.add_scalar_attribute("data_view", vtzero::data_view{"foo"}); // 1
-        fbuilder.add_scalar_attribute("uint", 17u); // 2
+        fbuilder.add_scalar_attribute("uint", 17U); // 2
         fbuilder.add_scalar_attribute("sint", -22); // 3
         fbuilder.add_scalar_attribute("double", 17.22); // 4
-        fbuilder.add_scalar_attribute("float", -5.3f); // 5
+        fbuilder.add_scalar_attribute("float", -5.3F); // 5
         fbuilder.add_scalar_attribute("true", true); // 6
         fbuilder.add_scalar_attribute("false", false); // 7
         fbuilder.add_scalar_attribute("null", vtzero::null_type{}); // 8
@@ -177,7 +177,7 @@ TEST_CASE("build feature with list and map attributes and read it again") {
         fbuilder.add_scalar_attribute("some_int", 111u);
         fbuilder.start_list_attribute_with_key("list", 8);
         fbuilder.attribute_value(vtzero::data_view{"foo"}); // 1
-        fbuilder.attribute_value(17u); // 2
+        fbuilder.attribute_value(17U); // 2
         fbuilder.attribute_value(-22); // 3
         fbuilder.attribute_value(true); // 4
         fbuilder.attribute_value(false); // 5

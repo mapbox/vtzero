@@ -191,18 +191,18 @@ public:
         m_layer(layer) {
     }
 
-    void key_index(vtzero::index_value index, std::size_t depth) const {
+    static void key_index(vtzero::index_value index, std::size_t depth) {
         for (; depth > 0; --depth) {
             std::cout << "    ";
         }
         std::cout << "      [" << index.value() << "] ";
     }
 
-    void attribute_key(const vtzero::data_view& key, std::size_t /*depth*/) const {
+    static void attribute_key(const vtzero::data_view& key, std::size_t /*depth*/) {
         std::cout << '{' << key << "} = ";
     }
 
-    void value_index(vtzero::index_value index, std::size_t /*depth*/) const {
+    static void value_index(vtzero::index_value index, std::size_t /*depth*/) {
         std::cout << '[' << index.value() << "] ";
     }
 

@@ -18,8 +18,8 @@ static std::string load_test_tile(const std::string& filename) {
         throw std::runtime_error{"could not open: '" + filename + "'"};
     }
 
-    const std::string message{std::istreambuf_iterator<char>(stream.rdbuf()),
-                              std::istreambuf_iterator<char>()};
+    std::string message{std::istreambuf_iterator<char>(stream.rdbuf()),
+                        std::istreambuf_iterator<char>()};
 
     stream.close();
     return message;
@@ -30,7 +30,7 @@ std::string load_test_tile() {
 }
 
 std::string load_fixture_tile(const char* env, const std::string& path) {
-    const auto fixtures_dir = std::getenv(env);
+    const auto* fixtures_dir = std::getenv(env);
     if (fixtures_dir == nullptr) {
         std::cerr << "Set "
                   << env

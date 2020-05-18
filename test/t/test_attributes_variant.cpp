@@ -137,7 +137,7 @@ TEST_CASE("build feature with attributes explicitly and read it again") {
         fbuilder.attribute_key("list");
         fbuilder.start_list_attribute(8);
         fbuilder.attribute_value(vtzero::data_view{"foo"}); // 1
-        fbuilder.attribute_value(17u); // 2
+        fbuilder.attribute_value(17U); // 2
         fbuilder.attribute_value(-22); // 3
         fbuilder.attribute_value(true); // 4
         fbuilder.attribute_value(false); // 5
@@ -172,15 +172,15 @@ TEST_CASE("build feature with attributes explicitly and read it again") {
     VariantConverter<variant_type> converter;
     const auto result = feature.decode_attributes(converter);
 
-    REQUIRE(boost::get<uint64_t>(result.find("some_int")->second) == 111u);
-    REQUIRE(boost::get<uint64_t>(result.find("a_different_int")->second) == 333u);
+    REQUIRE(boost::get<uint64_t>(result.find("some_int")->second) == 111U);
+    REQUIRE(boost::get<uint64_t>(result.find("a_different_int")->second) == 333U);
 
     const variant_type& lv = result.find("list")->second;
     const auto& vec = boost::get<std::vector<variant_type>>(lv);
     REQUIRE(vec.size() == 8);
 
     REQUIRE(boost::get<std::string>(vec[0]) == "foo");
-    REQUIRE(boost::get<uint64_t>(vec[1]) == 17u);
+    REQUIRE(boost::get<uint64_t>(vec[1]) == 17U);
     REQUIRE(boost::get<int64_t>(vec[2]) == -22);
     REQUIRE(boost::get<bool>(vec[3]));
     REQUIRE_FALSE(boost::get<bool>(vec[4]));
@@ -249,10 +249,10 @@ variant_type make_map(TArgs&&... args) {
 
 TEST_CASE("build feature with attributes from variant and read it again") {
     std::map<std::string, variant_type> test_data{
-        {"some_int", static_cast<uint64_t>(111u)},
+        {"some_int", static_cast<uint64_t>(111U)},
         {"list", make_list(
             std::string{"foo"},
-            static_cast<uint64_t>(17u),
+            static_cast<uint64_t>(17U),
             static_cast<int64_t>(-22),
             true,
             false,
@@ -260,7 +260,7 @@ TEST_CASE("build feature with attributes from variant and read it again") {
             std::string{"bar"},
             std::string{"baz"}
         )},
-        {"another_int", static_cast<uint64_t>(222u)},
+        {"another_int", static_cast<uint64_t>(222U)},
         {"map", make_map(
             std::make_pair("x", static_cast<int64_t>(3)),
             std::make_pair("y", static_cast<int64_t>(5))
@@ -277,7 +277,7 @@ TEST_CASE("build feature with attributes from variant and read it again") {
                 std::make_pair("false", false)
             )
         )},
-        {"a_different_int", static_cast<uint64_t>(333u)}
+        {"a_different_int", static_cast<uint64_t>(333U)}
     };
 
     vtzero::tile_builder tbuilder;
@@ -310,8 +310,8 @@ TEST_CASE("build feature with attributes from variant and read it again") {
     VariantConverter<variant_type> converter;
     const auto result = feature.decode_attributes(converter);
 
-    REQUIRE(boost::get<uint64_t>(result.find("some_int")->second) == 111u);
-    REQUIRE(boost::get<uint64_t>(result.find("a_different_int")->second) == 333u);
+    REQUIRE(boost::get<uint64_t>(result.find("some_int")->second) == 111U);
+    REQUIRE(boost::get<uint64_t>(result.find("a_different_int")->second) == 333U);
 
     {
         const variant_type& lv = result.find("list")->second;
@@ -319,7 +319,7 @@ TEST_CASE("build feature with attributes from variant and read it again") {
         REQUIRE(vec.size() == 8);
 
         REQUIRE(boost::get<std::string>(vec[0]) == "foo");
-        REQUIRE(boost::get<uint64_t>(vec[1]) == 17u);
+        REQUIRE(boost::get<uint64_t>(vec[1]) == 17U);
         REQUIRE(boost::get<int64_t>(vec[2]) == -22);
         REQUIRE(boost::get<bool>(vec[3]));
         REQUIRE_FALSE(boost::get<bool>(vec[4]));

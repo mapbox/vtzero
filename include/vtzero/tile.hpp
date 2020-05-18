@@ -30,7 +30,7 @@ namespace vtzero {
          * level.
          */
         inline constexpr uint32_t num_tiles_in_zoom(const uint32_t zoom) noexcept {
-            return 1u << zoom;
+            return 1U << zoom;
         }
 
         /// Maximum coordinate value in web mercator in millimeters.

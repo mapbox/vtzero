@@ -161,19 +161,19 @@ namespace vtzero {
 
         public:
 
-            index_value key_index() const noexcept {
+            static index_value key_index() noexcept {
                 return {};
             }
 
-            index_value scaling_index() const noexcept {
+            static index_value scaling_index() noexcept {
                 return {};
             }
 
-            bool get_next_value() noexcept {
+            static bool get_next_value() noexcept {
                 return false;
             }
 
-            int64_t value() const noexcept {
+            static int64_t value() noexcept {
                 return 0;
             }
 

@@ -52,7 +52,7 @@ namespace vtzero {
         }
 
         /// Get z value (dummy function for 2d coordinates)
-        int32_t get_z() const noexcept {
+        static int32_t get_z() noexcept {
             return 0;
         }
 

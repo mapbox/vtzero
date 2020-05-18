@@ -60,7 +60,7 @@ namespace vtzero {
         // benchmarking but probably needs some tuning.
         // See also https://github.com/mapbox/vtzero/issues/30
         enum : uint32_t {
-            max_entries_flat = 20u
+            max_entries_flat = 20U
         };
 
         class string_table {

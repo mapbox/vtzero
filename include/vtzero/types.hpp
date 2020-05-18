@@ -18,9 +18,11 @@ documentation.
 // @cond internal
 // Wrappers for assert() used for testing
 #ifndef vtzero_assert
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 # define vtzero_assert(x) assert(x)
 #endif
 #ifndef vtzero_assert_in_noexcept_function
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 # define vtzero_assert_in_noexcept_function(x) assert(x)
 #endif
 // @endcond

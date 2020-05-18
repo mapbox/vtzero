@@ -964,12 +964,12 @@ namespace vtzero {
 
             const uint64_t structured_value = *it++;
 
-            const auto vt = structured_value & 0x0fu;
+            const auto vt = structured_value & 0x0fU;
             if (vt > static_cast<std::size_t>(structured_value_type::max)) {
                 throw format_exception{"Unknown structured value type: " + std::to_string(vt), feature.layer_num(), feature.feature_num()};
             }
 
-            auto vp = structured_value >> 4u;
+            auto vp = structured_value >> 4U;
             switch (static_cast<structured_value_type>(vt)) {
                 case structured_value_type::cvt_inline_sint:
                     if (!call_attribute_value<THandler>(std::forward<THandler>(handler), protozero::decode_zigzag64(vp), depth)) {

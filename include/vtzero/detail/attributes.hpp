@@ -46,8 +46,8 @@ namespace vtzero {
         };
 
         inline uint64_t create_structured_value(const vtzero::detail::structured_value_type type, const uint64_t param) noexcept {
-            vtzero_assert_in_noexcept_function((param & 0xf0000000u) == 0u);
-            return static_cast<uint64_t>(type) | (param << 4u);
+            vtzero_assert_in_noexcept_function((param & 0xf0000000U) == 0U);
+            return static_cast<uint64_t>(type) | (param << 4U);
         }
 
 // @cond internal
@@ -199,13 +199,13 @@ namespace vtzero {
             const auto cvt = static_cast<structured_value_type>(vt);
 
             if (cvt == structured_value_type::cvt_list) {
-                auto vp = structured_value >> 4u;
+                auto vp = structured_value >> 4U;
                 while (vp > 0) {
                     --vp;
                     skip_structured_value(feature, depth + 1, it, end);
                 }
             } else if (cvt == structured_value_type::cvt_map) {
-                auto vp = structured_value >> 4u;
+                auto vp = structured_value >> 4U;
                 while (vp > 0) {
                     --vp;
                     if (it == end) {
@@ -218,7 +218,7 @@ namespace vtzero {
                     skip_structured_value(feature, depth + 1, it, end);
                 }
             } else if (cvt == structured_value_type::cvt_number_list) {
-                const auto count = static_cast<int64_t>((structured_value >> 4u) + 1);
+                const auto count = static_cast<int64_t>((structured_value >> 4U) + 1);
                 if (std::distance(it, end) < count) {
                     throw_format_exception<TFeaturePtr>("Attributes number-list is incomplete", feature);
                 }

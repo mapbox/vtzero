@@ -134,7 +134,7 @@ namespace vtzero {
             template <typename T, typename std::enable_if<std::is_integral<T>::value && std::is_unsigned<T>::value, int>::type = 0>
             void add_value_internal_vt3(T value) {
                 const auto raw_value = static_cast<uint64_t>(value);
-                if (raw_value < (1ull << 60u)) {
+                if (raw_value < (1ULL << 60U)) {
                     add_structured_value(detail::structured_value_type::cvt_inline_uint, raw_value);
                 } else {
                     const auto idx = m_layer->add_int_value(raw_value);
@@ -145,7 +145,7 @@ namespace vtzero {
             template <typename T, typename std::enable_if<std::is_integral<T>::value && std::is_signed<T>::value, int>::type = 0>
             void add_value_internal_vt3(T value) {
                 const auto raw_value = protozero::encode_zigzag64(static_cast<int64_t>(value));
-                if (raw_value < (1ull << 60u)) {
+                if (raw_value < (1ULL << 60U)) {
                     add_structured_value(detail::structured_value_type::cvt_inline_sint, raw_value);
                 } else {
                     const auto idx = m_layer->add_int_value(raw_value);

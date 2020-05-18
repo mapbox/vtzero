@@ -71,7 +71,7 @@ struct string_conv {
         s(std::to_string(value)) {
     }
 
-    explicit operator std::string() {
+    explicit operator std::string() const {
         return s;
     }
 
@@ -96,8 +96,8 @@ TEST_CASE("default constructed property_value") {
 }
 
 TEST_CASE("empty property_value") {
-    char x[1] = {0};
-    vtzero::data_view dv{x, 0};
+    char x = 0;
+    vtzero::data_view dv{&x, 0};
     vtzero::property_value pv{dv};
     REQUIRE(pv.valid());
     REQUIRE_THROWS_AS(pv.type(), const vtzero::format_exception&);

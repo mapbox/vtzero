@@ -78,7 +78,7 @@ namespace vtzero {
          */
         template <typename TString>
         detail::layer_builder_impl* add_layer(TString&& name, uint32_t version, uint32_t extent) {
-            const auto ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, extent};
+            auto* ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, extent};
             m_layers.emplace_back(ptr);
             return ptr;
         }
@@ -97,7 +97,7 @@ namespace vtzero {
          */
         template <typename TString>
         detail::layer_builder_impl* add_layer(TString&& name, uint32_t version, const tile& tile) {
-            const auto ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, tile};
+            auto* ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, tile};
             m_layers.emplace_back(ptr);
             return ptr;
         }
