@@ -225,12 +225,13 @@ jobs:
       env: BUILD='Debug' CC=gcc-8 CXX=g++-8
       addons: *gcc8
 
-    - os: linux
-      arch: s390x
-      dist: bionic
-      compiler: "gcc-8"
-      env: BUILD='Debug' CC=gcc-8 CXX=g++-8
-      addons: *gcc8
+# Fails with out of memory error
+#    - os: linux
+#      arch: s390x
+#      dist: bionic
+#      compiler: "gcc-8"
+#      env: BUILD='Debug' CC=gcc-8 CXX=g++-8
+#      addons: *gcc8
 
     - os: osx
       osx_image: xcode9.4
