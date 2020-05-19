@@ -9,6 +9,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -36,6 +37,13 @@ static_assert(movable_not_copyable<vtzero::linestring_feature_builder<3>>::value
 
 static_assert(movable_not_copyable<vtzero::polygon_feature_builder<2>>::value, "polygon_feature_builder<2> should be nothrow movable, but not copyable");
 static_assert(movable_not_copyable<vtzero::polygon_feature_builder<3>>::value, "polygon_feature_builder<3> should be nothrow movable, but not copyable");
+
+// Helper function counting all features in all layer in a tile.
+static std::size_t count_features(const vtzero::vector_tile& tile) {
+    return std::accumulate(tile.begin(), tile.end(), 0ULL, [](std::size_t sum, const vtzero::layer& layer) {
+        return sum + layer.num_features();
+    });
+}
 
 TEST_CASE("Create tile from existing layers") {
     const std::string buffer{load_test_tile()};
@@ -477,13 +485,8 @@ TEST_CASE("Copy only point geometries using geometry_feature_builder<2>") {
 
     const std::string data = tbuilder.serialize();
 
-    n = 0;
     const vtzero::vector_tile result_tile{data};
-    for (const auto layer : result_tile) {
-        n += layer.num_features();
-    }
-
-    REQUIRE(n == 17);
+    REQUIRE(count_features(result_tile) == 17);
 }
 
 struct points_to_vector {
@@ -541,13 +544,8 @@ TEST_CASE("Copy only point geometries using point_feature_builder<2>") {
 
     const std::string data = tbuilder.serialize();
 
-    n = 0;
     const vtzero::vector_tile result_tile{data};
-    for (const auto layer : result_tile) {
-        n += layer.num_features();
-    }
-
-    REQUIRE(n == 17);
+    REQUIRE(count_features(result_tile) == 17);
 }
 
 TEST_CASE("Build point feature from container with too many points") {
