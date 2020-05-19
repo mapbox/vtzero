@@ -368,15 +368,15 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
     const vtzero::vector_tile vt1{t1};
     const vtzero::vector_tile vt2{t2};
 
-    auto it1 = vt1.begin();
-    auto it2 = vt2.begin();
+    auto layer_it1 = vt1.begin();
+    auto layer_it2 = vt2.begin();
 
-    const auto end1 = vt1.end();
-    const auto end2 = vt2.end();
+    const auto layer_end1 = vt1.end();
+    const auto layer_end2 = vt2.end();
 
-    for (auto l1 = next_nonempty_layer(it1, end1), l2 = next_nonempty_layer(it2, end2);
+    for (auto l1 = next_nonempty_layer(layer_it1, layer_end1), l2 = next_nonempty_layer(layer_it2, layer_end2);
          l1 || l2;
-         l1 = next_nonempty_layer(it1, end1), l2 = next_nonempty_layer(it2, end2)) {
+         l1 = next_nonempty_layer(layer_it1, layer_end1), l2 = next_nonempty_layer(layer_it2, layer_end2)) {
 
         if (!l1 ||
             !l2 ||
