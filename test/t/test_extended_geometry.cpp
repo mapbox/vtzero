@@ -467,7 +467,7 @@ TEST_CASE("3d geometry_decoder decoding linestring with int32 overflow in y coor
 }
 
 TEST_CASE("3d geometry_decoder with multipoint with a huge count") {
-    const uint32_t huge_value = (1ul << 29u) - 1;
+    const uint32_t huge_value = (1UL << 29U) - 1;
     const geom_container geom = {vtzero::detail::command_move_to(huge_value), 10, 10};
     const elev_container elev = {};
 

@@ -13,8 +13,8 @@
 #include <string>
 #include <utility>
 
-static const std::string types[] = { // NOLINT(cert-err58-cpp)
-    "data_view", "uint", "sint", "double", "float", "true", "false", "null", "cstring", "string", "uint", "sint"
+static const std::array<std::string, 12> types = { // NOLINT(cert-err58-cpp)
+    {"data_view", "uint", "sint", "double", "float", "true", "false", "null", "cstring", "string", "uint", "sint"}
 };
 
 struct check_attribute_handler {
@@ -23,7 +23,7 @@ struct check_attribute_handler {
     std::size_t count_value = 0;
 
     bool attribute_key(vtzero::data_view key, std::size_t /*depth*/) {
-        REQUIRE(count < sizeof(types) / sizeof(types[0]));
+        REQUIRE(count < types.size());
         REQUIRE(types[count] == std::string(key)); // NOLINT(cppcoreguidelines-pro-bounds-constant-array-index)
         ++count;
         return true;
@@ -174,7 +174,7 @@ TEST_CASE("build feature with list and map attributes and read it again") {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(vtzero::point_2d{10, 20});
-        fbuilder.add_scalar_attribute("some_int", 111u);
+        fbuilder.add_scalar_attribute("some_int", 111U);
         fbuilder.start_list_attribute_with_key("list", 8);
         fbuilder.attribute_value(vtzero::data_view{"foo"}); // 1
         fbuilder.attribute_value(17U); // 2
@@ -184,11 +184,11 @@ TEST_CASE("build feature with list and map attributes and read it again") {
         fbuilder.attribute_value(vtzero::null_type{}); // 6
         fbuilder.attribute_value("bar"); // 7
         fbuilder.attribute_value(std::string{"baz"}); // 8
-        fbuilder.add_scalar_attribute("another_int", 222u);
+        fbuilder.add_scalar_attribute("another_int", 222U);
         fbuilder.start_map_attribute_with_key("map", 2);
         fbuilder.add_scalar_attribute("x", 3); // 1
         fbuilder.add_scalar_attribute("y", 5); // 2
-        fbuilder.add_scalar_attribute("a_different_int", 333u);
+        fbuilder.add_scalar_attribute("a_different_int", 333U);
         fbuilder.commit();
     }
 
@@ -343,9 +343,9 @@ TEST_CASE("build version 3 feature with many double attributes and read it again
         fbuilder.set_integer_id(1);
         fbuilder.add_point(vtzero::point_2d{10, 20});
         int n = 0;
-        char key[2] = "_";
-        for (*key = 'a'; *key != 'z'; ++(*key), ++n) {
-            fbuilder.add_scalar_attribute(key, 1.2 + n);
+        std::array<char, 2> key = {"_"};
+        for (key[0] = 'a'; key[0] != 'z'; ++key[0], ++n) {
+            fbuilder.add_scalar_attribute(key.data(), 1.2 + n);
         }
         fbuilder.commit();
     }

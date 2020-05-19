@@ -92,7 +92,7 @@ TEST_CASE("Calling add_spline() with bad values throws assert") {
         REQUIRE_THROWS_AS(fbuilder.add_spline(1, 0), assert_error);
     }
     SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_spline(1ul << 29u, 0), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_spline(1UL << 29U, 0), assert_error);
     }
 }
 

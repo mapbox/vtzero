@@ -123,7 +123,7 @@ static void layer_with_two_float_tables() {
     std::string data;
     protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
 
-    std::array<float, 2> x{{1.1f, 2.2f}};
+    std::array<float, 2> x{{1.1F, 2.2F}};
     layer_builder.add_packed_float(vtzero::detail::pbf_layer::float_values, x.cbegin(), x.cend());
     layer_builder.add_packed_float(vtzero::detail::pbf_layer::float_values, x.cbegin(), x.cend());
 
@@ -169,7 +169,7 @@ static void layer_with_version_2_float_table() {
     protozero::pbf_builder<vtzero::detail::pbf_layer> layer_builder{data};
 
     layer_builder.add_uint32(vtzero::detail::pbf_layer::version, 2);
-    std::array<float, 2> x{{1.1f, 2.2f}};
+    std::array<float, 2> x{{1.1F, 2.2F}};
     layer_builder.add_packed_float(vtzero::detail::pbf_layer::float_values, x.cbegin(), x.cend());
 
     write_layer("layer_with_version_2_float_table", data);

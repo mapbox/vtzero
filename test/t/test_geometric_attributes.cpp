@@ -182,11 +182,11 @@ std::string build_tile() {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(vtzero::point_2d{10, 20});
-        fbuilder.add_scalar_attribute("some_int", 111u);
+        fbuilder.add_scalar_attribute("some_int", 111U);
         fbuilder.switch_to_geometric_attributes();
         fbuilder.start_list_attribute_with_key("list", 8);
         fbuilder.attribute_value(vtzero::data_view{"foo"}); // 1
-        fbuilder.attribute_value(17u); // 2
+        fbuilder.attribute_value(17U); // 2
         fbuilder.attribute_value(-22); // 3
         fbuilder.attribute_value(true); // 4
         fbuilder.attribute_value(false); // 5

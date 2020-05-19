@@ -133,7 +133,7 @@ TEST_CASE("build feature with attributes explicitly and read it again") {
         vtzero::point_feature_builder<2> fbuilder{lbuilder};
         fbuilder.set_integer_id(1);
         fbuilder.add_point(vtzero::point_2d{10, 20});
-        fbuilder.add_scalar_attribute("some_int", 111u);
+        fbuilder.add_scalar_attribute("some_int", 111U);
         fbuilder.attribute_key("list");
         fbuilder.start_list_attribute(8);
         fbuilder.attribute_value(vtzero::data_view{"foo"}); // 1
@@ -145,12 +145,12 @@ TEST_CASE("build feature with attributes explicitly and read it again") {
         fbuilder.attribute_value("bar"); // 7
         fbuilder.attribute_value(std::string{"baz"}); // 8
         fbuilder.attribute_key("another_int");
-        fbuilder.attribute_value(222u);
+        fbuilder.attribute_value(222U);
         fbuilder.attribute_key("map");
         fbuilder.start_map_attribute(2);
         fbuilder.add_scalar_attribute("x", 3); // 1
         fbuilder.add_scalar_attribute("y", 5); // 2
-        fbuilder.add_scalar_attribute("a_different_int", 333u);
+        fbuilder.add_scalar_attribute("a_different_int", 333U);
         fbuilder.commit();
     }
 

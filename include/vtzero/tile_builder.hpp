@@ -58,8 +58,8 @@ namespace vtzero {
          * existing layer.
          */
         detail::layer_builder_impl* add_layer(const layer& layer) {
-            const auto ptr = layer.get_tile().valid() ? new detail::layer_builder_impl{layer.name(), layer.version(), layer.get_tile()}
-                                                      : new detail::layer_builder_impl{layer.name(), layer.version(), layer.extent()};
+            auto* ptr = layer.get_tile().valid() ? new detail::layer_builder_impl{layer.name(), layer.version(), layer.get_tile()}
+                                                 : new detail::layer_builder_impl{layer.name(), layer.version(), layer.extent()};
             m_layers.emplace_back(ptr);
             return ptr;
         }

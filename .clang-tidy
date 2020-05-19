@@ -1,5 +1,5 @@
 ---
-Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-clang-analyzer-core.CallAndMessage,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-non-private-member-variables-in-classes,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-fuchsia-*,-misc-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-google-runtime-references,-hicpp-no-array-decay,-readability-avoid-const-params-in-decls,-readability-implicit-bool-cast,-readability-implicit-bool-conversion,-readability-magic-numbers'
+Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-clang-analyzer-core.CallAndMessage,-cppcoreguidelines-avoid-magic-numbers,-cppcoreguidelines-macro-usage,-cppcoreguidelines-non-private-member-variables-in-classes,-cppcoreguidelines-owning-memory,-cppcoreguidelines-pro-bounds-array-to-pointer-decay,-cppcoreguidelines-pro-bounds-constant-array-index,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-fuchsia-*,-misc-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-google-runtime-references,-hicpp-no-array-decay,-hicpp-vararg,-readability-avoid-const-params-in-decls,-readability-implicit-bool-cast,-readability-implicit-bool-conversion,-readability-magic-numbers'
 #
 #  Disabled checks:
 #
@@ -16,6 +16,9 @@ Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-clang-analyzer-core.CallAndMessage,-
 #  readability-magic-numbers
 #    Not wrong, but many tests just have those
 #
+#  cppcoreguidelines-macro-usage
+#    Sometimes you need them.
+#
 #  cppcoreguidelines-non-private-member-variables-in-classes
 #  misc-non-private-member-variables-in-classes
 #    Can be useful, we use it for some mock classes in tests for instance
@@ -31,6 +34,10 @@ Checks: '*,-cert-dcl21-cpp,-cert-err60-cpp,-clang-analyzer-core.CallAndMessage,-
 #
 #  cppcoreguidelines-pro-bounds-pointer-arithmetic
 #    This is a low-level library, it needs to do pointer arithmetic.
+#
+#  cppcoreguidelines-pro-type-vararg
+#  hicpp-vararg
+#    This is used by our test framework Catch2.
 #
 #  fuchsia-*
 #    Much too strict.

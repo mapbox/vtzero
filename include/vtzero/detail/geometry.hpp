@@ -24,7 +24,9 @@ documentation.
 
 #include <protozero/pbf_reader.hpp>
 
+#include <array>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <utility>
 
@@ -185,7 +187,7 @@ namespace vtzero {
             static_assert(!std::is_same<TIterator, dummy_attr_iterator>::value,
                           "Please set MaxGeometricAttributes to 0 when dummy_attr_iterator is used");
 
-            geometric_attribute<TIterator> m_attrs[MaxGeometricAttributes];
+            std::array<geometric_attribute<TIterator>, MaxGeometricAttributes> m_attrs;
 
             std::size_t m_size = 0;
 
@@ -209,7 +211,7 @@ namespace vtzero {
                             throw format_exception{"Geometric attributes end too soon"};
                         }
 
-                        auto attr_count = structured_value >> 4u;
+                        auto attr_count = structured_value >> 4U;
                         m_attrs[m_size] = geometric_attribute<TIterator>{it, end, key_index, scaling, attr_count};
                         ++m_size;
 
@@ -229,11 +231,11 @@ namespace vtzero {
             }
 
             geometric_attribute<TIterator>* begin() noexcept {
-                return m_attrs;
+                return m_attrs.begin();
             }
 
             geometric_attribute<TIterator>* end() noexcept {
-                return m_attrs + m_size;
+                return std::next(m_attrs.begin(), static_cast<std::ptrdiff_t>(m_size));
             }
 
         }; // class geometric_attribute_collection
@@ -586,7 +588,7 @@ namespace vtzero {
                         throw format_exception{"Knots end too soon"};
                     }
 
-                    uint64_t knots_count = structured_value >> 4u;
+                    uint64_t knots_count = structured_value >> 4U;
                     const auto expected_knot_count = count() + 1 + spline_degree + 1;
                     if (knots_count != expected_knot_count) {
                         throw format_exception{"Wrong number of knots: " +

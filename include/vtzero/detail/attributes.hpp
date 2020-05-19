@@ -186,7 +186,7 @@ namespace vtzero {
 
             const uint64_t structured_value = *it++;
 
-            const auto vt = structured_value & 0x0fu;
+            const auto vt = structured_value & 0x0fU;
 
             // "4.4.2.2. Structured Value Encoding" says "Value types 11 through
             // 15 are reserved for future versions of this specification.
