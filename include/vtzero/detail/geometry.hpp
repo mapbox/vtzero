@@ -187,8 +187,9 @@ namespace vtzero {
             static_assert(!std::is_same<TIterator, dummy_attr_iterator>::value,
                           "Please set MaxGeometricAttributes to 0 when dummy_attr_iterator is used");
 
-            std::array<geometric_attribute<TIterator>, MaxGeometricAttributes> m_attrs;
+            using atype = std::array<geometric_attribute<TIterator>, MaxGeometricAttributes>;
 
+            atype m_attrs;
             std::size_t m_size = 0;
 
         public:
@@ -230,11 +231,13 @@ namespace vtzero {
                 }
             }
 
-            geometric_attribute<TIterator>* begin() noexcept {
+            using iterator = typename atype::iterator;
+
+            iterator begin() noexcept {
                 return m_attrs.begin();
             }
 
-            geometric_attribute<TIterator>* end() noexcept {
+            iterator end() noexcept {
                 return std::next(m_attrs.begin(), static_cast<std::ptrdiff_t>(m_size));
             }
 
