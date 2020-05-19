@@ -373,7 +373,7 @@ void test_skip_structured_value(const std::vector<uint64_t>& data) {
     auto it = data.cbegin();
     try {
         vtzero::detail::skip_structured_value(nullptr, 0, it, data.cend());
-    } catch (const vtzero::format_exception& e) {
+    } catch (const vtzero::format_exception&) {
     }
 }
 
