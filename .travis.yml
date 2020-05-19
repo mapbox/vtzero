@@ -135,6 +135,37 @@ jobs:
       addons: *clang9
 
     - os: linux
+      arch: arm64
+      dist: bionic
+      compiler: "clang-9"
+      env: BUILD='Debug' CC=clang-9 CXX=clang++-9
+           CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer"
+           LDFLAGS="-fsanitize=address,undefined,integer"
+      # LSAN doesn't work on container-based system
+      sudo: required
+      addons: *clang9
+    - os: linux
+      arch: ppc64le
+      dist: bionic
+      compiler: "clang-9"
+      env: BUILD='Debug' CC=clang-9 CXX=clang++-9
+           CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer"
+           LDFLAGS="-fsanitize=address,undefined,integer"
+      # LSAN doesn't work on container-based system
+      sudo: required
+      addons: *clang9
+    - os: linux
+      arch: s390x
+      dist: bionic
+      compiler: "clang-9"
+      env: BUILD='Debug' CC=clang-9 CXX=clang++-9
+           CXXFLAGS="-fsanitize=address,undefined,integer -fno-sanitize-recover=all -fno-omit-frame-pointer"
+           LDFLAGS="-fsanitize=address,undefined,integer"
+      # LSAN doesn't work on container-based system
+      sudo: required
+      addons: *clang9
+
+    - os: linux
       dist: trusty
       compiler: "gcc-4.8"
       env: BUILD='Debug' CC=gcc-4.8 CXX=g++-4.8
@@ -178,6 +209,27 @@ jobs:
       dist: bionic
       compiler: "gcc-8"
       env: BUILD='Release' CC=gcc-8 CXX=g++-8
+      addons: *gcc8
+
+    - os: linux
+      arch: arm64
+      dist: bionic
+      compiler: "gcc-8"
+      env: BUILD='Debug' CC=gcc-8 CXX=g++-8
+      addons: *gcc8
+
+    - os: linux
+      arch: ppc64le
+      dist: bionic
+      compiler: "gcc-8"
+      env: BUILD='Debug' CC=gcc-8 CXX=g++-8
+      addons: *gcc8
+
+    - os: linux
+      arch: s390x
+      dist: bionic
+      compiler: "gcc-8"
+      env: BUILD='Debug' CC=gcc-8 CXX=g++-8
       addons: *gcc8
 
     - os: osx
