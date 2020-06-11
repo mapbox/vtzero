@@ -11,7 +11,16 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+* Now needs protozero 1.7.0 or above.
+* Use `protozero::basic_pbf_builder` to make buffer type configurable. This
+  allows you to create the final vector tile in any type of buffer, not just
+  `std::string`. See documentation for details.
+* Switch to catch2 for testing.
+
 ### Fixed
+
+* Examples `vtzero-create` and `vtzero-streets` now commit features written.
+* Various fixes and small cleanups, mostly based on clang-tidy reports.
 
 
 ## [1.0.3] - 2018-07-17
