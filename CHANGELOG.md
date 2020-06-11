@@ -11,6 +11,13 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+### Fixed
+
+
+## [1.1.0] - 2020-06-11
+
+### Changed
+
 * Now needs protozero 1.7.0 or above.
 * Use `protozero::basic_pbf_builder` to make buffer type configurable. This
   allows you to create the final vector tile in any type of buffer, not just
@@ -74,7 +81,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 First release
 
 
-[unreleased]: https://github.com/osmcode/libosmium/compare/v1.0.3...HEAD
+[unreleased]: https://github.com/osmcode/libosmium/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/osmcode/libosmium/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/osmcode/libosmium/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/osmcode/libosmium/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/osmcode/libosmium/compare/v1.0.0...v1.0.1
