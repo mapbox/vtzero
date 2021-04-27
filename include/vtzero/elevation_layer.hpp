@@ -13,10 +13,11 @@ struct elevation_data {
     bool elevation_min_max = false;
     int32_t elevation_precision = 1;
     int32_t elevation_min = 0, elevation_max = 0;
-    // NB layer_feature_count == elevations.size()
-    std::vector<int32_t> elevations;
-    // some special data to
+    // some special data to reserve vertex/index buffers
     uint32_t layer_coordinates_count;
+    uint32_t layer_triangles_count;
+
+    std::vector<int32_t> elevations;
 };
 
 class elevation_ext {
@@ -32,6 +33,7 @@ public:
         elevations_count = 10,
         elevations = 11,
         layer_coordinates_count = 20,
+        layer_triangles_count = 21,
     };
 
     static std::string encode(const elevation_data &elevation) {
@@ -45,12 +47,13 @@ public:
         builder.add_int32(tag::elevation_min, elevation.elevation_min);
         builder.add_int32(tag::elevation_max, elevation.elevation_max);
 
+        builder.add_uint32(tag::layer_coordinates_count, elevation.layer_coordinates_count);
+        builder.add_uint32(tag::layer_triangles_count, elevation.layer_triangles_count);
+
         if (!elevation.elevations.empty()) {
             builder.add_uint32(tag::elevations_count, elevation.elevations.size());
             builder.add_packed_sint32(tag::elevations, std::begin(elevation.elevations), std::end(elevation.elevations));
         }
-
-        builder.add_uint32(tag::layer_coordinates_count, elevation.layer_coordinates_count);
 
         return data;
     }
@@ -87,6 +90,9 @@ public:
                 }
                 case protozero::tag_and_type(tag::layer_coordinates_count, protozero::pbf_wire_type::varint):
                     elevation.layer_coordinates_count = message.get_uint32();
+                    break;
+                case protozero::tag_and_type(tag::layer_triangles_count, protozero::pbf_wire_type::varint):
+                    elevation.layer_triangles_count = message.get_uint32();
                     break;
                 default:
                     printf("elevation_ext: skipping decode!\n");
