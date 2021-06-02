@@ -13,6 +13,7 @@ documentation.
 #include <protozero/pbf_reader.hpp>
 
 #include <cassert>
+#include <limits>
 
 // @cond internal
 // Wrappers for assert() used for testing
