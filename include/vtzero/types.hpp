@@ -14,6 +14,7 @@ documentation.
 
 #include <array>
 #include <cassert>
+#include <limits>
 
 // @cond internal
 // Wrappers for assert() used for testing
