@@ -6,6 +6,9 @@
 #include <vtzero/output.hpp>
 #include <vtzero/property_mapper.hpp>
 
+#include <protozero/buffer_fixed.hpp>
+#include <protozero/buffer_vector.hpp>
+
 #include <cstdint>
 #include <string>
 #include <type_traits>
@@ -48,8 +51,8 @@ TEST_CASE("Create tile from existing layers") {
 }
 
 TEST_CASE("Create layer based on existing layer") {
-    const auto buffer = load_test_tile();
-    vtzero::vector_tile tile{buffer};
+    const auto orig_tile_buffer = load_test_tile();
+    vtzero::vector_tile tile{orig_tile_buffer};
     const auto layer = tile.get_layer_by_name("place_label");
 
     vtzero::tile_builder tbuilder;
@@ -59,7 +62,36 @@ TEST_CASE("Create layer based on existing layer") {
     fbuilder.add_point(10, 20);
     fbuilder.commit();
 
-    const std::string data = tbuilder.serialize();
+    std::string data;
+
+    SECTION("use std::string buffer") {
+        data = tbuilder.serialize();
+    }
+
+    SECTION("use std::string buffer as parameter") {
+        tbuilder.serialize(data);
+    }
+
+    SECTION("use std::vector<char> buffer as parameter") {
+        std::vector<char> buffer;
+        tbuilder.serialize(buffer);
+        std::copy(buffer.cbegin(), buffer.cend(), std::back_inserter(data));
+    }
+
+    SECTION("use fixed size buffer on stack") {
+        std::array<char, 1000> buffer = {{0}};
+        protozero::fixed_size_buffer_adaptor adaptor{buffer};
+        tbuilder.serialize(adaptor);
+        std::copy_n(adaptor.data(), adaptor.size(), std::back_inserter(data));
+    }
+
+    SECTION("use fixed size buffer on heap") {
+        std::vector<char> buffer(1000);
+        protozero::fixed_size_buffer_adaptor adaptor{buffer};
+        tbuilder.serialize(adaptor);
+        std::copy_n(adaptor.data(), adaptor.size(), std::back_inserter(data));
+    }
+
     vtzero::vector_tile new_tile{data};
     const auto new_layer = new_tile.next_layer();
     REQUIRE(std::string(new_layer.name()) == "place_label");
@@ -132,9 +164,9 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
             fbuilder.rollback();
         }
 
-        REQUIRE_THROWS_AS(fbuilder.set_id(10), const assert_error&);
-        REQUIRE_THROWS_AS(fbuilder.add_point(20, 20), const assert_error&);
-        REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.set_id(10), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_point(20, 20), assert_error);
+        REQUIRE_THROWS_AS(fbuilder.add_property("x", "y"), assert_error);
     }
 
     const std::string data = tbuilder.serialize();
@@ -156,13 +188,13 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
 
     SECTION("explicit immediate commit") {
         vtzero::point_feature_builder fbuilder{lbuilder};
-        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.commit(), assert_error);
     }
 
     SECTION("explicit commit after setting id") {
         vtzero::point_feature_builder fbuilder{lbuilder};
         fbuilder.set_id(2);
-        REQUIRE_THROWS_AS(fbuilder.commit(), const assert_error&);
+        REQUIRE_THROWS_AS(fbuilder.commit(), assert_error);
     }
 }
 
@@ -393,7 +425,7 @@ TEST_CASE("Copy only point geometries using geometry_feature_builder") {
     n = 0;
     vtzero::vector_tile result_tile{data};
     while (auto layer = result_tile.next_layer()) {
-        while (auto feature = layer.next_feature()) {
+        while (layer.next_feature()) {
             ++n;
         }
     }
@@ -416,7 +448,7 @@ struct points_to_vector {
     void points_end() const {
     }
 
-    std::vector<vtzero::point> result() {
+    const std::vector<vtzero::point>& result() const {
         return m_points;
     }
 
@@ -452,7 +484,7 @@ TEST_CASE("Copy only point geometries using point_feature_builder") {
     n = 0;
     vtzero::vector_tile result_tile{data};
     while (auto layer = result_tile.next_layer()) {
-        while (auto feature = layer.next_feature()) {
+        while (layer.next_feature()) {
             ++n;
         }
     }
@@ -491,7 +523,7 @@ TEST_CASE("Copy only point geometries using point_feature_builder using property
     n = 0;
     vtzero::vector_tile result_tile{data};
     while (auto layer = result_tile.next_layer()) {
-        while (auto feature = layer.next_feature()) {
+        while (layer.next_feature()) {
             ++n;
         }
     }
@@ -504,15 +536,15 @@ TEST_CASE("Build point feature from container with too many points") {
     // fake container pretending to contain too many points
     struct test_container {
 
-        std::size_t size() const noexcept {
-            return 1ul << 29u;
+        static std::size_t size() noexcept {
+            return 1UL << 29U;
         }
 
-        vtzero::point* begin() const noexcept {
+        static vtzero::point* begin() noexcept {
             return nullptr;
         }
 
-        vtzero::point* end() const noexcept {
+        static vtzero::point* end() noexcept {
             return nullptr;
         }
 
@@ -525,7 +557,7 @@ TEST_CASE("Build point feature from container with too many points") {
     fbuilder.set_id(1);
 
     test_container tc;
-    REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), const vtzero::geometry_exception&);
+    REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), vtzero::geometry_exception);
 }
 
 TEST_CASE("Moving a feature builder is allowed") {

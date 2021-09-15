@@ -89,7 +89,7 @@ namespace vtzero {
         };
 
         inline constexpr uint32_t command_integer(CommandId id, const uint32_t count) noexcept {
-            return (static_cast<uint32_t>(id) & 0x7u) | (count << 3u);
+            return (static_cast<uint32_t>(id) & 0x7U) | (count << 3U);
         }
 
         inline constexpr uint32_t command_move_to(const uint32_t count) noexcept {
@@ -105,11 +105,11 @@ namespace vtzero {
         }
 
         inline constexpr uint32_t get_command_id(const uint32_t command_integer) noexcept {
-            return command_integer & 0x7u;
+            return command_integer & 0x7U;
         }
 
         inline constexpr uint32_t get_command_count(const uint32_t command_integer) noexcept {
-            return command_integer >> 3u;
+            return command_integer >> 3U;
         }
 
         // The maximum value for the command count according to the spec.
@@ -262,9 +262,9 @@ namespace vtzero {
                     throw geometry_exception{"MoveTo command count is zero (spec 4.3.4.2)"};
                 }
 
-                std::forward<TGeomHandler>(geom_handler).points_begin(count());
+                geom_handler.points_begin(count());
                 while (count() > 0) {
-                    std::forward<TGeomHandler>(geom_handler).points_point(next_point());
+                    geom_handler.points_point(next_point());
                 }
 
                 // spec 4.3.4.2 "MUST consist of of a single ... command"
@@ -272,7 +272,7 @@ namespace vtzero {
                     throw geometry_exception{"additional data after end of geometry (spec 4.3.4.2)"};
                 }
 
-                std::forward<TGeomHandler>(geom_handler).points_end();
+                geom_handler.points_end();
 
                 return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
             }
@@ -298,14 +298,14 @@ namespace vtzero {
                         throw geometry_exception{"LineTo command count is zero (spec 4.3.4.3)"};
                     }
 
-                    std::forward<TGeomHandler>(geom_handler).linestring_begin(count() + 1);
+                    geom_handler.linestring_begin(count() + 1);
 
-                    std::forward<TGeomHandler>(geom_handler).linestring_point(first_point);
+                    geom_handler.linestring_point(first_point);
                     while (count() > 0) {
-                        std::forward<TGeomHandler>(geom_handler).linestring_point(next_point());
+                        geom_handler.linestring_point(next_point());
                     }
 
-                    std::forward<TGeomHandler>(geom_handler).linestring_end();
+                    geom_handler.linestring_end();
                 }
 
                 return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));
@@ -329,15 +329,15 @@ namespace vtzero {
                         throw geometry_exception{"expected LineTo command (spec 4.3.4.4)"};
                     }
 
-                    std::forward<TGeomHandler>(geom_handler).ring_begin(count() + 2);
+                    geom_handler.ring_begin(count() + 2);
 
-                    std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
+                    geom_handler.ring_point(start_point);
 
                     while (count() > 0) {
                         const point p = next_point();
                         sum += detail::det(last_point, p);
                         last_point = p;
-                        std::forward<TGeomHandler>(geom_handler).ring_point(p);
+                        geom_handler.ring_point(p);
                     }
 
                     // spec 4.3.4.4 "3. A ClosePath command"
@@ -347,10 +347,10 @@ namespace vtzero {
 
                     sum += detail::det(last_point, start_point);
 
-                    std::forward<TGeomHandler>(geom_handler).ring_point(start_point);
+                    geom_handler.ring_point(start_point);
 
-                    std::forward<TGeomHandler>(geom_handler).ring_end(sum > 0 ? ring_type::outer :
-                                                                      sum < 0 ? ring_type::inner : ring_type::invalid);
+                    geom_handler.ring_end(sum > 0 ? ring_type::outer :
+                                                    sum < 0 ? ring_type::inner : ring_type::invalid);
                 }
 
                 return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));

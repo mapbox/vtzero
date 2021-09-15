@@ -263,7 +263,7 @@ struct to_string_visitor {
 
     template <typename T>
     std::string operator()(T value) {
-        reutrn std::to_string(value);
+        return std::to_string(value);
     }
 
     std::string operator()(vtzero::data_view value) {

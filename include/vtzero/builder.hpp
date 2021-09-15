@@ -22,11 +22,12 @@ documentation.
 #include "types.hpp"
 #include "vector_tile.hpp"
 
-#include <protozero/pbf_builder.hpp>
+#include <protozero/basic_pbf_builder.hpp>
 
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <numeric>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -53,7 +54,7 @@ namespace vtzero {
 
         friend class layer_builder;
 
-        std::vector<std::unique_ptr<detail::layer_builder_base>> m_layers;
+        std::vector<std::unique_ptr<detail::layer_builder_impl>> m_layers;
 
         /**
          * Add a new layer to the vector tile based on an existing layer. The
@@ -63,7 +64,7 @@ namespace vtzero {
          * existing layer.
          */
         detail::layer_builder_impl* add_layer(const layer& layer) {
-            const auto ptr = new detail::layer_builder_impl{layer.name(), layer.version(), layer.extent()};
+            auto* ptr = new detail::layer_builder_impl{layer.name(), layer.version(), layer.extent()};
             m_layers.emplace_back(ptr);
             return ptr;
         }
@@ -82,7 +83,7 @@ namespace vtzero {
          */
         template <typename TString>
         detail::layer_builder_impl* add_layer(TString&& name, uint32_t version, uint32_t extent) {
-            const auto ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, extent};
+            auto* ptr = new detail::layer_builder_impl{std::forward<TString>(name), version, extent};
             m_layers.emplace_back(ptr);
             return ptr;
         }
@@ -116,7 +117,7 @@ namespace vtzero {
          *        layer.
          */
         void add_existing_layer(data_view&& data) {
-            m_layers.emplace_back(new detail::layer_builder_existing{std::forward<data_view>(data)});
+            m_layers.emplace_back(new detail::layer_builder_impl{std::forward<data_view>(data)});
         }
 
         /**
@@ -135,17 +136,18 @@ namespace vtzero {
          * The data will be appended to the specified buffer. The buffer
          * doesn't have to be empty.
          *
+         * @tparam TBuffer Type of buffer. Must be std:string or other buffer
+         *         type supported by protozero.
          * @param buffer Buffer to append the encoded vector tile to.
          */
-        void serialize(std::string& buffer) const {
-            std::size_t estimated_size = 0;
-            for (const auto& layer : m_layers) {
-                estimated_size += layer->estimated_size();
-            }
+        template <typename TBuffer>
+        void serialize(TBuffer& buffer) const {
+            const std::size_t estimated_size = std::accumulate(m_layers.cbegin(), m_layers.cend(), 0ULL, [](std::size_t sum, const std::unique_ptr<detail::layer_builder_impl>& layer) {
+                return sum + layer->estimated_size();
+            });
 
-            buffer.reserve(buffer.size() + estimated_size);
-
-            protozero::pbf_builder<detail::pbf_tile> pbf_tile_builder{buffer};
+            protozero::basic_pbf_builder<TBuffer, detail::pbf_tile> pbf_tile_builder{buffer};
+            pbf_tile_builder.reserve(estimated_size);
             for (const auto& layer : m_layers) {
                 layer->build(pbf_tile_builder);
             }
@@ -156,7 +158,7 @@ namespace vtzero {
          * and return it.
          *
          * If you want to use an existing buffer instead, use the serialize()
-         * method taking a std::string& as parameter.
+         * member function taking a TBuffer& as parameter.
          *
          * @returns std::string Buffer with encoded vector_tile data.
          */
@@ -378,7 +380,7 @@ namespace vtzero {
         /// Helper function to check size isn't too large
         template <typename T>
         uint32_t check_num_points(T size) {
-            if (size >= (1ul << 29u)) {
+            if (size >= (1UL << 29U)) {
                 throw geometry_exception{"Maximum of 2^29 - 1 points allowed in geometry"};
             }
             return static_cast<uint32_t>(size);
@@ -667,7 +669,7 @@ namespace vtzero {
                           "can not call add_points() twice or mix with add_point()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_points() has to be called before properties are added");
-            vtzero_assert(count > 0 && count < (1ul << 29u) && "add_points() must be called with 0 < count < 2^29");
+            vtzero_assert(count > 0 && count < (1UL << 29U) && "add_points() must be called with 0 < count < 2^29");
             m_num_points.set(count);
             m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
             m_pbf_geometry.add_element(detail::command_move_to(count));
@@ -810,7 +812,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_linestring() has to be called before properties are added");
-            vtzero_assert(count > 1 && count < (1ul << 29u) && "add_linestring() must be called with 1 < count < 2^29");
+            vtzero_assert(count > 1 && count < (1UL << 29U) && "add_linestring() must be called with 1 < count < 2^29");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
@@ -984,7 +986,7 @@ namespace vtzero {
                           "Can not add geometry after commit() or rollback()");
             vtzero_assert(!m_pbf_tags.valid() &&
                           "add_ring() has to be called before properties are added");
-            vtzero_assert(count > 3 && count < (1ul << 29u) && "add_ring() must be called with 3 < count < 2^29");
+            vtzero_assert(count > 3 && count < (1UL << 29U) && "add_ring() must be called with 3 < count < 2^29");
             m_num_points.assert_is_zero();
             if (!m_pbf_geometry.valid()) {
                 m_pbf_geometry = {m_feature_writer, detail::pbf_feature::geometry};
