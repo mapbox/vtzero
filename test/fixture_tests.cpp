@@ -4,7 +4,7 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/geometry.hpp>
 #include <vtzero/vector_tile.hpp>
-
+#include <vtzero/mesh_layer.hpp>
 #include <cstdint>
 #include <cstdlib>
 #include <fstream>
