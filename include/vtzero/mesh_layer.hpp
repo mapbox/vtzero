@@ -14,7 +14,7 @@ struct Vertex {
 };
 
 struct feature_mesh_data {
-    std::vector<uint8_t>    draco_compressed_data;
+    std::vector<char>    draco_compressed_data;
     unsigned int            elevation_min;
     unsigned int            elevation_max;
     unsigned int            precision;
@@ -25,30 +25,21 @@ public:
     static constexpr uint32_t id = 18;
 
     enum class tag : protozero::pbf_tag_type {
-        elevation_min = 1,
-        elevation_max = 2,
-        precision = 3,
-        draco_compressed_data = 4
+        draco_compressed_data = 1,
+        elevation_min = 2,
+        elevation_max = 3,
+        precision = 4
     };
 
     static std::string encode(const feature_mesh_data &mesh) {
         std::string data;
         protozero::pbf_builder<tag> builder { data };
-        std::vector<uint32_t> packed_draco_data(mesh.draco_compressed_data.size() / 4);
-    
+
+
+        builder.add_message(tag::draco_compressed_data, mesh.draco_compressed_data.data(), mesh.draco_compressed_data.size());
         builder.add_int32(tag::elevation_min, mesh.elevation_min);
         builder.add_int32(tag::elevation_max, mesh.elevation_max);
         builder.add_int32(tag::precision, mesh.precision);
-
-        for (size_t i = 0; i < packed_draco_data.size(); ++i) {
-            packed_draco_data[i] = (uint32_t (
-                uint32_t(mesh.draco_compressed_data[i * 4 + 0]) << 24 |
-                uint32_t(mesh.draco_compressed_data[i * 4 + 1]) << 16 |
-                uint32_t(mesh.draco_compressed_data[i * 4 + 2]) << 8  |
-                uint32_t(mesh.draco_compressed_data[i * 4 + 3]) << 0
-                ));
-        }
-        builder.add_packed_uint32(tag::draco_compressed_data, std::begin(packed_draco_data), std::end(packed_draco_data));
         return data;
     }
 
@@ -57,15 +48,12 @@ public:
 
         while (message.next()) {
             switch (message.tag_and_type()) {
-
                 case protozero::tag_and_type(tag::draco_compressed_data, protozero::pbf_wire_type::length_delimited): {
-                    auto data = message.get_packed_uint32();
+                    auto data = message.get_bytes();
+                    mesh.draco_compressed_data.reserve(data.size());
                     for (auto it = data.begin(); it != data.end(); ++it) {
                         uint32_t packed_data = *it;
-                        mesh.draco_compressed_data.push_back( (packed_data & 0xff000000) >> 24);
-                        mesh.draco_compressed_data.push_back( (packed_data & 0x00ff0000) >> 16);
-                        mesh.draco_compressed_data.push_back( (packed_data & 0x0000ff00) >> 8);
-                        mesh.draco_compressed_data.push_back( (packed_data & 0x000000ff) >> 0);
+                        mesh.draco_compressed_data.push_back(packed_data);
                     }
                 break;
                 }
