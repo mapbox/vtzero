@@ -11,8 +11,9 @@
 namespace vtzero {
 
 struct feature_mesh_data {
-    std::vector<unsigned char>     vertex;
-    std::vector<unsigned char>     index;
+    std::vector<unsigned char>          vertex;
+    std::vector<unsigned char>          index;
+    std::vector<uint32_t>               indices_ranges;
     unsigned int                        vertex_count;
     unsigned int                        index_count;
     unsigned int                        precision;
@@ -27,7 +28,8 @@ public:
         index = 2,
         precision = 3,
         vertex_count = 4,
-        index_count = 5
+        index_count = 5,
+        indices_ranges = 6
     };
 
     static std::string encode(const feature_mesh_data &mesh) {
@@ -36,9 +38,10 @@ public:
 
         builder.add_message(tag::vertex, (char*)mesh.vertex.data(), mesh.vertex.size());
         builder.add_message(tag::index, (char*)mesh.index.data(), mesh.index.size());
-        builder.add_int32(tag::vertex_count, mesh.vertex_count);
-        builder.add_int32(tag::index_count, mesh.index_count);
-        builder.add_int32(tag::precision, mesh.precision);
+        builder.add_packed_uint32(tag::indices_ranges, std::begin(mesh.indices_ranges), std::end(mesh.indices_ranges));
+        builder.add_uint32(tag::vertex_count, mesh.vertex_count);
+        builder.add_uint32(tag::index_count, mesh.index_count);
+        builder.add_uint32(tag::precision, mesh.precision);
         return data;
     }
 
@@ -51,8 +54,8 @@ public:
                     auto data = message.get_bytes();
                     mesh.vertex.reserve(data.size());
                     for (auto it = data.begin(); it != data.end(); ++it) {
-                        uint32_t packed_data = *it;
-                        mesh.vertex.push_back(packed_data);
+                        char packed_data = *it;
+                        mesh.vertex.push_back((unsigned char)packed_data);
                     }
                 break;
                 }
@@ -60,20 +63,27 @@ public:
                     auto data = message.get_bytes();
                     mesh.index.reserve(data.size());
                     for (auto it = data.begin(); it != data.end(); ++it) {
-                        uint32_t packed_data = *it;
-                        mesh.index.push_back(packed_data);
+                        char packed_data = *it;
+                        mesh.index.push_back((unsigned char)packed_data);
                     }
                 break;
                 }
                 case protozero::tag_and_type(tag::vertex_count, protozero::pbf_wire_type::varint):
-                    mesh.vertex_count = message.get_int32();
+                    mesh.vertex_count = message.get_uint32();
                     break;
                 case protozero::tag_and_type(tag::index_count, protozero::pbf_wire_type::varint):
-                    mesh.index_count = message.get_int32();
+                    mesh.index_count = message.get_uint32();
                     break;
                 case protozero::tag_and_type(tag::precision, protozero::pbf_wire_type::varint):
-                    mesh.precision = message.get_int32();
+                    mesh.precision = message.get_uint32();
                     break;
+                case protozero::tag_and_type(tag::indices_ranges, protozero::pbf_wire_type::length_delimited): {
+                    auto pi = message.get_packed_uint32();
+                    for (auto it = pi.begin(); it != pi.end(); ++it) {
+                        mesh.indices_ranges.push_back(*it);
+                    }
+                    break;
+                }
                 default:
                     printf("mesh_ext: skipping decode!\n");
                     message.skip();
