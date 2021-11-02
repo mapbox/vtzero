@@ -16,7 +16,8 @@ struct feature_mesh_data {
     std::vector<uint32_t>               indices_ranges;
     unsigned int                        vertex_count;
     unsigned int                        index_count;
-    unsigned int                        precision;
+    float                               elevation_min;
+    float                               elevation_max;
 };
 
 class mesh_ext {
@@ -26,10 +27,11 @@ public:
     enum class tag : protozero::pbf_tag_type {
         vertex = 1,
         index = 2,
-        precision = 3,
-        vertex_count = 4,
-        index_count = 5,
-        indices_ranges = 6
+        vertex_count = 3,
+        index_count = 4,
+        indices_ranges = 5,
+        elevation_min = 6,
+        elevation_max  = 7
     };
 
     static std::string encode(const feature_mesh_data &mesh) {
@@ -41,7 +43,8 @@ public:
         builder.add_packed_uint32(tag::indices_ranges, std::begin(mesh.indices_ranges), std::end(mesh.indices_ranges));
         builder.add_uint32(tag::vertex_count, mesh.vertex_count);
         builder.add_uint32(tag::index_count, mesh.index_count);
-        builder.add_uint32(tag::precision, mesh.precision);
+        builder.add_float(tag::elevation_min, mesh.elevation_min);
+        builder.add_float(tag::elevation_max, mesh.elevation_max);
         return data;
     }
 
@@ -68,14 +71,17 @@ public:
                     }
                 break;
                 }
+                case protozero::tag_and_type(tag::elevation_min, protozero::pbf_wire_type::fixed32):
+                    mesh.elevation_min = message.get_float();
+                    break;
+                case protozero::tag_and_type(tag::elevation_max, protozero::pbf_wire_type::fixed32):
+                    mesh.elevation_max = message.get_float();
+                    break;    
                 case protozero::tag_and_type(tag::vertex_count, protozero::pbf_wire_type::varint):
                     mesh.vertex_count = message.get_uint32();
                     break;
                 case protozero::tag_and_type(tag::index_count, protozero::pbf_wire_type::varint):
                     mesh.index_count = message.get_uint32();
-                    break;
-                case protozero::tag_and_type(tag::precision, protozero::pbf_wire_type::varint):
-                    mesh.precision = message.get_uint32();
                     break;
                 case protozero::tag_and_type(tag::indices_ranges, protozero::pbf_wire_type::length_delimited): {
                     auto pi = message.get_packed_uint32();
