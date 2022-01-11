@@ -474,15 +474,19 @@ namespace vtzero {
          * Copy all properties of an existing feature to the one being built.
          *
          * @param feature The feature to copy the properties from.
+         * @param exclude_properties Optionally, properties to exclude from the feature.
          */
-        void copy_properties(const feature& feature) {
+        void copy_properties(const feature& feature, const std::vector<std::string>& exclude_properties = {}) {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
             prepare_to_add_property();
-            feature.for_each_property([this](const property& prop) {
-                add_property_impl(prop);
-                return true;
-            });
+
+            if (exclude_properties.empty()) {
+              feature.for_each_property([this](const property& prop) {
+                  add_property_impl(prop);
+                  return true;
+              });
+            }
         }
 
         /**
@@ -495,14 +499,17 @@ namespace vtzero {
          * @param mapper Instance of the property_mapper class.
          */
         template <typename TMapper>
-        void copy_properties(const feature& feature, TMapper& mapper) {
+        void copy_properties(const feature& feature, TMapper& mapper, const std::vector<std::string>& exclude_properties = {}) {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
             prepare_to_add_property();
-            feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
+
+            if (exclude_properties.empty()) {
+              feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
                 add_property_impl(mapper(idxs));
                 return true;
-            });
+              });
+            }
         }
 
         /**
@@ -1284,13 +1291,16 @@ namespace vtzero {
          *
          * @param feature The feature to copy the properties from.
          */
-        void copy_properties(const feature& feature) {
+        void copy_properties(const feature& feature, const std::vector<std::string>& exclude_properties = {}) {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
-            feature.for_each_property([this](const property& prop) {
+
+            if (exclude_properties.empty()) {
+              feature.for_each_property([this](const property& prop) {
                 add_property_impl(prop);
                 return true;
-            });
+              });
+            }
         }
 
         /**
@@ -1303,13 +1313,16 @@ namespace vtzero {
          * @param mapper Instance of the property_mapper class.
          */
         template <typename TMapper>
-        void copy_properties(const feature& feature, TMapper& mapper) {
+        void copy_properties(const feature& feature, TMapper& mapper, const std::vector<std::string>& exclude_properties = {}) {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
-            feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
+
+            if (exclude_properties.empty()) {
+              feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
                 add_property_impl(mapper(idxs));
                 return true;
-            });
+              });
+            }
         }
 
         /**
