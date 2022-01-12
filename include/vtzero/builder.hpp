@@ -486,6 +486,14 @@ namespace vtzero {
                   add_property_impl(prop);
                   return true;
               });
+            } else {
+              feature.for_each_property([this, &exclude_properties](const property& prop) {
+                // only include properties _not present_ in the exclude_properties array
+                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
+                  add_property_impl(prop);
+                }
+                return true;
+              });
             }
         }
 
@@ -497,6 +505,7 @@ namespace vtzero {
          *                 equivalent.
          * @param feature The feature to copy the properties from.
          * @param mapper Instance of the property_mapper class.
+         * @param exclude_properties Optionally, properties to exclude from the feature.
          */
         template <typename TMapper>
         void copy_properties(const feature& feature, TMapper& mapper, const std::vector<std::string>& exclude_properties = {}) {
@@ -507,6 +516,14 @@ namespace vtzero {
             if (exclude_properties.empty()) {
               feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
                 add_property_impl(mapper(idxs));
+                return true;
+              });
+            } else {
+              feature.for_each_property([this, &exclude_properties](const property& prop) {
+                // only include properties _not present_ in the exclude_properties array
+                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
+                  add_property_impl(prop);
+                }
                 return true;
               });
             }
@@ -1290,6 +1307,7 @@ namespace vtzero {
          * Copy all properties of an existing feature to the one being built.
          *
          * @param feature The feature to copy the properties from.
+         * @param exclude_properties Optionally, properties to exclude from the feature.
          */
         void copy_properties(const feature& feature, const std::vector<std::string>& exclude_properties = {}) {
             vtzero_assert(m_feature_writer.valid() &&
@@ -1298,6 +1316,14 @@ namespace vtzero {
             if (exclude_properties.empty()) {
               feature.for_each_property([this](const property& prop) {
                 add_property_impl(prop);
+                return true;
+              });
+            } else {
+              feature.for_each_property([this, &exclude_properties](const property& prop) {
+                // only include properties _not present_ in the exclude_properties array
+                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
+                  add_property_impl(prop);
+                }
                 return true;
               });
             }
@@ -1311,6 +1337,7 @@ namespace vtzero {
          *                 equivalent.
          * @param feature The feature to copy the properties from.
          * @param mapper Instance of the property_mapper class.
+         * @param exclude_properties Optionally, properties to exclude from the feature.
          */
         template <typename TMapper>
         void copy_properties(const feature& feature, TMapper& mapper, const std::vector<std::string>& exclude_properties = {}) {
@@ -1320,6 +1347,14 @@ namespace vtzero {
             if (exclude_properties.empty()) {
               feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
                 add_property_impl(mapper(idxs));
+                return true;
+              });
+            } else {
+              feature.for_each_property([this, &exclude_properties](const property& prop) {
+                // only include properties _not present_ in the exclude_properties array
+                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
+                  add_property_impl(prop);
+                }
                 return true;
               });
             }
