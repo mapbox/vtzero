@@ -481,20 +481,13 @@ namespace vtzero {
                           "Can not call copy_properties() after commit() or rollback()");
             prepare_to_add_property();
 
-            if (exclude_properties.empty()) {
-              feature.for_each_property([this](const property& prop) {
-                  add_property_impl(prop);
-                  return true;
-              });
-            } else {
-              feature.for_each_property([this, &exclude_properties](const property& prop) {
-                // only include properties _not present_ in the exclude_properties array
-                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
-                  add_property_impl(prop);
-                }
-                return true;
-              });
-            }
+            feature.for_each_property([this, &exclude_properties](const property& prop) {
+              // only include properties _not present_ in the exclude_properties array
+              if (exclude_properties.empty() || std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
+                add_property_impl(prop);
+              }
+              return true;
+            });
         }
 
         /**
@@ -513,20 +506,13 @@ namespace vtzero {
                           "Can not call copy_properties() after commit() or rollback()");
             prepare_to_add_property();
 
-            if (exclude_properties.empty()) {
-              feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
+            feature.for_each_property([this, &mapper, &exclude_properties](const index_value_pair& idxs) {
+              // only include properties _not present_ in the exclude_properties array
+              if (exclude_properties.empty() || std::find(std::begin(exclude_properties), std::end(exclude_properties), idxs.key()) == std::end(exclude_properties)) {
                 add_property_impl(mapper(idxs));
-                return true;
-              });
-            } else {
-              feature.for_each_property([this, &exclude_properties](const property& prop) {
-                // only include properties _not present_ in the exclude_properties array
-                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
-                  add_property_impl(prop);
-                }
-                return true;
-              });
-            }
+              }
+              return true;
+            });
         }
 
         /**
@@ -1313,20 +1299,13 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
 
-            if (exclude_properties.empty()) {
-              feature.for_each_property([this](const property& prop) {
+            feature.for_each_property([this, &exclude_properties](const property& prop) {
+              // only include properties _not present_ in the exclude_properties array
+              if (exclude_properties.empty() || std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
                 add_property_impl(prop);
-                return true;
-              });
-            } else {
-              feature.for_each_property([this, &exclude_properties](const property& prop) {
-                // only include properties _not present_ in the exclude_properties array
-                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
-                  add_property_impl(prop);
-                }
-                return true;
-              });
-            }
+              }
+              return true;
+            });
         }
 
         /**
@@ -1344,20 +1323,13 @@ namespace vtzero {
             vtzero_assert(m_feature_writer.valid() &&
                           "Can not call copy_properties() after commit() or rollback()");
 
-            if (exclude_properties.empty()) {
-              feature.for_each_property_indexes([this, &mapper](const index_value_pair& idxs) {
+            feature.for_each_property([this, &mapper, &exclude_properties](const index_value_pair& idxs) {
+              // only include properties _not present_ in the exclude_properties array
+              if (exclude_properties.empty() || std::find(std::begin(exclude_properties), std::end(exclude_properties), idxs.key()) == std::end(exclude_properties)) {
                 add_property_impl(mapper(idxs));
-                return true;
-              });
-            } else {
-              feature.for_each_property([this, &exclude_properties](const property& prop) {
-                // only include properties _not present_ in the exclude_properties array
-                if (std::find(std::begin(exclude_properties), std::end(exclude_properties), prop.key()) == std::end(exclude_properties)) {
-                  add_property_impl(prop);
-                }
-                return true;
-              });
-            }
+              }
+              return true;
+            });
         }
 
         /**
