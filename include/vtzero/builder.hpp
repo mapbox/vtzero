@@ -28,6 +28,7 @@ documentation.
 #include <iostream>
 #include <memory>
 #include <numeric>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -381,6 +382,14 @@ namespace vtzero {
             return static_cast<uint32_t>(size);
         }
 
+        /// Helper function to get string from property key/value
+        template <typename T>
+        std::string get_output(T v) {
+            std::stringstream ss;
+            ss << v;
+            return ss.str();
+        }
+
         /// Helper function to make sure we have everything before adding a property
         void prepare_to_add_property() {
             if (m_pbf_geometry.valid()) {
@@ -508,7 +517,9 @@ namespace vtzero {
 
             feature.for_each_property([this, &mapper, &exclude_properties](const index_value_pair& idxs) {
               // only include properties _not present_ in the exclude_properties array
-              if (exclude_properties.empty() || std::find(std::begin(exclude_properties), std::end(exclude_properties), idxs.key()) == std::end(exclude_properties)) {
+              if (exclude_properties.empty()) {
+                add_property_impl(mapper(idxs));
+              } else if (std::find(std::begin(exclude_properties), std::end(exclude_properties), get_output(idxs.key())) == std::end(exclude_properties)) {
                 add_property_impl(mapper(idxs));
               }
               return true;
@@ -1172,6 +1183,16 @@ namespace vtzero {
      */
     class geometry_feature_builder : public detail::feature_builder_base {
 
+    protected:
+
+      /// Helper function to get string from property key/value
+      template <typename T>
+      std::string get_output(T v) {
+          std::stringstream ss;
+          ss << v;
+          return ss.str();
+      }
+
     public:
 
         /**
@@ -1325,7 +1346,9 @@ namespace vtzero {
 
             feature.for_each_property([this, &mapper, &exclude_properties](const index_value_pair& idxs) {
               // only include properties _not present_ in the exclude_properties array
-              if (exclude_properties.empty() || std::find(std::begin(exclude_properties), std::end(exclude_properties), idxs.key()) == std::end(exclude_properties)) {
+              if (exclude_properties.empty()) {
+                add_property_impl(mapper(idxs));
+              } else if (std::find(std::begin(exclude_properties), std::end(exclude_properties), get_output(idxs.key())) == std::end(exclude_properties)) {
                 add_property_impl(mapper(idxs));
               }
               return true;
