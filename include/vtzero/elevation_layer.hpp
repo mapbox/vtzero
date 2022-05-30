@@ -14,8 +14,8 @@ struct elevation_data {
     int32_t elevation_precision = 1;
     int32_t elevation_min = 0, elevation_max = 0;
     // some special data to reserve vertex/index buffers
-    uint32_t layer_coordinates_count;
-    uint32_t layer_triangles_count;
+    uint32_t layer_coordinates_count = 0;
+    uint32_t layer_triangles_count = 0;
 
     std::vector<int32_t> elevations;
 };
