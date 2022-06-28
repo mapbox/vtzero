@@ -14,8 +14,9 @@ clone_depth: 1
 
 environment:
   matrix:
-  - config: MSYS2
-    autocrlf: true
+  # commented since this job is currently broken
+  # - config: MSYS2
+  #   autocrlf: true
   - config: Debug
     autocrlf: true
   - config: RelWithDebInfo
