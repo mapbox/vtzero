@@ -537,8 +537,8 @@ TEST_CASE("MVT test 032: Layer with single feature with string property value") 
     REQUIRE(ii.value().value() == 0);
     REQUIRE_FALSE(feature.next_property_indexes());
 
-    int32_t sum = 0;
-    int32_t count = 0;
+    uint32_t sum = 0;
+    uint32_t count = 0;
     feature.for_each_property_indexes([&](vtzero::index_value_pair&& ivp) {
         sum += ivp.key().value();
         sum += ivp.value().value();
