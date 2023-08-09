@@ -13,10 +13,11 @@
 #include <string>
 
 static std::string open_tile(const std::string& path) {
+    // NOLINTNEXTLINE(concurrency-mt-unsafe)
     const auto* fixtures_dir = std::getenv("FIXTURES_DIR");
     if (fixtures_dir == nullptr) {
         std::cerr << "Set FIXTURES_DIR environment variable to the directory where the mvt fixtures are!\n";
-        std::exit(2);
+        std::exit(2); // NOLINT(concurrency-mt-unsafe)
     }
 
     std::ifstream stream{std::string{fixtures_dir} + "/" + path,

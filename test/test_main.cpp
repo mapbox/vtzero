@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <string>
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 bool got_an_assert = false;
 
 std::string load_test_tile() {

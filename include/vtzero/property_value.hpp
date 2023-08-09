@@ -293,27 +293,27 @@ namespace vtzero {
         struct convert_visitor {
 
             TVariant operator()(data_view value) const {
-                return TVariant(typename TMapping::string_type(value));
+                return TVariant(static_cast<typename TMapping::string_type>(value));
             }
 
             TVariant operator()(float value) const {
-                return TVariant(typename TMapping::float_type(value));
+                return TVariant(static_cast<typename TMapping::float_type>(value));
             }
 
             TVariant operator()(double value) const {
-                return TVariant(typename TMapping::double_type(value));
+                return TVariant(static_cast<typename TMapping::double_type>(value));
             }
 
             TVariant operator()(int64_t value) const {
-                return TVariant(typename TMapping::int_type(value));
+                return TVariant(static_cast<typename TMapping::int_type>(value));
             }
 
             TVariant operator()(uint64_t value) const {
-                return TVariant(typename TMapping::uint_type(value));
+                return TVariant(static_cast<typename TMapping::uint_type>(value));
             }
 
             TVariant operator()(bool value) const {
-                return TVariant(typename TMapping::bool_type(value));
+                return TVariant(static_cast<typename TMapping::bool_type>(value));
             }
 
         }; // struct convert_visitor

@@ -18,6 +18,7 @@ struct assert_error : public std::runtime_error {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define vtzero_assert_in_noexcept_function(x) if (!(x)) { got_an_assert = true; }
 
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 extern bool got_an_assert;
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)

@@ -334,13 +334,13 @@ TEST_CASE("create encoded property values from different floating point types") 
 
 TEST_CASE("create encoded property values from different integer types") {
     vtzero::encoded_property_value i1{vtzero::int_value_type{7}};
-    vtzero::encoded_property_value i2{int64_t(7)};
-    vtzero::encoded_property_value i3{int32_t(7)};
-    vtzero::encoded_property_value i4{int16_t(7)};
+    vtzero::encoded_property_value i2{static_cast<int64_t>(7)};
+    vtzero::encoded_property_value i3{static_cast<int32_t>(7)};
+    vtzero::encoded_property_value i4{static_cast<int16_t>(7)};
     vtzero::encoded_property_value u1{vtzero::uint_value_type{7}};
-    vtzero::encoded_property_value u2{uint64_t(7)};
-    vtzero::encoded_property_value u3{uint32_t(7)};
-    vtzero::encoded_property_value u4{uint16_t(7)};
+    vtzero::encoded_property_value u2{static_cast<uint64_t>(7)};
+    vtzero::encoded_property_value u3{static_cast<uint32_t>(7)};
+    vtzero::encoded_property_value u4{static_cast<uint16_t>(7)};
     vtzero::encoded_property_value s1{vtzero::sint_value_type{7}};
 
     REQUIRE(i1 == i2);
