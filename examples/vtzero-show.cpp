@@ -20,23 +20,28 @@
 class geom_handler {
 
     std::string output{};
+    uint64_t num = 0;
 
 public:
 
     void points_begin(const uint32_t /*count*/) const noexcept {
     }
 
-    static void points_point(const vtzero::point point) {
-        std::cout << "      POINT(" << point.x << ',' << point.y << ")\n";
+    void points_point(const vtzero::point point) {
+        std::cout << "      [" << num << "] POINT(" << point.x << ',' << point.y << ")\n";
+        ++num;
     }
 
     void points_end() const noexcept {
     }
 
     void linestring_begin(const uint32_t count) {
-        output = "      LINESTRING[count=";
+        output = "      [";
+        output += std::to_string(num);
+        output += "] LINESTRING[count=";
         output += std::to_string(count);
         output += "](";
+        ++num;
     }
 
     void linestring_point(const vtzero::point point) {
@@ -58,9 +63,12 @@ public:
     }
 
     void ring_begin(const uint32_t count) {
-        output = "      RING[count=";
+        output = "      [";
+        output += std::to_string(num);
+        output += "] RING[count=";
         output += std::to_string(count);
         output += "](";
+        ++num;
     }
 
     void ring_point(const vtzero::point point) {
