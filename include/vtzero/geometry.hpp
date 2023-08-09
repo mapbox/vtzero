@@ -342,7 +342,7 @@ namespace vtzero {
 
                     // spec 4.3.4.4 "3. A ClosePath command"
                     if (!next_command(CommandId::CLOSE_PATH)) {
-                        throw geometry_exception{"expected ClosePath command (4.3.4.4)"};
+                        throw geometry_exception{"expected ClosePath command (spec 4.3.4.4)"};
                     }
 
                     sum += detail::det(last_point, start_point);

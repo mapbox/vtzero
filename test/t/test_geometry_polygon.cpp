@@ -92,7 +92,7 @@ TEST_CASE("Calling decode_polygon_geometry() with a linestring geometry fails") 
     }
     SECTION("check exception message") {
         REQUIRE_THROWS_WITH(decoder.decode_polygon(dummy_geom_handler{}),
-                            "expected ClosePath command (4.3.4.4)");
+                            "expected ClosePath command (spec 4.3.4.4)");
     }
 }
 
