@@ -1032,7 +1032,7 @@ namespace vtzero {
                 m_pbf_geometry.add_element(detail::command_close_path());
             } else {
                 if (p == m_cursor) {
-                    throw geometry_exception{"Zero-length segments in linestrings are not allowed."};
+                    throw geometry_exception{"Zero-length segments in rings are not allowed."};
                 }
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.x - m_cursor.x));
                 m_pbf_geometry.add_element(protozero::encode_zigzag32(p.y - m_cursor.y));
