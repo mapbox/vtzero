@@ -53,7 +53,7 @@ namespace vtzero {
 
             template <typename T>
             void add_value_internal(T&& value) {
-                encoded_property_value v{std::forward<T>(value)};
+                const encoded_property_value v{std::forward<T>(value)};
                 add_value_internal(m_layer->add_value(v));
             }
 

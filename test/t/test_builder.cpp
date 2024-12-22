@@ -52,11 +52,11 @@ TEST_CASE("Create tile from existing layers") {
 
 TEST_CASE("Create layer based on existing layer") {
     const auto orig_tile_buffer = load_test_tile();
-    vtzero::vector_tile tile{orig_tile_buffer};
+    const vtzero::vector_tile tile{orig_tile_buffer};
     const auto layer = tile.get_layer_by_name("place_label");
 
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, layer};
+    const vtzero::layer_builder lbuilder{tbuilder, layer};
     vtzero::point_feature_builder fbuilder{lbuilder};
     fbuilder.set_id(42);
     fbuilder.add_point(10, 20);
@@ -111,14 +111,14 @@ TEST_CASE("Create layer and add keys/values") {
     REQUIRE(ki1 == ki3);
 
     const auto vi1 = lbuilder.add_value_without_dup_check(vtzero::encoded_property_value{"value1"});
-    vtzero::encoded_property_value value2{"value2"};
+    const vtzero::encoded_property_value value2{"value2"};
     const auto vi2 = lbuilder.add_value_without_dup_check(vtzero::property_value{value2.data()});
 
     const auto vi3 = lbuilder.add_value(vtzero::encoded_property_value{"value1"});
     const auto vi4 = lbuilder.add_value(vtzero::encoded_property_value{19});
     const auto vi5 = lbuilder.add_value(vtzero::encoded_property_value{19.0});
     const auto vi6 = lbuilder.add_value(vtzero::encoded_property_value{22});
-    vtzero::encoded_property_value nineteen{19};
+    const vtzero::encoded_property_value nineteen{19};
     const auto vi7 = lbuilder.add_value(vtzero::property_value{nineteen.data()});
 
     REQUIRE(vi1 != vi2);
@@ -133,7 +133,7 @@ TEST_CASE("Create layer and add keys/values") {
 
 TEST_CASE("Committing a feature succeeds after a geometry was added") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     { // explicit commit after geometry
         vtzero::point_feature_builder fbuilder{lbuilder};
@@ -184,7 +184,7 @@ TEST_CASE("Committing a feature succeeds after a geometry was added") {
 
 TEST_CASE("Committing a feature fails with assert if no geometry was added") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     SECTION("explicit immediate commit") {
         vtzero::point_feature_builder fbuilder{lbuilder};
@@ -200,7 +200,7 @@ TEST_CASE("Committing a feature fails with assert if no geometry was added") {
 
 TEST_CASE("Rollback feature") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
         vtzero::point_feature_builder fbuilder{lbuilder};
@@ -358,7 +358,7 @@ TEST_CASE("Copy tile using geometry_feature_builder") {
     vtzero::tile_builder tbuilder;
 
     while (auto layer = tile.next_layer()) {
-        vtzero::layer_builder lbuilder{tbuilder, layer};
+        const vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
             vtzero::geometry_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
@@ -402,7 +402,7 @@ TEST_CASE("Copy only point geometries using geometry_feature_builder") {
 
     int n = 0;
     while (auto layer = tile.next_layer()) {
-        vtzero::layer_builder lbuilder{tbuilder, layer};
+        const vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
             vtzero::geometry_feature_builder fbuilder{lbuilder};
             fbuilder.set_id(feature.id());
@@ -462,7 +462,7 @@ TEST_CASE("Copy only point geometries using point_feature_builder") {
 
     int n = 0;
     while (auto layer = tile.next_layer()) {
-        vtzero::layer_builder lbuilder{tbuilder, layer};
+        const vtzero::layer_builder lbuilder{tbuilder, layer};
         while (auto feature = layer.next_feature()) {
             vtzero::point_feature_builder fbuilder{lbuilder};
             fbuilder.copy_id(feature);
@@ -551,21 +551,21 @@ TEST_CASE("Build point feature from container with too many points") {
     };
 
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     fbuilder.set_id(1);
 
-    test_container tc;
+    const test_container tc;
     REQUIRE_THROWS_AS(fbuilder.add_points_from_container(tc), vtzero::geometry_exception);
 }
 
 TEST_CASE("Moving a feature builder is allowed") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     auto fbuilder2 = std::move(fbuilder);
-    vtzero::point_feature_builder fbuilder3{std::move(fbuilder2)};
+    const vtzero::point_feature_builder fbuilder3{std::move(fbuilder2)};
 }
 

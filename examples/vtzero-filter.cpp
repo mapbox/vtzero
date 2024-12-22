@@ -64,7 +64,7 @@ int main(int argc, char* argv[]) {
         }
 
         const auto data = read_file(filename);
-        vtzero::vector_tile tile{data};
+        const vtzero::vector_tile tile{data};
 
         auto layer = get_layer(tile, layer_num_or_name);
         std::cerr << "Found layer: " << std::string(layer.name()) << "\n";
@@ -95,7 +95,7 @@ int main(int argc, char* argv[]) {
             layer_builder.add_feature(feature);
         }
 
-        std::string output = tb.serialize();
+        const std::string output = tb.serialize();
 
         write_data_to_file(output, output_file);
     } catch (const std::exception& e) {

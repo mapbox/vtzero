@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "layer,num_features,raw_size,raw_geometries_size,key_table_size,value_table_size\n";
     try {
-        std::string input_file{argv[1]};
+        const std::string input_file{argv[1]};
         const auto data = read_file(input_file);
 
         vtzero::vector_tile tile{data};

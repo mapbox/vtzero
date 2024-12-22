@@ -6,7 +6,7 @@
 #include <vtzero/vector_tile.hpp>
 
 TEST_CASE("default constructed feature") {
-    vtzero::feature feature{};
+    const vtzero::feature feature{};
 
     REQUIRE_FALSE(feature.valid());
     REQUIRE_FALSE(feature);
@@ -20,7 +20,7 @@ TEST_CASE("default constructed feature") {
 
 TEST_CASE("read a feature") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     auto layer = tile.get_layer_by_name("bridge");
     REQUIRE(layer.valid());
@@ -37,7 +37,7 @@ TEST_CASE("read a feature") {
 
 TEST_CASE("iterate over all properties of a feature") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
     auto layer = tile.get_layer_by_name("bridge");
     auto feature = layer.next_feature();
 
@@ -68,7 +68,7 @@ TEST_CASE("iterate over all properties of a feature") {
 
 TEST_CASE("iterate over some properties of a feature") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
     auto layer = tile.get_layer_by_name("bridge");
     REQUIRE(layer.valid());
 

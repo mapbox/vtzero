@@ -9,7 +9,7 @@
 TEST_CASE("open a vector tile with string") {
     const auto data = load_test_tile();
     REQUIRE(vtzero::is_vector_tile(data));
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 12);
@@ -18,7 +18,7 @@ TEST_CASE("open a vector tile with string") {
 TEST_CASE("open a vector tile with data_view") {
     const auto data = load_test_tile();
     const vtzero::data_view dv{data};
-    vtzero::vector_tile tile{dv};
+    const vtzero::vector_tile tile{dv};
 
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 12);
@@ -26,7 +26,7 @@ TEST_CASE("open a vector tile with data_view") {
 
 TEST_CASE("open a vector tile with pointer and size") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data.data(), data.size()};
+    const vtzero::vector_tile tile{data.data(), data.size()};
 
     REQUIRE_FALSE(tile.empty());
     REQUIRE(tile.count_layers() == 12);
@@ -34,7 +34,7 @@ TEST_CASE("open a vector tile with pointer and size") {
 
 TEST_CASE("get layer by index") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     auto layer = tile.get_layer(0);
     REQUIRE(layer);
@@ -54,7 +54,7 @@ TEST_CASE("get layer by index") {
 
 TEST_CASE("get layer by name") {
     const auto data = load_test_tile();
-    vtzero::vector_tile tile{data};
+    const vtzero::vector_tile tile{data};
 
     auto layer = tile.get_layer_by_name("landuse");
     REQUIRE(layer);
@@ -95,7 +95,7 @@ TEST_CASE("iterate over layers") {
 
     REQUIRE(names.size() == 12);
 
-    static std::vector<std::string> expected = {
+    const static std::vector<std::string> expected = {
         "landuse", "waterway", "water", "barrier_line", "building", "road",
         "bridge", "place_label", "water_label", "poi_label", "road_label",
         "waterway_label"

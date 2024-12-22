@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string input_file{argv[1]};
+    const std::string input_file{argv[1]};
     const auto data = read_file(input_file);
 
     std::set<std::string> layer_names;
@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
                 result.has_error();
             }
 
-            std::string name(layer.name());
+            const std::string name{layer.name()};
             if (layer_names.count(name) > 0) {
                 std::cerr << "Error in layer " << layer_num << ": name is duplicate of previous layer ('" << name << "') (spec 4.1)\n";
                 result.has_error();
