@@ -80,7 +80,7 @@ Extensive documentation is available:
 Make sure to read all of it before using vtzero. Vtzero isn't the simplest
 library to use, because it always chooses performance over ease of use.
 
-If [Doxygen](http://www.stack.nl/~dimitri/doxygen/) is installed on your
+If [Doxygen](https://www.doxygen.nl/) is installed on your
 system, the build process will automatically create the API docs for you.
 The results will be in your build directory under `doc/html`.
 
