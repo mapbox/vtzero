@@ -12,10 +12,10 @@ struct assert_error : public std::runtime_error {
     }
 };
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage, readability-simplify-boolean-expr)
 #define vtzero_assert(x) if (!(x)) { throw assert_error{#x}; }
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage, readability-simplify-boolean-expr)
 #define vtzero_assert_in_noexcept_function(x) if (!(x)) { got_an_assert = true; }
 
 // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
