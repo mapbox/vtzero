@@ -1,0 +1,10 @@
+name: Install vcpkg packages on Windows
+
+runs:
+  using: composite
+  steps:
+    - name: Install packages
+      run: |
+        vcpkg install \
+          boost-variant:x64-windows
+      shell: bash
