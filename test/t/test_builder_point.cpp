@@ -29,7 +29,7 @@ struct point_handler {
 
 static void test_point_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
         vtzero::point_feature_builder fbuilder{lbuilder};
@@ -53,8 +53,8 @@ static void test_point_builder(bool with_id, bool with_prop) {
         }
 
         SECTION("add point using mypoint / property using property") {
-            vtzero::encoded_property_value pv{3.5};
-            vtzero::property p{"foo", vtzero::property_value{pv.data()}};
+            const vtzero::encoded_property_value pv{3.5};
+            const vtzero::property p{"foo", vtzero::property_value{pv.data()}};
             fbuilder.add_point(mypoint{10, 20});
             if (with_prop) {
                 fbuilder.add_property(p);
@@ -102,7 +102,7 @@ TEST_CASE("Point builder with id/with properties") {
 
 TEST_CASE("Calling add_points() with bad values throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     SECTION("0") {
@@ -115,7 +115,7 @@ TEST_CASE("Calling add_points() with bad values throws assert") {
 
 static void test_multipoint_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     if (with_id) {
@@ -172,7 +172,7 @@ TEST_CASE("Multipoint builder with id/with properties") {
 
 TEST_CASE("Calling add_point() and then other geometry functions throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     fbuilder.add_point(10, 20);
@@ -190,7 +190,7 @@ TEST_CASE("Calling add_point() and then other geometry functions throws assert")
 
 TEST_CASE("Calling point_feature_builder::set_point() throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     REQUIRE_THROWS_AS(fbuilder.set_point(10, 10), assert_error);
@@ -198,7 +198,7 @@ TEST_CASE("Calling point_feature_builder::set_point() throws assert") {
 
 TEST_CASE("Calling add_points() and then other geometry functions throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     fbuilder.add_points(2);
@@ -213,7 +213,7 @@ TEST_CASE("Calling add_points() and then other geometry functions throws assert"
 
 TEST_CASE("Calling point_feature_builder::set_point() too often throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     fbuilder.add_points(2);
@@ -226,7 +226,7 @@ TEST_CASE("Add points from container") {
     const std::vector<vtzero::point> points = {{10, 20}, {20, 30}, {30, 40}};
 
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
         vtzero::point_feature_builder fbuilder{lbuilder};
@@ -269,7 +269,7 @@ TEST_CASE("Add points from iterator with wrong count throws assert") {
     const std::vector<vtzero::point> points = {{10, 20}, {20, 30}, {30, 40}};
 
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
 
     REQUIRE_THROWS_AS(fbuilder.add_points(points.cbegin(),

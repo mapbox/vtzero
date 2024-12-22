@@ -36,13 +36,13 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string input_file{argv[1]};
-    std::string output_file{"streets.mvt"};
+    const std::string input_file{argv[1]};
+    const std::string output_file{"streets.mvt"};
 
     const auto data = read_file(input_file);
 
     try {
-        vtzero::vector_tile tile{data};
+        const vtzero::vector_tile tile{data};
 
         auto layer = get_layer(tile, "road_label");
         if (!layer) {
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        std::string output = tb.serialize();
+        const std::string output = tb.serialize();
         write_data_to_file(output, output_file);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << '\n';

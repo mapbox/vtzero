@@ -37,7 +37,7 @@ TEST_CASE("Calling decode_linestring_geometry() with empty input") {
     const container g;
     vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), g.size() / 2};
 
-    dummy_geom_handler handler;
+    const dummy_geom_handler handler;
     decoder.decode_linestring(dummy_geom_handler{});
     REQUIRE(handler.result() == 0);
 }

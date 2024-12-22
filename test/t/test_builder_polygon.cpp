@@ -32,7 +32,7 @@ struct polygon_handler {
 
 static void test_polygon_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
         vtzero::polygon_feature_builder fbuilder{lbuilder};
@@ -92,7 +92,7 @@ TEST_CASE("polygon builder with id/with properties") {
 
 TEST_CASE("Calling add_ring() with bad values throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     SECTION("0") {
@@ -114,7 +114,7 @@ TEST_CASE("Calling add_ring() with bad values throws assert") {
 
 static void test_multipolygon_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     if (with_id) {
@@ -185,7 +185,7 @@ TEST_CASE("Multipolygon builder with id/with properties") {
 
 TEST_CASE("Calling add_ring() twice throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
@@ -194,7 +194,7 @@ TEST_CASE("Calling add_ring() twice throws assert") {
 
 TEST_CASE("Calling polygon_feature_builder::set_point()/close_ring() throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     SECTION("set_point") {
@@ -207,7 +207,7 @@ TEST_CASE("Calling polygon_feature_builder::set_point()/close_ring() throws asse
 
 TEST_CASE("Calling polygon_feature_builder::set_point()/close_ring() too often throws assert") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
@@ -226,7 +226,7 @@ TEST_CASE("Calling polygon_feature_builder::set_point()/close_ring() too often t
 
 TEST_CASE("Calling polygon_feature_builder::set_point() with same point throws") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
@@ -236,7 +236,7 @@ TEST_CASE("Calling polygon_feature_builder::set_point() with same point throws")
 
 TEST_CASE("Calling polygon_feature_builder::set_point() creating unclosed ring throws") {
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     fbuilder.add_ring(4);
@@ -250,7 +250,7 @@ TEST_CASE("Add polygon from container") {
     const polygon_type points = {{{10, 20}, {20, 30}, {30, 40}, {10, 20}}};
 
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
     {
         vtzero::polygon_feature_builder fbuilder{lbuilder};
@@ -296,7 +296,7 @@ TEST_CASE("Add polygon from iterator with wrong count throws assert") {
     const std::vector<vtzero::point> points = {{10, 20}, {20, 30}, {30, 40}, {10, 20}};
 
     vtzero::tile_builder tbuilder;
-    vtzero::layer_builder lbuilder{tbuilder, "test"};
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
 
     REQUIRE_THROWS_AS(fbuilder.add_ring(points.cbegin(),

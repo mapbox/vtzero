@@ -14,7 +14,7 @@ using variant_type = boost::variant<std::string, float, double, int64_t, uint64_
 
 TEST_CASE("property map") {
     vtzero::tile_builder tile;
-    vtzero::layer_builder layer_points{tile, "points"};
+    const vtzero::layer_builder layer_points{tile, "points"};
     {
         vtzero::point_feature_builder fbuilder{layer_points};
         fbuilder.set_id(1);
@@ -26,7 +26,7 @@ TEST_CASE("property map") {
         fbuilder.commit();
     }
 
-    std::string data = tile.serialize();
+    const std::string data = tile.serialize();
 
     vtzero::vector_tile vt{data};
     REQUIRE(vt.count_layers() == 1);
