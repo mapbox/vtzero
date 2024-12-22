@@ -6,7 +6,7 @@
 #
 #-----------------------------------------------------------------------------
 
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
@@ -38,10 +38,10 @@ set(MVT_FIXTURES "${CMAKE_SOURCE_DIR}/test/mvt-fixtures" CACHE PATH "mvt-fixture
 option(WERROR "Add -Werror flag to build (turns warnings into errors)" ON)
 
 if(MSVC)
-    add_definitions(-std=c++11 /W3)
+    add_definitions(-std=c++14 /W3)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
 else()
-    add_definitions(-std=c++11 -Wall -Wextra -pedantic -Wsign-compare -Wconversion)
+    add_definitions(-std=c++14 -Wall -Wextra -pedantic -Wsign-compare -Wconversion)
 #    add_definitions(-Weverything -Wno-c++98-compat -Wno-documentation -Wno-switch-enum -Wno-weak-vtables -Wno-padded -Wno-documentation-unknown-command -Wno-exit-time-destructors)
     if(WERROR)
         add_definitions(-Werror)
@@ -104,7 +104,7 @@ if(CPPCHECK)
     message(STATUS "Looking for cppcheck - found")
     add_custom_target(cppcheck
         ${CPPCHECK}
-        -Uassert --std=c++11 --enable=all
+        -Uassert --std=c++14 --enable=all
         ${CMAKE_SOURCE_DIR}/examples/*.cpp
         ${CMAKE_SOURCE_DIR}/test/*.cpp
         ${CMAKE_SOURCE_DIR}/test/t/*.cpp
