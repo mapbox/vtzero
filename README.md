@@ -4,9 +4,8 @@ Tiny and fast vector tile decoder and encoder in C++.
 
 Implements the [Mapbox Vector Tile Specification 2.x](https://www.mapbox.com/vector-tiles/specification).
 
-[![Build Status](https://travis-ci.com/mapbox/vtzero.svg?branch=master)](https://travis-ci.com/mapbox/vtzero)
+[![Github Build Status](https://github.com/mapbox/vtzero/actions/workflows/ci.yml/badge.svg)](https://github.com/mapbox/vtzero/actions/workflows/ci.yml)
 [![Appveyor Build Status](https://ci.appveyor.com/api/projects/status/github/mapbox/vtzero?svg=true)](https://ci.appveyor.com/project/Mapbox/vtzero)
-[![Coverage Status](https://codecov.io/gh/mapbox/vtzero/branch/master/graph/badge.svg)](https://codecov.io/gh/mapbox/vtzero)
 
 
 ## Depends
