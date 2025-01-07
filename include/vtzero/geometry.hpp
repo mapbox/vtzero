@@ -70,12 +70,12 @@ namespace vtzero {
     }
 
     /// Points are equal if their coordinates are
-    inline constexpr bool operator==(const point a, const point b) noexcept {
+    constexpr bool operator==(const point a, const point b) noexcept {
         return a.x == b.x && a.y == b.y;
     }
 
     /// Points are not equal if their coordinates aren't
-    inline constexpr bool operator!=(const point a, const point b) noexcept {
+    constexpr bool operator!=(const point a, const point b) noexcept {
         return !(a == b);
     }
 
@@ -88,36 +88,36 @@ namespace vtzero {
             CLOSE_PATH = 7
         };
 
-        inline constexpr uint32_t command_integer(CommandId id, const uint32_t count) noexcept {
+        constexpr uint32_t command_integer(CommandId id, const uint32_t count) noexcept {
             return (static_cast<uint32_t>(id) & 0x7U) | (count << 3U);
         }
 
-        inline constexpr uint32_t command_move_to(const uint32_t count) noexcept {
+        constexpr uint32_t command_move_to(const uint32_t count) noexcept {
             return command_integer(CommandId::MOVE_TO, count);
         }
 
-        inline constexpr uint32_t command_line_to(const uint32_t count) noexcept {
+        constexpr uint32_t command_line_to(const uint32_t count) noexcept {
             return command_integer(CommandId::LINE_TO, count);
         }
 
-        inline constexpr uint32_t command_close_path() noexcept {
+        constexpr uint32_t command_close_path() noexcept {
             return command_integer(CommandId::CLOSE_PATH, 1);
         }
 
-        inline constexpr uint32_t get_command_id(const uint32_t command_integer) noexcept {
+        constexpr uint32_t get_command_id(const uint32_t command_integer) noexcept {
             return command_integer & 0x7U;
         }
 
-        inline constexpr uint32_t get_command_count(const uint32_t command_integer) noexcept {
+        constexpr uint32_t get_command_count(const uint32_t command_integer) noexcept {
             return command_integer >> 3U;
         }
 
         // The maximum value for the command count according to the spec.
-        inline constexpr uint32_t max_command_count() noexcept {
+        constexpr uint32_t max_command_count() noexcept {
             return get_command_count(std::numeric_limits<uint32_t>::max());
         }
 
-        inline constexpr int64_t det(const point a, const point b) noexcept {
+        constexpr int64_t det(const point a, const point b) noexcept {
             return static_cast<int64_t>(a.x) * static_cast<int64_t>(b.y) -
                    static_cast<int64_t>(b.x) * static_cast<int64_t>(a.y);
         }
