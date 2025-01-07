@@ -46,8 +46,10 @@ TEST_CASE("add values to layer using value index built into layer") {
     }
 }
 
+namespace {
+
 template <typename TIndex>
-static void test_key_index() {
+void test_key_index() {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     TIndex index{lbuilder};
@@ -83,16 +85,8 @@ static void test_key_index() {
     REQUIRE(i6 != i7);
 }
 
-TEST_CASE("key index based on std::unordered_map") {
-    test_key_index<vtzero::key_index<std::unordered_map>>();
-}
-
-TEST_CASE("key index based on std::map") {
-    test_key_index<vtzero::key_index<std::map>>();
-}
-
 template <typename TIndex>
-static void test_value_index_internal() {
+void test_value_index_internal() {
     vtzero::tile_builder tbuilder;
     vtzero::layer_builder lbuilder{tbuilder, "test"};
     TIndex index{lbuilder};
@@ -131,6 +125,16 @@ static void test_value_index_internal() {
     REQUIRE(i5 != i7);
 
     REQUIRE(i6 != i7);
+}
+
+} // anonymous namespace
+
+TEST_CASE("key index based on std::unordered_map") {
+    test_key_index<vtzero::key_index<std::unordered_map>>();
+}
+
+TEST_CASE("key index based on std::map") {
+    test_key_index<vtzero::key_index<std::map>>();
 }
 
 TEST_CASE("internal value index based on std::unordered_map") {

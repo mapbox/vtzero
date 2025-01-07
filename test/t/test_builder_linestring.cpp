@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <vector>
 
+namespace {
+
 using ls_type = std::vector<std::vector<vtzero::point>>;
 
 struct linestring_handler {
@@ -30,7 +32,7 @@ struct linestring_handler {
 
 };
 
-static void test_linestring_builder(bool with_id, bool with_prop) {
+void test_linestring_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -73,39 +75,7 @@ static void test_linestring_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("linestring builder without id/without properties") {
-    test_linestring_builder(false, false);
-}
-
-TEST_CASE("linestring builder without id/with properties") {
-    test_linestring_builder(false, true);
-}
-
-TEST_CASE("linestring builder with id/without properties") {
-    test_linestring_builder(true, false);
-}
-
-TEST_CASE("linestring builder with id/with properties") {
-    test_linestring_builder(true, true);
-}
-
-TEST_CASE("Calling add_linestring() with bad values throws assert") {
-    vtzero::tile_builder tbuilder;
-    const vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::linestring_feature_builder fbuilder{lbuilder};
-
-    SECTION("0") {
-        REQUIRE_THROWS_AS(fbuilder.add_linestring(0), assert_error);
-    }
-    SECTION("1") {
-        REQUIRE_THROWS_AS(fbuilder.add_linestring(1), assert_error);
-    }
-    SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_linestring(1UL << 29U), assert_error);
-    }
-}
-
-static void test_multilinestring_builder(bool with_id, bool with_prop) {
+void test_multilinestring_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::linestring_feature_builder fbuilder{lbuilder};
@@ -149,6 +119,39 @@ static void test_multilinestring_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
+} // anonymous namespace
+
+TEST_CASE("linestring builder without id/without properties") {
+    test_linestring_builder(false, false);
+}
+
+TEST_CASE("linestring builder without id/with properties") {
+    test_linestring_builder(false, true);
+}
+
+TEST_CASE("linestring builder with id/without properties") {
+    test_linestring_builder(true, false);
+}
+
+TEST_CASE("linestring builder with id/with properties") {
+    test_linestring_builder(true, true);
+}
+
+TEST_CASE("Calling add_linestring() with bad values throws assert") {
+    vtzero::tile_builder tbuilder;
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::linestring_feature_builder fbuilder{lbuilder};
+
+    SECTION("0") {
+        REQUIRE_THROWS_AS(fbuilder.add_linestring(0), assert_error);
+    }
+    SECTION("1") {
+        REQUIRE_THROWS_AS(fbuilder.add_linestring(1), assert_error);
+    }
+    SECTION("2^29") {
+        REQUIRE_THROWS_AS(fbuilder.add_linestring(1UL << 29U), assert_error);
+    }
+}
 
 TEST_CASE("Multilinestring builder without id/without properties") {
     test_multilinestring_builder(false, false);

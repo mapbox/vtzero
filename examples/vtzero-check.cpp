@@ -15,6 +15,8 @@
 #include <stdexcept>
 #include <string>
 
+namespace {
+
 class result {
 
     int m_return_code = 0;
@@ -163,6 +165,8 @@ public:
     }
 
 }; // class CheckGeomHandler
+
+} // anonymous namespace
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {

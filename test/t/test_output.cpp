@@ -4,12 +4,16 @@
 #include <sstream>
 #include <string>
 
+namespace {
+
 template <typename T>
 std::string get_output(T v) {
     std::stringstream ss;
     ss << v;
     return ss.str();
 }
+
+} // anonymous namespace
 
 TEST_CASE("output GeomType") {
     REQUIRE(get_output(vtzero::GeomType::UNKNOWN)    == "unknown");

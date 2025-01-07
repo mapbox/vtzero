@@ -16,7 +16,9 @@
 #include <iostream>
 #include <string>
 
-static bool keep_feature(const vtzero::feature& feature) {
+namespace {
+
+bool keep_feature(const vtzero::feature& feature) {
     static const std::string key{"class"};
     static const std::string val{"street"};
 
@@ -29,6 +31,8 @@ static bool keep_feature(const vtzero::feature& feature) {
 
     return found;
 }
+
+} // anonymous namespace
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {

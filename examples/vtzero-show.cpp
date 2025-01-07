@@ -119,7 +119,9 @@ struct print_value {
 
 }; // struct print_value
 
-static void print_layer(vtzero::layer& layer, bool print_tables, bool print_value_types, int layer_num, int& feature_num) {
+namespace {
+
+void print_layer(vtzero::layer& layer, bool print_tables, bool print_value_types, int layer_num, int& feature_num) {
     std::cout << "=============================================================\n"
               << "layer: " << layer_num << '\n'
               << "  name: " << std::string(layer.name()) << '\n'
@@ -171,9 +173,11 @@ static void print_layer(vtzero::layer& layer, bool print_tables, bool print_valu
     }
 }
 
-static void print_layer_overview(const vtzero::layer& layer) {
+void print_layer_overview(const vtzero::layer& layer) {
     std::cout << layer.name() << ' ' << layer.num_features() << '\n';
 }
+
+} // anonymous namespace
 
 int main(int argc, char* argv[]) {
     std::string filename;

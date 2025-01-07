@@ -14,7 +14,9 @@
 #include <stdexcept>
 #include <string>
 
-static std::size_t geometries_size(const vtzero::layer& layer) {
+namespace {
+
+std::size_t geometries_size(const vtzero::layer& layer) {
     std::size_t sum = 0;
 
     layer.for_each_feature([&sum](vtzero::feature&& feature) {
@@ -24,6 +26,8 @@ static std::size_t geometries_size(const vtzero::layer& layer) {
 
     return sum;
 }
+
+} // anonymous namespace
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
