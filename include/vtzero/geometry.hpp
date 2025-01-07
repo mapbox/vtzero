@@ -134,7 +134,7 @@ namespace vtzero {
         };
 
         template <typename T>
-        struct get_result<T, typename std::enable_if<!std::is_same<decltype(std::declval<T>().result()), void>::value>::type> {
+        struct get_result<T, std::enable_if_t<!std::is_same<decltype(std::declval<T>().result()), void>::value>> {
 
             using type = decltype(std::declval<T>().result());
 
