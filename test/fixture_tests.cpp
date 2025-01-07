@@ -9,8 +9,11 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <iterator>
+#include <limits>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace {
 

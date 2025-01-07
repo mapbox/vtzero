@@ -9,9 +9,13 @@
 #include <protozero/buffer_fixed.hpp>
 #include <protozero/buffer_vector.hpp>
 
+#include <algorithm>
+#include <array>
 #include <cstdint>
+#include <iterator>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 template <typename T>
 struct movable_not_copyable {

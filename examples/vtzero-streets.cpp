@@ -13,6 +13,7 @@
 #include <vtzero/property_mapper.hpp>
 #include <vtzero/vector_tile.hpp>
 
+#include <exception>
 #include <iostream>
 #include <string>
 

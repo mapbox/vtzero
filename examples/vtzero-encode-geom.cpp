@@ -13,6 +13,7 @@
 #include <vtzero/geometry.hpp>
 
 #include <cctype>
+#include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
