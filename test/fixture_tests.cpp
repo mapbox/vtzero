@@ -12,7 +12,9 @@
 #include <stdexcept>
 #include <string>
 
-static std::string open_tile(const std::string& path) {
+namespace {
+
+std::string open_tile(const std::string& path) {
     // NOLINTNEXTLINE(concurrency-mt-unsafe)
     const auto* fixtures_dir = std::getenv("FIXTURES_DIR");
     if (fixtures_dir == nullptr) {
@@ -32,6 +34,21 @@ static std::string open_tile(const std::string& path) {
     stream.close();
     return message;
 }
+
+vtzero::feature check_layer(vtzero::vector_tile& tile) {
+    REQUIRE_FALSE(tile.empty());
+    REQUIRE(tile.count_layers() == 1);
+
+    auto layer = tile.next_layer();
+    REQUIRE(layer.name() == "hello");
+    REQUIRE(layer.version() == 2);
+    REQUIRE(layer.extent() == 4096);
+    REQUIRE(layer.num_features() == 1);
+
+    return layer.next_feature();
+}
+
+} // anonymous namespace
 
 // ---------------------------------------------------------------------------
 
@@ -131,21 +148,6 @@ struct geom_handler {
     }
 
 }; // struct geom_handler
-
-// ---------------------------------------------------------------------------
-
-static vtzero::feature check_layer(vtzero::vector_tile& tile) {
-    REQUIRE_FALSE(tile.empty());
-    REQUIRE(tile.count_layers() == 1);
-
-    auto layer = tile.next_layer();
-    REQUIRE(layer.name() == "hello");
-    REQUIRE(layer.version() == 2);
-    REQUIRE(layer.extent() == 4096);
-    REQUIRE(layer.num_features() == 1);
-
-    return layer.next_feature();
-}
 
 // ---------------------------------------------------------------------------
 

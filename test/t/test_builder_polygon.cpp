@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <vector>
 
+namespace {
+
 using polygon_type = std::vector<std::vector<vtzero::point>>;
 
 struct polygon_handler {
@@ -30,7 +32,7 @@ struct polygon_handler {
 
 };
 
-static void test_polygon_builder(bool with_id, bool with_prop) {
+void test_polygon_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -74,45 +76,7 @@ static void test_polygon_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("polygon builder without id/without properties") {
-    test_polygon_builder(false, false);
-}
-
-TEST_CASE("polygon builder without id/with properties") {
-    test_polygon_builder(false, true);
-}
-
-TEST_CASE("polygon builder with id/without properties") {
-    test_polygon_builder(true, false);
-}
-
-TEST_CASE("polygon builder with id/with properties") {
-    test_polygon_builder(true, true);
-}
-
-TEST_CASE("Calling add_ring() with bad values throws assert") {
-    vtzero::tile_builder tbuilder;
-    const vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::polygon_feature_builder fbuilder{lbuilder};
-
-    SECTION("0") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(0), assert_error);
-    }
-    SECTION("1") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(1), assert_error);
-    }
-    SECTION("2") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(2), assert_error);
-    }
-    SECTION("3") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(3), assert_error);
-    }
-    SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_ring(1UL << 29U), assert_error);
-    }
-}
-
-static void test_multipolygon_builder(bool with_id, bool with_prop) {
+void test_multipolygon_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::polygon_feature_builder fbuilder{lbuilder};
@@ -166,6 +130,46 @@ static void test_multipolygon_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
+
+} // anonymous namespace
+
+TEST_CASE("polygon builder without id/without properties") {
+    test_polygon_builder(false, false);
+}
+
+TEST_CASE("polygon builder without id/with properties") {
+    test_polygon_builder(false, true);
+}
+
+TEST_CASE("polygon builder with id/without properties") {
+    test_polygon_builder(true, false);
+}
+
+TEST_CASE("polygon builder with id/with properties") {
+    test_polygon_builder(true, true);
+}
+
+TEST_CASE("Calling add_ring() with bad values throws assert") {
+    vtzero::tile_builder tbuilder;
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::polygon_feature_builder fbuilder{lbuilder};
+
+    SECTION("0") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(0), assert_error);
+    }
+    SECTION("1") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(1), assert_error);
+    }
+    SECTION("2") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(2), assert_error);
+    }
+    SECTION("3") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(3), assert_error);
+    }
+    SECTION("2^29") {
+        REQUIRE_THROWS_AS(fbuilder.add_ring(1UL << 29U), assert_error);
+    }
+}
 
 TEST_CASE("Multipolygon builder without id/without properties") {
     test_multipolygon_builder(false, false);

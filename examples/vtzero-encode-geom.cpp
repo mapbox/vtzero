@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 
+namespace {
+
 int64_t get_int(const char* arg) {
     char* endptr = nullptr;
     const int64_t value = std::strtoll(arg, &endptr, 10);
@@ -75,6 +77,8 @@ uint32_t number(const char* arg) {
 
     return protozero::encode_zigzag32(num);
 }
+
+} // anonymous namespace
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {

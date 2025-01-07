@@ -271,7 +271,9 @@ TEST_CASE("Rollback feature") {
     REQUIRE_FALSE(feature);
 }
 
-static vtzero::layer next_nonempty_layer(vtzero::vector_tile& tile) {
+namespace {
+
+vtzero::layer next_nonempty_layer(vtzero::vector_tile& tile) {
     while (auto layer = tile.next_layer()) {
         if (layer && !layer.empty()) {
             return layer;
@@ -280,7 +282,7 @@ static vtzero::layer next_nonempty_layer(vtzero::vector_tile& tile) {
     return vtzero::layer{};
 }
 
-static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
+bool vector_tile_equal(const std::string& t1, const std::string& t2) {
     vtzero::vector_tile vt1{t1};
     vtzero::vector_tile vt2{t2};
 
@@ -323,6 +325,8 @@ static bool vector_tile_equal(const std::string& t1, const std::string& t2) {
 
     return true;
 }
+
+} // anonymous namespace
 
 TEST_CASE("vector_tile_equal") {
     REQUIRE(vector_tile_equal("", ""));

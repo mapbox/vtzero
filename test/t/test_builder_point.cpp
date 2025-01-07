@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <vector>
 
+namespace {
+
 struct point_handler {
 
     std::vector<vtzero::point> data;
@@ -27,7 +29,7 @@ struct point_handler {
 
 };
 
-static void test_point_builder(bool with_id, bool with_prop) {
+void test_point_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     const vtzero::layer_builder lbuilder{tbuilder, "test"};
 
@@ -84,36 +86,7 @@ static void test_point_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
-TEST_CASE("Point builder without id/without properties") {
-    test_point_builder(false, false);
-}
-
-TEST_CASE("Point builder without id/with properties") {
-    test_point_builder(false, true);
-}
-
-TEST_CASE("Point builder with id/without properties") {
-    test_point_builder(true, false);
-}
-
-TEST_CASE("Point builder with id/with properties") {
-    test_point_builder(true, true);
-}
-
-TEST_CASE("Calling add_points() with bad values throws assert") {
-    vtzero::tile_builder tbuilder;
-    const vtzero::layer_builder lbuilder{tbuilder, "test"};
-    vtzero::point_feature_builder fbuilder{lbuilder};
-
-    SECTION("0") {
-        REQUIRE_THROWS_AS(fbuilder.add_points(0), assert_error);
-    }
-    SECTION("2^29") {
-        REQUIRE_THROWS_AS(fbuilder.add_points(1UL << 29U), assert_error);
-    }
-}
-
-static void test_multipoint_builder(bool with_id, bool with_prop) {
+void test_multipoint_builder(bool with_id, bool with_prop) {
     vtzero::tile_builder tbuilder;
     const vtzero::layer_builder lbuilder{tbuilder, "test"};
     vtzero::point_feature_builder fbuilder{lbuilder};
@@ -153,6 +126,36 @@ static void test_multipoint_builder(bool with_id, bool with_prop) {
     REQUIRE(handler.data == result);
 }
 
+} // anonymous namespace
+
+TEST_CASE("Point builder without id/without properties") {
+    test_point_builder(false, false);
+}
+
+TEST_CASE("Point builder without id/with properties") {
+    test_point_builder(false, true);
+}
+
+TEST_CASE("Point builder with id/without properties") {
+    test_point_builder(true, false);
+}
+
+TEST_CASE("Point builder with id/with properties") {
+    test_point_builder(true, true);
+}
+
+TEST_CASE("Calling add_points() with bad values throws assert") {
+    vtzero::tile_builder tbuilder;
+    const vtzero::layer_builder lbuilder{tbuilder, "test"};
+    vtzero::point_feature_builder fbuilder{lbuilder};
+
+    SECTION("0") {
+        REQUIRE_THROWS_AS(fbuilder.add_points(0), assert_error);
+    }
+    SECTION("2^29") {
+        REQUIRE_THROWS_AS(fbuilder.add_points(1UL << 29U), assert_error);
+    }
+}
 
 TEST_CASE("Multipoint builder without id/without properties") {
     test_multipoint_builder(false, false);
