@@ -230,12 +230,12 @@ namespace vtzero {
     }; // class property_value
 
     /// property_values are equal if they contain the same data.
-    inline constexpr bool operator==(const property_value lhs, const property_value rhs) noexcept {
+    constexpr bool operator==(const property_value lhs, const property_value rhs) noexcept {
         return lhs.data() == rhs.data();
     }
 
     /// property_values are unequal if they do not contain the same data.
-    inline constexpr bool operator!=(const property_value lhs, const property_value rhs) noexcept {
+    constexpr bool operator!=(const property_value lhs, const property_value rhs) noexcept {
         return lhs.data() != rhs.data();
     }
 
