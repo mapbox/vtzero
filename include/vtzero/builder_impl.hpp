@@ -37,7 +37,7 @@ namespace vtzero {
             // If this layer is copied from an existing layer, this points
             // to the data of the original layer. For newly built layers,
             // this is empty.
-            data_view m_data_view{};
+            data_view m_data_view;
 
             // Buffer containing the encoded layer metadata and features
             std::string m_data;
@@ -48,9 +48,9 @@ namespace vtzero {
             // Buffer containing the encoded values table
             std::string m_values_data;
 
-            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer{};
-            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys{};
-            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_values{};
+            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_layer;
+            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_keys;
+            protozero::pbf_builder<detail::pbf_layer> m_pbf_message_values;
 
             // The number of features in the layer
             std::size_t m_num_features = 0;

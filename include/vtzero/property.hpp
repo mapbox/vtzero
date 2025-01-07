@@ -28,8 +28,8 @@ namespace vtzero {
      */
     class property {
 
-        data_view m_key{};
-        property_value m_value{};
+        data_view m_key;
+        property_value m_value;
 
     public:
 

@@ -47,7 +47,7 @@ public:
 
 class CheckGeomHandler {
 
-    vtzero::point m_prev_point{};
+    vtzero::point m_prev_point;
     int m_layer_num;
     int m_feature_num;
     int64_t m_extent;
