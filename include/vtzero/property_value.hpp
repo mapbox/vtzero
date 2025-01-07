@@ -35,7 +35,7 @@ namespace vtzero {
      */
     class property_value {
 
-        data_view m_value{};
+        data_view m_value;
 
         static bool check_tag_and_type(protozero::pbf_tag_type tag, protozero::pbf_wire_type type) noexcept {
             static constexpr const std::array<protozero::pbf_wire_type, 7> types{{

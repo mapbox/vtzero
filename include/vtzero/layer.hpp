@@ -55,11 +55,11 @@ namespace vtzero {
      */
     class layer {
 
-        data_view m_data{};
+        data_view m_data;
         uint32_t m_version = 1; // defaults to 1, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L55
         uint32_t m_extent = 4096; // defaults to 4096, see https://github.com/mapbox/vector-tile-spec/blob/master/2.1/vector_tile.proto#L70
         std::size_t m_num_features = 0;
-        data_view m_name{};
+        data_view m_name;
         protozero::pbf_message<detail::pbf_layer> m_layer_reader{m_data};
         mutable std::vector<data_view> m_key_table;
         mutable std::vector<property_value> m_value_table;

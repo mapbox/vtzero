@@ -359,7 +359,7 @@ namespace vtzero {
     protected:
 
         /// Encoded geometry.
-        protozero::packed_field_uint32 m_pbf_geometry{};
+        protozero::packed_field_uint32 m_pbf_geometry;
 
         /// Number of points still to be set for the geometry to be complete.
         countdown_value m_num_points;

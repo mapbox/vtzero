@@ -19,7 +19,7 @@
 
 class geom_handler {
 
-    std::string output{};
+    std::string output;
     uint64_t num = 0;
 
 public:
