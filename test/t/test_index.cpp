@@ -4,6 +4,7 @@
 #include <vtzero/builder.hpp>
 #include <vtzero/index.hpp>
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <unordered_map>

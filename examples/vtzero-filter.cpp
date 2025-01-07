@@ -16,8 +16,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <iostream>
-#include <limits>
 #include <string>
 
 int main(int argc, char* argv[]) {

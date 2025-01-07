@@ -12,6 +12,8 @@
 #include <vtzero/index.hpp>
 
 #include <cstdint>
+#include <exception>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <vector>

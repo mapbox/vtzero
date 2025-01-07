@@ -5,6 +5,7 @@
 #include <vtzero/vector_tile.hpp>
 
 #include <cstddef>
+#include <cstdint>
 
 TEST_CASE("default constructed layer") {
     vtzero::layer layer{};

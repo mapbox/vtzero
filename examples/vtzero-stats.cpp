@@ -10,8 +10,9 @@
 
 #include <vtzero/vector_tile.hpp>
 
+#include <cstdlib>
+#include <exception>
 #include <iostream>
-#include <stdexcept>
 #include <string>
 
 namespace {
