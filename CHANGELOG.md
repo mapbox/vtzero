@@ -9,9 +9,18 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+* Add layer raw size and geometries raw size to vtzero-stats, use CSV format.
+
 ### Changed
 
+* Switched to C++14 as minimum requirement (because the Protozero library
+  we depend on switched).
+* Various updates to build and clang-tidy config
+* Lots of small code cleanups.
+
 ### Fixed
+
+* Remove superfluous std::forwards.
 
 
 ## [1.1.0] - 2020-06-11
