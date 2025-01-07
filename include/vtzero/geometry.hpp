@@ -118,8 +118,8 @@ namespace vtzero {
         }
 
         constexpr int64_t det(const point a, const point b) noexcept {
-            return static_cast<int64_t>(a.x) * static_cast<int64_t>(b.y) -
-                   static_cast<int64_t>(b.x) * static_cast<int64_t>(a.y);
+            return (static_cast<int64_t>(a.x) * static_cast<int64_t>(b.y)) -
+                   (static_cast<int64_t>(b.x) * static_cast<int64_t>(a.y));
         }
 
         template <typename T, typename Enable = void>
