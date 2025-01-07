@@ -1,7 +1,7 @@
 #ifndef TEST_HPP
 #define TEST_HPP
 
-#include <catch.hpp>
+#include <catch.hpp> // IWYU pragma: export
 
 #include <stdexcept>
 
