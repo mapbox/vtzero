@@ -188,7 +188,7 @@ namespace vtzero {
         }
 
         template <typename T>
-        using is_layer = std::is_same<typename std::remove_cv<typename std::remove_reference<T>::type>::type, layer>;
+        using is_layer = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, layer>;
 
     public:
 
@@ -213,7 +213,7 @@ namespace vtzero {
          * @param version The vector tile spec version of the new layer.
          * @param extent The extent of the new layer.
          */
-        template <typename TString, typename std::enable_if<!is_layer<TString>::value, int>::type = 0>
+        template <typename TString, typename std::enable_if_t<!is_layer<TString>::value, int> = 0>
         layer_builder(vtzero::tile_builder& tile, TString&& name, uint32_t version = 2, uint32_t extent = 4096) :
             m_layer(tile.add_layer(std::forward<TString>(name), version, extent)) {
         }
