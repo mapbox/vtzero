@@ -4,7 +4,7 @@
 
 To release a new vtzero version:
 
- - Make sure all tests are passing locally and on travis/appveyor
+ - Make sure all tests are passing locally and on Github and on Appveyor
  - Update version number in
    - `CMakeLists.txt` (one place)
    - `include/vtzero/version.hpp` (two places)
