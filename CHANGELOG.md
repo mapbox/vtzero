@@ -9,6 +9,15 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+### Changed
+
+### Fixed
+
+
+## [1.2.0] - 2025-01-13
+
+### Added
+
 * Add layer raw size and geometries raw size to vtzero-stats, use CSV format.
 
 ### Changed
@@ -90,7 +99,8 @@ This project adheres to [Semantic Versioning](https://semver.org/).
 First release
 
 
-[unreleased]: https://github.com/osmcode/libosmium/compare/v1.1.0...HEAD
+[unreleased]: https://github.com/osmcode/libosmium/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/osmcode/libosmium/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/osmcode/libosmium/compare/v1.0.3...v1.1.0
 [1.0.3]: https://github.com/osmcode/libosmium/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/osmcode/libosmium/compare/v1.0.1...v1.0.2
