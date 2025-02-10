@@ -259,7 +259,7 @@ vtzero::tile_builder tb;
 vtzero::layer_builder lb{tb};
 vtzero::geometry_feature_builder fb{lb};
 fb.set_id(123); // optionally set ID
-fb.add_geometry(geom) // add geometry
+fb.set_geometry(geom) // add geometry
 fb.add_property("foo", "bar"); // add properties
 fb.commit();
 ...
