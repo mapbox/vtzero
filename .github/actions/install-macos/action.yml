@@ -6,5 +6,7 @@ runs:
     - name: Install homebrew packages
       run: |
         brew install \
-          boost
+          boost \
+          doxygen \
+          graphviz
       shell: bash
