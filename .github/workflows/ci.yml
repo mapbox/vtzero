@@ -132,8 +132,8 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - windows-2019
           - windows-2022
+          - windows-2025
     steps:
       - uses: actions/checkout@v4
         with:
