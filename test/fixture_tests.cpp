@@ -1019,3 +1019,19 @@ TEST_CASE("MVT test 058: A linestring fixture with a gigantic LineTo command") {
     REQUIRE_THROWS_WITH(vtzero::decode_geometry(geometry, geom_handler{}), "count too large");
 }
 
+TEST_CASE("MVT test 059: iterating properties of an invalid tile") {
+    std::string buffer{open_tile("041/tile.mvt")};
+    vtzero::vector_tile tile{buffer};
+
+    REQUIRE_THROWS_WITH([](vtzero::vector_tile& tile) {
+        tile.for_each_layer([&](vtzero::layer const& layer) {
+            layer.for_each_feature([&](vtzero::feature const& feature) {
+                feature.for_each_property([&](vtzero::property const& p) {
+                    return true;
+                });
+                return true;
+            });
+            return true;
+        });
+    }(tile), "index out of range: 106");
+}
