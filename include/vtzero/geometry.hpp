@@ -160,7 +160,7 @@ namespace vtzero {
 
         template <typename T>
         std::enable_if_t<accepts_ring_end_area<T, int64_t>::value, int64_t> classify_ring_area(int64_t sum) {
-            return sum;
+            return sum / 2;
         }
 
         template <typename T>
