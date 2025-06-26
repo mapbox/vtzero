@@ -145,6 +145,29 @@ namespace vtzero {
 
         };
 
+        // Trait to detect if T has ring_end(V)
+        template <typename T, typename V>
+        class accepts_ring_end_area {
+
+            template <typename U> static auto test(int) -> decltype(std::declval<U&>().ring_end(std::declval<V>()), std::true_type{});
+            template <typename> static std::false_type test(...);
+
+        public:
+
+            static constexpr bool value = decltype(test<T>(0))::value;
+
+        };
+
+        template <typename T>
+        std::enable_if_t<accepts_ring_end_area<T, int64_t>::value, int64_t> classify_ring_area(int64_t sum) {
+            return sum / 2;
+        }
+
+        template <typename T>
+        std::enable_if_t<accepts_ring_end_area<T, ring_type>::value, ring_type> classify_ring_area(int64_t sum) {
+            return sum > 0 ? ring_type::outer : sum < 0 ? ring_type::inner : ring_type::invalid;
+        }
+
         /**
          * Decode a geometry as specified in spec 4.3 from a sequence of 32 bit
          * unsigned integers. This templated base class can be instantiated
@@ -349,8 +372,7 @@ namespace vtzero {
 
                     geom_handler.ring_point(start_point);
 
-                    geom_handler.ring_end(sum > 0 ? ring_type::outer :
-                                                    sum < 0 ? ring_type::inner : ring_type::invalid);
+                    geom_handler.ring_end(detail::classify_ring_area<TGeomHandler>(sum));
                 }
 
                 return detail::get_result<TGeomHandler>{}(std::forward<TGeomHandler>(geom_handler));

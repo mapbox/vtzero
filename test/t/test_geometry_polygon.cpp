@@ -33,6 +33,24 @@ public:
 
 }; // class dummy_geom_handler
 
+struct dummy_geom_handler_area {
+    std::vector<std::vector<vtzero::point>> rings;
+    std::vector<int64_t> areas;
+
+    void ring_begin(const uint32_t count) noexcept {
+        rings.emplace_back();
+        rings.back().reserve(count);
+    }
+
+    void ring_point(const vtzero::point point) noexcept {
+        rings.back().emplace_back(point);
+    }
+
+    void ring_end(int64_t area) noexcept {
+        areas.emplace_back(area);
+    }
+}; // class dummy_geom_handler_area
+
 TEST_CASE("Calling decode_polygon_geometry() with empty input") {
     const container g;
     vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), g.size() / 2};
@@ -202,3 +220,14 @@ TEST_CASE("Calling decode_polygon_geometry() on polygon with zero area") {
     REQUIRE(handler.result() == 10501);
 }
 
+TEST_CASE("Calling decode_polygon_geometry() with a handler accepting ring area") {
+    const container g = {vtzero::detail::command_move_to(1), 3, 6,
+                         vtzero::detail::command_line_to(2), 8, 12, 20, 34,
+                         vtzero::detail::command_close_path()};
+
+    vtzero::detail::geometry_decoder<container::const_iterator> decoder{g.begin(), g.end(), g.size() / 2};
+    dummy_geom_handler_area handler;
+    decoder.decode_polygon(handler);
+    REQUIRE(handler.rings == std::vector<std::vector<vtzero::point>>{{{-2, 3}, {2, 9}, {12, 26}, {-2, 3}}});
+    REQUIRE(handler.areas == std::vector<int64_t>{4});
+}
