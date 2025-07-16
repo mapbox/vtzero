@@ -383,9 +383,11 @@ functions:
   times.
 * `void ring_point(vtzero::point point)`: This is called once for each
   point.
-* `void ring_end(vtzero::ring_type)`: This is called at the end of each ring.
-  The parameter tells you whether the ring is an outer or inner ring or whether
-  the ring was invalid (if the area is 0).
+* `void ring_end(vtzero::ring_type)` or `void ring_end(int64_t)`: This is called
+  at the end of each ring. The parameter tells you whether the ring is an outer
+  or inner ring or whether the ring was invalid (if the area is 0). Alternatively,
+  your handler can accept an `int64_t` parameter representing the computed ring
+  area, which can be useful for filtering small rings in downstream applications.
 
 The handler for `decode_geometry()` must implement all of the functions
 mentioned above for the different types. It is guaranteed that only one
